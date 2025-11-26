@@ -42,11 +42,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 64, nullable: true)]
     private ?string $slug = null;
 
-    #[Groups(['post:read'])]
+    #[Groups(['post:read', 'comment:read'])]
     #[ORM\Column(length: 100)]
     private ?string $username = null;
 
-    #[Groups(['post:read'])]
+    #[Groups(['post:read', 'comment:read'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $avatarUrl = null;
 

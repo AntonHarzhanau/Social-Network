@@ -20,7 +20,7 @@ class Comment
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id = null;
 
-    #[Groups(['post:read'])]
+    #[Groups(['post:read', 'comment:read'])]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $author = null;
@@ -32,11 +32,11 @@ class Comment
     #[ORM\ManyToOne(targetEntity: self::class)]
     private ?self $parent = null;
 
-    #[Groups(['post:read'])]
+    #[Groups(['post:read', 'comment:read'])]
     #[ORM\Column]
     private ?int $likeCount = 0;
 
-    #[Groups(['post:read'])]
+    #[Groups(['post:read', 'comment:read'])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $content = null;
 

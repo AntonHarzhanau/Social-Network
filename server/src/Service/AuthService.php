@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\DTO\AuthDTO\RegisterUserDTO;
+use App\DTO\Auth\RegisterUserDTO;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;

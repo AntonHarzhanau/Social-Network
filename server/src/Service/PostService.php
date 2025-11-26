@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\DTO\PostDTO\CreatePostDTO;
+use App\DTO\Post\CreatePostDTO;
 use App\Entity\Post;
 use App\Entity\User;
 use App\Repository\PostRepository;
@@ -14,7 +14,7 @@ class PostService
         private readonly PostRepository $postRepository,
     ) {}
 
-    public function createPost(CreatePostDTO $dto, User $author): void
+    public function create(CreatePostDTO $dto, User $author): void
     {
         $post = new Post();
         $post->setContent($dto->content);
@@ -37,7 +37,7 @@ class PostService
         return $this->postRepository->find($id);
     }
 
-    public function deletePost(Post $post, User $user): void
+    public function delete(Post $post, User $user): void
     {
         if ($post->getAuthor() !== $user) {
             throw new AccessDeniedException('You do not have permission to delete this post.');
@@ -45,7 +45,7 @@ class PostService
         $this->postRepository->remove($post);
     }
 
-    public function toggleLike(Post $post, User $user): void
+    public function toggleLike(Post $post, User $user): int 
     {
         if ($post->getLikeBy()->contains($user)) {
             $post->getLikeBy()->removeElement($user);
@@ -56,5 +56,7 @@ class PostService
         }
 
         $this->postRepository->save($post);
+
+        return $post->getLikeCount();
     }
 }

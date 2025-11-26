@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTO\PostDTO;
+namespace App\DTO\Post;
 
 use App\Enum\VisibilityEnum;
 
