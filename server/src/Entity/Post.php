@@ -9,23 +9,28 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: PostRepository::class)]
 class Post
 {
+    #[Groups(['post:read'])]
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id = null;
 
+    #[Groups(['post:read'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $content = null;
 
+    #[Groups(['post:read'])]
     #[ORM\Column]
     private ?int $likeCount = 0;
 
+    #[Groups(['post:read'])]
     #[ORM\Column]
     private ?int $commentCount = 0;
 
@@ -41,6 +46,7 @@ class Post
     /**
      * @var Collection<int, Comment>
      */
+    #[Groups(['post:read'])]
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'post', orphanRemoval: true)]
     private Collection $comments;
 
@@ -49,6 +55,11 @@ class Post
      */
     #[ORM\ManyToMany(targetEntity: User::class)]
     private Collection $likeBy;
+
+    #[ORM\ManyToOne(inversedBy: 'posts')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['post:read'])]
+    private ?User $author = null;
 
     public function __construct()
     {
@@ -184,6 +195,18 @@ class Post
     public function removeLikeBy(User $likeBy): static
     {
         $this->likeBy->removeElement($likeBy);
+
+        return $this;
+    }
+
+    public function getAuthor(): ?User
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?User $author): static
+    {
+        $this->author = $author;
 
         return $this;
     }

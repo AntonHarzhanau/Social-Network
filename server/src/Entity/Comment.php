@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
@@ -19,6 +20,7 @@ class Comment
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id = null;
 
+    #[Groups(['post:read'])]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $author = null;
@@ -30,9 +32,11 @@ class Comment
     #[ORM\ManyToOne(targetEntity: self::class)]
     private ?self $parent = null;
 
+    #[Groups(['post:read'])]
     #[ORM\Column]
     private ?int $likeCount = 0;
 
+    #[Groups(['post:read'])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $content = null;
 

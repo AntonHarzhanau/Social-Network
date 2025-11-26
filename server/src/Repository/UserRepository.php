@@ -33,28 +33,38 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
-    //    /**
-    //     * @return User[] Returns an array of User objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('u.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findByEmail(string $email): ?User
+    {
+        $queryBuilder = $this->createQueryBuilder('u')
+            ->andWhere('u.email = :email')
+            ->setParameter('email', $email)
+            ->setMaxResults(1);
 
-    //    public function findOneBySomeField($value): ?User
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        return $queryBuilder->getQuery()->getOneOrNullResult();
+    }
+
+    public function findByUsername(string $username): ?User
+    {
+        $queryBuilder = $this->createQueryBuilder('u')
+            ->andWhere('u.username = :username')
+            ->setParameter('username', $username)
+            ->setMaxResults(1);
+        return $queryBuilder->getQuery()->getOneOrNullResult();
+    }
+
+    public function save(User $user, bool $flush = true): void
+    {
+        $this->getEntityManager()->persist($user);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(User $user, bool $flush = true): void
+    {
+        $this->getEntityManager()->remove($user);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
 }
