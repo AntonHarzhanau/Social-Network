@@ -69,4 +69,14 @@ class CommentService
         }
         $this->commentRepository->save($comment);
     }
+
+    public function hasUserLiked(Comment $comment, User $user): bool
+    {
+        return $comment->getLikeBy()->contains($user);
+    }
+
+    public function getRootCommentsByPost(Post $post, int $page = 1, int $limit = 2): array
+    {
+        return $this->commentRepository->findRootByPost($post, $page, $limit);
+    }
 }

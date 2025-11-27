@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Comment;
+use App\Entity\Post;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -30,6 +31,20 @@ class CommentRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    public function findRootByPost(Post $post, int $page, int $limit): array
+    {
+        $page = max(1, $page);
+
+        $comments = $this->findBy(
+            ['post' => $post, 'parent' => null],
+            ['createdAt' => 'DESC'],
+            $limit,
+            ($page - 1) * $limit
+        );
+        
+        return $comments;
     }
     
 }

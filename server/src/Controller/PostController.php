@@ -6,10 +6,12 @@ use App\DTO\Comment\CreateCommentDTO;
 use App\DTO\Post\CreatePostDTO;
 use App\Entity\Post;
 use App\Entity\User;
+use App\Enum\VisibilityEnum;
 use App\Service\CommentService;
 use App\Service\PostService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
@@ -24,8 +26,10 @@ final class PostController extends AbstractController
 
 
     #[Route('', name: 'create_post', methods: ['POST'], format: 'json')]
-    public function create(#[MapRequestPayload] CreatePostDTO $dto, #[CurrentUser] User $user): JsonResponse
-    {
+    public function create(
+        #[MapRequestPayload] CreatePostDTO $dto,
+        #[CurrentUser] User $user
+    ): JsonResponse {
         $this->postService->create($dto, $user);
 
         return $this->json([
@@ -34,19 +38,34 @@ final class PostController extends AbstractController
     }
 
 
-    #[Route('', name: 'get_all_posts', methods: ['GET'], format: 'json')]
-    public function getAll(): JsonResponse
+    #[Route('', name: 'get_posts', methods: ['GET'], format: 'json')]
+    public function getAll(Request $request): JsonResponse
     {
-        $posts = $this->postService->getAll();
+        $page = max(1, (int) $request->query->get('page', 1));
+        $limit = max(1, (int) $request->query->get('limit', 1));
+        $visibilities = [VisibilityEnum::PUBLIC];
 
-        return $this->json($posts, 200, [], ['groups' => 'post:read']);
+        $posts = $this->postService->getAll($page, $limit, $visibilities, $this->getUser());
+
+        return $this->json(['posts' => $posts], JsonResponse::HTTP_OK, [], ['groups' => 'post:feed']);
     }
 
 
     #[Route('/{id}', name: 'get_post_by_id', methods: ['GET'], format: 'json')]
     public function getById(Post $post): JsonResponse
     {
-        return $this->json($post, 200, [], ['groups' => 'post:read']);
+        return $this->json($post, JsonResponse::HTTP_OK, [], ['groups' => 'post:read']);
+    }
+
+    #[Route('/{authorId}', name: 'get_posts_by_author', methods: ['GET'], format: 'json')]
+    public function getByAuthor(User $user, Request $request): JsonResponse
+    {
+        $page = max(1, (int) $request->query->get('page', 1));
+        $limit = max(1, (int) $request->query->get('limit', 2));
+        
+        $posts = $this->postService->getByAuthor($user, $page, $limit);
+
+        return $this->json($posts, JsonResponse::HTTP_OK, [], ['groups' => 'post:read']);
     }
 
 

@@ -94,5 +94,5 @@ class MediaStorageService
 
         return FileTypeEnum::OTHER;
     }
-
+    
 }

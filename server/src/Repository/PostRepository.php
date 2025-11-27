@@ -17,6 +17,8 @@ class PostRepository extends ServiceEntityRepository
         parent::__construct($registry, Post::class);
     }
 
+
+
     public function save(Post $post, bool $flush = true): void
     {
         $this->getEntityManager()->persist($post);
@@ -33,40 +35,33 @@ class PostRepository extends ServiceEntityRepository
         }
     }
 
-    public function findByUser(User $user): array
+    public function getAllPosts(int $page, int $limit, array $visibilities): array
     {
+        $offset = ($page - 1) * $limit;
+
         return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $user)
-            ->orderBy('p.id', 'ASC')
-            ->setMaxResults(10)
+            ->andWhere('p.visibility IN (:vis)')
+            ->setParameter('vis', $visibilities)
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
 
-    //    /**
-    //     * @return Post[] Returns an array of Post objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findLikedPostIdsByUser(User $user, array $posts): array
+    {
+        $ids = array_map(fn(Post $post) => $post->getId(), $posts);
 
-    //    public function findOneBySomeField($value): ?Post
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        $rows = $this->createQueryBuilder('p')
+            ->select('DISTINCT p.id AS id')
+            ->join('p.likeBy', 'u')
+            ->andWhere('u = :user')
+            ->andWhere('p.id IN (:ids)')
+            ->setParameter('user', $user)
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(fn(array $row) => $row['id'], $rows);
+    }
 }

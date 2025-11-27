@@ -13,6 +13,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: PostRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Post
 {
     #[Groups(['post:read'])]
@@ -64,7 +65,12 @@ class Post
     /**
      * @var Collection<int, PostMediaBinding>
      */
-    #[ORM\OneToMany(targetEntity: PostMediaBinding::class, mappedBy: 'post', orphanRemoval: true)]
+    #[ORM\OneToMany(
+        targetEntity: PostMediaBinding::class,
+        cascade: ['persist'],
+        mappedBy: 'post', 
+        orphanRemoval: true
+    )]
     private Collection $bindedMedia;
 
     public function __construct()
@@ -138,6 +144,12 @@ class Post
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    #[ORM\PreUpdate]
+    public function setUpdatedAtValue(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getVisibility(): ?VisibilityEnum
@@ -226,22 +238,22 @@ class Post
         return $this->bindedMedia;
     }
 
-    public function addBindedMedium(PostMediaBinding $bindedMedium): static
+    public function addBindedMedia(PostMediaBinding $bindedMedia): static
     {
-        if (!$this->bindedMedia->contains($bindedMedium)) {
-            $this->bindedMedia->add($bindedMedium);
-            $bindedMedium->setPost($this);
+        if (!$this->bindedMedia->contains($bindedMedia)) {
+            $this->bindedMedia->add($bindedMedia);
+            $bindedMedia->setPost($this);
         }
 
         return $this;
     }
 
-    public function removeBindedMedium(PostMediaBinding $bindedMedium): static
+    public function removeBindedMedia(PostMediaBinding $bindedMedia): static
     {
-        if ($this->bindedMedia->removeElement($bindedMedium)) {
+        if ($this->bindedMedia->removeElement($bindedMedia)) {
             // set the owning side to null (unless already changed)
-            if ($bindedMedium->getPost() === $this) {
-                $bindedMedium->setPost(null);
+            if ($bindedMedia->getPost() === $this) {
+                $bindedMedia->setPost(null);
             }
         }
 
