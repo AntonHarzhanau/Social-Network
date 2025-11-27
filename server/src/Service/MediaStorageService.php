@@ -2,12 +2,11 @@
 
 namespace App\Service;
 
-use App\Entity\MediaAssets;
+use App\Entity\MediaAsset;
 use App\Entity\User;
 use App\Enum\FileTypeEnum;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
 
@@ -19,7 +18,7 @@ class MediaStorageService
         private EntityManagerInterface $em,
     ) {}
 
-    public function storeFile(UploadedFile $file, User $owner): MediaAssets
+    public function storeFile(UploadedFile $file, User $owner): MediaAsset
     {
 
         $size = $file->getSize();
@@ -41,7 +40,7 @@ class MediaStorageService
 
         $storageKey = $subbdir . '/' . $filename;
 
-        $media = new MediaAssets();
+        $media = new MediaAsset();
         $media
             ->setOwner($owner)
             ->setStorageKey($storageKey)
@@ -56,12 +55,12 @@ class MediaStorageService
         return $media;
     }
 
-    public function getFilesystemPath(MediaAssets $media): string
+    public function getFilesystemPath(MediaAsset $media): string
     {
         return $this->mediaStorageRoot . '/' . $media->getStorageKey();
     }
 
-    public function delete(MediaAssets $media): void
+    public function delete(MediaAsset $media): void
     {
         $path = $this->getFilesystemPath($media);
         if (is_file($path)) {

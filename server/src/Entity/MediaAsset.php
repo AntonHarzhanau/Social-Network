@@ -3,14 +3,14 @@
 namespace App\Entity;
 
 use App\Enum\FileTypeEnum;
-use App\Repository\MediaAssetsRepository;
+use App\Repository\MediaAssetRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: MediaAssetsRepository::class)]
-class MediaAssets
+#[ORM\Entity(repositoryClass: MediaAssetRepository::class)]
+class MediaAsset
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]

@@ -83,14 +83,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, MediaAssets>
      */
-    #[ORM\OneToMany(targetEntity: MediaAssets::class, mappedBy: 'owner')]
+    #[ORM\OneToMany(targetEntity: MediaAsset::class, mappedBy: 'owner')]
     private Collection $media;
+
+    /**
+     * @var Collection<int, UserMediaBindings>
+     */
+    #[ORM\OneToMany(targetEntity: UserMediaBindings::class, mappedBy: 'owner', orphanRemoval: true)]
+    private Collection $bindMedia;
 
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->posts = new ArrayCollection();
         $this->media = new ArrayCollection();
+        $this->bindMedia = new ArrayCollection();
     }
     
     public function getId(): ?Uuid
@@ -344,7 +351,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->media;
     }
 
-    public function addMedium(MediaAssets $medium): static
+    public function addMedium(MediaAsset $medium): static
     {
         if (!$this->media->contains($medium)) {
             $this->media->add($medium);
@@ -354,12 +361,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function removeMedium(MediaAssets $medium): static
+    public function removeMedium(MediaAsset $medium): static
     {
         if ($this->media->removeElement($medium)) {
             // set the owning side to null (unless already changed)
             if ($medium->getOwner() === $this) {
                 $medium->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserMediaBindings>
+     */
+    public function getBindMedia(): Collection
+    {
+        return $this->bindMedia;
+    }
+
+    public function addBindMedium(UserMediaBindings $bindMedium): static
+    {
+        if (!$this->bindMedia->contains($bindMedium)) {
+            $this->bindMedia->add($bindMedium);
+            $bindMedium->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBindMedium(UserMediaBindings $bindMedium): static
+    {
+        if ($this->bindMedia->removeElement($bindMedium)) {
+            // set the owning side to null (unless already changed)
+            if ($bindMedium->getOwner() === $this) {
+                $bindMedium->setOwner(null);
             }
         }
 

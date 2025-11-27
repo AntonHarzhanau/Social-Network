@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\MediaAssets;
+use App\Entity\MediaAsset;
 use App\Entity\User;
 use App\Service\MediaStorageService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -48,11 +48,11 @@ final class MediaController extends AbstractController
     #[Route('', name: 'list_media', methods: ['GET'], format: 'json')]
     public function listMedia(#[CurrentUser] User $user): JsonResponse
     {
-        $repo = $this->em->getRepository(MediaAssets::class);
+        $repo = $this->em->getRepository(MediaAsset::class);
 
         $items = $repo->findAll();
 
-        $data = array_map(function (MediaAssets $media) {
+        $data = array_map(function (MediaAsset $media) {
             return [
                 'id' => $media->getId(),
                 'fileType' => $media->getFileType(),
@@ -68,7 +68,7 @@ final class MediaController extends AbstractController
     #[Route('/{id}', name: 'download_media', methods: ['GET'], format: 'json')]
     public function download(string $id): Response
     {
-        $repo = $this->em->getRepository(MediaAssets::class);
+        $repo = $this->em->getRepository(MediaAsset::class);
 
         $media = $repo->find($id);
 
@@ -90,4 +90,17 @@ final class MediaController extends AbstractController
 
         return $response;
     }
+
+    #[Route('/{id}', name: 'delete_media', methods: ['DELETE'], format: 'json')]
+    public function delete(MediaAsset $media): JsonResponse
+    {
+        if ($media->getDeletedAt()) {
+            return $this->json(['error' => 'Not found'], 404);
+        }
+
+        $this->mediaStorage->delete($media);
+
+        return $this->json(null, 204);
+    }
+
 }

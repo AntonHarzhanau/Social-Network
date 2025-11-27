@@ -61,11 +61,18 @@ class Post
     #[Groups(['post:read'])]
     private ?User $author = null;
 
+    /**
+     * @var Collection<int, PostMediaBindings>
+     */
+    #[ORM\OneToMany(targetEntity: PostMediaBindings::class, mappedBy: 'post', orphanRemoval: true)]
+    private Collection $bindedMedia;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();
         $this->likeBy = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
+        $this->bindedMedia = new ArrayCollection();
     }
 
     public function getId(): ?Uuid
@@ -207,6 +214,36 @@ class Post
     public function setAuthor(?User $author): static
     {
         $this->author = $author;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PostMediaBindings>
+     */
+    public function getBindedMedia(): Collection
+    {
+        return $this->bindedMedia;
+    }
+
+    public function addBindedMedium(PostMediaBindings $bindedMedium): static
+    {
+        if (!$this->bindedMedia->contains($bindedMedium)) {
+            $this->bindedMedia->add($bindedMedium);
+            $bindedMedium->setPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBindedMedium(PostMediaBindings $bindedMedium): static
+    {
+        if ($this->bindedMedia->removeElement($bindedMedium)) {
+            // set the owning side to null (unless already changed)
+            if ($bindedMedium->getPost() === $this) {
+                $bindedMedium->setPost(null);
+            }
+        }
 
         return $this;
     }

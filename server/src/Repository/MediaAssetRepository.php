@@ -2,18 +2,18 @@
 
 namespace App\Repository;
 
-use App\Entity\MediaAssets;
+use App\Entity\MediaAsset;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<MediaAssets>
+ * @extends ServiceEntityRepository<MediaAsset>
  */
-class MediaAssetsRepository extends ServiceEntityRepository
+class MediaAssetRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, MediaAssets::class);
+        parent::__construct($registry, MediaAsset::class);
     }
 
     //    /**
