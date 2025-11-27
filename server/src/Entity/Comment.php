@@ -32,6 +32,12 @@ class Comment
     #[ORM\ManyToOne(targetEntity: self::class)]
     private ?self $parent = null;
 
+    /**
+     * @var Collection<int, Comment>
+     */
+    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'parent')]
+    private Collection $replies;
+
     #[Groups(['post:read', 'comment:read'])]
     #[ORM\Column]
     private ?int $likeCount = 0;
@@ -56,6 +62,7 @@ class Comment
     {
         $this->likeBy = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
+        $this->replies = new ArrayCollection();
     }
 
     public function getId(): ?Uuid
@@ -167,6 +174,36 @@ class Comment
     public function removeLikeBy(User $likeBy): static
     {
         $this->likeBy->removeElement($likeBy);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getReplies(): Collection
+    {
+        return $this->replies;
+    }
+
+    public function addReply(Comment $reply): static
+    {
+        if (!$this->replies->contains($reply)) {
+            $this->replies->add($reply);
+            $reply->setParent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReply(Comment $reply): static
+    {
+        if ($this->replies->removeElement($reply)) {
+            // set the owning side to null (unless already changed)
+            if ($reply->getParent() === $this) {
+                $reply->setParent(null);
+            }
+        }
 
         return $this;
     }

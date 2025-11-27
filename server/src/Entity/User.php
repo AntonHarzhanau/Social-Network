@@ -81,23 +81,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $posts;
 
     /**
-     * @var Collection<int, MediaAssets>
+     * @var Collection<int, MediaAsset>
      */
     #[ORM\OneToMany(targetEntity: MediaAsset::class, mappedBy: 'owner')]
     private Collection $media;
 
     /**
-     * @var Collection<int, UserMediaBindings>
+     * @var Collection<int, UserMediaBinding>
      */
-    #[ORM\OneToMany(targetEntity: UserMediaBindings::class, mappedBy: 'owner', orphanRemoval: true)]
-    private Collection $bindMedia;
+    #[ORM\OneToMany(targetEntity: UserMediaBinding::class, mappedBy: 'owner', orphanRemoval: true)]
+    private Collection $bindedMedia;
+
+    /**
+     * @var Collection<int, ChatParticipant>
+     */
+    #[ORM\OneToMany(targetEntity: ChatParticipant::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $chats;
 
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->posts = new ArrayCollection();
         $this->media = new ArrayCollection();
-        $this->bindMedia = new ArrayCollection();
+        $this->bindedMedia = new ArrayCollection();
+        $this->chats = new ArrayCollection();
     }
     
     public function getId(): ?Uuid
@@ -374,29 +381,81 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, UserMediaBindings>
+     * @return Collection<int, UserMediaBinding>
      */
-    public function getBindMedia(): Collection
+    public function getBindedMedia(): Collection
     {
-        return $this->bindMedia;
+        return $this->bindedMedia;
     }
 
-    public function addBindMedium(UserMediaBindings $bindMedium): static
+    public function addBindedMedia(UserMediaBinding $bindedMedia): static
     {
-        if (!$this->bindMedia->contains($bindMedium)) {
-            $this->bindMedia->add($bindMedium);
-            $bindMedium->setOwner($this);
+        if (!$this->bindedMedia->contains($bindedMedia)) {
+            $this->bindedMedia->add($bindedMedia);
+            $bindedMedia->setOwner($this);
         }
 
         return $this;
     }
 
-    public function removeBindMedium(UserMediaBindings $bindMedium): static
+    public function removeBindedMedia(UserMediaBinding $bindedMedia): static
     {
-        if ($this->bindMedia->removeElement($bindMedium)) {
+        if ($this->bindedMedia->removeElement($bindedMedia)) {
             // set the owning side to null (unless already changed)
-            if ($bindMedium->getOwner() === $this) {
-                $bindMedium->setOwner(null);
+            if ($bindedMedia->getOwner() === $this) {
+                $bindedMedia->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ChatParticipant>
+     */
+    public function getChats(): Collection
+    {
+        return $this->chats;
+    }
+
+    public function addChat(ChatParticipant $chat): static
+    {
+        if (!$this->chats->contains($chat)) {
+            $this->chats->add($chat);
+            $chat->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChat(ChatParticipant $chat): static
+    {
+        if ($this->chats->removeElement($chat)) {
+            // set the owning side to null (unless already changed)
+            if ($chat->getUser() === $this) {
+                $chat->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addBindedMedium(UserMediaBinding $bindedMedium): static
+    {
+        if (!$this->bindedMedia->contains($bindedMedium)) {
+            $this->bindedMedia->add($bindedMedium);
+            $bindedMedium->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBindedMedium(UserMediaBinding $bindedMedium): static
+    {
+        if ($this->bindedMedia->removeElement($bindedMedium)) {
+            // set the owning side to null (unless already changed)
+            if ($bindedMedium->getOwner() === $this) {
+                $bindedMedium->setOwner(null);
             }
         }
 

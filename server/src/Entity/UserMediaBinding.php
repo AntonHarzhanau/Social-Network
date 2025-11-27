@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\PostMediaBindingsRepository;
+use App\Repository\UserMediaBindingRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: PostMediaBindingsRepository::class)]
-class PostMediaBindings
+#[ORM\Entity(repositoryClass: UserMediaBindingRepository::class)]
+class UserMediaBinding
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
@@ -18,7 +18,7 @@ class PostMediaBindings
 
     #[ORM\ManyToOne(inversedBy: 'bindedMedia')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Post $post = null;
+    private ?User $owner = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
@@ -32,14 +32,14 @@ class PostMediaBindings
         return $this->id;
     }
 
-    public function getPost(): ?Post
+    public function getOwner(): ?User
     {
-        return $this->post;
+        return $this->owner;
     }
 
-    public function setPost(?Post $post): static
+    public function setOwner(?User $owner): static
     {
-        $this->post = $post;
+        $this->owner = $owner;
 
         return $this;
     }

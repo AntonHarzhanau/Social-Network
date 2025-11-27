@@ -62,9 +62,9 @@ class Post
     private ?User $author = null;
 
     /**
-     * @var Collection<int, PostMediaBindings>
+     * @var Collection<int, PostMediaBinding>
      */
-    #[ORM\OneToMany(targetEntity: PostMediaBindings::class, mappedBy: 'post', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: PostMediaBinding::class, mappedBy: 'post', orphanRemoval: true)]
     private Collection $bindedMedia;
 
     public function __construct()
@@ -219,14 +219,14 @@ class Post
     }
 
     /**
-     * @return Collection<int, PostMediaBindings>
+     * @return Collection<int, PostMediaBinding>
      */
     public function getBindedMedia(): Collection
     {
         return $this->bindedMedia;
     }
 
-    public function addBindedMedium(PostMediaBindings $bindedMedium): static
+    public function addBindedMedium(PostMediaBinding $bindedMedium): static
     {
         if (!$this->bindedMedia->contains($bindedMedium)) {
             $this->bindedMedia->add($bindedMedium);
@@ -236,7 +236,7 @@ class Post
         return $this;
     }
 
-    public function removeBindedMedium(PostMediaBindings $bindedMedium): static
+    public function removeBindedMedium(PostMediaBinding $bindedMedium): static
     {
         if ($this->bindedMedia->removeElement($bindedMedium)) {
             // set the owning side to null (unless already changed)

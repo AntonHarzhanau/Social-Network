@@ -2,39 +2,39 @@
 
 namespace App\Repository;
 
-use App\Entity\PostMediaBindings;
+use App\Entity\UserMediaBinding;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<PostMediaBindings>
+ * @extends ServiceEntityRepository<UserMediaBindings>
  */
-class PostMediaBindingsRepository extends ServiceEntityRepository
+class UserMediaBindingRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, PostMediaBindings::class);
+        parent::__construct($registry, UserMediaBinding::class);
     }
 
     //    /**
-    //     * @return PostMediaBindings[] Returns an array of PostMediaBindings objects
+    //     * @return UserMediaBindings[] Returns an array of UserMediaBindings objects
     //     */
     //    public function findByExampleField($value): array
     //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
+    //        return $this->createQueryBuilder('u')
+    //            ->andWhere('u.exampleField = :val')
     //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
+    //            ->orderBy('u.id', 'ASC')
     //            ->setMaxResults(10)
     //            ->getQuery()
     //            ->getResult()
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?PostMediaBindings
+    //    public function findOneBySomeField($value): ?UserMediaBindings
     //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
+    //        return $this->createQueryBuilder('u')
+    //            ->andWhere('u.exampleField = :val')
     //            ->setParameter('val', $value)
     //            ->getQuery()
     //            ->getOneOrNullResult()
