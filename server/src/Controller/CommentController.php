@@ -41,4 +41,24 @@ final class CommentController extends AbstractController
 
         return $this->json(['likeCount' => $likeCount], JsonResponse::HTTP_OK);
     }
+
+    #[Route('', name: 'delete_comment', methods: ['DELETE'], format: 'json')]
+    public function delete(
+        Comment $comment,
+        #[CurrentUser] User $user
+    ): JsonResponse {
+        $this->commentService->delete($comment, $user);
+        return $this->json([], JsonResponse::HTTP_NO_CONTENT);
+    }
+
+    #[Route('', name: 'update_comment', methods: ['PUT'], format: 'json')]
+    public function update(
+        Comment $comment,
+        #[MapRequestPayload] CreateCommentDTO $dto,
+        #[CurrentUser] User $user
+    ): JsonResponse {
+        $this->commentService->update($comment, $dto, $user);
+
+        return $this->json([], JsonResponse::HTTP_CREATED);
+    }
 }

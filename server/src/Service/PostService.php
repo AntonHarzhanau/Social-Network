@@ -6,6 +6,7 @@ use App\DTO\Post\CreatePostDTO;
 use App\Entity\Post;
 use App\Entity\User;
 use App\Repository\PostRepository;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class PostService
@@ -40,7 +41,7 @@ class PostService
     public function delete(Post $post, User $user): void
     {
         if ($post->getAuthor() !== $user) {
-            throw new AccessDeniedException('You do not have permission to delete this post.');
+            throw new AccessDeniedHttpException('You do not have permission to delete this post.');
         }
         $this->postRepository->remove($post);
     }

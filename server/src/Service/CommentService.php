@@ -7,6 +7,7 @@ use App\Entity\Comment;
 use App\Entity\Post;
 use App\Entity\User;
 use App\Repository\CommentRepository;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class CommentService
 {
@@ -48,4 +49,24 @@ class CommentService
         $this->commentRepository->save($comment);
     }
 
+    public function delete(Comment $comment, User $user): void
+    {
+        if ($comment->getAuthor() !== $user && $comment->getPost()->getAuthor() !== $user) {
+            throw new AccessDeniedHttpException('You do not have permission to delete this comment.');
+        }
+
+        $this->commentRepository->remove($comment);
+    }
+
+    public function update(Comment $comment, CreateCommentDTO $dto, User $user): void
+    {
+        if ($comment->getAuthor() !== $user) {
+            throw new AccessDeniedHttpException('You do not have permission to update this comment.');
+        }
+
+        if ($dto->content !== null) {
+            $comment->setContent($dto->content);
+        }
+        $this->commentRepository->save($comment);
+    }
 }

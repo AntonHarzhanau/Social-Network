@@ -80,10 +80,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Post::class, mappedBy: 'author', orphanRemoval: true)]
     private Collection $posts;
 
+    /**
+     * @var Collection<int, MediaAssets>
+     */
+    #[ORM\OneToMany(targetEntity: MediaAssets::class, mappedBy: 'owner')]
+    private Collection $media;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->posts = new ArrayCollection();
+        $this->media = new ArrayCollection();
     }
     
     public function getId(): ?Uuid
@@ -323,6 +330,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($post->getAuthor() === $this) {
                 $post->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MediaAssets>
+     */
+    public function getMedia(): Collection
+    {
+        return $this->media;
+    }
+
+    public function addMedium(MediaAssets $medium): static
+    {
+        if (!$this->media->contains($medium)) {
+            $this->media->add($medium);
+            $medium->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMedium(MediaAssets $medium): static
+    {
+        if ($this->media->removeElement($medium)) {
+            // set the owning side to null (unless already changed)
+            if ($medium->getOwner() === $this) {
+                $medium->setOwner(null);
             }
         }
 
