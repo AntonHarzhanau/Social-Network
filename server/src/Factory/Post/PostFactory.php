@@ -3,19 +3,19 @@
 namespace App\Factory\Post;
 
 use App\DTO\Post\CreatePostDTO;
-use App\DTO\Post\PostAuthorDTO;
 use App\DTO\Post\PostFeedItemDTO;
 use App\DTO\Post\PostMediaDTO;
 use App\Entity\Post;
 use App\Entity\PostMediaBinding;
 use App\Entity\User;
+use App\Factory\User\UserFactory;
 
 class PostFactory
 {
     public function __construct(
-
+        private readonly UserFactory $userFactory,
     ) {}
-    
+
     public function createPostFromDTO(CreatePostDTO $dto, User $author, array $media): Post
     {
         $post = new Post();
@@ -33,34 +33,27 @@ class PostFactory
         return $post;
     }
 
-    public static function mapPostToPostFeedItemDTO(Post $post, array $likedMap): PostFeedItemDTO
+    public function mapPostToPostFeedItemDTO(Post $post, bool $isLikedByCurrentUser): PostFeedItemDTO
     {
-        $postId = (string) $post->getId();
-        $author = $post->getAuthor();
-        $date = $post->getUpdatedAt() ?? $post->getCreatedAt();
-        
         $mediaDTOs = [];
         foreach ($post->getBindedMedia() as $binding) {
             $media = $binding->getMedia();
-            $mediaDTOs[] = new PostMediaDTO(
-                id: (string) $media->getId(),
-                url: $media->getStorageKey(),
-                type: $media->getFileType()->value ?? null,
-            );
+            if ($media) {
+                $mediaDTOs[] = new PostMediaDTO(
+                    id: $media->getId(),
+                    url: $media->getStorageKey(),
+                    type: $media->getFileType(),
+                );
+            }
         }
-
         return new PostFeedItemDTO(
-            id: (string) $post->getId(),
+            id: $post->getId(),
+            author: $this->userFactory->toAuthorSummaryDTO($post->getAuthor()),
             content: $post->getContent(),
-            date: $date,
+            date: $post->getCreatedAt(),
             likeCount: $post->getLikeCount(),
             commentCount: $post->getCommentCount(),
-            isLikedByCurrentUser: $likedMap[$postId] ?? false,
-            author: new PostAuthorDTO(
-                id: (string) $author->getId(),
-                username: $author->getUsername(),
-                avatarUrl: $author->getAvatarUrl(),
-            ),
+            isLikedByCurrentUser: $isLikedByCurrentUser,
             media: $mediaDTOs,
         );
     }

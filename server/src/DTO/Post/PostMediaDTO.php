@@ -2,18 +2,13 @@
 
 namespace App\DTO\Post;
 
-use Symfony\Component\Serializer\Attribute\Groups;
+use App\Enum\FileTypeEnum;
 
 final readonly class PostMediaDTO
 {
     public function __construct(
-        #[Groups (['post:feed'])]
         public string $id,
-
-        #[Groups (['post:feed'])]
         public string $url,
-
-        #[Groups (['post:feed'])]
-        public string $type,
+        public FileTypeEnum $type,
     ) {}
 }

@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Comment;
 use App\Entity\Post;
 use App\Entity\User;
 use App\Repository\UserRepository;
@@ -21,15 +22,22 @@ class AppFixtures extends Fixture
         $conn = $manager->getConnection();
         $conn->executeStatement('TRUNCATE TABLE post, "user" CASCADE');
 
-        // $product = new Product();
-        // $manager->persist($product);
-        $user = $this->createUser();
-        $manager->persist($user);
 
         for ($i=0; $i < 5; $i++) { 
-            $post = $this->createPost();
-            $user->addPost($post);
-            $manager->persist($post);
+            $user = $this->createUser();
+            for ($j=0; $j < 10; $j++) { 
+                $post = $this->createPost();
+                $user->addPost($post);
+                $manager->persist($post);
+                
+                for ($k=0; $k < 3; $k++) { 
+                    $comment = $this->createComment();
+                    $post->addComment($comment);
+                    $comment->setAuthor($user);
+                    $manager->persist($comment);
+                }
+            }
+            $manager->persist($user);
         }
 
         $manager->flush();
@@ -37,20 +45,33 @@ class AppFixtures extends Fixture
 
     public function createUser(): User
     {
+        $faker = \Faker\Factory::create();
         $user = new User();
-        $user->setEmail('user@mail.com');
-        $user->setUsername('user');
+        $user->setEmail($faker->unique()->safeEmail());
+        $user->setUsername($faker->userName());
         $user->setPassword($this->passwordHasher->hashPassword($user, '1234'));
-        $user->setDateOfBirth(new \DateTimeImmutable('2000-01-01'));
+        $user->setDateOfBirth(\DateTimeImmutable::createFromMutable(
+            $faker->dateTimeBetween('-30 years', '-18 years')
+        ));
 
         return $user;
     }
 
     public function createPost(): Post
     {
+        $faker = \Faker\Factory::create();
         $post = new Post();
-        $post->setContent('This is a sample post content.');
+        $post->setContent($faker->text(maxNbChars: 1000));
 
         return $post;
+    }
+
+    public function createComment(): Comment
+    {
+        $faker = \Faker\Factory::create();
+        $comment = new Comment();
+        $comment->setContent($faker->text(maxNbChars: 500));
+
+        return $comment;
     }
 }

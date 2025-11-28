@@ -4,15 +4,18 @@ namespace App\Controller;
 
 use App\DTO\Comment\CreateCommentDTO;
 use App\DTO\Post\CreatePostDTO;
+use App\DTO\Post\UpdatePostDTO;
 use App\Entity\Post;
 use App\Entity\User;
 use App\Enum\VisibilityEnum;
+use App\Factory\Post\PostFactory;
 use App\Service\CommentService;
 use App\Service\PostService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
@@ -47,25 +50,26 @@ final class PostController extends AbstractController
 
         $posts = $this->postService->getAll($page, $limit, $visibilities, $this->getUser());
 
-        return $this->json(['posts' => $posts], JsonResponse::HTTP_OK, [], ['groups' => 'post:feed']);
+        return $this->json(['posts' => $posts], JsonResponse::HTTP_OK, []);
     }
 
 
     #[Route('/{id}', name: 'get_post_by_id', methods: ['GET'], format: 'json')]
-    public function getById(Post $post): JsonResponse
+    public function getById(string $id, #[CurrentUser] User $currentUser): JsonResponse
     {
-        return $this->json($post, JsonResponse::HTTP_OK, [], ['groups' => 'post:read']);
+        $post = $this->postService->getById($currentUser, $id);
+        return $this->json($post, JsonResponse::HTTP_OK, []);
     }
 
-    #[Route('/{authorId}', name: 'get_posts_by_author', methods: ['GET'], format: 'json')]
-    public function getByAuthor(User $user, Request $request): JsonResponse
+    #[Route('/author/{author}', name: 'get_posts_by_author', methods: ['GET'], format: 'json')]
+    public function getByAuthor(#[CurrentUser] User $user, User $author, Request $request): JsonResponse
     {
         $page = max(1, (int) $request->query->get('page', 1));
         $limit = max(1, (int) $request->query->get('limit', 2));
-        
-        $posts = $this->postService->getByAuthor($user, $page, $limit);
 
-        return $this->json($posts, JsonResponse::HTTP_OK, [], ['groups' => 'post:read']);
+        $posts = $this->postService->getByAuthor($user, $author, $page, $limit);
+
+        return $this->json($posts, JsonResponse::HTTP_OK, []);
     }
 
 
@@ -75,6 +79,28 @@ final class PostController extends AbstractController
         $this->postService->delete($post, $user);
 
         return $this->json(['message' => 'Post deleted successfully']);
+    }
+
+    // TODO: test
+    #[Route('/{id}', name: 'update_post', methods: ['PUT'], format: 'json')]
+    public function update(
+        Post $post,
+        #[MapRequestPayload] UpdatePostDTO $dto,
+        #[CurrentUser] User $user,
+        PostFactory $postFactory
+    ): JsonResponse {
+        try {
+            $updated = $this->postService->update($post, $dto, $user);
+        } catch (AccessDeniedHttpException $e) {
+            return $this->json(['error' => 'Forbidden', 'message' => $e->getMessage()], 403);
+        } catch (\RuntimeException $e) {
+            return $this->json(['error' => 'Bad Request', 'message' => $e->getMessage()], 400);
+        }
+
+        $isLikedByCurrentUser = $updated->getLikeBy()->contains($user);
+        $responseDTO = $postFactory->mapPostToPostFeedItemDTO($updated, $isLikedByCurrentUser);
+
+        return $this->json($responseDTO, 200);
     }
 
 
@@ -88,11 +114,13 @@ final class PostController extends AbstractController
 
 
     #[Route('/{id}/comments', name: 'get_comments_for_post', methods: ['GET'], format: 'json')]
-    public function getCommentsForPost(Post $post): JsonResponse
+    public function getRootCommentsForPost(Post $post, #[CurrentUser] User $currentUser, Request $request): JsonResponse
     {
-        $comments = $post->getComments();
+        $page = max(1, (int) $request->query->get('page', 1));
+        $limit = max(1, (int) $request->query->get('limit', 2));
+        $comments = $this->commentService->getCommentsForPost($post, $currentUser, $page, $limit);
 
-        return $this->json($comments, 200, [], ['groups' => 'comment:read']);
+        return $this->json($comments, 200, []);
     }
 
 

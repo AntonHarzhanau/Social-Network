@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\DTO\Post\PostWithLikeFlagDTO;
 use App\Entity\Post;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -35,33 +36,51 @@ class PostRepository extends ServiceEntityRepository
         }
     }
 
-    public function getAllPosts(int $page, int $limit, array $visibilities): array
+    public function findPosts(
+        User $currentUser,
+        ?User $author = null,
+        ?string $id = null,
+        ?int $page = null, 
+        ?int $limit = null, 
+        ?array $visibilities = null
+    ): array
     {
-        $offset = ($page - 1) * $limit;
+        $qb = $this->createQueryBuilder('p')
+            ->select('NEW App\DTO\Post\PostWithLikeFlagDTO(
+            p,
+            CASE WHEN :currentUser MEMBER OF p.likeBy
+                THEN 
+                    true 
+                ELSE 
+                    false 
+                END
+            )')
+            ->setParameter('currentUser', $currentUser)
+            ->orderBy('p.createdAt', 'DESC');
 
-        return $this->createQueryBuilder('p')
-            ->andWhere('p.visibility IN (:vis)')
-            ->setParameter('vis', $visibilities)
-            ->setFirstResult($offset)
-            ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
+        if ($id) {
+            $qb->andWhere('p.id = :id')
+               ->setParameter('id', $id);
+        }
+
+        if ($author) {
+            $qb->andWhere('p.author = :author')
+               ->setParameter('author', $author);
+        }
+
+        if ($visibilities !== null && $visibilities !== []) {
+            $qb->andWhere('p.visibility IN (:vis)')
+               ->setParameter('vis', $visibilities);
+        }
+
+        if ($page !== null && $limit !== null) {
+            $qb->setFirstResult(($page - 1) * $limit)
+               ->setMaxResults($limit);
+        }
+
+        /** @var PostWithLikeFlagDTO[] $results */
+        $results = $qb->getQuery()->getResult();
+        return $results;
     }
 
-    public function findLikedPostIdsByUser(User $user, array $posts): array
-    {
-        $ids = array_map(fn(Post $post) => $post->getId(), $posts);
-
-        $rows = $this->createQueryBuilder('p')
-            ->select('DISTINCT p.id AS id')
-            ->join('p.likeBy', 'u')
-            ->andWhere('u = :user')
-            ->andWhere('p.id IN (:ids)')
-            ->setParameter('user', $user)
-            ->setParameter('ids', $ids)
-            ->getQuery()
-            ->getArrayResult();
-
-        return array_map(fn(array $row) => $row['id'], $rows);
-    }
 }

@@ -2,10 +2,13 @@
 
 namespace App\Service;
 
+use App\DTO\Comment\CommentViewDTO;
 use App\DTO\Comment\CreateCommentDTO;
+use App\DTO\Common\AuthorSummaryDTO;
 use App\Entity\Comment;
 use App\Entity\Post;
 use App\Entity\User;
+use App\Factory\Comment\CommentFactory;
 use App\Repository\CommentRepository;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
@@ -13,6 +16,7 @@ class CommentService
 {
     public function __construct(
         private readonly CommentRepository $commentRepository,
+        private readonly CommentFactory $commentFactory
     ) {}
 
     public function create(CreateCommentDTO $dto, User $author, Post $post): void
@@ -70,13 +74,22 @@ class CommentService
         $this->commentRepository->save($comment);
     }
 
-    public function hasUserLiked(Comment $comment, User $user): bool
-    {
-        return $comment->getLikeBy()->contains($user);
-    }
-
     public function getRootCommentsByPost(Post $post, int $page = 1, int $limit = 2): array
     {
         return $this->commentRepository->findRootByPost($post, $page, $limit);
+    }
+
+    public function getCommentsForPost(Post $post, User $currentUser, int $page = 1, int $limit = 10) : array
+    {
+        $rows = $this->commentRepository->findRootForPost($post, $currentUser, $page, $limit);
+        $result = [];
+        foreach ($rows as $row) {
+            $comment = $row[0];
+            $replyCount = $row['replyCount'];
+            $likedByCurrentUser = $row['likedByCurrentUser'];
+            
+            $result[] = $this->commentFactory->toCommentViewDTO($comment, $replyCount, $likedByCurrentUser);
+        }
+        return $result;
     }
 }
