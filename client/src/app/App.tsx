@@ -1,12 +1,13 @@
-import { Button } from '@/shared/components/ui/button'
+import Providers from "./Providers";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./router";
 
 function App() {
-
   return (
-    <div className='flex justify-center min-h-screen items-center'>
-      <Button>Click me</Button>
-    </div>
-  )
+    <Providers>
+     <RouterProvider router={router} /> 
+    </Providers>
+  );
 }
 
-export default App
+export default App;
