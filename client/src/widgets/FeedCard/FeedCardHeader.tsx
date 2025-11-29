@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
-import { CardHeader } from "../ui/card";
-import { Button } from "../ui/button";
+import { CardHeader } from "@/shared/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
-import { UserAvatar } from "../UserAvatar";
+import { UserAvatar } from "@/shared/components/UserAvatar";
 
 interface FeedCardHeaderProps {
   name: string;
   initials: string;
-  imageId?: string;
+  imageId?: string | null;
   date: string;
 }
 

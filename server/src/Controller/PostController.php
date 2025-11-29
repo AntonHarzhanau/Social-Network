@@ -54,12 +54,14 @@ final class PostController extends AbstractController
     }
 
 
+
     #[Route('/{id}', name: 'get_post_by_id', methods: ['GET'], format: 'json')]
     public function getById(string $id, #[CurrentUser] User $currentUser): JsonResponse
     {
         $post = $this->postService->getById($currentUser, $id);
         return $this->json($post, JsonResponse::HTTP_OK, []);
     }
+
 
     #[Route('/author/{author}', name: 'get_posts_by_author', methods: ['GET'], format: 'json')]
     public function getByAuthor(#[CurrentUser] User $user, User $author, Request $request): JsonResponse
@@ -81,6 +83,7 @@ final class PostController extends AbstractController
         return $this->json(['message' => 'Post deleted successfully']);
     }
 
+
     // TODO: test
     #[Route('/{id}', name: 'update_post', methods: ['PUT'], format: 'json')]
     public function update(
@@ -100,16 +103,16 @@ final class PostController extends AbstractController
         $isLikedByCurrentUser = $updated->getLikeBy()->contains($user);
         $responseDTO = $postFactory->mapPostToPostFeedItemDTO($updated, $isLikedByCurrentUser);
 
-        return $this->json($responseDTO, 200);
+        return $this->json($responseDTO, JsonResponse::HTTP_OK);
     }
 
 
     #[Route('/{id}/like', name: 'like_post', methods: ['POST'], format: 'json')]
     public function toggleLike(Post $post, #[CurrentUser] User $user): JsonResponse
     {
-        $likeCount = $this->postService->toggleLike($post, $user);
+        $responseDTO = $this->postService->toggleLike($post, $user);
 
-        return $this->json(['message' => 'Toggled like status successfully', 'likeCount' => $likeCount]);
+        return $this->json($responseDTO, JsonResponse::HTTP_OK);
     }
 
 
@@ -120,7 +123,7 @@ final class PostController extends AbstractController
         $limit = max(1, (int) $request->query->get('limit', 2));
         $comments = $this->commentService->getCommentsForPost($post, $currentUser, $page, $limit);
 
-        return $this->json($comments, 200, []);
+        return $this->json($comments, JsonResponse::HTTP_OK, []);
     }
 
 

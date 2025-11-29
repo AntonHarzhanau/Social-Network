@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\DTO\Post\CreatePostDTO;
 use App\DTO\Post\PostFeedItemDTO;
+use App\DTO\Post\PostLikeResponseDTO;
 use App\DTO\Post\UpdatePostDTO;
 use App\Entity\Post;
 use App\Entity\PostMediaBinding;
@@ -128,7 +129,7 @@ class PostService
         return $post;
     }
 
-    public function toggleLike(Post $post, User $user): int
+    public function toggleLike(Post $post, User $user): PostLikeResponseDTO
     {
         if ($post->getLikeBy()->contains($user)) {
             $post->getLikeBy()->removeElement($user);
@@ -140,7 +141,13 @@ class PostService
 
         $this->postRepository->save($post);
 
-        return $post->getLikeCount();
+        $dto = new PostLikeResponseDTO(
+            postId: $post->getId(),
+            likeCount: $post->getLikeCount(),
+            isLikedByCurrentUser: $post->getLikeBy()->contains($user)
+        );
+
+        return $dto;
     }
 
     // TODO: test!!!!!!!!!!!!!!!!!!!!!!!!!!!!

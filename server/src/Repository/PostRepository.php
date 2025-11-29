@@ -40,11 +40,10 @@ class PostRepository extends ServiceEntityRepository
         User $currentUser,
         ?User $author = null,
         ?string $id = null,
-        ?int $page = null, 
-        ?int $limit = null, 
+        ?int $page = null,
+        ?int $limit = null,
         ?array $visibilities = null
-    ): array
-    {
+    ): array {
         $qb = $this->createQueryBuilder('p')
             ->select('NEW App\DTO\Post\PostWithLikeFlagDTO(
             p,
@@ -56,31 +55,31 @@ class PostRepository extends ServiceEntityRepository
                 END
             )')
             ->setParameter('currentUser', $currentUser)
-            ->orderBy('p.createdAt', 'DESC');
+            ->orderBy('p.createdAt', 'DESC')
+            ->addOrderBy('p.id', 'DESC');
 
         if ($id) {
             $qb->andWhere('p.id = :id')
-               ->setParameter('id', $id);
+                ->setParameter('id', $id);
         }
 
         if ($author) {
             $qb->andWhere('p.author = :author')
-               ->setParameter('author', $author);
+                ->setParameter('author', $author);
         }
 
         if ($visibilities !== null && $visibilities !== []) {
             $qb->andWhere('p.visibility IN (:vis)')
-               ->setParameter('vis', $visibilities);
+                ->setParameter('vis', $visibilities);
         }
 
         if ($page !== null && $limit !== null) {
             $qb->setFirstResult(($page - 1) * $limit)
-               ->setMaxResults($limit);
+                ->setMaxResults($limit);
         }
 
         /** @var PostWithLikeFlagDTO[] $results */
         $results = $qb->getQuery()->getResult();
         return $results;
     }
-
 }
