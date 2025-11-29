@@ -7,7 +7,7 @@ import NotFoundPage from "@/pages/NotFoundPage";
 import ProfilePage from "@/pages/ProfilePage";
 import SettingsPage from "@/pages/SettingsPage";
 import { ROUTES } from "@/shared/constants/routes";
-import Layout from "@/widgets/Layout";
+import Layout from "@/widgets/Layout/Layout";
 import { createBrowserRouter, createRoutesFromElements, Route } from "react-router-dom";
 
 export const routes = createRoutesFromElements(
