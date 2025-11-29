@@ -1,6 +1,7 @@
 import { apiClient } from "./apiClient";
 
 export type MediaType = "image" | "video" | "audio" | "document" | "other";
+export type Visibility = "public" | "private" | "friends"| "group";
 
 export interface Author {
   id: string;
@@ -40,6 +41,16 @@ export interface FetchPostsParams {
   limit?: number;
 }
 
+export interface CreatePostPayload {
+    content?: string;
+    visibility?: Visibility;
+    mediaIds?: string[];
+}
+
+export interface CreatePostResponse {
+    message: string;
+}
+
 export const fetchPosts = async ({
   page = 1,
   limit = 10,
@@ -51,9 +62,20 @@ export const fetchPosts = async ({
   return response.data.posts;
 };
 
+export const createPost = async (
+    payload: CreatePostPayload,
+): Promise<CreatePostResponse> => {
+    const response = await apiClient.post<CreatePostResponse>(
+        "/posts",
+        payload,
+    );
+    
+    return response.data;
+}
+
 export const toggleLikePost = async (
   postId: string,
 ): Promise<ToggleLikeResponse> => {
-  const response = await apiClient.post(`/posts/${postId}/like`);
+  const response = await apiClient.post<ToggleLikeResponse>(`/posts/${postId}/like`);
   return response.data;
 };

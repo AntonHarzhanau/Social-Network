@@ -10,7 +10,7 @@ const Layout = () => {
         <div className="flex-1">
           <Menu />
         </div>
-        <main className="flex-6">
+        <main className="flex-6 py-2 px-4">
           <Outlet />
         </main>
       </div>

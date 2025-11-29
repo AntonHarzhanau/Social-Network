@@ -33,6 +33,7 @@ final class MediaController extends AbstractController
             return $this->json(['error' => 'No file uploaded'], 400);
         }
 
+
         $media = $this->mediaStorage->storeFile($file, $user);
 
         return $this->json([
