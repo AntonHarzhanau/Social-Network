@@ -10,29 +10,18 @@ import { formatPostDate } from "@/shared/lib/date";
 import FeedCardHeader from "@/widgets/FeedCard/FeedCardHeader";
 import FeedCardMedia from "./FeedCardMedia";
 import FeedCardActions from "./FeedCardActions";
-import { useToggleLikePost } from "@/shared/hooks/useToggleLikePost";
 
 interface FeedCardProps {
   post: Post;
-
-  onComment?: (postId: string) => void;
-  onShare?: (postId: string) => void;
 }
 
-const FeedCard = ({ post, onComment, onShare }: FeedCardProps) => {
-  const toggleLike = useToggleLikePost();
+const FeedCard = ({ post }: FeedCardProps) => {
   const authorName = post.author.username || "Unknown User";
   const initials = authorName
     .split(" ")
     .map((namePart) => namePart.charAt(0).toUpperCase())
     .join("")
     .slice(0, 2);
-
-  const handleLike = () => {
-    toggleLike.mutate(post.id);
-  }
-  const handleComment = () => onComment?.(post.id);
-  const handleShare = () => onShare?.(post.id);
 
   return (
     <Card className="max-w-full bg-card">
@@ -53,12 +42,10 @@ const FeedCard = ({ post, onComment, onShare }: FeedCardProps) => {
       </CardContent>
       <CardFooter className="flex items-center">
         <FeedCardActions
+          postId={post.id}
           likeCount={post.likeCount}
           commentCount={post.commentCount}
           isLikedByCurrentUser={post.isLikedByCurrentUser}
-          onLikeClick={handleLike}
-          onCommentClick={handleComment}
-          onShareClick={handleShare}
         />
       </CardFooter>
     </Card>

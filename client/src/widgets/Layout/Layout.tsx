@@ -6,11 +6,11 @@ const Layout = () => {
   return (
     <div>
       <Header />
-      <div className="flex max-w-6xl w-full  mx-auto gap-2">
-        <div>
+      <div className="flex max-w-[1100px] w-full  mx-auto gap-2">
+        <div className="flex-1">
           <Menu />
         </div>
-        <main className="flex-5">
+        <main className="flex-6">
           <Outlet />
         </main>
       </div>

@@ -1,42 +1,25 @@
-import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
-import { toggleLikePost } from "@/shared/api/post";
-import { Toggle } from "@/shared/components/ui/toggle";
 import { Heart } from "lucide-react";
+import { Button } from "./ui/button";
 
 interface LikeButtonProps {
-  id: string;
-  likeCount: number;
-  isLiked: boolean;
+  count: number;
+  isActive: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
 }
 
-export const LikeButton = ({ id, likeCount, isLiked }: LikeButtonProps) => {
-  const [liked, setLiked] = useState(isLiked);
-  const [count, setCount] = useState(likeCount);
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: () => toggleLikePost(id),
-    onSuccess: (data) => {
-      setLiked((prev) => !prev);
-      setCount(data.likeCount);
-    },
-    onError: (error) => {
-      console.error("Error toggling like:", error);
-    },
-  });
+export const LikeButton = ({ count, isActive, disabled, onClick }: LikeButtonProps) => {
 
   return (
-    <Toggle
-      aria-label="Toggle like"
+   <Button
+      variant="ghost"
       size="sm"
-      variant="default"
-      pressed={liked}
-      disabled={isPending}
-      onPressedChange={() => mutate()}
-      className="data-[state=on]:bg-transparent data-[state=on]:*:[svg]:fill-red-400 data-[state=on]:*:[svg]:stroke-red-400"
+      className="flex items-center gap-1"
+      onClick={onClick}
+      disabled={disabled}
     >
-      <Heart />
-      {count}
-    </Toggle>
+      <Heart className={isActive ? "fill-current text-red-500" : ""} />
+      <span className={isActive ? "text-sm text-red-500" : "text-sm"}>{count}</span>
+    </Button>
   );
 };

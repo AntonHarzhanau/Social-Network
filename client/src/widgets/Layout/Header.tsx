@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 const Header = () => {
   return (
     <header className="flex justify-center h-12 border border-b items-center bg-card px-4 sticky top-0 z-20">
-      <div className="flex items-center max-w-6xl w-full justify-between">
+      <div className="flex items-center max-w-[1100px] w-full justify-between">
         <div className="flex gap-8 items-center ">
           <Link to="/" className="w-40">
             Logo

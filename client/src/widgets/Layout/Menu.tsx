@@ -38,7 +38,7 @@ const Menu = ({ className }: MenuProps) => {
             key={item.path}
             className="flex items-center"
           >
-            <Button variant="ghost" className="w-full justify-start p-2 hover:bg-accent-foreground/5">
+            <Button variant="ghost" className="w-full justify-start py-2 hover:bg-accent-foreground/5">
               <Icon className="w-5 h-5" />
               <span className="font-normal">{item.name}</span>
             </Button>
