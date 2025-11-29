@@ -29,7 +29,7 @@ interface MenuProps {
 }
 const Menu = ({ className }: MenuProps) => {
   return (
-    <nav className={cn("", className)}>
+    <nav className={cn("sticky top-14 ", className)}>
       {MAIN_MENU.map((item) => {
         const Icon = iconByPath[item.path];
         return (

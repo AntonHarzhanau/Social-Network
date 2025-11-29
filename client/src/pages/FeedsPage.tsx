@@ -1,49 +1,43 @@
-import type { Post } from "@/shared/api/post";
+import { fetchPosts} from "@/shared/api/post";
 import { Button } from "@/shared/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
-import { Input } from "@/shared/components/ui/input";
-import { Label } from "@radix-ui/react-dropdown-menu";
-import { useEffect, useState } from "react";
+import FeedCard from "@/widgets/FeedCard";
+import { useQuery } from "@tanstack/react-query";
+
+
 
 const FeedsPage = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
 
-  // useEffect(() => {
+  const {data, isPending, isError} = useQuery({ queryKey: ['posts'], queryFn: fetchPosts });
 
-  // }, [])
+
+  if (isPending) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error loading posts.</div>;
+  }
+
   return (
-    <div>
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>
-            
-          </CardTitle>
-          <CardContent></CardContent>
-          <CardDescription>
-            Enter your email below to login to your account
-          </CardDescription>
-          <CardAction>
-            <Button variant="link">Sign Up</Button>
-          </CardAction>
-        </CardHeader>
+    <div className="flex gap-2 p-2">
+      <div className="flex flex-col flex-5">
+       {data && data.map((post) => (
+        <FeedCard key={post.id} post={post} />
+       ))}    
 
-        <CardFooter className="flex-col gap-2">
-          <Button type="submit" className="w-full">
-            Login
-          </Button>
-          <Button variant="outline" className="w-full">
-            Login with Google
-          </Button>
-        </CardFooter>
-      </Card>
+      </div>
+
+      <aside className="flex-3 flex flex-col gap-2 h-fit rounded-xl bg-card sticky top-14 p-2">
+        <Button variant="ghost" className="w-full justify-start">
+          All
+        </Button>
+        <Button variant="ghost" className="w-full justify-start">
+          Friends
+        </Button>
+        <Button variant="ghost" className="w-full justify-start">
+          Groups
+        </Button>
+      </aside>
     </div>
   );
 };

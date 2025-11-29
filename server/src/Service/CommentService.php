@@ -2,9 +2,7 @@
 
 namespace App\Service;
 
-use App\DTO\Comment\CommentViewDTO;
 use App\DTO\Comment\CreateCommentDTO;
-use App\DTO\Common\AuthorSummaryDTO;
 use App\Entity\Comment;
 use App\Entity\Post;
 use App\Entity\User;
@@ -25,6 +23,7 @@ class CommentService
         $comment->setContent($dto->content);
         $comment->setAuthor($author);
         $comment->setPost($post);
+        $post->setCommentCount($post->getCommentCount() + 1);
         $this->commentRepository->save($comment);
     }
 

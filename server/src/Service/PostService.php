@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use App\DTO\Post\CreatePostDTO;
-use App\DTO\Post\PostAuthorDTO;
 use App\DTO\Post\PostFeedItemDTO;
 use App\DTO\Post\UpdatePostDTO;
 use App\Entity\Post;
@@ -30,7 +29,6 @@ class PostService
         if (!empty($dto->mediaIds)) {
             $media = $this->mediaAssetRepository->findBy(['id' => $dto->mediaIds]);
         }
-
         $post = $this->postFactory->createPostFromDTO($dto, $author, $media);
 
         $this->postRepository->save($post);
