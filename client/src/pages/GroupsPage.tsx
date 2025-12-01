@@ -1,6 +1,8 @@
 const GroupsPage = () => {
   return (
-    <div>GroupsPage</div>
+    <div>
+        GroupsPage
+    </div>
   )
 }
 

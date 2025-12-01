@@ -2,7 +2,6 @@ import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -10,7 +9,7 @@ import {
 } from "@/shared/components/ui/dialog";
 import { cn } from "@/shared/lib/utils";
 import { PlusCircleIcon } from "lucide-react";
-import { CreatePostForm } from "./CreatePostForm";
+import { CreatePostForm } from "@/widgets/CreatePostForm/CreatePostForm";
 
 interface CreatePostDIalogProps {
     className?: string;

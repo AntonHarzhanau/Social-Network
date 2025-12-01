@@ -1,7 +1,7 @@
 // src/features/posts/PostMediaField.tsx
 import { UploadCloud } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import { PostMediaPreviewItem } from "./PostMediaPreviewItem";
+import { PostMediaPreviewItem } from "@/widgets/CreatePostForm/PostMediaPreviewItem";
 import { usePostMediaUpload } from "@/shared/hooks/usePostMediaUpload";
 
 type PostMediaFieldProps = {

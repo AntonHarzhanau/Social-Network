@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/shared/components/ui/form";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { PostMediaField } from "./PostMediaField";
+import { PostMediaField } from "@/widgets/CreatePostForm/PostMediaField";
 import { useCreatePost } from "@/shared/hooks/useCreatePost";
 import type { Visibility } from "@/shared/api/post";
 
@@ -24,7 +24,6 @@ const postSchema = z
 
     visibility: z.enum(["public", "friends", "private", "group"]),
 
-    // ВАЖНО: не optional, не default — просто строковый массив
     mediaIds: z.array(z.string()),
   })
   .refine(
@@ -32,12 +31,11 @@ const postSchema = z
       (data.content && data.content.trim().length > 0) ||
       data.mediaIds.length > 0,
     {
-      message: "Нужно либо текст, либо хотя бы одно изображение",
+      message: "Either text or at least one image is required",
       path: ["content"],
     },
   );
 
-// тип формы — строго из схемы
 export type PostFormValues = z.infer<typeof postSchema>;
 
 type Props = {
@@ -60,7 +58,7 @@ export function CreatePostForm({ onSuccess }: Props) {
   const isSubmitting = createPostMutation.isPending;
 
   const onSubmit = async (values: PostFormValues) => {
-    if (isUploading) return; // на всякий пожарный
+    if (isUploading) return;
 
     await createPostMutation.mutateAsync({
       content: values.content,
@@ -80,10 +78,10 @@ export function CreatePostForm({ onSuccess }: Props) {
           name="content"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Текст поста</FormLabel>
+              <FormLabel>Post Text</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="О чём ты думаешь?"
+                  placeholder="What are you thinking about?"
                   className="resize-none"
                   {...field}
                 />
@@ -93,14 +91,14 @@ export function CreatePostForm({ onSuccess }: Props) {
           )}
         />
 
-        {/* visibility, если нужно, можно добавить Select */}
+        {/* visibility*/}
 
         <FormField
           control={form.control}
           name="mediaIds"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Изображения</FormLabel>
+              <FormLabel>Images</FormLabel>
               <FormControl>
                 <PostMediaField
                   value={field.value ?? []} // string[]
@@ -116,7 +114,7 @@ export function CreatePostForm({ onSuccess }: Props) {
 
         {isUploading && (
           <p className="text-xs text-muted-foreground">
-            Идёт загрузка изображений, подождите…
+            Uploading images, please wait…
           </p>
         )}
 
@@ -127,14 +125,14 @@ export function CreatePostForm({ onSuccess }: Props) {
             onClick={() => form.reset()}
             disabled={isSubmitting || isUploading}
           >
-            Отмена
+            Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting || isUploading}>
             {isUploading
-              ? "Ждём загрузки медиа…"
+              ? "Waiting for media upload…"
               : isSubmitting
-                ? "Публикуем..."
-                : "Опубликовать"}
+                ? "Publishing..."
+                : "Publish"}
           </Button>
         </div>
       </form>
