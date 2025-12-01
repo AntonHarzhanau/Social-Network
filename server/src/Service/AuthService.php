@@ -22,9 +22,11 @@ class AuthService
             throw new ConflictHttpException('Email is already in use.');
         }
 
+        $fullName = $dto->firstName . ' ' . $dto->lastName;
+
         $user = new User();
         $user->setEmail($dto->email);
-        $user->setUsername($dto->username);
+        $user->setUsername($fullName);
         $hashedPassword = $this->passwordHasher->hashPassword($user, $dto->password);
         $user->setPassword($hashedPassword);
         $user->setDateOfBirth(new \DateTimeImmutable($dto->dateOfBirth));

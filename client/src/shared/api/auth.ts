@@ -1,26 +1,31 @@
-import { apiClient } from "./apiClient"
+import type { RegisterApiPayload } from "@/widgets/AuthForms/RegisterForm";
+import { apiClient } from "./apiClient";
 
 export interface Me {
-    id: string;
-    username: string;
-    avatarUrl?: string;
+  id: string;
+  username: string;
+  avatarUrl?: string;
 }
 
 export const AuthApi = {
-    login(email: string, password: string) {
-        return apiClient.post<{ token: string }>('/auth/login', { email, password });
-    },
-    register(email: string, password: string) {
-        return apiClient.post('/auth/register', { email, password});
-    },
-    logout() {
-        return apiClient.post('/auth/logout');
-    },
-    refresh() {
-        return apiClient.post<{ token: string}>('/auth/refresh');
-    },
-    me() {
-        const response = apiClient.get<Me>('/auth/me');
-        return response;
-    }
-}
+  login(email: string, password: string) {
+    return apiClient.post<{ token: string }>("/auth/login", {
+      email,
+      password,
+    });
+  },
+  register(registerData: RegisterApiPayload) {
+    console.log("API Register data:", registerData);
+    return apiClient.post("/auth/register", registerData);
+  },
+  logout() {
+    return apiClient.post("/auth/logout");
+  },
+  refresh() {
+    return apiClient.post<{ token: string }>("/auth/refresh");
+  },
+  me() {
+    const response = apiClient.get<Me>("/auth/me");
+    return response;
+  },
+};

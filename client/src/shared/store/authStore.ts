@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { AuthApi, type Me } from "../api/auth";
+import type { RegisterApiPayload } from "@/widgets/AuthForms/RegisterForm";
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -7,9 +8,14 @@ interface AuthState {
   user?: Me | null;
 
   login: (email: string, password: string) => Promise<void>;
-  // register: (email: string, password: string) => Promise<void>;
+  register: (registerData: RegisterApiPayload) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
+}
+
+export interface RegisterData {
+  email: string;
+  password: string;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -26,6 +32,17 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch (error) {
       console.error("Login failed:", error);
       set({ isAuthenticated: false });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  register: async (registerData) => {
+    set({ isLoading: true });
+    try {
+      await AuthApi.register(registerData);
+    } catch (error) {
+      console.error("Registration failed:", error);
     } finally {
       set({ isLoading: false });
     }

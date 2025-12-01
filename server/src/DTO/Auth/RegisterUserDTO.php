@@ -11,8 +11,10 @@ final readonly class RegisterUserDTO
         public ?string $email = null,
 
         #[Assert\NotBlank]
-        public ?string $username = null,
+        public ?string $firstName = null,
 
+        #[Assert\NotBlank]
+        public ?string $lastName = null,
 
         #[Assert\NotBlank]
         public ?string $password = null,
@@ -20,5 +22,6 @@ final readonly class RegisterUserDTO
         #[Assert\NotBlank]
         #[Assert\Date]
         public ?string $dateOfBirth = null,
+
     ) {}
 }
