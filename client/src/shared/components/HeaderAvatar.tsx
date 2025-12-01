@@ -1,17 +1,18 @@
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
+import { UserAvatar } from "./UserAvatar";
 
-const HeaderAvatar = () => {
+
+
+const HeaderAvatar = ({name, imageId}: {name: string, imageId?: string | null}) => {
+    console.log("HeaderAvatar", imageId, name);
+    console.log("HeaderAvatar render:");
   return (
     <Button
       variant="ghost"
       size="icon"
       className="cursor-pointer p-5 hover:bg-accent/80"
     >
-      <Avatar>
-        <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-        <AvatarFallback>CN</AvatarFallback>
-      </Avatar>
+      <UserAvatar imageId={imageId} name={name} />
     </Button>
   );
 };

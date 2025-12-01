@@ -35,7 +35,7 @@ final class AuthController extends AbstractController
         UserFactory $userFactory,
         #[CurrentUser] User $user,
     ): JsonResponse {
-        $meUserDTO = $userFactory->toMeUserDTO($user);
+        $meUserDTO = $userFactory->toAuthorSummaryDTO($user);
         return $this->json($meUserDTO, JsonResponse::HTTP_OK);
     }
 }

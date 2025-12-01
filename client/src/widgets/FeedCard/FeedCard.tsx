@@ -17,17 +17,12 @@ interface FeedCardProps {
 
 const FeedCard = ({ post }: FeedCardProps) => {
   const authorName = post.author.username || "Unknown User";
-  const initials = authorName
-    .split(" ")
-    .map((namePart) => namePart.charAt(0).toUpperCase())
-    .join("")
-    .slice(0, 2);
+  console.log("FeedCard");
 
   return (
     <Card className="max-w-full bg-card">
       <FeedCardHeader
         name={authorName}
-        initials={initials}
         imageId={post.author.avatarUrl}
         date={formatPostDate(post.date)}
       />

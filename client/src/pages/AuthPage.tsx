@@ -1,8 +1,15 @@
 
-const LoginPage = () => {
-  return (
-    <div>LoginPage</div>
-  )
-}
+import LoginForm from "@/widgets/AuthForms/LoginForm";
 
-export default LoginPage
+
+
+const LoginPage = () => {
+
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <LoginForm />
+    </div>
+  );
+};
+
+export default LoginPage;

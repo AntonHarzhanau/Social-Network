@@ -22,7 +22,7 @@ const ProfileColumn = () => {
     defaultValue: "photos",
   };
   return (
-    <div>
+    <div className="flex flex-col gap-2">
       <Card>
         <Tabs defaultValue={contentTabs.defaultValue}>
           <TabsList className="p-2 gap-2 bg-surface">
@@ -45,7 +45,7 @@ const ProfileColumn = () => {
         </Tabs>
       </Card>
 
-      <CreatePostDIalog />
+      <CreatePostDIalog className="mt-2" />
       <FeedsList />
     </div>
   );

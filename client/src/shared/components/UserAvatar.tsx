@@ -6,25 +6,32 @@ import {
   AvatarImage,
   AvatarFallback,
 } from "@/shared/components/ui/avatar";
+import { getInitials } from "../lib/getInitials";
 
 interface UserAvatarProps {
   imageId?: string | null;
-  initials: string;
+  name: string;
   alt?: string;
   className?: string;
 }
 
 export const UserAvatar = ({
   imageId,
-  initials,
+  name,
   alt,
   className,
 }: UserAvatarProps) => {
+  const initials = getInitials(name);
+  const { data: blob, isLoading, isError } = useMedia(imageId);
+
   const [src, setSrc] = useState<string | null>(null);
-  const { data: blob, isLoading, isError } = useMedia(imageId!);
 
   useEffect(() => {
-    if (!blob) return;
+    if (!blob) {
+        setSrc(null);
+        return;
+    }
+    
     const objectUrl = URL.createObjectURL(blob);
     setSrc(objectUrl);
 
@@ -40,7 +47,7 @@ export const UserAvatar = ({
       {showFallback ? (
         <AvatarFallback>{initials}</AvatarFallback>
       ) : (
-        <AvatarImage src={src} alt={alt} />
+        <AvatarImage src={src} alt={alt} className="object-cover"/>
       )}
     </Avatar>
   );

@@ -6,23 +6,17 @@ import { UserAvatar } from "@/shared/components/UserAvatar";
 
 interface FeedCardHeaderProps {
   name: string;
-  initials: string;
   imageId?: string | null;
   date: string;
 }
 
-const FeedCardHeader = ({
-  name,
-  initials,
-  imageId,
-  date,
-}: FeedCardHeaderProps) => {
+const FeedCardHeader = ({ name, imageId, date }: FeedCardHeaderProps) => {
   return (
     <CardHeader className="flex items-center gap-3">
       <Link to="/profile" className="">
         <UserAvatar
           imageId={imageId}
-          initials={initials}
+          name={name}
           alt={name}
           className="h-10 w-10"
         />

@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { Card, CardTitle } from "@/shared/components/ui/card";
+import { ROUTES } from "@/shared/constants/routes";
 import { Link } from "react-router-dom";
 
 const ProfileAside = () => {
@@ -8,7 +9,7 @@ const ProfileAside = () => {
       <Card className="h-56 p-3">
         <CardTitle>
           <div className="flex items-baseline gap-2">
-            <Link to="/" className="text-sm font-medium hover:underline">
+            <Link to={ROUTES.FRIENDS} className="text-sm font-medium hover:underline">
               Friends
             </Link>
             <p className="text-xs text-muted-foreground">177</p>
