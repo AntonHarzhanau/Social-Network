@@ -8,7 +8,6 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/shared/components/ui/carousel";
-import Image from "@/shared/components/Image";
 import { useState } from "react";
 
 interface FeedCardMediaProps {
@@ -16,13 +15,11 @@ interface FeedCardMediaProps {
 }
 
 const FeedCardMedia = ({ media }: FeedCardMediaProps) => {
-  const images = media.filter((media) => media.type === "image");
   const [_, setApi] = useState<CarouselApi>();
   const isTouch =
     typeof window !== "undefined" &&
     ("ontouchstart" in window || navigator.maxTouchPoints > 0);
-
-  if (images.length === 0) {
+  if (media.length === 0) {
     return null;
   }
 
@@ -30,24 +27,24 @@ const FeedCardMedia = ({ media }: FeedCardMediaProps) => {
     <Carousel
       setApi={setApi}
       opts={{
-        watchDrag: isTouch && images.length > 1,
+        watchDrag: isTouch && media.length > 1,
       }}
       className="w-full"
     >
       <CarouselContent className="rounded-none gap-1">
-        {images.map((media) => (
+        {media.map((media) => (
           <CarouselItem key={media.id} className="p-0 rounded-none">
             <AspectRatio
               ratio={4 / 5}
               className="flex justify-center items-center bg-muted"
             >
-              <Image mediaId={media.id} alt="Post Image" className="" />
+              <img src={media.url} alt="" />
             </AspectRatio>
           </CarouselItem>
         ))}
       </CarouselContent>
 
-      {images.length > 1 && (
+      {media.length > 1 && (
         <>
           <CarouselPrevious variant="secondary" className="left-4" />
           <CarouselNext variant="secondary" className="right-4" />

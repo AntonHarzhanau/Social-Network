@@ -2,19 +2,21 @@ import { useAuthStore } from "@/shared/store/authStore";
 import ProfileAside from "@/widgets/Profile/ProfileAside";
 import ProfileColumn from "@/widgets/Profile/ProfileColumn";
 import ProfileHeader from "@/widgets/Profile/ProfileHeader";
+import { useParams } from "react-router-dom";
 import { useShallow } from "zustand/react/shallow";
 
-
 const ProfilePage = () => {
-    const {username, avatarUrl} = useAuthStore(
-        useShallow((state) => ({
-            username: state.user?.username,
-            avatarUrl: state.user?.avatarUrl,
-        }))
-    );
+  const params = useParams<{ userId: string }>();
+  const { username, avatarUrl } = useAuthStore(
+    useShallow((state) => ({
+      username: state.user?.username,
+      avatarUrl: state.user?.avatarUrl,
+    })),
+  );
 
   return (
     <div>
+        <div>{params.userId}</div>
       <ProfileHeader name={username || ""} imageId={avatarUrl} />
       <div className="flex gap-2 mt-4">
         <section className="flex flex-col flex-5 gap-2">
@@ -30,3 +32,4 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
+export const Component = ProfilePage;

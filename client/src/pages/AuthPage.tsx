@@ -1,3 +1,4 @@
+import { ModeToggle } from "@/shared/components/ModeToggle";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { FieldDescription } from "@/shared/components/ui/field";
 import LoginForm from "@/widgets/AuthForms/LoginForm";
@@ -6,11 +7,11 @@ import { useState } from "react";
 
 type Authmode = "login" | "register";
 
-const LoginPage = () => {
-  const [mode, setMode] = useState<Authmode>("register");
+const AuthPage = () => {
+  const [mode, setMode] = useState<Authmode>("login");
 
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
+    <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10 relative">
       <div className="w-full max-w-sm md:max-w-4xl">
         <div className="flex flex-col gap-6">
           <Card className="overflow-hidden p-0">
@@ -33,6 +34,7 @@ const LoginPage = () => {
           <FieldDescription className="px-6 text-center">
             By clicking continue, you agree to our{" "}
             <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+            <ModeToggle /> {/* TODO: for test */}
           </FieldDescription>
         </div>
       </div>
@@ -40,4 +42,5 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default AuthPage;
+export const Component = AuthPage;

@@ -1,7 +1,12 @@
-
 services:
-###> symfony/mercure-bundle ###
+  ###> symfony/mercure-bundle ###
   mercure:
     ports:
-      - "80"
-###< symfony/mercure-bundle ###
+      - "80:80"
+  ###< symfony/mercure-bundle ###
+
+  s3:
+    ports:
+      - "9000:9000" # S3 API endpoint
+      - "9001:9001" # Web console (UI)
+

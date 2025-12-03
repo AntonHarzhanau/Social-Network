@@ -10,7 +10,7 @@ import {
 import { useAuthStore } from "@/shared/store/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { FormInput } from "./FormInput";
+import { FormInput } from "@/shared/components/FormInput";
 import {
   loginFormSchema,
   type LoginFormSchema,
@@ -31,7 +31,11 @@ const LoginForm = ({
   const { login } = useAuthStore();
 
   const handleSubmit = async (data: LoginFormSchema) => {
-    await login(data.email, data.password);
+    try {
+      await login(data.email, data.password);
+    } catch (e) {
+      console.error("Login failed", e);
+    }
   };
 
   return (
@@ -65,7 +69,7 @@ const LoginForm = ({
         />
 
         <Field>
-          <Button type="submit" form="login-form">
+          <Button type="submit" form="login-form" disabled={form.formState.isSubmitting} className="w-full">
             Login
           </Button>
         </Field>

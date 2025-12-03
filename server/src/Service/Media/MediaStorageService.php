@@ -1,80 +1,96 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Media;
 
+use App\DTO\Media\MediaResponseDTO;
 use App\Entity\MediaAsset;
 use App\Entity\User;
 use App\Enum\FileTypeEnum;
+use App\Factory\Media\MediaFactory;
+use Aws\S3\S3Client;
 use Doctrine\ORM\EntityManagerInterface;
+
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
 
-class MediaStorageService
+class MediaStorageService implements MediaUrlGeneratorInterface
 {
     public function __construct(
-        #[Autowire('%media_storage_root%')]
-        private string $mediaStorageRoot,
+        private S3Client $s3,
+        #[Autowire(env: 'AWS_BUCKET')]
+        private string $bucket,
         private EntityManagerInterface $em,
+        private MediaFactory $mediaFactory,
     ) {}
 
-    public function storeFile(UploadedFile $file, User $owner): MediaAsset
+    public function storeFile(UploadedFile $file, User $owner): MediaResponseDTO
     {
 
         $size = $file->getSize();
-        $mime = $file->getClientMimeType();
+        $mime = $file->getClientMimeType() ?? 'application/octet-stream';
 
         $now = new \DateTimeImmutable();
         $subbdir = $now->format('Y/m/d');
-        $targetDir = $this->mediaStorageRoot . '/' . $subbdir;
-
-        if (!is_dir($targetDir) && !mkdir($targetDir, 0755, true) && !is_dir($targetDir)) {
-            throw new \RuntimeException(sprintf('Directory "%s" was not created', $targetDir));
-        }
-
         $uuid = Uuid::v4()->toRfc4122();
         $extension = $file->guessExtension() ?? 'bin';
         $filename = $uuid . '.' . $extension;
 
-        $file->move($targetDir, $filename);
+        $key = $subbdir . '/' . $filename;
 
-        $storageKey = $subbdir . '/' . $filename;
+        $this->s3->putObject([
+            'Bucket' => $this->bucket,
+            'Key' => $key,
+            'Body' => fopen($file->getPathname(), 'rb'),
+            'ContentType' => $mime,
+            'ContentLength' => $size,
+        ]);
 
         $media = new MediaAsset();
         $media
             ->setOwner($owner)
-            ->setStorageKey($storageKey)
+            ->setStorageKey($key)
             ->setMimeType($mime)
             ->setSizeByte($size)
             ->setFileType($this->detectFileType($mime))
             ->setCreatedAt($now);
-        
+
         $this->em->persist($media);
         $this->em->flush();
 
-        return $media;
+        return $this->mediaFactory->toResponseDTO($media, $this->getPublicUrl($media));
     }
 
-    public function getFilesystemPath(MediaAsset $media): string
+    public function getPublicUrl(MediaAsset $media): string
     {
-        return $this->mediaStorageRoot . '/' . $media->getStorageKey();
+        $endpoint = rtrim((string) $this->s3->getEndpoint(), '/');
+        return sprintf('%s/%s/%s', $endpoint, $this->bucket, $media->getStorageKey());
+    }
+
+    public function getSignedUrl(MediaAsset $media, int $ttlSeconds = 3600): string
+    {
+        $cmd = $this->s3->getCommand('GetObject', [
+            'Bucket' => $this->bucket,
+            'Key' => $media->getStorageKey(),
+        ]);
+
+        $request = $this->s3->createPresignedRequest($cmd, sprintf('+%d seconds', $ttlSeconds));
+        return (string) $request->getUri();
     }
 
     public function delete(MediaAsset $media): void
     {
-        $path = $this->getFilesystemPath($media);
-        if (is_file($path)) {
-            unlink($path);
-        }
+        $this->s3->deleteObject([
+            'Bucket' => $this->bucket,
+            'Key' => $media->getStorageKey(),
+        ]);
+
         $this->em->remove($media);
         $this->em->flush();
     }
 
     private function detectFileType(?string $mimeType): FileTypeEnum
     {
-        if ($mimeType === null) {
-            return FileTypeEnum::OTHER;
-        }
 
         if (str_starts_with($mimeType, 'image/')) {
             return FileTypeEnum::IMAGE;
@@ -91,8 +107,6 @@ class MediaStorageService
         if (in_array($mimeType, ['application/pdf', 'application/msword'])) {
             return FileTypeEnum::DOCUMENT;
         }
-
         return FileTypeEnum::OTHER;
     }
-    
 }

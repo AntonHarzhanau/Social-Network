@@ -4,14 +4,13 @@ namespace App\Controller;
 
 use App\Entity\MediaAsset;
 use App\Entity\User;
-use App\Service\MediaStorageService;
+use App\Service\Media\MediaStorageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
@@ -33,17 +32,9 @@ final class MediaController extends AbstractController
             return $this->json(['error' => 'No file uploaded'], 400);
         }
 
-
         $media = $this->mediaStorage->storeFile($file, $user);
 
-        return $this->json([
-            'id' => $media->getId(),
-            'fileType' => $media->getFileType(),
-            'mimeType' => $media->getMimeType(),
-            'sizeByte' => $media->getSizeByte(),
-            'storageKey' => $media->getStorageKey(),
-            'createdAt' => $media->getCreatedAt()->format(\DateTime::ATOM),
-        ], 201);
+        return $this->json($media, JsonResponse::HTTP_CREATED);
     }
 
     #[Route('', name: 'list_media', methods: ['GET'], format: 'json')]
@@ -59,38 +50,29 @@ final class MediaController extends AbstractController
                 'fileType' => $media->getFileType(),
                 'mimeType' => $media->getMimeType(),
                 'sizeByte' => $media->getSizeByte(),
-                'storageKey' => $media->getStorageKey(),
+                'url' => $this->mediaStorage->getPublicUrl($media),
                 'createdAt' => $media->getCreatedAt()->format(\DateTime::ATOM),
             ];
         }, $items);
         return $this->json($data);
     }
 
+    
     #[Route('/{id}', name: 'download_media', methods: ['GET'], format: 'json')]
     public function download(string $id): Response
     {
         $repo = $this->em->getRepository(MediaAsset::class);
-
         $media = $repo->find($id);
 
         if (!$media || $media->getDeletedAt()) {
             return $this->json(['error' => 'Not found'], 404);
         }
 
-        $path = $this->mediaStorage->getFilesystemPath($media);
-        if (!is_file($path)) {
-            return $this->json(['error' => 'File missing'], 500);
-        }
+        $url = $this->mediaStorage->getPublicUrl($media);
 
-        $response = new BinaryFileResponse($path);
-        $response->headers->set('Content-Type', $media->getMimeType() ?? 'application/octet-stream');
-        $response->setContentDisposition(
-            ResponseHeaderBag::DISPOSITION_INLINE,
-            'file'
-        );
-
-        return $response;
+        return new RedirectResponse($url, 302);
     }
+
 
     #[Route('/{id}', name: 'delete_media', methods: ['DELETE'], format: 'json')]
     public function delete(MediaAsset $media): JsonResponse
@@ -103,5 +85,4 @@ final class MediaController extends AbstractController
 
         return $this->json(null, 204);
     }
-
 }

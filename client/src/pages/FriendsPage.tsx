@@ -3,3 +3,4 @@ const FriendsPage = () => {
 };
 
 export default FriendsPage;
+export const Component = FriendsPage;

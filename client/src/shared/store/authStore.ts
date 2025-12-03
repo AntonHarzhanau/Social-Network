@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { AuthApi, type Me } from "../api/auth";
-import type { RegisterApiPayload } from "@/widgets/AuthForms/RegisterForm";
+import type { RegisterApiPayload } from "@/shared/types/registerApiSchema";
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -29,6 +29,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       const response = await AuthApi.login(email, password);
       localStorage.setItem("token", response.data.token);
       set({ isAuthenticated: true });
+
+      const me = await AuthApi.me();
+      set({ user: me.data });
     } catch (error) {
       console.error("Login failed:", error);
       set({ isAuthenticated: false });
@@ -65,6 +68,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         return;
       }
       const me = await AuthApi.me();
+      console.log("Auth check successful:", me.data);
       set({ user: me.data, isAuthenticated: true });
     } catch (error) {
       console.error("Auth check failed:", error);

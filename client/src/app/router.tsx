@@ -1,48 +1,62 @@
-import AuthPage from "@/pages/AuthPage";
-import FeedsPage from "@/pages/FeedsPage";
-import FriendsPage from "@/pages/FriendsPage";
-import GroupsPage from "@/pages/GroupsPage";
-import MessagesPage from "@/pages/MessagesPage";
-import NotFoundPage from "@/pages/NotFoundPage";
-import ProfilePage from "@/pages/ProfilePage";
-import SettingsPage from "@/pages/SettingsPage";
+// import AuthPage from "@/pages/AuthPage";
 import { ROUTES } from "@/shared/constants/routes";
-import Layout from "@/widgets/Layout/Layout";
-import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Route,
-} from "react-router-dom";
+// import Layout from "@/widgets/Layout/Layout";
+import { createBrowserRouter, redirect } from "react-router-dom";
 import AuthGuard from "./AuthGuard";
+import { lazy, Suspense } from "react";
 
-export const routes = createRoutesFromElements(
-  <>
-    <Route
-      path={ROUTES.AUTH}
-      element={
-        <AuthGuard mode="public">
+const AuthPage = lazy(() => import("@/pages/AuthPage"));
+const Layout = lazy(() => import("@/widgets/Layout/Layout"));
+
+export const router = createBrowserRouter([
+  {
+    element: (
+      <AuthGuard mode="public">
+        <Suspense fallback={<div>Loading...</div>}>
           <AuthPage />
-        </AuthGuard>
-      }
-    />
-
-    <Route
-      path="/"
-      element={
-        <AuthGuard mode="private">
+        </Suspense>
+      </AuthGuard>
+    ),
+    path: ROUTES.AUTH,
+  },
+  {
+    element: (
+      <AuthGuard mode="private">
+        <Suspense fallback={<div>Loading...</div>}>
           <Layout />
-        </AuthGuard>
-      }
-    >
-      <Route index element={<FeedsPage />} />
-      <Route path={ROUTES.FEEDS} element={<FeedsPage />} />
-      <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
-      <Route path={ROUTES.MESSAGES} element={<MessagesPage />} />
-      <Route path={ROUTES.FRIENDS} element={<FriendsPage />} />
-      <Route path={ROUTES.GROUPS} element={<GroupsPage />} />
-      <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
-    </Route>
-    <Route path="*" element={<NotFoundPage />} />
-  </>,
-);
-export const router = createBrowserRouter(routes);
+        </Suspense>
+      </AuthGuard>
+    ),
+    path: "/",
+    children: [
+      {
+        index: true,
+        loader: () => redirect(ROUTES.FEEDS),
+      },
+      {
+        path: ROUTES.FEEDS,
+        lazy: () => import("@/pages/FeedsPage"),
+      },
+      {
+        path: ROUTES.PROFILE,
+        lazy: () => import("@/pages/ProfilePage"),
+      },
+      {
+        path: ROUTES.MESSAGES,
+        lazy: () => import("@/pages/MessagesPage"),
+      },
+      {
+        path: ROUTES.FRIENDS,
+        lazy: () => import("@/pages/FriendsPage"),
+      },
+      {
+        path: ROUTES.GROUPS,
+        lazy: () => import("@/pages/GroupsPage"),
+      },
+      {
+        path: ROUTES.SETTINGS,
+        lazy: () => import("@/pages/SettingsPage"),
+      },
+    ],
+  },
+]);

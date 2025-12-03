@@ -5,28 +5,19 @@ import { Navigate } from "react-router-dom";
 type GuardMode = "private" | "public";
 
 interface AuthGuardProps {
-    mode: GuardMode;
-    children: React.ReactNode;
+  mode: GuardMode;
+  children: React.ReactNode;
 }
 const AuthGuard = ({ mode, children }: AuthGuardProps) => {
-    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-    const isLoading = useAuthStore((state) => state.isLoading);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
-    console.log("AuthGuard - isAuthenticated:", isAuthenticated, "mode:", mode);
+  if (mode === "private" && !isAuthenticated) {
+    return <Navigate to={ROUTES.AUTH} replace />;
+  }
+  if (mode === "public" && isAuthenticated) {
+    return <Navigate to={ROUTES.FEEDS} replace />;
+  }
+  return <>{children}</>;
+};
 
-
-    if (mode === 'private' && !isAuthenticated) {
-        return <Navigate to={ROUTES.AUTH} replace />;
-    }
-    if (mode === 'public' && isAuthenticated) {
-        return <Navigate to={ROUTES.FEEDS} replace />;
-    }
-    return (
-    <>{children}</>
-  )
-}
-
-export default AuthGuard
+export default AuthGuard;

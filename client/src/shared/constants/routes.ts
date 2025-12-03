@@ -1,18 +1,21 @@
 export const ROUTES = {
   AUTH: "/auth",
-  REGISTER: "/register",
-  PROFILE: "/profile",
+  HOME: "/",
+  PROFILE: "/profile/:userId",
   FEEDS: "/feeds",
-  FEED: "/feeds/:feedid",
   FRIENDS: "/friends",
   MESSAGES: "/messages",
   GROUPS: "/groups",
+  GROUP: "/group/:groupId",
   SETTINGS: "/settings",
 } as const;
 
 export type PathParams = {
-  [ROUTES.FEED]: {
-    feedid: string;
+  [ROUTES.GROUP]: {
+    groupId: string;
+  };
+  [ROUTES.PROFILE]: {
+    userId: string;
   };
 };
 

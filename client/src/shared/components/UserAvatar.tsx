@@ -1,54 +1,50 @@
-// UserAvatar.tsx
-import { useEffect, useState } from "react";
-import { useMedia } from "@/shared/hooks/useMedia";
 import {
   Avatar,
   AvatarImage,
   AvatarFallback,
 } from "@/shared/components/ui/avatar";
 import { getInitials } from "../lib/getInitials";
+import { Skeleton } from "./ui/skeleton";
+import { cn } from "../lib/utils";
+import { useState } from "react";
 
 interface UserAvatarProps {
-  imageId?: string | null;
-  name: string;
+  imageUrl?: string | null;
+  name?: string | null;
   alt?: string;
   className?: string;
 }
 
 export const UserAvatar = ({
-  imageId,
+  imageUrl,
   name,
   alt,
   className,
 }: UserAvatarProps) => {
   const initials = getInitials(name);
-  const { data: blob, isLoading, isError } = useMedia(imageId);
+  const [status, setStatus] = useState<"idle" | "loading" | "loaded" | "error">(
+    "loading",
+  );
 
-  const [src, setSrc] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!blob) {
-        setSrc(null);
-        return;
-    }
-    
-    const objectUrl = URL.createObjectURL(blob);
-    setSrc(objectUrl);
-
-    return () => {
-      URL.revokeObjectURL(objectUrl);
-    };
-  }, [blob]);
-
-  const showFallback = !imageId || isLoading || isError || !src;
+  //   if (isLoading) {
+  //     return <Skeleton className={cn("h-8 w-8 rounded-full", className)} />;
+  //   }
 
   return (
-    <Avatar className={className}>
-      {showFallback ? (
-        <AvatarFallback>{initials}</AvatarFallback>
-      ) : (
-        <AvatarImage src={src} alt={alt} className="object-cover"/>
+    <div className={className}>
+      {status !== "loaded" && (
+        <Skeleton className={cn("h-10 w-10 rounded-full", className)} />
       )}
-    </Avatar>
+
+      <Avatar className={cn("h-10 w-10", status !== "loaded" && "invisible")}>
+        <AvatarImage
+          src={imageUrl || undefined}
+          alt={alt}
+          onLoadingStatusChange={setStatus}
+          className="object-cover"
+        />
+        <AvatarFallback>{initials}</AvatarFallback>
+      </Avatar>
+    </div>
   );
 };

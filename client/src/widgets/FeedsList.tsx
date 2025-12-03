@@ -12,7 +12,12 @@ const FeedsList = () => {
   } = useInfinitePosts(10);
 
   if (isLoading && posts.length === 0) {
-    return <div>Loading...</div>;
+    return Array.from({ length: 5 }).map((_, index) => (
+      <div
+        key={index}
+        className="h-32 w-full animate-pulse bg-muted rounded-md"
+      />
+    ));
   }
 
   if (isError) {

@@ -7,13 +7,13 @@ import {
 import { useAuthStore } from "@/shared/store/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { FormInput } from "./FormInput";
+import { FormInput } from "@/shared/components/FormInput";
 import {
   registerFormSchema,
   type RegisterFormSchema,
 } from "@/shared/types/registerFormSchema";
 import { registerApiSchema } from "@/shared/types/registerApiSchema";
-import { DatePicker } from "./DatePicker";
+import { DatePicker } from "@/shared/components/DatePicker";
 
 const RegisterForm = ({ switchToLogin }: { switchToLogin: () => void }) => {
   const form = useForm<RegisterFormSchema>({

@@ -16,22 +16,18 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\HasLifecycleCallbacks]
 class Post
 {
-    #[Groups(['post:read'])]
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id = null;
 
-    #[Groups(['post:read'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $content = null;
 
-    #[Groups(['post:read'])]
     #[ORM\Column]
     private ?int $likeCount = 0;
 
-    #[Groups(['post:read'])]
     #[ORM\Column]
     private ?int $commentCount = 0;
 
@@ -47,7 +43,6 @@ class Post
     /**
      * @var Collection<int, Comment>
      */
-    #[Groups(['post:read'])]
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'post', orphanRemoval: true)]
     private Collection $comments;
 
@@ -59,7 +54,6 @@ class Post
 
     #[ORM\ManyToOne(inversedBy: 'posts')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['post:read'])]
     private ?User $author = null;
 
     /**

@@ -13,3 +13,4 @@ const NotFoundPage = () => {
 }
 
 export default NotFoundPage
+export const Component = NotFoundPage

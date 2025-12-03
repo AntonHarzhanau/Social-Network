@@ -16,14 +16,12 @@ interface FeedCardProps {
 }
 
 const FeedCard = ({ post }: FeedCardProps) => {
-  const authorName = post.author.username || "Unknown User";
-  console.log("FeedCard");
-
+  const authorName = post.author.username;
   return (
     <Card className="max-w-full bg-card">
       <FeedCardHeader
         name={authorName}
-        imageId={post.author.avatarUrl}
+        avatarUrl={post.author.avatarUrl}
         date={formatPostDate(post.date)}
       />
 

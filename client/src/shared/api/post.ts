@@ -13,6 +13,7 @@ export interface PostMedia {
   id: string;
   url: string;
   type: MediaType;
+  createdAt: string;
 }
 
 export interface Post {

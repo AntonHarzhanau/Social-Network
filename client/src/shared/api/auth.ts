@@ -1,4 +1,4 @@
-import type { RegisterApiPayload } from "@/widgets/AuthForms/RegisterForm";
+import type { RegisterApiPayload } from "../types/registerApiSchema";
 import { apiClient } from "./apiClient";
 
 export interface Me {

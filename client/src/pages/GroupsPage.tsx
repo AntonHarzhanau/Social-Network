@@ -7,3 +7,4 @@ const GroupsPage = () => {
 }
 
 export default GroupsPage
+export const Component = GroupsPage;

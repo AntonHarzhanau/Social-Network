@@ -5,3 +5,4 @@ const MessagesPage = () => {
 }
 
 export default MessagesPage
+export const Component = MessagesPage;
