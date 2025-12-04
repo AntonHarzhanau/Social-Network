@@ -2,18 +2,27 @@
 
 namespace App\DTO\Post;
 
-use App\DTO\Common\AuthorSummaryDTO;
+use App\DTO\User\UserResponseDTO;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 final readonly class PostFeedItemDTO
 {
     public function __construct(
+        #[Groups(['post:feed'])]
         public string $id,
-        public AuthorSummaryDTO $author,
+        #[Groups(['post:feed'])]
+        public UserResponseDTO $author,
+        #[Groups(['post:feed'])]
         public string $content,
+        #[Groups(['post:feed'])]
         public int $likeCount,
+        #[Groups(['post:feed'])]
         public int $commentCount,
+        #[Groups(['post:feed'])]
         public bool $isLikedByCurrentUser,
+        #[Groups(['post:feed'])]
         public \DateTimeImmutable $date,
+        #[Groups(['post:feed'])]
         public array $media,
     ) {}
 }

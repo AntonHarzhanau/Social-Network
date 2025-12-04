@@ -10,7 +10,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Bridge\Doctrine\Types\UuidType;
-use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -42,11 +41,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 64, nullable: true)]
     private ?string $slug = null;
 
-    #[Groups(['post:read', 'comment:read'])]
     #[ORM\Column(length: 100)]
     private ?string $username = null;
 
-    #[Groups(['post:read', 'comment:read'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $avatarUrl = null;
 

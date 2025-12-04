@@ -50,7 +50,7 @@ final class PostController extends AbstractController
 
         $posts = $this->postService->getAll($page, $limit, $visibilities, $this->getUser());
 
-        return $this->json(['posts' => $posts], JsonResponse::HTTP_OK, []);
+        return $this->json(['posts' => $posts], JsonResponse::HTTP_OK, [], ['groups' => ['post:feed']]);
     }
 
 
@@ -59,7 +59,7 @@ final class PostController extends AbstractController
     public function getById(string $id, #[CurrentUser] User $currentUser): JsonResponse
     {
         $post = $this->postService->getById($currentUser, $id);
-        return $this->json($post, JsonResponse::HTTP_OK, []);
+        return $this->json($post, JsonResponse::HTTP_OK, [], ['groups' => ['post:full', 'media:read']]);
     }
 
 
@@ -71,7 +71,7 @@ final class PostController extends AbstractController
 
         $posts = $this->postService->getByAuthor($user, $author, $page, $limit);
 
-        return $this->json($posts, JsonResponse::HTTP_OK, []);
+        return $this->json($posts, JsonResponse::HTTP_OK, [], ['groups' => ['post:feed']]);
     }
 
 

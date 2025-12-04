@@ -15,6 +15,8 @@ import {
   loginFormSchema,
   type LoginFormSchema,
 } from "@/shared/types/loginFormSchema";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "@/shared/constants/routes";
 
 const LoginForm = ({
   onSwitchToRegister,
@@ -29,10 +31,13 @@ const LoginForm = ({
     },
   });
   const { login } = useAuthStore();
+  const navigate = useNavigate();
 
   const handleSubmit = async (data: LoginFormSchema) => {
     try {
       await login(data.email, data.password);
+      console.log("Login successful, redirecting...");  
+      navigate(ROUTES.HOME, { replace: true });
     } catch (e) {
       console.error("Login failed", e);
     }

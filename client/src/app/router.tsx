@@ -1,25 +1,19 @@
-// import AuthPage from "@/pages/AuthPage";
 import { ROUTES } from "@/shared/constants/routes";
-// import Layout from "@/widgets/Layout/Layout";
 import { createBrowserRouter, redirect } from "react-router-dom";
 import AuthGuard from "./AuthGuard";
-import { lazy, Suspense } from "react";
+import { lazy } from "react";
 
 const AuthPage = lazy(() => import("@/pages/AuthPage"));
 const Layout = lazy(() => import("@/widgets/Layout/Layout"));
 
 export const router = createBrowserRouter([
   {
-    element: (
-      <AuthGuard mode="public">
-        <AuthPage />
-      </AuthGuard>
-    ),
+    element: <AuthPage />,
     path: ROUTES.AUTH,
   },
   {
     element: (
-      <AuthGuard mode="private">
+      <AuthGuard>
         <Layout />
       </AuthGuard>
     ),

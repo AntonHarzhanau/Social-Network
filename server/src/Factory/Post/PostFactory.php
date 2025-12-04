@@ -47,7 +47,7 @@ class PostFactory
         }
         return new PostFeedItemDTO(
             id: $post->getId(),
-            author: $this->userFactory->toAuthorSummaryDTO($post->getAuthor()),
+            author: $this->userFactory->toUserResponseDTO($post->getAuthor()),
             content: $post->getContent(),
             date: $post->getCreatedAt(),
             likeCount: $post->getLikeCount(),

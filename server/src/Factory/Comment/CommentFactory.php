@@ -17,7 +17,7 @@ class CommentFactory
         $user = $comment->getAuthor();
         return new CommentViewDTO(
             id: $comment->getId(),
-            author: $this->userFactory->toAuthorSummaryDTO($user),
+            author: $this->userFactory->toUserResponseDTO($user),
             content: $comment->getContent(),
             likeCount: $comment->getLikeCount(),
             createdAt: $comment->getCreatedAt(),

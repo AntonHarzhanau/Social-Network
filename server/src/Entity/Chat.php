@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\ChatTypeEnum;
 use App\Repository\ChatRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -18,8 +19,8 @@ class Chat
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $type = null;
+    #[ORM\Column(length: 255, enumType: ChatTypeEnum::class)]
+    private ?ChatTypeEnum $type = null;
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $title = null;
@@ -54,6 +55,7 @@ class Chat
     {
         $this->messages = new ArrayCollection();
         $this->chatParticipants = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?Uuid
@@ -61,12 +63,12 @@ class Chat
         return $this->id;
     }
 
-    public function getType(): ?string
+    public function getType(): ?ChatTypeEnum
     {
         return $this->type;
     }
 
-    public function setType(string $type): static
+    public function setType(ChatTypeEnum $type): static
     {
         $this->type = $type;
 

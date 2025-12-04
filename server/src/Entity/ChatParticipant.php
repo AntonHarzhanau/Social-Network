@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\ChatParticipantRoleEnum;
 use App\Repository\ChatParticipantRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -24,11 +25,11 @@ class ChatParticipant
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $role = null;
+    #[ORM\Column(length: 255, enumType: ChatParticipantRoleEnum::class)]
+    private ?ChatParticipantRoleEnum $role = null;
 
     #[ORM\Column]
-    private ?bool $is_muted = null;
+    private ?bool $isMuted = false;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $lastReadAt = null;
@@ -38,6 +39,11 @@ class ChatParticipant
 
     #[ORM\ManyToOne]
     private ?Message $lastReadMessage = null;
+
+    public function __construct()
+    {
+        $this->joinedAt = new \DateTimeImmutable();
+    }
 
     public function getId(): ?Uuid
     {
@@ -68,12 +74,12 @@ class ChatParticipant
         return $this;
     }
 
-    public function getRole(): ?string
+    public function getRole(): ?ChatParticipantRoleEnum
     {
         return $this->role;
     }
 
-    public function setRole(string $role): static
+    public function setRole(ChatParticipantRoleEnum $role): static
     {
         $this->role = $role;
 
@@ -82,12 +88,12 @@ class ChatParticipant
 
     public function isMuted(): ?bool
     {
-        return $this->is_muted;
+        return $this->isMuted;
     }
 
-    public function setIsMuted(bool $is_muted): static
+    public function setIsMuted(bool $isMuted): static
     {
-        $this->is_muted = $is_muted;
+        $this->isMuted = $isMuted;
 
         return $this;
     }

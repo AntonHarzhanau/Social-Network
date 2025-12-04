@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Media;
 
 use App\Entity\MediaAsset;
 use App\Entity\User;

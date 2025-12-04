@@ -2,13 +2,13 @@
 
 namespace App\DTO\Comment;
 
-use App\DTO\Common\AuthorSummaryDTO;
+use App\DTO\User\UserResponseDTO;
 
 final readonly class CommentViewDTO
 {
     public function __construct(
         public string $id,
-        public AuthorSummaryDTO $author,
+        public UserResponseDTO $author,
         public string $content,
         public int $likeCount,
         public \DateTimeImmutable $createdAt,
