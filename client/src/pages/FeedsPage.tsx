@@ -1,14 +1,14 @@
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import CreatePostDIalog from "@/widgets/CreatePostForm/CreatePostDIalog";
-// import FeedsList from "@/widgets/FeedsList";
+import FeedsList from "@/widgets/FeedsList";
 
 const FeedsPage = () => {
   return (
     <div className="flex gap-2 p-2">
       <div className="flex flex-col flex-5 gap-2">
         <CreatePostDIalog />
-        {/* <FeedsList /> */}
+        <FeedsList />
       </div>
 
       <aside className="flex-3 h-fit sticky top-14 p-2">

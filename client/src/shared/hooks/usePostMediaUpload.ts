@@ -7,7 +7,7 @@ import {
 import { uploadMedia } from "../api/media";
 
 interface UsePostMediaUploadParams {
-  onMediaIdsChange: (mediaIds: string[]) => void;
+  onMediaIdsChange?: (mediaIds: string[]) => void;
 }
 
 export const usePostMediaUpload = ({
@@ -24,7 +24,7 @@ export const usePostMediaUpload = ({
       .filter((i) => i.status === UPLOADING_STATUS.SUCCESS && i.serverId)
       .map((i) => i.serverId!) as string[];
 
-    onMediaIdsChange(ids);
+    onMediaIdsChange?.(ids);
   };
 
   const uploadSingleFile = async (localId: string, file: File) => {
@@ -81,6 +81,11 @@ export const usePostMediaUpload = ({
     });
   };
 
+  const resetMedia = () => {
+    setMediaItems([]);
+    onMediaIdsChange?.([]);
+  }
+
   const handleRemoveMedia = (localId: string) => {
     setMediaItems((prev) => {
       const next = prev.filter((item) => item.localId !== localId);
@@ -109,5 +114,6 @@ export const usePostMediaUpload = ({
     handleFilesSelected,
     handleRemoveMedia,
     handleRetry,
+    resetMedia,
   }
 };

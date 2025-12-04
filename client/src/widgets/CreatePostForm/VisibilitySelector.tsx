@@ -1,4 +1,5 @@
 import { VISIBILITY_VALUES } from "@/shared/api/post";
+import { Field, FieldLabel } from "@/shared/components/ui/field";
 import {
   FormControl,
   FormField,
@@ -13,7 +14,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import type { Control, FieldPath, FieldValues } from "react-hook-form";
+import {
+  Controller,
+  type Control,
+  type FieldPath,
+  type FieldValues,
+} from "react-hook-form";
 
 interface VisibilitySelectorProps<TFieldValues extends FieldValues> {
   name: FieldPath<TFieldValues>;
@@ -25,31 +31,27 @@ const VisibilitySelector = <TFieldValues extends FieldValues>({
   control,
 }: VisibilitySelectorProps<TFieldValues>) => {
   return (
-    <FormField
+    <Controller
       control={control}
       name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Visibility</FormLabel>
-          <FormControl>
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select visibility" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={VISIBILITY_VALUES.PUBLIC}>Public</SelectItem>
-                <SelectItem value={VISIBILITY_VALUES.FRIENDS}>
-                  Friends
-                </SelectItem>
-                <SelectItem value={VISIBILITY_VALUES.GROUP}>Group</SelectItem>
-                <SelectItem value={VISIBILITY_VALUES.PRIVATE}>
-                  Private
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </FormControl>
-          <FormMessage />
-        </FormItem>
+      render={({ field, fieldState }) => (
+        <Field data-invalid={fieldState.invalid} orientation="responsive">
+
+          <Select value={field.value} onValueChange={field.onChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select visibility" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={VISIBILITY_VALUES.PUBLIC}>Public</SelectItem>
+              <SelectItem value={VISIBILITY_VALUES.FRIENDS}>Friends</SelectItem>
+              <SelectItem value={VISIBILITY_VALUES.GROUP}>Group</SelectItem>
+              <SelectItem value={VISIBILITY_VALUES.PRIVATE}>Private</SelectItem>
+            </SelectContent>
+          </Select>
+          {fieldState.error && (
+            <FormMessage>{fieldState.error.message}</FormMessage>
+          )}
+        </Field>
       )}
     />
   );

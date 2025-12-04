@@ -1,14 +1,6 @@
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "@/shared/components/ui/textarea";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/shared/components/ui/form";
 import { createPostSchema, type CreatePostFormValues } from "./schema";
 import { VISIBILITY_VALUES } from "@/shared/api/post";
 import DnDZone from "./DnDZone";
@@ -16,8 +8,16 @@ import { PostMediaPreview } from "./PostMediaPreview";
 import VisibilitySelector from "./VisibilitySelector";
 import { usePostMediaUpload } from "@/shared/hooks/usePostMediaUpload";
 import { toast } from "sonner";
+import { useCreatePost } from "@/shared/hooks/useCreatePost";
+import { Button } from "@/shared/components/ui/button";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/shared/components/ui/field";
 
-export const CreatePostForm = () => {
+interface CreatePostFormProps {
+  onSuccess?: () => void;
+}
+
+export const CreatePostForm = ({ onSuccess }: CreatePostFormProps) => {
+  const { mutateAsync: createPost } = useCreatePost();
   const form = useForm<CreatePostFormValues>({
     resolver: zodResolver(createPostSchema),
     defaultValues: {
@@ -33,6 +33,7 @@ export const CreatePostForm = () => {
     handleFilesSelected,
     handleRemoveMedia,
     handleRetry,
+    resetMedia,
   } = usePostMediaUpload({
     onMediaIdsChange: (mediaIds: string[]) => {
       form.setValue("mediaIds", mediaIds, {
@@ -42,30 +43,33 @@ export const CreatePostForm = () => {
     },
   });
 
-  const onSubmit = (rawvalues: CreatePostFormValues) => {
+  const onSubmit = async (rawvalues: CreatePostFormValues) => {
     if (isUploadingAny) {
-      toast("Event has been created", {
-        description: "Sunday, December 03, 2023 at 9:00 AM",
-        action: {
-          label: "Undo",
-          onClick: () => console.log("Undo"),
-        },
-      });
-      console.warn("Wait until all files are uploaded");
+      toast("Wait until all files are uploaded");
       return;
     }
 
     const values = createPostSchema.parse(rawvalues);
-    console.log("Create post payload:", values);
+
+    try {
+      await createPost(values);
+      toast.success("Post created successfully", { closeButton: true });
+      form.reset();
+      resetMedia();
+      onSuccess?.();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to create post. Please try again.");
+    }
   };
 
   return (
-    <Form {...form}>
-      <form
-        id="create-post-form"
-        className="flex flex-col gap-4"
-        onSubmit={form.handleSubmit(onSubmit)}
-      >
+    <form
+      id="create-post-form"
+      className="flex flex-col gap-4"
+      onSubmit={form.handleSubmit(onSubmit)}
+    >
+      <FieldGroup>
         <DnDZone onFilesSelected={handleFilesSelected} />
 
         <PostMediaPreview
@@ -73,27 +77,28 @@ export const CreatePostForm = () => {
           onRemove={handleRemoveMedia}
           onRetry={handleRetry}
         />
-
-        <FormField
+        <Controller
+          name='content'
           control={form.control}
-          name="content"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Text</FormLabel>
-              <FormControl>
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="content">Content</FieldLabel>
                 <Textarea
-                  placeholder="What's on your mind?"
-                  className="resize-y min-h-20"
                   {...field}
+                  id="content"
+                  placeholder="What's on your mind?"
+                  aria-invalid={fieldState.invalid}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+              {fieldState.error && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
         />
 
         <VisibilitySelector name="visibility" control={form.control} />
-      </form>
-    </Form>
+        <Button type="submit" form="create-post-form">
+          Publish
+        </Button>
+      </FieldGroup>
+    </form>
   );
 };
