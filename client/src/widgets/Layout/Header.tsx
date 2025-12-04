@@ -1,18 +1,17 @@
-import HeaderAvatar from "@/shared/components/HeaderAvatar";
 import { ModeToggle } from "@/shared/components/ModeToggle";
 import SearchInput from "@/shared/components/SearchInput";
 import { Button } from "@/shared/components/ui/button";
 import { Skeleton } from "@/shared/components/ui/skeleton";
+import { UserAvatar } from "@/shared/components/UserAvatar";
 import { useAuthStore } from "@/shared/store/authStore";
 import { Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useShallow } from "zustand/react/shallow";
 
 const Header = () => {
-  const { username, avatarUrl, isLoading, logout } = useAuthStore(
+  const { user, isLoading, logout } = useAuthStore(
     useShallow((state) => ({
-      username: state.user?.username,
-      avatarUrl: state.user?.avatarUrl,
+      user: state.user,
       isLoading: state.isLoading,
       logout: state.logout,
     })),
@@ -35,10 +34,17 @@ const Header = () => {
           <Button variant="ghost" onClick={logout} disabled={isLoading}>
             Logout
           </Button>
+
           {isLoading ? (
             <Skeleton className="w-8 h-8 rounded-full" />
           ) : (
-            <HeaderAvatar name={username || ""} imageId={avatarUrl} />
+            <Button asChild variant="ghost" className="w-8 h-8 p-0 rounded-full">
+              <UserAvatar
+                name={user?.username || "user"}
+                imageUrl={user?.avatarUrl}
+                
+              />
+            </Button>
           )}
         </div>
       </div>

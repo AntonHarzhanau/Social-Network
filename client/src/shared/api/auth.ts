@@ -4,7 +4,7 @@ import { apiClient } from "./apiClient";
 export interface Me {
   id: string;
   username: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
 }
 
 export const AuthApi = {

@@ -14,7 +14,7 @@ const FeedCardHeader = ({ name, avatarUrl, date }: FeedCardHeaderProps) => {
   return (
     <CardHeader className="flex items-center gap-3">
       <Link to="/profile" className="">
-        <UserAvatar imageUrl={avatarUrl} name={name} alt={name} />
+        <UserAvatar imageUrl={avatarUrl} name={name} alt={name} className="w-10 h-10"/>
       </Link>
       <div className="flex flex-col">
         <Link to="/profile" className="text-sm font-semibold hover:underline">

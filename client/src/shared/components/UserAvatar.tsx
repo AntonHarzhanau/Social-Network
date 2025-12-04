@@ -26,17 +26,17 @@ export const UserAvatar = ({
     "loading",
   );
 
-  //   if (isLoading) {
-  //     return <Skeleton className={cn("h-8 w-8 rounded-full", className)} />;
-  //   }
+    // if (isLoading) {
+    //   return <Skeleton className={cn("h-8 w-8 rounded-full", className)} />;
+    // }
 
   return (
     <div className={className}>
       {status !== "loaded" && (
-        <Skeleton className={cn("h-10 w-10 rounded-full", className)} />
+        <Skeleton className="w-full h-full rounded-full" />
       )}
 
-      <Avatar className={cn("h-10 w-10", status !== "loaded" && "invisible")}>
+      <Avatar className={cn("w-full h-full", status !== "loaded" && "invisible")}>
         <AvatarImage
           src={imageUrl || undefined}
           alt={alt}
