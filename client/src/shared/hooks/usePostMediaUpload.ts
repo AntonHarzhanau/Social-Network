@@ -1,102 +1,60 @@
-import { useEffect, useState, useRef, type DragEvent } from "react";
-import { uploadMedia, type UploadMediaResponse } from "@/shared/api/media";
+import { useState } from "react";
 
-export type UploadStatus = "uploading" | "success" | "error";
+import {
+  UPLOADING_STATUS,
+  type MediaItem,
+} from "@/shared/types/uploadMediaTypes";
+import { uploadMedia } from "../api/media";
 
-export type MediaItem = {
-  localId: string;
-  file: File;
-  previewUrl: string;
-  status: UploadStatus;
-  serverId?: string;
-  error?: string;
-};
+interface UsePostMediaUploadParams {
+  onMediaIdsChange: (mediaIds: string[]) => void;
+}
 
-type UsePostMediaUploadParams = {
-  maxFiles: number;
-  value: string[];                 // текущие mediaIds из формы
-  onChange: (ids: string[]) => void;
-  onUploadingChange?: (isUploading: boolean) => void;
-};
+export const usePostMediaUpload = ({
+  onMediaIdsChange,
+}: UsePostMediaUploadParams) => {
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
 
-export function usePostMediaUpload({
-  maxFiles,
-  value,
-  onChange,
-  onUploadingChange,
-}: UsePostMediaUploadParams) {
-  const [items, setItems] = useState<MediaItem[]>([]);
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const isUploadingAny = mediaItems.some(
+    (i) => i.status === UPLOADING_STATUS.UPLOADING,
+  );
 
-  // следим за статусом загрузки
-  useEffect(() => {
-    const uploading = items.some((i) => i.status === "uploading");
-    onUploadingChange?.(uploading);
-  }, [items, onUploadingChange]);
+  const syncMediaIds = (items: MediaItem[]) => {
+    const ids = items
+      .filter((i) => i.status === UPLOADING_STATUS.SUCCESS && i.serverId)
+      .map((i) => i.serverId!) as string[];
 
-  // чистим objectURL при размонтировании
-  useEffect(() => {
-    return () => {
-      items.forEach((item) => URL.revokeObjectURL(item.previewUrl));
-    };
-  }, [items]);
-
-  const openFileDialog = () => {
-    inputRef.current?.click();
+    onMediaIdsChange(ids);
   };
 
-  const handleFiles = (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-
-    const incoming = Array.from(files).filter((file) =>
-      file.type.startsWith("image/"),
-    );
-    if (incoming.length === 0) return;
-
-    const availableSlots = maxFiles - value.length;
-    const limited = incoming.slice(0, Math.max(availableSlots, 0));
-    if (limited.length === 0) return;
-
-    limited.forEach(addFile);
-  };
-
-  const addFile = (file: File) => {
-    const localId = crypto.randomUUID();
-    const previewUrl = URL.createObjectURL(file);
-
-    const newItem: MediaItem = {
-      localId,
-      file,
-      previewUrl,
-      status: "uploading",
-    };
-
-    setItems((prev) => [...prev, newItem]);
-    uploadFile(file, localId);
-  };
-
-  const uploadFile = async (file: File, localId: string) => {
+  const uploadSingleFile = async (localId: string, file: File) => {
     try {
-      const res: UploadMediaResponse = await uploadMedia(file);
+      const res = await uploadMedia(file);
 
-      setItems((prev) =>
-        prev.map((item) =>
+      setMediaItems((prev) => {
+        const next = prev.map((item) =>
           item.localId === localId
-            ? { ...item, status: "success", serverId: res.id }
+            ? {
+                ...item,
+                status: UPLOADING_STATUS.SUCCESS,
+                serverId: res.id,
+                previewUrl: res.url,
+                error: undefined,
+              }
             : item,
-        ),
-      );
-
-      onChange([...value, res.id]);
+        );
+        syncMediaIds(next);
+        return next;
+      });
     } catch (e) {
-      console.error(e);
-      setItems((prev) =>
+      console.error("Upload error", e);
+      setMediaItems((prev) =>
         prev.map((item) =>
           item.localId === localId
             ? {
                 ...item,
-                status: "error",
-                error: "Ошибка загрузки",
+                status: UPLOADING_STATUS.ERROR,
+                error: "Error while uploading file",
               }
             : item,
         ),
@@ -104,51 +62,52 @@ export function usePostMediaUpload({
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleFiles(e.target.files);
-    e.target.value = "";
+  const handleFilesSelected = (files: File[]) => {
+    if (files.length === 0) return;
+
+    setMediaItems((prev) => {
+      const newItems: MediaItem[] = files.map((file) => {
+        const localId = crypto.randomUUID();
+
+        void uploadSingleFile(localId, file);
+
+        return {
+          localId,
+          file,
+          status: UPLOADING_STATUS.UPLOADING,
+        };
+      });
+      return [...prev, ...newItems];
+    });
   };
 
-  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
-
-  const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    handleFiles(e.dataTransfer.files);
-  };
-
-  const removeItem = (localId: string) => {
-    setItems((prev) => {
-      const item = prev.find((i) => i.localId === localId);
-      if (item) {
-        URL.revokeObjectURL(item.previewUrl);
-      }
-      const next = prev.filter((i) => i.localId !== localId);
-
-      if (item?.serverId) {
-        onChange(value.filter((id) => id !== item.serverId));
-      }
-
+  const handleRemoveMedia = (localId: string) => {
+    setMediaItems((prev) => {
+      const next = prev.filter((item) => item.localId !== localId);
+      syncMediaIds(next);
       return next;
     });
   };
 
-  const isUploading = items.some((i) => i.status === "uploading");
+  const handleRetry = (localId: string) => {
+    const item = mediaItems.find((i) => i.localId === localId);
+    if (!item) return;
+
+    setMediaItems((prev) =>
+      prev.map((item) =>
+        item.localId === localId
+          ? { ...item, status: UPLOADING_STATUS.UPLOADING, error: undefined }
+          : item,
+      ),
+    );
+    void uploadSingleFile(localId, item.file);
+  };
 
   return {
-    inputRef,
-    items,
-    isUploading,
-    openFileDialog,
-    handleInputChange,
-    handleDragOver,
-    handleDragEnter,
-    handleDrop,
-    removeItem,
-  };
-}
+    mediaItems,
+    isUploadingAny,
+    handleFilesSelected,
+    handleRemoveMedia,
+    handleRetry,
+  }
+};

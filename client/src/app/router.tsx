@@ -12,9 +12,7 @@ export const router = createBrowserRouter([
   {
     element: (
       <AuthGuard mode="public">
-        <Suspense fallback={<div>Loading...</div>}>
-          <AuthPage />
-        </Suspense>
+        <AuthPage />
       </AuthGuard>
     ),
     path: ROUTES.AUTH,
@@ -22,9 +20,7 @@ export const router = createBrowserRouter([
   {
     element: (
       <AuthGuard mode="private">
-        <Suspense fallback={<div>Loading...</div>}>
-          <Layout />
-        </Suspense>
+        <Layout />
       </AuthGuard>
     ),
     path: "/",

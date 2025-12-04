@@ -17,7 +17,7 @@ const ProfilePage = () => {
   return (
     <div>
         <div>{params.userId}</div>
-      <ProfileHeader name={username || ""} imageId={avatarUrl} />
+      <ProfileHeader name={username || ""} avatarUrl={avatarUrl} />
       <div className="flex gap-2 mt-4">
         <section className="flex flex-col flex-5 gap-2">
           <ProfileColumn />

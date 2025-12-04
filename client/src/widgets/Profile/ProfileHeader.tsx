@@ -5,10 +5,10 @@ import { Link } from "react-router-dom";
 
 const ProfileHeader = ({
   name,
-  imageId,
+  avatarUrl,
 }: {
   name: string;
-  imageId?: string | null;
+  avatarUrl?: string | null;
 }) => {
   return (
     <div className="w-full  mx-auto rounded-2xl bg-secondary shadow overflow-hidden">
@@ -23,7 +23,7 @@ const ProfileHeader = ({
         </Button>
 
         <UserAvatar
-          imageId={imageId}
+          imageUrl={avatarUrl}
           name={name}
           className="
         absolute left-4 sm:left-6

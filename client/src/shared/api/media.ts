@@ -1,3 +1,4 @@
+import type { MediaResponse } from "../types/mediaResponseTypes";
 import { apiClient } from "./apiClient";
 
 export const fetchMedia = async (id: string): Promise<Blob> => {
@@ -8,20 +9,13 @@ export const fetchMedia = async (id: string): Promise<Blob> => {
   return response.data;
 };
 
-export interface UploadMediaResponse {
-  id: string;
-  fileType: string; //change to enum
-  mimeType: string;
-  sizeByte: number;
-  storageKey: string;
-  createdAt: string;
-}
 
-export const uploadMedia = async (file: File): Promise<UploadMediaResponse> => {
+
+export const uploadMedia = async (file: File): Promise<MediaResponse> => {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await apiClient.post<UploadMediaResponse>(
+  const response = await apiClient.post<MediaResponse>(
     "/media",
     formData,
   );

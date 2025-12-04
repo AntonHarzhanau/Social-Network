@@ -1,6 +1,7 @@
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -12,26 +13,31 @@ import { PlusCircleIcon } from "lucide-react";
 import { CreatePostForm } from "@/widgets/CreatePostForm/CreatePostForm";
 
 interface CreatePostDIalogProps {
-    className?: string;
+  className?: string;
 }
 
 const CreatePostDIalog = ({ className }: CreatePostDIalogProps) => {
   return (
-    <Dialog >
+    <Dialog>
       <DialogTrigger asChild>
         <Button className={cn("w-full justify-center", className)}>
-            <PlusCircleIcon />
-            New Post
+          <PlusCircleIcon />
+          New Post
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent aria-describedby="CreatePostDIalog">
         <DialogHeader>
           <DialogTitle className="mx-auto">New Post</DialogTitle>
         </DialogHeader>
-
+        
         <CreatePostForm />
 
         <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="secondary" type="button" form="create-post-form">
+              Cancel
+            </Button>
+          </DialogClose>
           <Button type="submit" form="create-post-form">
             Publish
           </Button>

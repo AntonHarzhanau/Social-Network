@@ -1,19 +1,21 @@
+import type { MediaResponse } from "../types/mediaResponseTypes";
 import { apiClient } from "./apiClient";
 
-export type MediaType = "image" | "video" | "audio" | "document" | "other";
-export type Visibility = "public" | "private" | "friends"| "group";
+export const VISIBILITY_VALUES = {
+  PUBLIC: "public",
+  PRIVATE: "private",
+  FRIENDS: "friends",
+  GROUP: "group",
+} as const;
+
+// TypeScript-тип
+export type Visibility =
+  (typeof VISIBILITY_VALUES)[keyof typeof VISIBILITY_VALUES];
 
 export interface Author {
   id: string;
   username: string;
   avatarUrl: string | null;
-}
-
-export interface PostMedia {
-  id: string;
-  url: string;
-  type: MediaType;
-  createdAt: string;
 }
 
 export interface Post {
@@ -24,7 +26,7 @@ export interface Post {
   likeCount: number;
   commentCount: number;
   isLikedByCurrentUser: boolean;
-  media: PostMedia[];
+  media: MediaResponse[];
 }
 
 export interface ToggleLikeResponse {
@@ -43,13 +45,13 @@ export interface FetchPostsParams {
 }
 
 export interface CreatePostPayload {
-    content?: string;
-    visibility?: Visibility;
-    mediaIds?: string[];
+  content?: string;
+  visibility?: Visibility;
+  mediaIds?: string[];
 }
 
 export interface CreatePostResponse {
-    message: string;
+  message: string;
 }
 
 export const fetchPosts = async ({
@@ -64,19 +66,18 @@ export const fetchPosts = async ({
 };
 
 export const createPost = async (
-    payload: CreatePostPayload,
+  payload: CreatePostPayload,
 ): Promise<CreatePostResponse> => {
-    const response = await apiClient.post<CreatePostResponse>(
-        "/posts",
-        payload,
-    );
-    
-    return response.data;
-}
+  const response = await apiClient.post<CreatePostResponse>("/posts", payload);
+
+  return response.data;
+};
 
 export const toggleLikePost = async (
   postId: string,
 ): Promise<ToggleLikeResponse> => {
-  const response = await apiClient.post<ToggleLikeResponse>(`/posts/${postId}/like`);
+  const response = await apiClient.post<ToggleLikeResponse>(
+    `/posts/${postId}/like`,
+  );
   return response.data;
 };

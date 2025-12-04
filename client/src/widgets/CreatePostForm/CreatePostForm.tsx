@@ -1,88 +1,89 @@
-// CreatePostForm.tsx
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-
-import { Button } from "@/shared/components/ui/button";
+import { Textarea } from "@/shared/components/ui/textarea";
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
+  FormControl,
   FormMessage,
 } from "@/shared/components/ui/form";
-import { Textarea } from "@/shared/components/ui/textarea";
-import { PostMediaField } from "@/widgets/CreatePostForm/PostMediaField";
-import { useCreatePost } from "@/shared/hooks/useCreatePost";
-import type { Visibility } from "@/shared/api/post";
+import { createPostSchema, type CreatePostFormValues } from "./schema";
+import { VISIBILITY_VALUES } from "@/shared/api/post";
+import DnDZone from "./DnDZone";
+import { PostMediaPreview } from "./PostMediaPreview";
+import VisibilitySelector from "./VisibilitySelector";
+import { usePostMediaUpload } from "@/shared/hooks/usePostMediaUpload";
+import { toast } from "sonner";
 
-const postSchema = z
-  .object({
-    content: z.string().max(3000).optional(),
-
-    visibility: z.enum(["public", "friends", "private", "group"]),
-
-    mediaIds: z.array(z.string()),
-  })
-  .refine(
-    (data) =>
-      (data.content && data.content.trim().length > 0) ||
-      data.mediaIds.length > 0,
-    {
-      message: "Either text or at least one image is required",
-      path: ["content"],
-    },
-  );
-
-export type PostFormValues = z.infer<typeof postSchema>;
-
-type Props = {
-  onSuccess?: () => void;
-};
-
-export function CreatePostForm({ onSuccess }: Props) {
-  const [isUploading, setIsUploading] = useState(false);
-
-  const form = useForm<PostFormValues>({
-    resolver: zodResolver(postSchema),
+export const CreatePostForm = () => {
+  const form = useForm<CreatePostFormValues>({
+    resolver: zodResolver(createPostSchema),
     defaultValues: {
       content: "",
-      visibility: "public",
+      visibility: VISIBILITY_VALUES.PUBLIC,
       mediaIds: [],
     },
   });
 
-  const createPostMutation = useCreatePost();
-  const isSubmitting = createPostMutation.isPending;
+  const {
+    mediaItems,
+    isUploadingAny,
+    handleFilesSelected,
+    handleRemoveMedia,
+    handleRetry,
+  } = usePostMediaUpload({
+    onMediaIdsChange: (mediaIds: string[]) => {
+      form.setValue("mediaIds", mediaIds, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    },
+  });
 
-  const onSubmit = async (values: PostFormValues) => {
-    if (isUploading) return;
+  const onSubmit = (rawvalues: CreatePostFormValues) => {
+    if (isUploadingAny) {
+      toast("Event has been created", {
+        description: "Sunday, December 03, 2023 at 9:00 AM",
+        action: {
+          label: "Undo",
+          onClick: () => console.log("Undo"),
+        },
+      });
+      console.warn("Wait until all files are uploaded");
+      return;
+    }
 
-    await createPostMutation.mutateAsync({
-      content: values.content,
-      visibility: values.visibility as Visibility,
-      mediaIds: values.mediaIds,
-    });
-
-    form.reset();
-    onSuccess?.();
+    const values = createPostSchema.parse(rawvalues);
+    console.log("Create post payload:", values);
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        id="create-post-form"
+        className="flex flex-col gap-4"
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
+        <DnDZone onFilesSelected={handleFilesSelected} />
+
+        <PostMediaPreview
+          items={mediaItems}
+          onRemove={handleRemoveMedia}
+          onRetry={handleRetry}
+        />
+
         <FormField
           control={form.control}
           name="content"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Post Text</FormLabel>
+              <FormLabel>Text</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="What are you thinking about?"
-                  className="resize-none"
+                  placeholder="What's on your mind?"
+                  className="resize-y min-h-20"
                   {...field}
                 />
               </FormControl>
@@ -91,51 +92,8 @@ export function CreatePostForm({ onSuccess }: Props) {
           )}
         />
 
-        {/* visibility*/}
-
-        <FormField
-          control={form.control}
-          name="mediaIds"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Images</FormLabel>
-              <FormControl>
-                <PostMediaField
-                  value={field.value ?? []} // string[]
-                  onChange={field.onChange} // (ids: string[]) => void
-                  onUploadingChange={setIsUploading}
-                  maxFiles={10}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {isUploading && (
-          <p className="text-xs text-muted-foreground">
-            Uploading images, please wait…
-          </p>
-        )}
-
-        <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => form.reset()}
-            disabled={isSubmitting || isUploading}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting || isUploading}>
-            {isUploading
-              ? "Waiting for media upload…"
-              : isSubmitting
-                ? "Publishing..."
-                : "Publish"}
-          </Button>
-        </div>
+        <VisibilitySelector name="visibility" control={form.control} />
       </form>
     </Form>
   );
-}
+};

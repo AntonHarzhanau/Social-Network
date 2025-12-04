@@ -1,4 +1,3 @@
-import type { PostMedia } from "@/shared/api/post";
 import { AspectRatio } from "@/shared/components/ui/aspect-ratio";
 import {
   Carousel,
@@ -8,10 +7,11 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/shared/components/ui/carousel";
+import type { MediaResponse } from "@/shared/types/mediaResponseTypes";
 import { useState } from "react";
 
 interface FeedCardMediaProps {
-  media: PostMedia[];
+  media: MediaResponse[];
 }
 
 const FeedCardMedia = ({ media }: FeedCardMediaProps) => {
