@@ -6,6 +6,7 @@ use App\Entity\Chat;
 use App\Entity\Message;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Schema\Exception\NotImplemented;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -30,5 +31,11 @@ class MessageRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
 
         return $message;
+    }
+
+    public function getUnreadMessageCountForUserByChats(User $user, array $chatsIds): array
+    {
+       throw new NotImplemented();
+       
     }
 }

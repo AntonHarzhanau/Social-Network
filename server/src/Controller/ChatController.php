@@ -2,7 +2,10 @@
 
 namespace App\Controller;
 
+use App\DTO\Chat\ChatResponseDTO;
 use App\DTO\Chat\CreateDirectChatDTO;
+use App\DTO\Message\MessageResponseDTO;
+use App\DTO\User\UserResponseDTO;
 use App\Entity\Chat;
 use App\Entity\ChatParticipant;
 use App\Entity\User;
@@ -10,6 +13,7 @@ use App\Enum\ChatParticipantRoleEnum;
 use App\Enum\ChatTypeEnum;
 use App\Repository\ChatRepository;
 use App\Repository\UserRepository;
+use App\Service\ChatService;
 use App\Service\DirectChatService;
 use App\Service\MessageService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -25,6 +29,7 @@ final class ChatController extends AbstractController
 {
     public function __construct(
         private readonly UserRepository $userRepository,
+        private readonly ChatService $chatService,
         private readonly EntityManagerInterface $em,
     ) {}
 
@@ -33,30 +38,6 @@ final class ChatController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $participant = $this->userRepository->findOneBy(['id' => $data['participantId']]);
-
-        if (!$participant) {
-            return $this->json(['error' => 'Participant not found'], 404);
-        }
-        // dd( $participant);
-
-        $newChat = new Chat();
-        $newChat->setType(ChatTypeEnum::GROUP);
-        $newChat->setCreatedBy($user);
-        $this->em->persist($newChat);
-
-        $chatParticipant = new ChatParticipant();
-        $chatParticipant->setChat($newChat);
-        $chatParticipant->setUser($user);
-        $chatParticipant->setRole(ChatParticipantRoleEnum::MEMBER);
-        $this->em->persist($chatParticipant);
-
-        $chatParticipant = new ChatParticipant();
-        $chatParticipant->setChat($newChat);
-        $chatParticipant->setUser($participant);
-        $chatParticipant->setRole(ChatParticipantRoleEnum::MEMBER);
-        $this->em->persist($chatParticipant);
-        $this->em->flush();
 
         return $this->json([
             'message' => 'Welcome to your new controller!',
@@ -65,13 +46,18 @@ final class ChatController extends AbstractController
     }
 
     #[Route('', name: 'get_chats', methods: ['GET'], format: 'json')]
-    public function getAll(): JsonResponse
+    public function getAll(#[CurrentUser] User $user,): JsonResponse
     {
-        return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/ChatController.php',
-        ]);
+        $dto = $this->chatService->getChatListForUser($user);
+
+        return $this->json(
+            $dto,
+            JsonResponse::HTTP_OK,
+            [],
+            ['groups' => 'chat:list']
+        );
     }
+
 
     #[Route('/{id}', name: 'get_chat', methods: ['GET'], format: 'json')]
     public function get(): JsonResponse
@@ -124,7 +110,10 @@ final class ChatController extends AbstractController
         $chat = $directChatService->getOrCreateDirectChat($currentUser, $otherUser);
 
         $message = $messageService->createMessage($chat, $currentUser, $content);
-        
+        $chat->setLastMessage($message);
+        $this->em->persist($chat);
+        $this->em->flush();
+
         return $this->json([
             'chatId' => $chat->getId(),
             'type' => $chat->getType(),
@@ -132,5 +121,26 @@ final class ChatController extends AbstractController
             'content' => $message->getContent(),
             'createdAt' => $message->getCreatedAt()->format('Y-m-d H:i:s'),
         ], JsonResponse::HTTP_CREATED);
+    }
+
+    #[Route('/{id}/messages', name: 'get_chat_messages', methods: ['GET'], format: 'json')]
+    public function getChatMessages(Chat $chat, #[CurrentUser] User $currentUser): JsonResponse
+    {
+        if (!$chat->getChatParticipants()->exists(function ($key, ChatParticipant $participant) use ($currentUser) {
+            return $participant->getUser()->getId() === $currentUser->getId();
+        })) {
+            return $this->json(['error' => 'Access denied to this chat'], JsonResponse::HTTP_FORBIDDEN);
+        }
+
+        $messages = $chat->getMessages()->map(function ($message) {
+            return [
+                'id' => $message->getId(),
+                'sender' => $message->getSender()->getId(),
+                'content' => $message->getContent(),
+                'createdAt' => $message->getCreatedAt()->format('Y-m-d H:i:s'),
+            ];
+        })->toArray();
+
+        return $this->json($messages, JsonResponse::HTTP_OK);
     }
 }

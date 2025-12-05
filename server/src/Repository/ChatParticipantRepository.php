@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\ChatParticipant;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,14 @@ class ChatParticipantRepository extends ServiceEntityRepository
         parent::__construct($registry, ChatParticipant::class);
     }
 
-    //    /**
-    //     * @return ChatParticipant[] Returns an array of ChatParticipant objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function getOtherUsersForDirectChats(User $currentUser, array $chatIds): array
+    {
+        if (empty($chatIds)) {
+            return [];
+        }
 
-    //    public function findOneBySomeField($value): ?ChatParticipant
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+       
+
+        return [];
+    }
 }

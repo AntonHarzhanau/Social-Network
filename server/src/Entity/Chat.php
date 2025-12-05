@@ -6,6 +6,7 @@ use App\Enum\ChatTypeEnum;
 use App\Repository\ChatRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
@@ -50,6 +51,9 @@ class Chat
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true, unique: true)]
     private ?Message $lastMessage = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $avatarUrl = null;
 
     public function __construct()
     {
@@ -191,6 +195,18 @@ class Chat
     public function setLastMessage(?Message $lastMessage): static
     {
         $this->lastMessage = $lastMessage;
+
+        return $this;
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return $this->avatarUrl;
+    }
+
+    public function setAvatarUrl(?string $avatarUrl): static
+    {
+        $this->avatarUrl = $avatarUrl;
 
         return $this;
     }

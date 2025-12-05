@@ -35,25 +35,28 @@ class DirectChatService
                 return $index->getChat();
             }
 
-            $chat = new Chat();
-            $chat->setType(ChatTypeEnum::DIRECT);
-            $chat->setCreatedBy($current);
-
-            $this->em->persist($chat);
 
             // participants
             $p1 = new ChatParticipant();
-            $p1->setChat($chat);
+
             $p1->setUser($user1);
             $p1->setRole(ChatParticipantRoleEnum::MEMBER);
 
             $p2 = new ChatParticipant();
-            $p2->setChat($chat);
             $p2->setUser($user2);
             $p2->setRole(ChatParticipantRoleEnum::MEMBER);
 
             $this->em->persist($p1);
             $this->em->persist($p2);
+
+            $chat = new Chat();
+            $chat->setType(ChatTypeEnum::DIRECT);
+            $chat->setCreatedBy($current);
+            $chat->addChatParticipant($p1);
+            $chat->addChatParticipant($p2);
+
+            $this->em->persist($chat);
+
 
             $index = new DirectChatIndex($user1, $user2, $chat);
             $this->em->persist($index);
