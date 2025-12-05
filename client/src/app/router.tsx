@@ -36,6 +36,10 @@ export const router = createBrowserRouter([
         lazy: () => import("@/pages/MessagesPage"),
       },
       {
+        path: ROUTES.CHAT,
+        lazy: () => import("@/pages/ChatPage"),
+      },
+      {
         path: ROUTES.FRIENDS,
         lazy: () => import("@/pages/FriendsPage"),
       },

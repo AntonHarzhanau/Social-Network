@@ -5,6 +5,7 @@ export const ROUTES = {
   FEEDS: "/feeds",
   FRIENDS: "/friends",
   MESSAGES: "/messages",
+  CHAT: "/chat/:chatId",
   GROUPS: "/groups",
   GROUP: "/group/:groupId",
   SETTINGS: "/settings",
@@ -16,6 +17,9 @@ export type PathParams = {
   };
   [ROUTES.PROFILE]: {
     userId: string;
+  };
+  [ROUTES.CHAT]: {
+    chatId: string;
   };
 };
 

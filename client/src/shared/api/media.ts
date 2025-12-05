@@ -11,6 +11,7 @@ export const fetchMedia = async (id: string): Promise<Blob> => {
 
 
 
+
 export const uploadMedia = async (file: File): Promise<MediaResponse> => {
   const formData = new FormData();
   formData.append("file", file);

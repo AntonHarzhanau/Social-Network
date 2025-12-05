@@ -78,4 +78,5 @@ class ChatRepository extends ServiceEntityRepository
 
         $qb->getQuery()->getResult();
     }
+
 }

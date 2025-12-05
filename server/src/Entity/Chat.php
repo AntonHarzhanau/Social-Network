@@ -140,6 +140,7 @@ class Chat
         if (!$this->messages->contains($message)) {
             $this->messages->add($message);
             $message->setChat($this);
+            $this->setLastMessage($message);
         }
 
         return $this;

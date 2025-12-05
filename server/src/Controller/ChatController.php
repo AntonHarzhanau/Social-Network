@@ -123,6 +123,7 @@ final class ChatController extends AbstractController
         ], JsonResponse::HTTP_CREATED);
     }
 
+
     #[Route('/{id}/messages', name: 'get_chat_messages', methods: ['GET'], format: 'json')]
     public function getChatMessages(Chat $chat, #[CurrentUser] User $currentUser): JsonResponse
     {
@@ -132,15 +133,7 @@ final class ChatController extends AbstractController
             return $this->json(['error' => 'Access denied to this chat'], JsonResponse::HTTP_FORBIDDEN);
         }
 
-        $messages = $chat->getMessages()->map(function ($message) {
-            return [
-                'id' => $message->getId(),
-                'sender' => $message->getSender()->getId(),
-                'content' => $message->getContent(),
-                'createdAt' => $message->getCreatedAt()->format('Y-m-d H:i:s'),
-            ];
-        })->toArray();
-
-        return $this->json($messages, JsonResponse::HTTP_OK);
+        $messages = $this->chatService->getMessagesByChat($chat, $currentUser);
+        return $this->json($messages, JsonResponse::HTTP_OK, [], ['groups' => 'message:list']);
     }
 }

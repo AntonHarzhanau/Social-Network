@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Chat;
 use App\Entity\Message;
 use App\Entity\User;
 use App\Repository\ChatRepository;
@@ -13,43 +14,41 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
+#[Route('/api/messages')]
 final class MessageController extends AbstractController
 {
-    #[Route('/api/chats/{id}/messages', methods: ['POST'])]
+    #[Route('/{chat}', methods: ['POST'])]
     public function send(
-        string $id,
+        Chat $chat,
         Request $request,
-        ChatRepository $chats,
         EntityManagerInterface $em,
         ChatNotifier $notifier,
         #[CurrentUser] User $user,
     ): JsonResponse {
 
-        $chat = $chats->find($id);
         if (!$chat) {
             return $this->json(['error' => 'Chat not found'], 404);
         }
 
         $data = json_decode($request->getContent(), true);
         $content = $data['content'] ?? null;
-
+        
         if (!$content) {
             return $this->json(['error' => 'Content is required'], 422);
         }
 
-        // 1) Создаём и сохраняем сообщение
+   
         $message = new Message();
-        $message->setChat($chat);
         $message->setSender($user);
         $message->setContent($content);
+        $chat->addMessage($message);
 
         $em->persist($message);
         $em->flush();
 
-        // 2) Шлём обновление через Mercure
-        $notifier->notifyNewMessage($message);
 
-        // 3) Возвращаем JSON (DTO потом можно сделать нормальный)
+        // $notifier->notifyNewMessage($message);
+
         return $this->json([
             'id' => (string) $message->getId(),
             'chatId' => (string) $chat->getId(),

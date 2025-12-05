@@ -1,0 +1,37 @@
+import { Item, ItemMedia } from "@/shared/components/ui/item";
+import { UserAvatar } from "@/shared/components/UserAvatar";
+import { Link } from "react-router-dom";
+
+interface ChatListItemProps {
+  chat: {
+    id: string;
+    title?: string;
+    avatarUrl?: string;
+    lastMessage?: {
+      content: string;
+    };
+  };
+}
+
+const ChatListItem = ({ chat }: ChatListItemProps) => {
+    
+  return (
+    <Item variant="outline" key={chat.id} asChild>
+      <Link to={`/chat/${chat.id}`} className="flex items-center gap-2">
+        <ItemMedia variant="icon" className="w-10 h-10 rounded-full">
+          <UserAvatar
+            imageUrl={chat.avatarUrl}
+            alt={chat.title}
+            name={chat.title}
+          />
+        </ItemMedia>
+        <div>
+          <h2>{chat.title}</h2>
+          <p>{chat.lastMessage?.content}</p>
+        </div>
+      </Link>
+    </Item>
+  );
+};
+
+export default ChatListItem;
