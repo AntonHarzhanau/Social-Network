@@ -20,6 +20,7 @@ const FeedCard = ({ post }: FeedCardProps) => {
   return (
     <Card className="max-w-full bg-card">
       <FeedCardHeader
+        userId={post.author.id}
         name={authorName}
         avatarUrl={post.author.avatarUrl}
         date={formatPostDate(post.date)}

@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use App\DTO\Message\MessageResponseDTO;
+use App\DTO\User\UserResponseDTO;
 use App\Entity\Message;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
@@ -25,15 +27,20 @@ class ChatNotifier
         );
 
         // 2) Что отправляем (payload)
+        $payload = new MessageResponseDTO(
+            id: $message->getId(),
+            chatId: $chat->getId(),
+            sender: new UserResponseDTO(
+                id: $sender->getId(),
+                username: $sender->getUsername(),
+                avatarUrl: $sender->getAvatarUrl(),
+            ),
+            content: $message->getContent(),
+            createdAt: $message->getCreatedAt()->format(DATE_ATOM),
+        );
         $data = [
             'type' => 'message_created',
-            'chatId' => (string) $chat->getId(),
-            'message' => [
-                'id' => (string) $message->getId(),
-                'senderId' => (string) $sender->getId(),
-                'content' => $message->getContent(),
-                'createdAt' => $message->getCreatedAt()->format(DATE_ATOM),
-            ],
+            'message' => $payload,
         ];
 
         // 3) Создаём Update

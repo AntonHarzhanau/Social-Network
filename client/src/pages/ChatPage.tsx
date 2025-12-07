@@ -1,42 +1,152 @@
-import { fetchMessages, type MessageResponse } from "@/shared/api/Chat";
+import { sendMessage, type MessageResponse } from "@/shared/api/chat";
+import {
+  useChatQuery,
+  useInfiniteMessages,
+  type MessagesInfiniteData,
+} from "@/shared/hooks/useChat";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+} from "@/shared/components/ui/card";
+import { Input } from "@/shared/components/ui/input";
 import { UserAvatar } from "@/shared/components/UserAvatar";
-import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store/authStore";
+import MessageList from "@/widgets/Message/MessageList";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+
+const MERCURE_URL =
+  import.meta.env.VITE_MERCURE_URL ?? "http://localhost/.well-known/mercure";
 
 const ChatPage = () => {
   const params = useParams<{ chatId: string }>();
-  const [messages, setMessages] = useState<MessageResponse[]>([]);
+  const chatId = params.chatId;
+  const [newMessage, setNewMessage] = useState("");
   const currentUserId = useAuthStore((state) => state.user?.id);
 
+  const queryClient = useQueryClient();
+  const { data: chat } = useChatQuery(chatId);
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteMessages(chatId);
+
+  const messages =
+    data?.pages
+      .flat()
+      .sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      ) ?? [];
+
   useEffect(() => {
-    const loadMessages = async () => {
-      if (params.chatId) {
-        console.log("Fetching messages for chatId:", params.chatId);
-        const data = await fetchMessages(params.chatId);
-        setMessages(data);
-        console.log("Fetched messages:", data);
-      }
+    if (!chatId) return;
+
+    const topic = `https://qynso.local/chats/${chatId}`;
+    const url = new URL(MERCURE_URL);
+    url.searchParams.append("topic", topic);
+
+    const es = new EventSource(url.toString());
+
+    es.onmessage = (event) => {
+      const data = JSON.parse(event.data) as {
+        type: string;
+        message: MessageResponse;
+      };
+
+      if (data.type !== "message_created") return;
+
+      const newMsg = data.message;
+
+      queryClient.setQueryData<MessagesInfiniteData>(
+        ["messages", chatId],
+        (old) => {
+          if (!old) {
+            return {
+              pageParams: [1],
+              pages: [[newMsg]],
+            };
+          }
+
+          const pages = [...old.pages];
+          const lastIndex = pages.length - 1;
+          pages[lastIndex] = [...pages[lastIndex], newMsg];
+
+          return {
+            ...old,
+            pages,
+          };
+        },
+      );
     };
 
-    loadMessages();
-  }, []);
+    es.onerror = (err) => {
+      console.error("Mercure error", err);
+    };
+
+    return () => {
+      es.close();
+    };
+  }, [chatId, queryClient]);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatId || !newMessage.trim()) return;
+    await sendMessage(chatId, newMessage);
+    setNewMessage("");
+  };
+
+  if (!chatId) {
+    return <div>No chat selected</div>;
+  }
+
+  console.log("Rendering ChatPage for", chat);
 
   return (
-    <div className="flex flex-col gap-2">
-      {messages.map((message) => (
-        <div key={message.id}>
-          <div className={cn("flex gap-4 border", message.sender.id === currentUserId ? "justify-end" : "justify-start")}>
-            <UserAvatar imageUrl={message.sender.avatarUrl} name={message.sender.username} className="w-10 h-10" />
-            <div className="flex flex-col">
-              <h2>{message.sender.username}</h2>
-              <p>{message.content}</p>
-            </div>
-          </div>
+    <Card className="flex flex-col gap-2 h-full">
+      <CardHeader className="flex items-center gap-3 border-b px-3 py-1">
+        <UserAvatar
+          imageUrl={chat?.avatarUrl}
+          name={chat?.title ?? "Chat"}
+          className="w-12 h-12"
+        />
+        <div className="flex flex-col">
+          <h2 className="text-lg font-semibold">{chat?.title ?? "Chat"}</h2>
         </div>
-      ))}
-    </div>
+      </CardHeader>
+
+      <CardContent className="flex flex-col gap-2 p-2">
+        {isFetchingNextPage && (
+          <div className="text-center text-xs text-muted-foreground">
+            Loading messages…
+          </div>
+        )}
+        <MessageList
+          messages={messages}
+          currentUserId={currentUserId}
+          hasMore={!!hasNextPage}
+          onLoadMore={() => {
+            if (hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
+            }
+          }}
+        />
+      </CardContent>
+
+      <CardAction className="w-full">
+        <form onSubmit={handleSendMessage} className="flex w-full gap-2 px-2 items-center">
+          <Input
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="Type your message..."
+          />
+          <Button type="submit">Send</Button>
+        </form>
+      </CardAction>
+    </Card>
   );
 };
 

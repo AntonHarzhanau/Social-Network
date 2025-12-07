@@ -40,6 +40,7 @@ export interface PostsResponse {
 }
 
 export interface FetchPostsParams {
+  authorId?: string | null;
   page?: number;
   limit?: number;
 }
@@ -55,11 +56,13 @@ export interface CreatePostResponse {
 }
 
 export const fetchPosts = async ({
+  authorId = null,
   page = 1,
   limit = 10,
 }: FetchPostsParams = {}): Promise<Post[]> => {
+    const authorIdParam = authorId ? `/author/${authorId}` : "";
   const response = await apiClient.get<PostsResponse>(
-    `/posts?page=${page}&limit=${limit}`,
+    `/posts${authorIdParam}?page=${page}&limit=${limit}`,
   );
 
   return response.data.posts;

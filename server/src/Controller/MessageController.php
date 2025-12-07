@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\DTO\Message\MessageResponseDTO;
+use App\DTO\User\UserResponseDTO;
 use App\Entity\Chat;
 use App\Entity\Message;
 use App\Entity\User;
@@ -17,6 +19,9 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 #[Route('/api/messages')]
 final class MessageController extends AbstractController
 {
+    public function __construct(
+        private readonly ChatRepository $chatRepository,
+    ) {}
     #[Route('/{chat}', methods: ['POST'])]
     public function send(
         Chat $chat,
@@ -46,15 +51,20 @@ final class MessageController extends AbstractController
         $em->persist($message);
         $em->flush();
 
-
-        // $notifier->notifyNewMessage($message);
-
-        return $this->json([
-            'id' => (string) $message->getId(),
-            'chatId' => (string) $chat->getId(),
-            'senderId' => (string) $user->getId(),
-            'content' => $message->getContent(),
-            'createdAt' => $message->getCreatedAt()->format(DATE_ATOM),
-        ]);
+        
+        $notifier->notifyNewMessage($message);
+        $message = new MessageResponseDTO(
+            
+            id: $message->getId(),
+            chatId: $chat->getId(),
+            sender: new UserResponseDTO(
+                id: $user->getId(),
+                username: $user->getUsername(),
+                avatarUrl: $user->getAvatarUrl(),
+            ),
+            content: $message->getContent(),
+            createdAt: $message->getCreatedAt()->format(DATE_ATOM),
+        );
+        return $this->json($message, 201, [], ['groups' => 'message:list']);
     }
 }

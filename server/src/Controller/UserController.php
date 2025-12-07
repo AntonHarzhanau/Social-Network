@@ -36,4 +36,24 @@ final class UserController extends AbstractController
         }
         return $this->json($user, JsonResponse::HTTP_OK, [], ['groups' => 'user:preview']);
     }
+
+      #[Route('/{id}/profile', name: 'get_profile', methods: ['GET'], format: 'json')]
+    public function getProfile(User $user): JsonResponse
+    {
+        $user = $this->userFactory->toUserResponseDTO($user);
+        if (!$user) {
+            return $this->json(['message' => 'User not found'], JsonResponse::HTTP_NOT_FOUND);
+        }
+        return $this->json($user, JsonResponse::HTTP_OK, [], ['groups' => 'user:fullProfile']);
+    }
+
+    #[Route('/avatar/{id}', name: 'add_avatar', methods: ['POST'], format: 'json')]
+    public function addAvatar(#[CurrentUser] User $user, string $url): JsonResponse
+    {
+        $avatarUrl = $this->userService->addAvatar($user, $url);
+        if (!$avatarUrl) {
+            return $this->json(['message' => 'Failed to add avatar'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+        return $this->json(['avatarUrl' => $avatarUrl], JsonResponse::HTTP_OK);
+    }
 }

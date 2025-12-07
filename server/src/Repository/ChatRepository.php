@@ -48,35 +48,7 @@ class ChatRepository extends ServiceEntityRepository
  
         $chats = $qb->getQuery()->getResult();
 
-        // separate request for loading participants for DIRECT chats
-
-        $this->prefetchDirectParticipants($chats);
-
         return $chats;
-    }
-
-    private function prefetchDirectParticipants(array $chats): void
-    {
-        $directChats = array_filter(
-            $chats,
-            fn(Chat $chat) => $chat->getType()->value === ChatTypeEnum::DIRECT->value
-        );
-
-        if (empty($directChats)) {
-            return;
-        }
-
-        $ids = array_map(fn(Chat $chat) => $chat->getId(), $directChats);
-
-
-        $qb = $this->createQueryBuilder('c')
-            ->select('c', 'cp', 'u')
-            ->innerJoin('c.chatParticipants', 'cp')
-            ->innerJoin('cp.user', 'u')
-            ->where('c.id IN (:ids)')
-            ->setParameter('ids', $ids);
-
-        $qb->getQuery()->getResult();
     }
 
 }

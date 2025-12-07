@@ -1,6 +1,4 @@
-import { MessageCircle, Newspaper, User, Users } from "lucide-react";
-import { href } from "react-router-dom";
-import { ROUTES } from "./routes";
+import { MessageCircle, Newspaper,  Users } from "lucide-react";
 
 export type MenuItem = {
     name: string;
@@ -9,7 +7,6 @@ export type MenuItem = {
 }
 
 export const MAIN_MENU: MenuItem[] = [
-  { path: href(ROUTES.PROFILE, { userId: "me" }), name: "Profile", icon: User },
   { path: "/feeds", name: "Feed", icon: Newspaper },
   { path: "/messages", name: "Messages", icon: MessageCircle },
   { path: "/friends", name: "Friends", icon: Users },

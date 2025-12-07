@@ -21,9 +21,9 @@ class ChatService
         private readonly MessageRepository $messageRepository,
     ) {}
 
-    public function getChatListForUser(User $currentUser): array
+    public function getChatList(User $currentUser, int $page = 1, int $limit = 20): array
     {
-        $chats = $this->chatRepository->findUserChatsWithLastMessage($currentUser);
+        $chats = $this->chatRepository->findUserChatsWithLastMessage($currentUser, $page, $limit);
         $items = [];
 
         foreach ($chats as $chat) {
@@ -33,7 +33,7 @@ class ChatService
         return $items;
     }
 
-    public function getMessagesByChat(Chat $chat, User $currentUser): array
+    public function getMessagesByChat(Chat $chat, User $currentUser, int $page = 1, int $limit = 30): array
     {
         if ($this->chatParticipantRepository->findOneBy([
             'chat' => $chat,
@@ -44,7 +44,10 @@ class ChatService
 
         $data = $this->messageRepository->findBy([
             'chat' => $chat,
-        ]);
+        ],
+        [
+            'createdAt' => 'DESC',
+        ], $limit, ($page - 1) * $limit);
 
         $messages = [];
         foreach ($data as $message) {
@@ -59,6 +62,8 @@ class ChatService
                 createdAt: $message->getCreatedAt()->format(DATE_ATOM),
             );
         }
+
         return $messages;
     }
+
 }

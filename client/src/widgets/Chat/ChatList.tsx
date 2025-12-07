@@ -1,22 +1,51 @@
-import { fetchChats, type ChatResponse } from "@/shared/api/Chat";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import ChatListItem from "./ChatListItem";
+import { useInfiniteChats } from "@/shared/hooks/useChat";
 
 const ChatList = () => {
-  const [chats, setChats] = useState<ChatResponse[]>([]);
+  const { data, fetchNextPage, hasNextPage, status } =
+    useInfiniteChats();
+
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const loadUsers = async () => {
-      const data = await fetchChats();
-      setChats(data);
+    if (!hasNextPage) return;
+
+    const target = loadMoreRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 1 },
+    );
+    observer.observe(target);
+
+    return () => {
+      observer.disconnect();
     };
-    loadUsers();
-  }, []);
+  }, [fetchNextPage, hasNextPage]);
+
+  if (status === "pending") {
+    return <div>Loading...</div>;
+  }
+
+  if (status === "error") {
+    return <div>Failed to load chats.</div>;
+  }
+
+  const chats = data?.pages.flat() ?? [];
+
   return (
     <div className="flex flex-col">
       {chats.map((chat) => (
         <ChatListItem key={chat.id} chat={chat} />
       ))}
+      <div ref={loadMoreRef} />
     </div>
   );
 };

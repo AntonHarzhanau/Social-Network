@@ -1,10 +1,10 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchPosts, type Post } from "../api/post";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";  
 
 export const POSTS_QUERY_KEY = ["posts"] as const;
 
-export const useInfinitePosts = (limit = 10) => {
+export const useInfinitePosts = (limit = 10, authorId: string | null = null) => {
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const query = useInfiniteQuery<Post[]>({
@@ -12,6 +12,7 @@ export const useInfinitePosts = (limit = 10) => {
     initialPageParam: 1,
     queryFn: ({ pageParam }) =>
       fetchPosts({
+        authorId,
         page: pageParam as number,
         limit,
       }),

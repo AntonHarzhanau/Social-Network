@@ -1,21 +1,19 @@
+import type { Me } from "@/shared/api/auth";
 import { ModeToggle } from "@/shared/components/ModeToggle";
 import SearchInput from "@/shared/components/SearchInput";
 import { Button } from "@/shared/components/ui/button";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { UserAvatar } from "@/shared/components/UserAvatar";
-import { useAuthStore } from "@/shared/store/authStore";
 import { Bell } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useShallow } from "zustand/react/shallow";
 
-const Header = () => {
-  const { user, isLoading, logout } = useAuthStore(
-    useShallow((state) => ({
-      user: state.user,
-      isLoading: state.isLoading,
-      logout: state.logout,
-    })),
-  );
+interface HeaderProps {
+  user?: Me | null;
+  isLoading: boolean;
+  logout: () => void;
+}
+
+const Header = ({ user, isLoading, logout }: HeaderProps) => {
 
   return (
     <header className="flex justify-center h-12 border border-b items-center bg-card px-4 sticky top-0 z-20">

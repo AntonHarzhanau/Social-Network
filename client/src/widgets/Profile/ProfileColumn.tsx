@@ -12,8 +12,10 @@ import CreatePostDIalog from "../CreatePostForm/CreatePostDIalog";
 import ProfileImageContent from "./ProfileImageContent";
 import ProfileVideoContent from "./ProfileVideoContent";
 import FeedsList from "../FeedsList";
+import { useAuthStore } from "@/shared/store/authStore";
 
 const ProfileColumn = () => {
+    const { id } = useAuthStore(s => s.user?.id ? s.user : { id: null });
   const contentTabs = {
     tabs: [
       { value: "photos", label: "Photos" },
@@ -46,7 +48,7 @@ const ProfileColumn = () => {
       </Card>
 
       <CreatePostDIalog className="mt-2" />
-      <FeedsList />
+      <FeedsList authorId={id} />
     </div>
   );
 };

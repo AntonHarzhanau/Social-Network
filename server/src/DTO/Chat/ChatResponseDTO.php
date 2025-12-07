@@ -8,13 +8,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
 final readonly class ChatResponseDTO
 {
     public function __construct(
-        #[Groups(['chat:list'])]
+        #[Groups(['chat:list', 'chat:detail'])]
         public string $id,
-        #[Groups(['chat:list'])]
+        #[Groups(['chat:list', 'chat:detail'])]
         public string $type,
-        #[Groups(['chat:list'])]
+        #[Groups(['chat:list', 'chat:detail'])]
         public ?string $title = null,
-        #[Groups(['chat:list'])]
+        #[Groups(['chat:list', 'chat:detail'])]
         public ?string $avatarUrl = null,
         #[Groups(['chat:list'])]
         public ?MessageResponseDTO $lastMessage = null,

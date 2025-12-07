@@ -1,7 +1,7 @@
 import { useInfinitePosts } from "@/shared/hooks/useInfinitePosts";
 import FeedCard from "./FeedCard/FeedCard";
 
-const FeedsList = () => {
+const FeedsList = ({ authorId = null }: { authorId?: string | null }) => {
   const {
     posts,
     isLoading,
@@ -9,7 +9,7 @@ const FeedsList = () => {
     hasNextPage,
     isFetchingNextPage,
     loadMoreRef,
-  } = useInfinitePosts(10);
+  } = useInfinitePosts(10, authorId);
 
   if (isLoading && posts.length === 0) {
     return Array.from({ length: 5 }).map((_, index) => (

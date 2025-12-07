@@ -1,16 +1,10 @@
+import type { ChatResponse } from "@/shared/api/chat";
 import { Item, ItemMedia } from "@/shared/components/ui/item";
 import { UserAvatar } from "@/shared/components/UserAvatar";
 import { Link } from "react-router-dom";
 
 interface ChatListItemProps {
-  chat: {
-    id: string;
-    title?: string;
-    avatarUrl?: string;
-    lastMessage?: {
-      content: string;
-    };
-  };
+    chat: ChatResponse;
 }
 
 const ChatListItem = ({ chat }: ChatListItemProps) => {

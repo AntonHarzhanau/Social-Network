@@ -17,14 +17,4 @@ class ChatParticipantRepository extends ServiceEntityRepository
         parent::__construct($registry, ChatParticipant::class);
     }
 
-    public function getOtherUsersForDirectChats(User $currentUser, array $chatIds): array
-    {
-        if (empty($chatIds)) {
-            return [];
-        }
-
-       
-
-        return [];
-    }
 }

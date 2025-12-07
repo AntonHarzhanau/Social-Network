@@ -71,7 +71,7 @@ final class PostController extends AbstractController
 
         $posts = $this->postService->getByAuthor($user, $author, $page, $limit);
 
-        return $this->json($posts, JsonResponse::HTTP_OK, [], ['groups' => ['post:feed']]);
+        return $this->json(['posts' => $posts], JsonResponse::HTTP_OK, [], ['groups' => ['post:feed']]);
     }
 
 
