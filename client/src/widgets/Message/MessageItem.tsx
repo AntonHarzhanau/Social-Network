@@ -19,11 +19,11 @@ const MessageItem = ({ message, currentUserId }: MessageItemProps) => {
         <UserAvatar
           imageUrl={message.sender.avatarUrl}
           name={message.sender.username}
-          className="w-8 h-8"
+          className="w-8 h-8 min-w-8"
         />
         <div className="flex flex-col rounded-lg bg-muted px-3 py-2">
           <h2 className="text-xs font-semibold">{message.sender.username}</h2>
-          <p className="text-sm">{message.content}</p>
+          <p className="text-sm whitespace-pre-wrap wrap-break-words wrap-anywhere">{message.content}</p>
         </div>
       </div>
     </div>
