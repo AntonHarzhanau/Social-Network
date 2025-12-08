@@ -63,3 +63,26 @@ export const sendMessage = async (
 ): Promise<void> => {
   await apiClient.post(`/messages/${chatId}`, { content });
 };
+
+interface CreateDirectChatParams {
+  participantId: string;
+  content?: string;
+}
+
+interface CreateDirectChatResponse extends ChatResponse {
+  id: string;
+  type: "self" | "direct" | "group";
+  messageId: string;
+  content: string;
+  createdAt: string;
+}
+
+export const createDirectChat = async (
+  params: CreateDirectChatParams): Promise<CreateDirectChatResponse> => {
+  const { participantId, content } = params;
+  const response = await apiClient.post<CreateDirectChatResponse>("/chats/direct", {
+    participantId,
+    content,
+  });
+  return response.data;
+};

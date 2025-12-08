@@ -19,6 +19,5 @@ export const fetchUserProfile = async (
   userId: string,
 ): Promise<UserProfile> => {
   const response = await apiClient.get<UserProfile>(`/user/${userId}/profile`);
-  console.log("Fetched user profile:", response.data);
   return response.data;
 };

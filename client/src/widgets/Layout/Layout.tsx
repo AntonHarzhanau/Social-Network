@@ -13,7 +13,7 @@ const Layout = () => {
     })),
   );
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col ">
       <Header user={user} isLoading={isLoading} logout={logout} />
       <div className="flex max-w-[1100px] w-full h-full mx-auto gap-2">
         <div className="flex-1">

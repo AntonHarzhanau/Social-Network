@@ -121,7 +121,7 @@ final class ChatController extends AbstractController
         $this->em->flush();
 
         return $this->json([
-            'chatId' => $chat->getId(),
+            'id' => $chat->getId(),
             'type' => $chat->getType(),
             'messageId' => $message->getId(),
             'content' => $message->getContent(),

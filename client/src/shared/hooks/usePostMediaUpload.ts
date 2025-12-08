@@ -22,7 +22,7 @@ export const usePostMediaUpload = ({
   const syncMediaIds = (items: MediaItem[]) => {
     const ids = items
       .filter((i) => i.status === UPLOADING_STATUS.SUCCESS && i.serverId)
-      .map((i) => i.serverId!) as string[];
+      .map((i) => i.serverId as string);
 
     onMediaIdsChange?.(ids);
   };
@@ -65,26 +65,23 @@ export const usePostMediaUpload = ({
   const handleFilesSelected = (files: File[]) => {
     if (files.length === 0) return;
 
-    setMediaItems((prev) => {
-      const newItems: MediaItem[] = files.map((file) => {
-        const localId = crypto.randomUUID();
+    const newItems: MediaItem[] = files.map((file) => ({
+      localId: crypto.randomUUID(),
+      file,
+      status: UPLOADING_STATUS.UPLOADING,
+    }));
 
-        void uploadSingleFile(localId, file);
+    setMediaItems((prev) => [...prev, ...newItems]);
 
-        return {
-          localId,
-          file,
-          status: UPLOADING_STATUS.UPLOADING,
-        };
-      });
-      return [...prev, ...newItems];
+    newItems.forEach((item) => {
+      void uploadSingleFile(item.localId, item.file);
     });
   };
 
   const resetMedia = () => {
     setMediaItems([]);
     onMediaIdsChange?.([]);
-  }
+  };
 
   const handleRemoveMedia = (localId: string) => {
     setMediaItems((prev) => {
@@ -115,5 +112,5 @@ export const usePostMediaUpload = ({
     handleRemoveMedia,
     handleRetry,
     resetMedia,
-  }
+  };
 };

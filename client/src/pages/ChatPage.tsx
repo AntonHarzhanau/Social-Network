@@ -103,8 +103,6 @@ const ChatPage = () => {
     return <div>No chat selected</div>;
   }
 
-  console.log("Rendering ChatPage for", chat);
-
   return (
     <Card className="flex flex-col gap-2 h-full">
       <CardHeader className="flex items-center gap-3 border-b px-3 py-1">
