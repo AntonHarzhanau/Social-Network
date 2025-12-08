@@ -2,7 +2,6 @@ import { sendMessage, type MessageResponse } from "@/shared/api/chat";
 import {
   useChatQuery,
   useInfiniteMessages,
-  type MessagesInfiniteData,
 } from "@/shared/hooks/useChat";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -17,7 +16,6 @@ import { useAuthStore } from "@/shared/store/authStore";
 import MessageList from "@/widgets/Message/MessageList";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
 
 const MERCURE_URL =
   import.meta.env.VITE_MERCURE_URL ?? "http://localhost/.well-known/mercure";
@@ -26,21 +24,30 @@ const ChatPage = () => {
   const params = useParams<{ chatId: string }>();
   const chatId = params.chatId;
   const [newMessage, setNewMessage] = useState("");
+  const [liveMessages, setLiveMessages] = useState<MessageResponse[]>([]);
   const currentUserId = useAuthStore((state) => state.user?.id);
 
-  const queryClient = useQueryClient();
   const { data: chat } = useChatQuery(chatId);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteMessages(chatId);
 
-  const messages =
+  const historyMessages =
     data?.pages
       .flat()
       .sort(
         (a, b) =>
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
       ) ?? [];
+
+  const messages = [...historyMessages, ...liveMessages]
+    .filter(
+      (msg, index, arr) => arr.findIndex((m) => m.id === msg.id) === index,
+    )
+    .sort(
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+    );
 
   useEffect(() => {
     if (!chatId) return;
@@ -61,26 +68,12 @@ const ChatPage = () => {
 
       const newMsg = data.message;
 
-      queryClient.setQueryData<MessagesInfiniteData>(
-        ["messages", chatId],
-        (old) => {
-          if (!old) {
-            return {
-              pageParams: [1],
-              pages: [[newMsg]],
-            };
-          }
-
-          const pages = [...old.pages];
-          const lastIndex = pages.length - 1;
-          pages[lastIndex] = [...pages[lastIndex], newMsg];
-
-          return {
-            ...old,
-            pages,
-          };
-        },
-      );
+      setLiveMessages((prevMessages) => {
+        if (prevMessages.find((msg) => msg.id === newMsg.id)) {
+            return prevMessages;
+        }
+        return [...prevMessages, newMsg];
+      });
     };
 
     es.onerror = (err) => {
@@ -90,7 +83,7 @@ const ChatPage = () => {
     return () => {
       es.close();
     };
-  }, [chatId, queryClient]);
+  }, [chatId]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,7 +128,10 @@ const ChatPage = () => {
       </CardContent>
 
       <CardAction className="w-full">
-        <form onSubmit={handleSendMessage} className="flex w-full gap-2 px-2 items-center">
+        <form
+          onSubmit={handleSendMessage}
+          className="flex w-full gap-2 px-2 items-center"
+        >
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
