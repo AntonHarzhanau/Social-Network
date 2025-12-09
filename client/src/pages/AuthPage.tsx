@@ -16,18 +16,18 @@ const AuthPage = () => {
         <div className="flex flex-col gap-6">
           <Card className="overflow-hidden p-0">
             <CardContent className="grid p-0 md:grid-cols-2">
+              <div className="bg-muted relative hidden md:block">
+                <div className="flex flex-col justify-center items-center h-full">
+                  <h1 className="text-5xl font-extrabold">LOGO</h1>
+                  <h1 className="text-3xl text-bold">Simple. Clear. Friendly.</h1>
+                </div>
+              </div>
               {mode === "login" ? (
                 <LoginForm onSwitchToRegister={() => setMode("register")} />
               ) : (
                 <RegisterForm switchToLogin={() => setMode("login")} />
               )}
-              <div className="bg-muted relative hidden md:block">
-                <img
-                  src="/placeholder.svg"
-                  alt="Image"
-                  className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-                />
-              </div>
+
             </CardContent>
           </Card>
 
