@@ -1,4 +1,5 @@
 import { MessageCircle, Newspaper,  Users } from "lucide-react";
+import { ROUTES } from "./routes";
 
 export type MenuItem = {
     name: string;
@@ -7,9 +8,9 @@ export type MenuItem = {
 }
 
 export const MAIN_MENU: MenuItem[] = [
-  { path: "/feeds", name: "Feed", icon: Newspaper },
-  { path: "/messages", name: "Messages", icon: MessageCircle },
-  { path: "/friends", name: "Friends", icon: Users },
-  { path: "/groups", name: "Groups", icon: Users },
-  { path: "/settings", name: "Settings", icon: Users },
+  { path: ROUTES.FEEDS, name: "Feed", icon: Newspaper },
+  { path: "/chats", name: "Messages", icon: MessageCircle },
+  { path: ROUTES.FRIENDS, name: "Friends", icon: Users },
+  { path: ROUTES.GROUPS, name: "Groups", icon: Users },
+  { path: ROUTES.SETTINGS, name: "Settings", icon: Users },
 ];

@@ -1,7 +1,8 @@
 import type { ChatResponse } from "@/shared/api/chat";
 import { Item, ItemMedia } from "@/shared/components/ui/item";
 import { UserAvatar } from "@/shared/components/UserAvatar";
-import { Link } from "react-router-dom";
+import { useChatStore } from "@/shared/store/chatStore";
+import { useNavigate } from "react-router-dom";
 
 interface ChatListItemProps {
     chat: ChatResponse;
@@ -9,9 +10,17 @@ interface ChatListItemProps {
 
 const ChatListItem = ({ chat }: ChatListItemProps) => {
     
+    const addChat = useChatStore((s) => s.addChat);
+    const navigate = useNavigate();
+
+    const handleClick = () => {
+      addChat(chat)
+      navigate(`/chats/${chat.id}`)
+    }
+
   return (
     <Item variant="outline" key={chat.id} asChild>
-      <Link to={`/chat/${chat.id}`} className="flex items-center gap-2">
+      <div onClick={() => handleClick()} className="flex items-center gap-2">
         <ItemMedia variant="icon" className="w-10 h-10 rounded-full">
           <UserAvatar
             imageUrl={chat.avatarUrl}
@@ -23,7 +32,7 @@ const ChatListItem = ({ chat }: ChatListItemProps) => {
           <h2>{chat.title}</h2>
           <p>{chat.lastMessage?.content}</p>
         </div>
-      </Link>
+      </div>
     </Item>
   );
 };
