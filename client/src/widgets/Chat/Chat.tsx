@@ -1,8 +1,5 @@
 import { sendMessage, type MessageResponse } from "@/shared/api/chat";
-import {
-  useChatQuery,
-  useInfiniteMessages,
-} from "@/shared/hooks/useChat";
+import { useChatQuery, useInfiniteMessages } from "@/shared/hooks/useChat";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -14,26 +11,25 @@ import { Input } from "@/shared/components/ui/input";
 import { UserAvatar } from "@/shared/components/UserAvatar";
 import { useAuthStore } from "@/shared/store/authStore";
 import MessageList from "@/widgets/Message/MessageList";
-import { useEffect, useState } from "react";
-import { useChatStore } from "@/shared/store/chatStore";
-
-
-const MERCURE_URL =
-  import.meta.env.VITE_MERCURE_URL ?? "http://localhost/.well-known/mercure";
+import { useCallback, useEffect, useState } from "react";
+import { useMercure } from "@/shared/hooks/useMercure";
 
 interface MessagesPageProps {
-  chatId: string
+  chatId: string;
 }
 
-const MessagesPage = ({chatId}: MessagesPageProps) => {
+interface ChatMercureEvent {
+  type: string;
+  message: MessageResponse;
+}
 
+const MessagesPage = ({ chatId }: MessagesPageProps) => {
   const [newMessage, setNewMessage] = useState("");
   const [liveMessages, setLiveMessages] = useState<MessageResponse[]>([]);
   const currentUserId = useAuthStore((state) => state.user?.id);
-  
+
   const { data: chat } = useChatQuery(chatId);
 
-  
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteMessages(chatId);
 
@@ -45,6 +41,29 @@ const MessagesPage = ({chatId}: MessagesPageProps) => {
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
       ) ?? [];
 
+  const handleMercureMessage = useCallback((payload: ChatMercureEvent) => {
+    if (payload.type !== "message_created") return;
+
+    const newMsg = payload.message;
+
+    setLiveMessages((prev) => {
+      if (prev.find((msg) => msg.id === newMsg.id)) {
+        return prev;
+      }
+      return [...prev, newMsg];
+    });
+  }, []);
+
+  useEffect(() => {
+    setLiveMessages([]);
+  }, [chatId]);
+
+  useMercure<ChatMercureEvent>({
+    topic: `https://qynso.local/chats/${chatId}`,
+    onMessage: handleMercureMessage,
+    enable: !!chatId,
+  });
+
   const messages = [...historyMessages, ...liveMessages]
     .filter(
       (msg, index, arr) => arr.findIndex((m) => m.id === msg.id) === index,
@@ -53,43 +72,6 @@ const MessagesPage = ({chatId}: MessagesPageProps) => {
       (a, b) =>
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
     );
-
-  useEffect(() => {
-    if (!chatId) return;
-    
-
-    const topic = `https://qynso.local/chats/${chatId}`;
-    const url = new URL(MERCURE_URL);
-    url.searchParams.append("topic", topic);
-
-    const es = new EventSource(url.toString());
-
-    es.onmessage = (event) => {
-      const data = JSON.parse(event.data) as {
-        type: string;
-        message: MessageResponse;
-      };
-
-      if (data.type !== "message_created") return;
-
-      const newMsg = data.message;
-
-      setLiveMessages((prevMessages) => {
-        if (prevMessages.find((msg) => msg.id === newMsg.id)) {
-            return prevMessages;
-        }
-        return [...prevMessages, newMsg];
-      });
-    };
-
-    es.onerror = (err) => {
-      console.error("Mercure error", err);
-    };
-
-    return () => {
-      es.close();
-    };
-  }, [chatId]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
