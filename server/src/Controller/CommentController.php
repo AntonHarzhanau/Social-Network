@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\DTO\Comment\CreateCommentDTO;
 use App\Entity\Comment;
-use App\Entity\Post;
 use App\Entity\User;
 use App\Service\CommentService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

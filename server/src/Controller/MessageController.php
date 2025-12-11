@@ -7,7 +7,6 @@ use App\DTO\User\UserResponseDTO;
 use App\Entity\Chat;
 use App\Entity\Message;
 use App\Entity\User;
-use App\Repository\ChatRepository;
 use App\Service\ChatNotifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,9 +18,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 #[Route('/api/messages')]
 final class MessageController extends AbstractController
 {
-    public function __construct(
-        private readonly ChatRepository $chatRepository,
-    ) {}
+    public function __construct() {}
     #[Route('/{chat}', methods: ['POST'])]
     public function send(
         Chat $chat,
@@ -37,12 +34,12 @@ final class MessageController extends AbstractController
 
         $data = json_decode($request->getContent(), true);
         $content = $data['content'] ?? null;
-        
+
         if (!$content) {
             return $this->json(['error' => 'Content is required'], 422);
         }
 
-   
+
         $message = new Message();
         $message->setSender($user);
         $message->setContent($content);
@@ -51,10 +48,10 @@ final class MessageController extends AbstractController
         $em->persist($message);
         $em->flush();
 
-        
+
         $notifier->notifyNewMessage($message);
         $message = new MessageResponseDTO(
-            
+
             id: $message->getId(),
             chatId: $chat->getId(),
             sender: new UserResponseDTO(

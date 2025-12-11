@@ -37,7 +37,7 @@ class Post
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\Column(length: 255, enumType: VisibilityEnum::class)]
+    #[ORM\Column(enumType: VisibilityEnum::class)]
     private ?VisibilityEnum $visibility = VisibilityEnum::PUBLIC;
 
     /**

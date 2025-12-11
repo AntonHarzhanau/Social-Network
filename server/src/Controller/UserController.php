@@ -4,9 +4,11 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Factory\User\UserFactory;
-use App\Service\UserService;
+use App\Service\User\FriendshipService;
+use App\Service\User\UserService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
@@ -16,9 +18,7 @@ final class UserController extends AbstractController
     public function __construct(
         private readonly UserService $userService,
         private readonly UserFactory $userFactory,
-    )
-    {
-    }
+    ) {}
 
     #[Route('', name: 'get_users', methods: ['GET'], format: 'json')]
     public function getAll(#[CurrentUser] User $user): JsonResponse
@@ -56,4 +56,7 @@ final class UserController extends AbstractController
         }
         return $this->json(['avatarUrl' => $avatarUrl], JsonResponse::HTTP_OK);
     }
+
+
+
 }

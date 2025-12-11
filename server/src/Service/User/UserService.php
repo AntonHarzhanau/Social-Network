@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\User;
 
 use App\Entity\User;
 use App\Factory\User\UserFactory;
@@ -18,6 +18,13 @@ class UserService
         $data = $this->userRepository->findAllExeptUser($currentUser);
         $usersDTO = array_map(fn($user) => $this->userFactory->toUserResponseDTO($user), $data);
         return $usersDTO;
+    }
+
+    public function getUserById(string $id): ?User
+    {
+        $user = $this->userRepository->find($id);
+        // $this->userFactory->toUserResponseDTO($user);
+        return $user;
     }
 
     // TODO: change string $url to file upload handling

@@ -2,10 +2,9 @@
 
 namespace App\Enum;
 
-enum FrendshipStatusEnum: string
+enum FriendshipStatusEnum: string
 {
     case PENDING = 'pending';
     case ACCEPTED = 'accepted';
     case DECLINED = 'declined';
-    case CANCELED = 'canceled';
 }
