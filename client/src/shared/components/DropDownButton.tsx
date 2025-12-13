@@ -5,16 +5,22 @@ import {
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
 import { Ellipsis } from "lucide-react";
+import { cn } from "../lib/utils";
 
-const DropDownButton = () => {
+interface DropDownButtonProps {
+  className?: string;
+}
+
+const DropDownButton = ({ className }: DropDownButtonProps) => {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger className={cn("", className)}>
         <Ellipsis />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-card p-2 rounded-2xl">
-        <DropdownMenuItem className="hover:bg-muted-foreground text-destructive">Delete</DropdownMenuItem>
-      
+        <DropdownMenuItem className="hover:bg-muted-foreground text-destructive">
+          Delete
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -20,7 +20,7 @@ const ChatListItem = ({ chat }: ChatListItemProps) => {
     }
 
   return (
-    <Item variant="outline" key={chat.id} className="hover:bg-muted border-none" asChild>
+    <Item variant="default" key={chat.id} className="hover:bg-muted p-2" asChild>
       <div onClick={() => handleClick()} className="flex items-center gap-2 min-w-0">
         <ItemMedia variant="icon" className="w-10 h-10 rounded-full shrink-0">
           <UserAvatar

@@ -19,15 +19,15 @@ const ChatPage = () => {
     return <Navigate to="/chats" replace />;
   }
   return (
-    <div className="h-full p-4 flex gap-2">
-      <div className="flex-5 min-w-0">
+    <div className="flex gap-2 p-2">
+      <div className="flex flex-col flex-5 gap-2 min-w-0">
         {urlChatId ? (
           <Chat chatId={urlChatId} />
         ) : (
           <ChatList />
         )}
       </div>
-      <div className="flex-3">
+      <div className="flex-3 h-fit sticky top-14 p-2">
         <Card className="py-2 gap-1">
           {chats.map((chat) => (
             <div key={chat.id} className="flex p-1 hover:bg-muted rounded-2xl">

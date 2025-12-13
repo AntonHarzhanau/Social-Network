@@ -161,8 +161,8 @@ const MessageList = ({
   };
 
   return (
-    <div className="relative h-[400px] w-full border">
-      <div ref={containerRef} className="h-full w-full overflow-y-auto p-4">
+    <div className="relative h-[65vh] w-full ">
+      <div ref={containerRef} className="h-full w-full overflow-y-auto p-0">
         <div ref={topRef} />
         {messages.map((message) => (
           <MessageItem key={message.id} message={message} currentUserId={currentUserId} />

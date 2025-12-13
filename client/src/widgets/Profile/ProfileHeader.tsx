@@ -28,7 +28,7 @@ const ProfileHeader = ({
           className="
         absolute left-4 sm:left-6
         -bottom-4 translate-y-1/2
-        h-20 w-20 sm:h-28 sm:w-28
+        h-32 w-32 sm:h-36 sm:w-36
         rounded-full border-4 shadow-lg
       "
         />
@@ -40,23 +40,21 @@ const ProfileHeader = ({
       flex flex-col sm:flex-row
       justify-between items-start sm:items-center
       gap-3
-      ml-28
-      px-4 sm:px-8
-      pt-12 sm:pt-6 pb-4
+      ml-34 sm:ml-40
+      px-2 sm:px-4
+      pt-8 sm:pt-4 pb-4
     "
       >
         <div className="flex flex-col w-full">
-          <div className="flex justify-between items-center gap-4">
+          <div className="flex justify-between items-center w-full">
             <h1 className="text-2xl font-bold text-secondary-foreground">
               {name}
             </h1>
-            <div className="flex gap-2">
-              <Button size="sm">Edit profile</Button>
-            </div>
+            <Button size="sm" className="">Edit profile</Button>
           </div>
 
           <div className=" text-sm text-muted-foreground">
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-3">
               <Link to="/profile">
                 <Button
                   variant="link"

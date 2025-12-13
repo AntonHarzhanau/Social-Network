@@ -2,7 +2,6 @@ import {
   Card,
   CardAction,
   CardContent,
-  CardHeader,
 } from "@/shared/components/ui/card";
 
 import { UserAvatar } from "@/shared/components/UserAvatar";
@@ -17,7 +16,6 @@ interface MessagesPageProps {
 }
 
 const Chat = ({ chatId }: MessagesPageProps) => {
-  
   const currentUserId = useAuthStore((state) => state.user?.id);
   const chat = useChatStore((s) => s.chats.find((c) => c.id === chatId));
   const { messages, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -28,19 +26,17 @@ const Chat = ({ chatId }: MessagesPageProps) => {
   }
 
   return (
-    <Card className="flex flex-col gap-2 h-full">
-      <CardHeader className="flex items-center gap-3 border-b px-3 py-1">
+    <Card className="flex flex-col gap-2 py-4 px-2">
+      <div className="flex items-center gap-3 p-2 border-b">
         <UserAvatar
           imageUrl={chat?.avatarUrl}
           name={chat?.title ?? "Chat"}
           className="w-12 h-12"
         />
-        <div className="flex flex-col">
-          <h2 className="text-lg font-semibold">{chat?.title ?? "Chat"}</h2>
-        </div>
-      </CardHeader>
+        <h2 className="text-lg font-semibold">{chat?.title ?? "Chat"}</h2>
+      </div>
 
-      <CardContent className="flex flex-col gap-2 p-2">
+      <CardContent className="flex flex-col gap-2 p-0">
         {isFetchingNextPage && (
           <div className="text-center text-xs text-muted-foreground">
             Loading messages…
@@ -58,7 +54,7 @@ const Chat = ({ chatId }: MessagesPageProps) => {
         />
       </CardContent>
 
-      <CardAction className="w-full">
+      <CardAction className="w-full shadow-t-md pt-2 border-t">
         <NewMessageForm chatId={chatId} />
       </CardAction>
     </Card>

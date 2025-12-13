@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import ChatListItem from "./ChatListItem";
 import { useInfiniteChats } from "@/shared/hooks/useChat";
+import { Card } from "@/shared/components/ui/card";
 
 const ChatList = () => {
   const { data, fetchNextPage, hasNextPage, status } =
@@ -41,12 +42,12 @@ const ChatList = () => {
   const chats = data?.pages.flat() ?? [];
 
   return (
-    <div className="flex flex-col">
+    <Card className="p-1 gap-0 h-full overflow-y-auto">
       {chats.map((chat) => (
         <ChatListItem key={chat.id} chat={chat} />
       ))}
       <div ref={loadMoreRef} />
-    </div>
+    </Card>
   );
 };
 
