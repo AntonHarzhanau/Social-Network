@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Entity;
+namespace App\Modules\SocialGraph\Domain\Entity;
 
+use App\Entity\User;
 use App\Enum\FriendshipStatusEnum;
-use App\Repository\FriendshipRepository;
+use App\Modules\SocialGraph\Domain\Repository\FriendshipRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;

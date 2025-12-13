@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repository;
+namespace App\Modules\SocialGraph\Domain\Repository;
 
-use App\Entity\Friendship;
+use App\Modules\SocialGraph\Domain\Entity\Friendship;
 use App\Entity\User;
 use App\Enum\FriendshipStatusEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;

@@ -1,18 +1,15 @@
 <?php
 
-namespace App\Controller;
+namespace App\Modules\SocialGraph\Infrastructure\Controller;
 
 use App\Entity\User;
-use App\Enum\FriendshipStatusEnum;
 use App\Enum\FriendshipsTypeEnum;
 use App\Factory\User\UserFactory;
-use App\Service\User\FriendshipService;
+use App\Modules\SocialGraph\Application\FriendshipService;
 use App\Service\User\UserService;
-use Lcobucci\JWT\Signer\Rsa;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Service\User;
+namespace App\Modules\SocialGraph\Application;
 
-use App\Entity\Friendship;
+use App\Modules\SocialGraph\Domain\Entity\Friendship;
 use App\Entity\User;
 use App\Enum\FriendshipStatusEnum;
 use App\Enum\FriendshipsTypeEnum;
-use App\Repository\FriendshipRepository;
+use App\Modules\SocialGraph\Domain\Repository\FriendshipRepository;
 
 class FriendshipService
 {
