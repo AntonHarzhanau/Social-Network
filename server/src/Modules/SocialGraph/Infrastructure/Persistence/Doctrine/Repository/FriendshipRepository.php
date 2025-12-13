@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Modules\SocialGraph\Domain\Repository;
+namespace App\Modules\SocialGraph\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Modules\SocialGraph\Domain\Entity\Friendship;
 use App\Entity\User;
 use App\Enum\FriendshipStatusEnum;
+use App\Modules\SocialGraph\Domain\Repository\FriendshipRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<Friendship>
  */
-class FriendshipRepository extends ServiceEntityRepository
+class FriendshipRepository extends ServiceEntityRepository implements FriendshipRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -51,6 +52,9 @@ class FriendshipRepository extends ServiceEntityRepository
         return $qb->getQuery()->getOneOrNullResult();
     }
 
+    /**
+     * @return Friendship[]
+     */
     public function findUserFriends(User $user): array
     {
         $qb = $this->createQueryBuilder('f')
@@ -62,7 +66,10 @@ class FriendshipRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findReceivedRequests(User $user): array
+    /**
+     * @return Friendship[]
+     */
+    public function findReceivedFriendRequests(User $user): array
     {
         $qb = $this->createQueryBuilder('f')
             ->leftJoin('f.requester', 'r')
@@ -75,7 +82,10 @@ class FriendshipRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findSentRequests(User $user): array
+    /**
+     * @return Friendship[]
+     */
+    public function findSentFriendRequests(User $user): array
     {
         $qb = $this->createQueryBuilder('f')
             ->leftJoin('f.addressee', 'a')
