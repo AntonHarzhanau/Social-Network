@@ -56,7 +56,4 @@ final class UserController extends AbstractController
         }
         return $this->json(['avatarUrl' => $avatarUrl], JsonResponse::HTTP_OK);
     }
-
-
-
 }

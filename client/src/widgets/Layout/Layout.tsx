@@ -13,13 +13,13 @@ const Layout = () => {
     })),
   );
   return (
-    <div className="flex flex-col ">
+    <div className="flex flex-col overflow-visible">
       <Header user={user} isLoading={isLoading} logout={logout} />
       <div className="flex max-w-[1100px] w-full h-full mx-auto gap-2">
         <div className="flex-1">
           <Menu user={user} />
         </div>
-        <main className="flex-6 py-2 px-4 h-full">
+        <main className="flex-6 py-2 px-4 h-full min-w-0">
           <Outlet />
         </main>
       </div>

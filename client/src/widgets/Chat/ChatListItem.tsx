@@ -1,4 +1,5 @@
 import type { ChatResponse } from "@/shared/api/chat";
+import DropDownButton from "@/shared/components/DropDownButton";
 import { Item, ItemMedia } from "@/shared/components/ui/item";
 import { UserAvatar } from "@/shared/components/UserAvatar";
 import { useChatStore } from "@/shared/store/chatStore";
@@ -19,18 +20,21 @@ const ChatListItem = ({ chat }: ChatListItemProps) => {
     }
 
   return (
-    <Item variant="outline" key={chat.id} asChild>
-      <div onClick={() => handleClick()} className="flex items-center gap-2">
-        <ItemMedia variant="icon" className="w-10 h-10 rounded-full">
+    <Item variant="outline" key={chat.id} className="hover:bg-muted border-none" asChild>
+      <div onClick={() => handleClick()} className="flex items-center gap-2 min-w-0">
+        <ItemMedia variant="icon" className="w-10 h-10 rounded-full shrink-0">
           <UserAvatar
             imageUrl={chat.avatarUrl}
             alt={chat.title}
             name={chat.title}
           />
         </ItemMedia>
-        <div>
-          <h2>{chat.title}</h2>
-          <p>{chat.lastMessage?.content}</p>
+        <div className="min-w-0 flex-1">
+         <div className="flex justify-between">
+             <h2 className="truncate">{chat.title}</h2>
+            <DropDownButton/>
+         </div>
+          <p className="text-sm text-muted-foreground truncate">{chat.lastMessage?.content}</p>
         </div>
       </div>
     </Item>

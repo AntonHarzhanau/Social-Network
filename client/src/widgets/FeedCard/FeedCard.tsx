@@ -28,7 +28,7 @@ const FeedCard = ({ post }: FeedCardProps) => {
 
       <CardContent className="w-full px-2">
         <FeedCardMedia media={post.media} />
-        <CardDescription className="whitespace-pre-wrap text-sm mt-2">
+        <CardDescription className="whitespace-pre-wrap break-all wrap-anywhere min-w-0 max-w-full text-sm mt-2">
           {post.content && (
             <ExpandableDescription content={post.content} limit={200} />
           )}

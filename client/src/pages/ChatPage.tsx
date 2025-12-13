@@ -20,7 +20,7 @@ const ChatPage = () => {
   }
   return (
     <div className="h-full p-4 flex gap-2">
-      <div className="flex-5">
+      <div className="flex-5 min-w-0">
         {urlChatId ? (
           <Chat chatId={urlChatId} />
         ) : (
@@ -28,10 +28,10 @@ const ChatPage = () => {
         )}
       </div>
       <div className="flex-3">
-        <Card>
+        <Card className="py-2 gap-1">
           {chats.map((chat) => (
-            <div key={chat.id} className="flex justify-between p-2">
-              <Link to={`/chats/${chat.id}`} className={cn("flex gap-2")}>
+            <div key={chat.id} className="flex p-1 hover:bg-muted rounded-2xl">
+              <Link to={`/chats/${chat.id}`} className={cn("flex gap-2 items-center  rounded-md w-full")}>
                 <UserAvatar
                   imageUrl={chat.avatarUrl}
                   name={chat.title}
@@ -39,8 +39,8 @@ const ChatPage = () => {
                 />
                 <p>{chat.title}</p>
               </Link>
-              <Button variant="ghost" onClick={() => removeChat(chat.id)}>
-                <X />
+              <Button variant="ghost" onClick={() => removeChat(chat.id)} className="">
+                <X className="w-4 h-4" />
               </Button>
             </div>
           ))}

@@ -20,10 +20,10 @@ const ExpandableDescription = ({
   };
   
   return (
-    <div className={cn("", classname)}>
+    <div className={cn("min-w-0 max-w-full", classname)}>
       {isLong ? (
-        <div>
-          <div className="text-accent-foreground mb-2">
+        <div className="min-w-0 max-w-full">
+        <div className="text-accent-foreground mb-2 ">
             {!open ? content.slice(0, limit) + "..." : content}
           </div>
           <Button
@@ -35,7 +35,7 @@ const ExpandableDescription = ({
           </Button>
         </div>
       ) : (
-        <p className="text-accent-foreground whitespace-pre-wrap wrap-break-words wrap-anywhere">
+        <p className="">
           {content}
         </p>
       )}
