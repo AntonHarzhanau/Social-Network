@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Modules\Identity\Domain\Entity\User;
 use App\Repository\CommentRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

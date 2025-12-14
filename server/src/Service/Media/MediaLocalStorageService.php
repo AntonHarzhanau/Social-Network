@@ -3,8 +3,8 @@
 namespace App\Service\Media;
 
 use App\Entity\MediaAsset;
-use App\Entity\User;
 use App\Enum\FileTypeEnum;
+use App\Modules\Identity\Domain\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\File\UploadedFile;

@@ -2,8 +2,8 @@
 
 namespace App\Modules\SocialGraph\Domain\Repository;
 
-use App\Entity\User;
 use App\Enum\FriendshipStatusEnum;
+use App\Modules\Identity\Domain\Entity\User;
 use App\Modules\SocialGraph\Domain\Entity\Friendship;
 
 interface FriendshipRepositoryInterface

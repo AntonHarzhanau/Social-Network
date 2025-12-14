@@ -1,16 +1,17 @@
 <?php
 
-namespace App\Repository;
+namespace App\Modules\Chat\Infrastructure\Persistence\Doctrine\Repository;
 
-use App\Entity\DirectChatIndex;
-use App\Entity\User;
+use App\Modules\Chat\Domain\Entity\DirectChatIndex;
+use App\Modules\Chat\Domain\Repository\DirectChatIndexRepositoryInterface;
+use App\Modules\Identity\Domain\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<DirectChatIndex>
  */
-class DirectChatIndexRepository extends ServiceEntityRepository
+class DirectChatIndexRepository extends ServiceEntityRepository implements DirectChatIndexRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {

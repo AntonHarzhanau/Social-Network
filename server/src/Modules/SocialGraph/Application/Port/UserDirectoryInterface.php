@@ -2,7 +2,7 @@
 
 namespace App\Modules\SocialGraph\Application\Port;
 
-use App\Entity\User;
+use App\Modules\Identity\Domain\Entity\User;
 use Symfony\Component\Uid\Uuid;
 
 interface UserDirectoryInterface

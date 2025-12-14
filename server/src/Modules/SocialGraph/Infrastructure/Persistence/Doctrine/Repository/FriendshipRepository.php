@@ -3,8 +3,8 @@
 namespace App\Modules\SocialGraph\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Modules\SocialGraph\Domain\Entity\Friendship;
-use App\Entity\User;
 use App\Enum\FriendshipStatusEnum;
+use App\Modules\Identity\Domain\Entity\User;
 use App\Modules\SocialGraph\Domain\Repository\FriendshipRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Controller;
+namespace App\Modules\Chat\Infrastructure\Controller;
 
 use App\DTO\Message\MessageResponseDTO;
 use App\DTO\User\UserResponseDTO;
-use App\Entity\Chat;
-use App\Entity\Message;
-use App\Entity\User;
+use App\Modules\Chat\Domain\Entity\Chat;
+use App\Modules\Chat\Domain\Entity\Message;
+use App\Modules\Identity\Domain\Entity\User;
 use App\Service\ChatNotifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

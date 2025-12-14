@@ -3,8 +3,8 @@
 namespace App\Controller;
 
 use App\DTO\Auth\RegisterUserDTO;
-use App\Entity\User;
 use App\Factory\User\UserFactory;
+use App\Modules\Identity\Domain\Entity\User;
 use App\Service\AuthService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;

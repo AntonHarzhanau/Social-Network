@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\DTO\Comment\CreateCommentDTO;
 use App\Entity\Comment;
-use App\Entity\User;
+use App\Modules\Identity\Domain\Entity\User;
 use App\Service\CommentService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;

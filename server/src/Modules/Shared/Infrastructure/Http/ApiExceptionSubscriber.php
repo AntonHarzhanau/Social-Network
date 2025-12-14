@@ -10,9 +10,12 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 final class ApiExceptionSubscriber implements EventSubscriberInterface
 {
+    public function __construct(private readonly KernelInterface $kernel,) {}
+
     public static function getSubscribedEvents(): array
     {
         return [
@@ -41,9 +44,7 @@ final class ApiExceptionSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $message = $event->getKernel()->isDebug()
-            ? $error->getMessage()
-            : 'Internal Server Error';
+        $message = $this->kernel->isDebug() ? $error->getMessage() : 'Internal Server Error';
 
         $event->setResponse($this->jsonError($message, JsonResponse::HTTP_INTERNAL_SERVER_ERROR));
     }

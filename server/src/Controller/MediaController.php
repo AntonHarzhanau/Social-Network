@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\MediaAsset;
-use App\Entity\User;
+use App\Modules\Identity\Domain\Entity\User;
 use App\Service\Media\MediaStorageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

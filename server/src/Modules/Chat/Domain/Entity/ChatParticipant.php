@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Entity;
+namespace App\Modules\Chat\Domain\Entity;
 
 use App\Enum\ChatParticipantRoleEnum;
-use App\Repository\ChatParticipantRepository;
+use App\Modules\Identity\Domain\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: ChatParticipantRepository::class)]
+#[ORM\Entity]
 class ChatParticipant
 {
     #[ORM\Id]

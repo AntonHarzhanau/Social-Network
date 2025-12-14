@@ -2,9 +2,9 @@
 
 namespace App\Modules\SocialGraph\Infrastructure\Controller;
 
-use App\Entity\User;
 use App\Enum\FriendshipsTypeEnum;
 use App\Factory\User\UserFactory;
+use App\Modules\Identity\Domain\Entity\User;
 use App\Modules\SocialGraph\Application\Action\AcceptFriendRequestAction;
 use App\Modules\SocialGraph\Application\Action\CancelFriendRequestAction;
 use App\Modules\SocialGraph\Application\Action\DeclineFriendRequestAction;

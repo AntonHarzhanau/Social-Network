@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Service;
+namespace App\Modules\Chat\Application;
 
-use App\Entity\Chat;
-use App\Entity\ChatParticipant;
-use App\Entity\DirectChatIndex;
-use App\Entity\User;
 use App\Enum\ChatParticipantRoleEnum;
 use App\Enum\ChatTypeEnum;
-use App\Repository\DirectChatIndexRepository;
+use App\Modules\Chat\Domain\Entity\Chat;
+use App\Modules\Chat\Domain\Entity\ChatParticipant;
+use App\Modules\Chat\Domain\Entity\DirectChatIndex;
+use App\Modules\Chat\Domain\Repository\DirectChatIndexRepositoryInterface;
+use App\Modules\Identity\Domain\Entity\User;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -16,7 +16,7 @@ class DirectChatService
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
-        private readonly DirectChatIndexRepository $directChatIndexRepository,
+        private readonly DirectChatIndexRepositoryInterface $directChatIndexRepository,
     ) {}
 
 

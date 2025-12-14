@@ -1,14 +1,12 @@
 <?php
 
-namespace App\Controller;
+namespace App\Modules\Identity\Infrastructure\Controller;
 
-use App\Entity\User;
 use App\Factory\User\UserFactory;
-use App\Service\User\FriendshipService;
-use App\Service\User\UserService;
+use App\Modules\Identity\Application\UserService;
+use App\Modules\Identity\Domain\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 

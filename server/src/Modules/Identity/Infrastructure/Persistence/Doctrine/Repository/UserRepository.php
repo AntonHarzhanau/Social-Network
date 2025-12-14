@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Repository;
+namespace App\Modules\Identity\Infrastructure\Persistence\Doctrine\Repository;
 
-use App\Entity\User;
+use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\Identity\Domain\Repository\UserRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -12,7 +13,7 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 /**
  * @extends ServiceEntityRepository<User>
  */
-class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
+class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface, UserRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -33,6 +34,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
+    public function findById(string $id): ?User
+    {
+        return $this->find($id);
+    }
 
     public function findAllExeptUser(User $excludedUser): array
     {

@@ -2,7 +2,7 @@
 
 namespace App\DTO\Chat;
 
-use App\Entity\User;
+use App\Modules\Identity\Domain\Entity\User;
 
 final readonly class CreateDirectChatDTO
 {

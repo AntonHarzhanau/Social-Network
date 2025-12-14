@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Service\User;
+namespace App\Modules\Identity\Application;
 
-use App\Entity\User;
+
 use App\Factory\User\UserFactory;
-use App\Repository\UserRepository;
+use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\Identity\Infrastructure\Persistence\Doctrine\Repository\UserRepository;
 
 class UserService
 {
     public function __construct(
         private readonly UserRepository $userRepository,
-        private readonly UserFactory $userFactory,
     ) {}
 
     public function getAllUsersExemptCurrentUser($currentUser)

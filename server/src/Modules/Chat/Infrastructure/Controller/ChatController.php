@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Controller;
+namespace App\Modules\Chat\Infrastructure\Controller;
 
-use App\Entity\Chat;
-use App\Entity\ChatParticipant;
-use App\Entity\User;
+use App\Modules\Chat\Domain\Entity\Chat;
+use App\Modules\Chat\Domain\Entity\ChatParticipant;
 use App\Factory\Chat\ChatFactory;
-use App\Repository\UserRepository;
-use App\Service\ChatService;
-use App\Service\DirectChatService;
-use App\Service\MessageService;
+use App\Modules\Chat\Application\ChatService;
+use App\Modules\Chat\Application\DirectChatService;
+use App\Modules\Chat\Application\MessageService;
+use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\Identity\Infrastructure\Persistence\Doctrine\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;

@@ -3,8 +3,8 @@
 namespace App\Service;
 
 use App\DTO\Auth\RegisterUserDTO;
-use App\Entity\User;
-use App\Repository\UserRepository;
+use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\Identity\Infrastructure\Persistence\Doctrine\Repository\UserRepository;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 

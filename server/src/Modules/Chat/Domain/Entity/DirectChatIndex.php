@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Entity;
+namespace App\Modules\Chat\Domain\Entity;
 
-use App\Repository\DirectChatIndexRepository;
+use App\Modules\Identity\Domain\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: DirectChatIndexRepository::class)]
+#[ORM\Entity]
 #[ORM\UniqueConstraint(
     name: 'unique_user_pair',
     columns: ['user1_id', 'user2_id']

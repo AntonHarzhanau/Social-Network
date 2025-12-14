@@ -2,7 +2,6 @@
 
 namespace App\Modules\SocialGraph\Application\Action;
 
-use App\Entity\User;
 use App\Modules\SocialGraph\Application\Port\UserDirectoryInterface;
 use App\Modules\SocialGraph\Domain\Entity\Friendship;
 use App\Modules\SocialGraph\Domain\Repository\FriendshipRepositoryInterface;

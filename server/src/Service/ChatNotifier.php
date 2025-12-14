@@ -4,7 +4,7 @@ namespace App\Service;
 
 use App\DTO\Message\MessageResponseDTO;
 use App\DTO\User\UserResponseDTO;
-use App\Entity\Message;
+use App\Modules\Chat\Domain\Entity\Message;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
 

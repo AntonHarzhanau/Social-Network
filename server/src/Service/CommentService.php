@@ -5,8 +5,8 @@ namespace App\Service;
 use App\DTO\Comment\CreateCommentDTO;
 use App\Entity\Comment;
 use App\Entity\Post;
-use App\Entity\User;
 use App\Factory\Comment\CommentFactory;
+use App\Modules\Identity\Domain\Entity\User;
 use App\Repository\CommentRepository;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 

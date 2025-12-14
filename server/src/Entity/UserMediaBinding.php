@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Modules\Identity\Domain\Entity\User;
 use App\Repository\UserMediaBindingRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;

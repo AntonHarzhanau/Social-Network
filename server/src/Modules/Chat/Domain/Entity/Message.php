@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Entity;
+namespace App\Modules\Chat\Domain\Entity;
 
-use App\Repository\MessageRepository;
+use App\Modules\Identity\Domain\Entity\User;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: MessageRepository::class)]
+#[ORM\Entity]
 class Message
 {
     #[ORM\Id]

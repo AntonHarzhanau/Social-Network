@@ -5,9 +5,9 @@ namespace App\Factory\Chat;
 use App\DTO\Chat\ChatResponseDTO;
 use App\DTO\Message\MessageResponseDTO;
 use App\DTO\User\UserResponseDTO;
-use App\Entity\Chat;
-use App\Entity\User;
 use App\Enum\ChatTypeEnum;
+use App\Modules\Chat\Domain\Entity\Chat;
+use App\Modules\Identity\Domain\Entity\User;
 
 class ChatFactory
 {

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Enum\FileTypeEnum;
+use App\Modules\Identity\Domain\Entity\User;
 use App\Repository\MediaAssetRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;

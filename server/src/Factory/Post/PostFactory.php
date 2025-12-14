@@ -6,9 +6,9 @@ use App\DTO\Post\CreatePostDTO;
 use App\DTO\Post\PostFeedItemDTO;
 use App\Entity\Post;
 use App\Entity\PostMediaBinding;
-use App\Entity\User;
 use App\Factory\Media\MediaFactory;
 use App\Factory\User\UserFactory;
+use App\Modules\Identity\Domain\Entity\User;
 use App\Service\Media\MediaUrlGeneratorInterface;
 
 class PostFactory

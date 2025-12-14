@@ -1,24 +1,24 @@
 <?php
 
-namespace App\Service;
+namespace App\Modules\Chat\Application;
 
 use App\DTO\Message\MessageResponseDTO;
 use App\DTO\User\UserResponseDTO;
-use App\Entity\Chat;
-use App\Entity\User;
 use App\Factory\Chat\ChatFactory;
-use App\Repository\ChatParticipantRepository;
-use App\Repository\ChatRepository;
-use App\Repository\MessageRepository;
+use App\Modules\Chat\Domain\Entity\Chat;
+use App\Modules\Chat\Domain\Repository\ChatParticipantRepositoryInterface;
+use App\Modules\Chat\Domain\Repository\ChatRepositoryInterface;
+use App\Modules\Chat\Domain\Repository\MessageRepositoryInterface;
+use App\Modules\Identity\Domain\Entity\User;
 use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 
 class ChatService
 {
     public function __construct(
-        private readonly ChatRepository $chatRepository,
+        private readonly ChatRepositoryInterface $chatRepository,
         private readonly ChatFactory $chatFactory,
-        private readonly ChatParticipantRepository $chatParticipantRepository,
-        private readonly MessageRepository $messageRepository,
+        private readonly ChatParticipantRepositoryInterface $chatParticipantRepository,
+        private readonly MessageRepositoryInterface $messageRepository,
     ) {}
 
     public function getChatList(User $currentUser, int $page = 1, int $limit = 20): array

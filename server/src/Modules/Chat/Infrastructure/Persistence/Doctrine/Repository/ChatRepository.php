@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Repository;
+namespace App\Modules\Chat\Infrastructure\Persistence\Doctrine\Repository;
 
-use App\Entity\Chat;
-use App\Entity\User;
-use App\Enum\ChatTypeEnum;
+use App\Modules\Chat\Domain\Entity\Chat;
+use App\Modules\Chat\Domain\Repository\ChatRepositoryInterface;
+use App\Modules\Identity\Domain\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 use Doctrine\Persistence\ManagerRegistry;
@@ -12,7 +12,7 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @extends ServiceEntityRepository<Chat>
  */
-class ChatRepository extends ServiceEntityRepository
+class ChatRepository extends ServiceEntityRepository implements ChatRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {

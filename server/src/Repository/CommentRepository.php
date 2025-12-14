@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Comment;
 use App\Entity\Post;
-use App\Entity\User;
+use App\Modules\Identity\Domain\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

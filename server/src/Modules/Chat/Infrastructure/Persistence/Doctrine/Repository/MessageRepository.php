@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Repository;
+namespace App\Modules\Chat\Infrastructure\Persistence\Doctrine\Repository;
 
-use App\Entity\Chat;
-use App\Entity\Message;
-use App\Entity\User;
+use App\Modules\Chat\Domain\Entity\Chat;
+use App\Modules\Chat\Domain\Entity\Message;
+use App\Modules\Chat\Domain\Repository\MessageRepositoryInterface;
+use App\Modules\Identity\Domain\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Schema\Exception\NotImplemented;
 use Doctrine\Persistence\ManagerRegistry;
@@ -12,7 +13,7 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @extends ServiceEntityRepository<Message>
  */
-class MessageRepository extends ServiceEntityRepository
+class MessageRepository extends ServiceEntityRepository implements MessageRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {

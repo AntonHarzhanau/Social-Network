@@ -1,8 +1,11 @@
 <?php
 
-namespace App\Entity;
+namespace App\Modules\Identity\Domain\Entity;
 
-use App\Repository\UserRepository;
+use App\Entity\MediaAsset;
+use App\Entity\Post;
+use App\Entity\UserMediaBinding;
+use App\Modules\Chat\Domain\Entity\ChatParticipant;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -12,7 +15,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Entity]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -355,22 +358,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->media;
     }
 
-    public function addMedium(MediaAsset $medium): static
+    public function addMedia(MediaAsset $media): static
     {
-        if (!$this->media->contains($medium)) {
-            $this->media->add($medium);
-            $medium->setOwner($this);
+        if (!$this->media->contains($media)) {
+            $this->media->add($media);
+            $media->setOwner($this);
         }
 
         return $this;
     }
 
-    public function removeMedium(MediaAsset $medium): static
+    public function removeMedia(MediaAsset $media): static
     {
-        if ($this->media->removeElement($medium)) {
+        if ($this->media->removeElement($media)) {
             // set the owning side to null (unless already changed)
-            if ($medium->getOwner() === $this) {
-                $medium->setOwner(null);
+            if ($media->getOwner() === $this) {
+                $media->setOwner(null);
             }
         }
 

@@ -2,9 +2,9 @@
 
 namespace App\Modules\SocialGraph\Domain\Entity;
 
-use App\Entity\User;
+
 use App\Enum\FriendshipStatusEnum;
-use App\Modules\SocialGraph\Infrastructure\Persistence\Doctrine\Repository\FriendshipRepository;
+use App\Modules\Identity\Domain\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
@@ -14,7 +14,7 @@ use Symfony\Component\Uid\Uuid;
     name: 'unique_friendship_request',
     columns: ['requester_id', 'addressee_id']
 )]
-#[ORM\Entity(repositoryClass: FriendshipRepository::class)]
+#[ORM\Entity]
 class Friendship
 {
     #[ORM\Id]
