@@ -38,7 +38,7 @@ const FeedCardMedia = ({ media }: FeedCardMediaProps) => {
               ratio={4 / 5}
               className="flex bg-muted"
             >
-              <img src={media.url} alt="" className="object-cover"/>
+              <img src={media.url} alt="" className="object-cover w-full"/>
             </AspectRatio>
           </CarouselItem>
         ))}

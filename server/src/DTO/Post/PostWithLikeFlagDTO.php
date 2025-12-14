@@ -2,7 +2,7 @@
 
 namespace App\DTO\Post;
 
-use App\Entity\Post;
+use App\Modules\Feed\Domain\Entity\Post;
 
 final class PostWithLikeFlagDTO
 {

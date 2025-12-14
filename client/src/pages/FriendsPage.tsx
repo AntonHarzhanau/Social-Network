@@ -1,5 +1,5 @@
 import type { Me } from "@/shared/api/auth";
-import { fetchFriends } from "@/shared/api/friends";
+import { fetchFriends, fetchFriendsRequest } from "@/shared/api/friends";
 import { fetchUsers } from "@/shared/api/user";
 import Aside from "@/shared/components/Aside";
 import MainSectionLayout from "@/shared/components/MainSectionLayout";
@@ -12,7 +12,7 @@ const FriendsPage = () => {
 
   useEffect(() => {
     const loadFriends = async () => {
-      const data = await fetchFriends(filter);
+      const data = await fetchFriends();
       setUsers(data);
     };
     const loadUsers = async () => {
@@ -20,9 +20,18 @@ const FriendsPage = () => {
       setUsers(data);
     };
 
+    const loadFriendsRequests = async () => {
+      const data = await fetchFriendsRequest(filter as 'sent' | 'received');
+      setUsers(data);
+    }
+
     if (filter === "all") {
       loadUsers();
-    } else {
+    } 
+    else if (filter === "sent" || filter === "received") {
+      loadFriendsRequests();
+    }
+    else {
       loadFriends();
     }
   }, [filter]);

@@ -10,6 +10,7 @@ use App\Modules\Identity\Infrastructure\Persistence\Doctrine\Repository\UserRepo
 class UserService
 {
     public function __construct(
+        private readonly UserFactory $userFactory,
         private readonly UserRepository $userRepository,
     ) {}
 

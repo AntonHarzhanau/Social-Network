@@ -3,7 +3,7 @@
 namespace App\Factory\Media;
 
 use App\DTO\Media\MediaResponseDTO;
-use App\Entity\MediaAsset;
+use App\Modules\Media\Domain\Entity\MediaAsset;
 
 class MediaFactory
 {

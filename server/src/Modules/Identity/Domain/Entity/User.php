@@ -2,10 +2,10 @@
 
 namespace App\Modules\Identity\Domain\Entity;
 
-use App\Entity\MediaAsset;
-use App\Entity\Post;
-use App\Entity\UserMediaBinding;
 use App\Modules\Chat\Domain\Entity\ChatParticipant;
+use App\Modules\Feed\Domain\Entity\Post;
+use App\Modules\Media\Domain\Entity\MediaAsset;
+use App\Modules\Media\Domain\Entity\UserMediaBinding;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;

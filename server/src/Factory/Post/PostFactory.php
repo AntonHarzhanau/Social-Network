@@ -4,12 +4,12 @@ namespace App\Factory\Post;
 
 use App\DTO\Post\CreatePostDTO;
 use App\DTO\Post\PostFeedItemDTO;
-use App\Entity\Post;
-use App\Entity\PostMediaBinding;
 use App\Factory\Media\MediaFactory;
 use App\Factory\User\UserFactory;
+use App\Modules\Feed\Domain\Entity\Post;
 use App\Modules\Identity\Domain\Entity\User;
-use App\Service\Media\MediaUrlGeneratorInterface;
+use App\Modules\Media\Application\MediaUrlGeneratorInterface;
+use App\Modules\Media\Domain\Entity\PostMediaBinding;
 
 class PostFactory
 {
