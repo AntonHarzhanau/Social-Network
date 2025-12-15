@@ -17,7 +17,6 @@ final class UpdateProfileAction
         ?string $coverUrl = null,
         ?string $maritalStatus = null,
     ): void {
-        // Частичное обновление: меняем только то, что пришло != null
         if ($username !== null) $user->setUsername($username);
         if ($location !== null) $user->setLocation($location);
         if ($bio !== null) $user->setBio($bio);
