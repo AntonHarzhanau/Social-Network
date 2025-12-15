@@ -12,4 +12,6 @@ interface MessageRepositoryInterface
 
     public function getUnreadMessageCountForUserByChats(User $user, array $chatsIds): array;
 
+    public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
+
 }

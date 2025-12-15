@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Modules\Shared\Infrastructure;
 
 use App\DTO\Message\MessageResponseDTO;
 use App\DTO\User\UserResponseDTO;

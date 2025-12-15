@@ -6,7 +6,6 @@ use App\Modules\Identity\Domain\Entity\User;
 
 interface ChatRepositoryInterface
 {
-    
     public function findUserChatsWithLastMessage(
         User $user,
         int $page = 1,
