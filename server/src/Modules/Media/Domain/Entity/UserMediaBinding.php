@@ -3,12 +3,11 @@
 namespace App\Modules\Media\Domain\Entity;
 
 use App\Modules\Identity\Domain\Entity\User;
-use App\Repository\UserMediaBindingRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: UserMediaBindingRepository::class)]
+#[ORM\Entity]
 class UserMediaBinding
 {
     #[ORM\Id]
@@ -17,12 +16,12 @@ class UserMediaBinding
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'bindedMedia')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'owner_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?User $owner = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: MediaAsset::class)]
+    #[ORM\JoinColumn(name: 'media_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?MediaAsset $media = null;
 
     #[ORM\Column]

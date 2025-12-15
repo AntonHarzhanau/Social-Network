@@ -4,7 +4,6 @@ namespace App\Modules\Feed\Domain\Entity;
 
 use App\Enum\VisibilityEnum;
 use App\Modules\Comment\Domain\Entity\Comment;
-use App\Modules\Feed\Infrastructure\Persistence\Doctrine\Repository\PostRepository;
 use App\Modules\Identity\Domain\Entity\User;
 use App\Modules\Media\Domain\Entity\PostMediaBinding;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -14,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: PostRepository::class)]
+#[ORM\Entity]
 #[ORM\HasLifecycleCallbacks]
 class Post
 {
@@ -52,9 +51,12 @@ class Post
      * @var Collection<int, User>
      */
     #[ORM\ManyToMany(targetEntity: User::class)]
+    #[ORM\JoinTable(name: 'post_likes')]
+    #[ORM\JoinColumn(name: 'post_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'user_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
     private Collection $likeBy;
 
-    #[ORM\ManyToOne(inversedBy: 'posts')]
+    #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $author = null;
 
@@ -64,7 +66,7 @@ class Post
     #[ORM\OneToMany(
         targetEntity: PostMediaBinding::class,
         cascade: ['persist'],
-        mappedBy: 'post', 
+        mappedBy: 'post',
         orphanRemoval: true
     )]
     private Collection $bindedMedia;

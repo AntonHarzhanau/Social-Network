@@ -21,8 +21,8 @@ class ChatParticipant
     #[ORM\JoinColumn(nullable: false)]
     private ?Chat $chat = null;
 
-    #[ORM\ManyToOne(inversedBy: 'chats')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?User $user = null;
 
     #[ORM\Column(length: 255, enumType: ChatParticipantRoleEnum::class)]
@@ -37,7 +37,8 @@ class ChatParticipant
     #[ORM\Column]
     private ?\DateTimeImmutable $joinedAt = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(targetEntity: Message::class)]
+    #[ORM\JoinColumn(name: 'last_read_message_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?Message $lastReadMessage = null;
 
     public function __construct()

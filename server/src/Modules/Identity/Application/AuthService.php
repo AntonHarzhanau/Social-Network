@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Auth\Application;
+namespace App\Modules\Identity\Application;
 
 use App\DTO\Auth\RegisterUserDTO;
 use App\Modules\Identity\Domain\Entity\User;
@@ -13,8 +13,7 @@ class AuthService
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
-    )
-    {}
+    ) {}
 
     public function register(RegisterUserDTO $dto): void
     {
@@ -32,5 +31,4 @@ class AuthService
         $user->setDateOfBirth(new \DateTimeImmutable($dto->dateOfBirth));
         $this->userRepository->save($user);
     }
-
 }

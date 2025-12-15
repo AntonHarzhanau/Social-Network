@@ -2,12 +2,6 @@
 
 namespace App\Modules\Identity\Domain\Entity;
 
-use App\Modules\Chat\Domain\Entity\ChatParticipant;
-use App\Modules\Feed\Domain\Entity\Post;
-use App\Modules\Media\Domain\Entity\MediaAsset;
-use App\Modules\Media\Domain\Entity\UserMediaBinding;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -18,6 +12,7 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Entity]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_SLUG', fields: ['slug'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -74,37 +69,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $emailVerifiedAt = null;
 
-    /**
-     * @var Collection<int, Post>
-     */
-    #[ORM\OneToMany(targetEntity: Post::class, mappedBy: 'author', orphanRemoval: true)]
-    private Collection $posts;
-
-    /**
-     * @var Collection<int, MediaAsset>
-     */
-    #[ORM\OneToMany(targetEntity: MediaAsset::class, mappedBy: 'owner')]
-    private Collection $media;
-
-    /**
-     * @var Collection<int, UserMediaBinding>
-     */
-    #[ORM\OneToMany(targetEntity: UserMediaBinding::class, mappedBy: 'owner', orphanRemoval: true)]
-    private Collection $bindedMedia;
-
-    /**
-     * @var Collection<int, ChatParticipant>
-     */
-    #[ORM\OneToMany(targetEntity: ChatParticipant::class, mappedBy: 'user', orphanRemoval: true)]
-    private Collection $chats;
-
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
-        $this->posts = new ArrayCollection();
-        $this->media = new ArrayCollection();
-        $this->bindedMedia = new ArrayCollection();
-        $this->chats = new ArrayCollection();
     }
     
     public function getId(): ?Uuid
@@ -316,148 +283,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmailVerifiedAt(?\DateTimeImmutable $emailVerifiedAt): static
     {
         $this->emailVerifiedAt = $emailVerifiedAt;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Post>
-     */
-    public function getPosts(): Collection
-    {
-        return $this->posts;
-    }
-
-    public function addPost(Post $post): static
-    {
-        if (!$this->posts->contains($post)) {
-            $this->posts->add($post);
-            $post->setAuthor($this);
-        }
-
-        return $this;
-    }
-
-    public function removePost(Post $post): static
-    {
-        if ($this->posts->removeElement($post)) {
-            // set the owning side to null (unless already changed)
-            if ($post->getAuthor() === $this) {
-                $post->setAuthor(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, MediaAssets>
-     */
-    public function getMedia(): Collection
-    {
-        return $this->media;
-    }
-
-    public function addMedia(MediaAsset $media): static
-    {
-        if (!$this->media->contains($media)) {
-            $this->media->add($media);
-            $media->setOwner($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMedia(MediaAsset $media): static
-    {
-        if ($this->media->removeElement($media)) {
-            // set the owning side to null (unless already changed)
-            if ($media->getOwner() === $this) {
-                $media->setOwner(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, UserMediaBinding>
-     */
-    public function getBindedMedia(): Collection
-    {
-        return $this->bindedMedia;
-    }
-
-    public function addBindedMedia(UserMediaBinding $bindedMedia): static
-    {
-        if (!$this->bindedMedia->contains($bindedMedia)) {
-            $this->bindedMedia->add($bindedMedia);
-            $bindedMedia->setOwner($this);
-        }
-
-        return $this;
-    }
-
-    public function removeBindedMedia(UserMediaBinding $bindedMedia): static
-    {
-        if ($this->bindedMedia->removeElement($bindedMedia)) {
-            // set the owning side to null (unless already changed)
-            if ($bindedMedia->getOwner() === $this) {
-                $bindedMedia->setOwner(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, ChatParticipant>
-     */
-    public function getChats(): Collection
-    {
-        return $this->chats;
-    }
-
-    public function addChat(ChatParticipant $chat): static
-    {
-        if (!$this->chats->contains($chat)) {
-            $this->chats->add($chat);
-            $chat->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeChat(ChatParticipant $chat): static
-    {
-        if ($this->chats->removeElement($chat)) {
-            // set the owning side to null (unless already changed)
-            if ($chat->getUser() === $this) {
-                $chat->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function addBindedMedium(UserMediaBinding $bindedMedium): static
-    {
-        if (!$this->bindedMedia->contains($bindedMedium)) {
-            $this->bindedMedia->add($bindedMedium);
-            $bindedMedium->setOwner($this);
-        }
-
-        return $this;
-    }
-
-    public function removeBindedMedium(UserMediaBinding $bindedMedium): static
-    {
-        if ($this->bindedMedia->removeElement($bindedMedium)) {
-            // set the owning side to null (unless already changed)
-            if ($bindedMedium->getOwner() === $this) {
-                $bindedMedium->setOwner(null);
-            }
-        }
 
         return $this;
     }

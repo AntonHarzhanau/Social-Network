@@ -4,13 +4,12 @@ namespace App\Modules\Media\Domain\Entity;
 
 use App\Enum\FileTypeEnum;
 use App\Modules\Identity\Domain\Entity\User;
-use App\Repository\MediaAssetRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: MediaAssetRepository::class)]
+#[ORM\Entity]
 class MediaAsset
 {
     #[ORM\Id]
@@ -19,8 +18,8 @@ class MediaAsset
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'media')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'owner_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?User $owner = null;
 
     #[ORM\Column(enumType: FileTypeEnum::class)]

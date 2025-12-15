@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Modules\Auth\Domain\Entity;
+namespace App\Modules\Identity\Domain\Entity;
 
-use App\Modules\Auth\Infrastructure\Persistence\Doctrine\Repository\EmailVerificationRepository;
+use App\Modules\Identity\Infrastructure\Persistence\Doctrine\Repository\EmailVerificationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: EmailVerificationRepository::class)]
+#[ORM\Entity]
+#[ORM\UniqueConstraint(name: 'uniq_ev_token_hash', columns: ['token_hash'])]
+#[ORM\Index(name: 'idx_ev_user_expires', columns: ['user_id', 'expires_at'])]
 class EmailVerification
 {
     #[ORM\Id]
@@ -16,6 +18,10 @@ class EmailVerification
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    private User $user;
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $tokenHash = null;
@@ -130,5 +136,15 @@ class EmailVerification
         $this->consumedAt = $consumedAt;
 
         return $this;
+    }
+
+    public function getUser(): User
+    {
+        return $this->user;
+    }
+    
+    public function setUser(User $user): void
+    {
+        $this->user = $user;
     }
 }

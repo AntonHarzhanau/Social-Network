@@ -3,12 +3,11 @@
 namespace App\Modules\Media\Domain\Entity;
 
 use App\Modules\Feed\Domain\Entity\Post;
-use App\Repository\PostMediaBindingRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: PostMediaBindingRepository::class)]
+#[ORM\Entity]
 class PostMediaBinding
 {
     #[ORM\Id]
