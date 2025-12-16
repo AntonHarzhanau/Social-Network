@@ -25,40 +25,40 @@ final class ApiExceptionSubscriber implements EventSubscriberInterface
 
     public function onKernelException(ExceptionEvent $event): void
     {
-        $error = $event->getThrowable();
+    //     $error = $event->getThrowable();
 
-        $statusCode = match (true) {
-            $error instanceof CannotFriendYourselfException => JsonResponse::HTTP_BAD_REQUEST,
-            $error instanceof FriendshipAlreadyExistsException => JsonResponse::HTTP_CONFLICT,
-            $error instanceof PendingRequestNotFoundException => JsonResponse::HTTP_NOT_FOUND,
-            default => null,
-        };
+    //     $statusCode = match (true) {
+    //         $error instanceof CannotFriendYourselfException => JsonResponse::HTTP_BAD_REQUEST,
+    //         $error instanceof FriendshipAlreadyExistsException => JsonResponse::HTTP_CONFLICT,
+    //         $error instanceof PendingRequestNotFoundException => JsonResponse::HTTP_NOT_FOUND,
+    //         default => null,
+    //     };
 
-        if ($statusCode !== null) {
-            $event->setResponse($this->jsonError($error->getMessage(), $statusCode));
-            return;
-        }
+    //     if ($statusCode !== null) {
+    //         $event->setResponse($this->jsonError($error->getMessage(), $statusCode));
+    //         return;
+    //     }
 
-        if ($error instanceof HttpExceptionInterface) {
-            $event->setResponse($this->jsonError($error->getMessage(), $error->getStatusCode()));
-            return;
-        }
+    //     if ($error instanceof HttpExceptionInterface) {
+    //         $event->setResponse($this->jsonError($error->getMessage(), $error->getStatusCode()));
+    //         return;
+    //     }
 
-        $message = $this->kernel->isDebug() ? $error->getMessage() : 'Internal Server Error';
+    //     $message = $this->kernel->isDebug() ? $error->getMessage() : 'Internal Server Error';
 
-        $event->setResponse($this->jsonError($message, JsonResponse::HTTP_INTERNAL_SERVER_ERROR));
-    }
+    //     $event->setResponse($this->jsonError($message, JsonResponse::HTTP_INTERNAL_SERVER_ERROR));
+    // }
 
-    private function jsonError(string $message, int $statusCode): JsonResponse
-    {
-        return new JsonResponse(
-            [
-                'error' => [
-                    'message' => $message,
-                    'status_code' => $statusCode,
-                ],
-            ],
-            $statusCode
-        );
+    // private function jsonError(string $message, int $statusCode): JsonResponse
+    // {
+    //     return new JsonResponse(
+    //         [
+    //             'error' => [
+    //                 'message' => $message,
+    //                 'status_code' => $statusCode,
+    //             ],
+    //         ],
+    //         $statusCode
+    //     );
     }
 }

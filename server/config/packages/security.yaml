@@ -5,7 +5,7 @@ security:
     providers:
         app_user_provider:
             entity:
-                class: App\Modules\Identity\Domain\Entity\User
+                class: App\Modules\User\Infrastructure\Persistence\Doctrine\Entity\DoctrineUser
                 property: email
     firewalls:
         dev:
@@ -37,6 +37,8 @@ security:
         - { path: ^/api/auth/refresh, roles: IS_AUTHENTICATED_FULLY }   
         - { path: ^/api/auth/logout, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/, roles: PUBLIC_ACCESS }
+        
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
 
