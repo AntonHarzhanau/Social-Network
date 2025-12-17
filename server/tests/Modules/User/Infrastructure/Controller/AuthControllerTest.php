@@ -1,59 +1,28 @@
 <?php
 
-declare(strict_types=1);
 
 namespace Tests\Modules\User\Infrastructure\Controller;
 
-use App\Modules\User\Domain\Entity\User;
-use App\Modules\User\Infrastructure\Persistence\Doctrine\Mapper\DoctrineUserMapper;
-use Doctrine\ORM\EntityManagerInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Tests\Support\ApiWebTestCase;
 
-
-final class AuthControllerTest extends WebTestCase
+final class AuthControllerTest extends ApiWebTestCase
 {
-    protected function createUser(EntityManagerInterface $em, string $email = 'user@mail.com'): User
-    {
-        $user = new User();
-        $user->setEmail($email);
-        $user->setPassword('password');
-        $user->setUsername('username');
-        $user->setDateOfBirth(new \DateTimeImmutable('1990-01-01'));
-
-        $em->persist($user);
-        $em->flush();
-        return $user;
-    }
-
-    protected function authClient(KernelBrowser $client, User $user): KernelBrowser
-    {
-        $jwt = static::getContainer()
-            ->get(JWTTokenManagerInterface::class)
-            ->create($user);
-
-        $client->setServerParameter('HTTP_AUTHORIZATION', 'Bearer ' . $jwt);
-        $client->setServerParameter('CONTENT_TYPE', 'application/json');
-
-        return $client;
-    }
 
     public function testAuthMeUnathorized(): void
     {
         $client = static::createClient();
         $client->request('GET', '/api/auth/me');
 
-        self::assertResponseStatusCodeSame(401);
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_UNAUTHORIZED);
     }
 
     public function testAuthMeOk(): void
     {
-        $client = static::createClient();
-
-        $em = static::getContainer()->get(EntityManagerInterface::class);
-        $user = $this->createUser($em, 'anton@test.local');
-        $client = $this->authClient($client, $user);
+        [$client, $user] = $this->createAuthenticatedClient([
+            'email' => 'anton@test.com',
+        ]);
+        
 
         $client->request('GET', '/api/auth/me');
 
@@ -74,6 +43,6 @@ final class AuthControllerTest extends WebTestCase
         ];
 
         self::assertResponseIsSuccessful();
-        self::assertJsonStringEqualsJsonString(json_encode($expectedResponse), $client->getResponse()->getContent() ?? '');
+        self::assertJsonStringEqualsJsonString(json_encode($expectedResponse, JSON_THROW_ON_ERROR), $client->getResponse()->getContent() ?? '');
     }
 }

@@ -26,7 +26,7 @@ final class FriendsController extends AbstractController
     {
         $userIds = $this->listFriends->execute($currentUser->getId());
         $previews = $this->userApi->findPreviewsByIds($userIds);
-
+        
         return $this->json($previews, JsonResponse::HTTP_OK);
     }
 
@@ -37,9 +37,12 @@ final class FriendsController extends AbstractController
         string $friendId,
     ): JsonResponse {
 
-        $this->removeFriend->execute($currentUser->getId(), Uuid::fromString($friendId));
+        try {
+            $this->removeFriend->execute($currentUser->getId(), Uuid::fromString($friendId));
+        } catch (\Throwable $th) {
+            return $this->json(['error' => $th->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
 
         return $this->json(['message' => 'Friend removed'], JsonResponse::HTTP_OK);
     }
-
 }

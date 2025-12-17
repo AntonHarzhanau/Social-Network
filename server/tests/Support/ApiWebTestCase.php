@@ -1,8 +1,8 @@
 <?php
 
-namespace Test\Support;
+namespace App\Tests\Support;
 
-use App\Modules\Identity\Infrastructure\Persistence\Doctrine\Entity\DoctrineUser;
+use App\Modules\User\Domain\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -15,29 +15,64 @@ abstract class ApiWebTestCase extends WebTestCase
         return static::getContainer()->get(EntityManagerInterface::class);
     }
 
-    protected function createUser(string $email = 'user@mail.com'): DoctrineUser
+    protected function createUser(array $overrides = []): User
     {
-        $em = $this->em();
-        $user = new DoctrineUser();
-        $user->setEmail($email);
-        $user->setPassword('password');
-        $user->setUsername('username');
-        $user->setDateOfBirth(new \DateTimeImmutable('1990-01-01'));
+        $defaults = [
+            'email' => 'user@mail.com',
+            'password' => 'password',
+            'username' => 'username',
+            'dateOfBirth' => new \DateTimeImmutable('1996-08-16'),
+        ];
 
+        $data = array_merge($defaults, $overrides);
+
+        $user = new User();
+        $user->setEmail($data['email']);
+        $user->setPassword($data['password']);
+        $user->setUsername($data['username']);
+        $user->setDateOfBirth($data['dateOfBirth']);
+
+        $em = $this->em();
         $em->persist($user);
         $em->flush();
+
         return $user;
     }
 
-    protected function authClient(DoctrineUser $user): KernelBrowser
+    protected function authClient(KernelBrowser $client, User $user): KernelBrowser
     {
         $jwt = static::getContainer()
-        ->get(JWTTokenManagerInterface::class)
-        ->create($user);
+            ->get(JWTTokenManagerInterface::class)
+            ->create($user);
 
-        $client = static::createClient();
-        $client->setServerParameter('HTTP_AUTHORIZATION', 'Bearer %s' . $jwt);
+        $client->setServerParameter('HTTP_AUTHORIZATION', 'Bearer ' . $jwt);
+        $client->setServerParameter('HTTP_ACCEPT', 'application/json');
         $client->setServerParameter('CONTENT_TYPE', 'application/json');
+
         return $client;
     }
+
+    /**
+     * @return array{0: KernelBrowser, 1: User}
+     */
+    protected function createAuthenticatedClient(array $userOverrides = []): array
+    {
+        $client = static::createClient();
+        $user = $this->createUser($userOverrides);
+
+        $client = $this->authClient($client, $user);
+
+        return [$client, $user];
+    }
+
+    protected function tearDown(): void
+    {
+        if (static::getContainer(false) !== null) {
+            $em = $this->em();
+            $em->clear();
+        }
+
+        parent::tearDown();
+    }
 }
+

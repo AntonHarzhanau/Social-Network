@@ -34,7 +34,6 @@ final class SendFriendRequestAction
         $friendship->setRequester($requester);
         $friendship->setAddressee($addressee);
         $friendship->setStatus(FriendshipStatusEnum::PENDING);
-        $friendship->setCreatedAt(new \DateTimeImmutable());
 
         $this->friendships->save($friendship);
     }

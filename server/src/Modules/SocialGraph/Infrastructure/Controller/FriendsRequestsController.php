@@ -18,6 +18,7 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Uid\Uuid;
+use ValueError;
 
 #[Route('/api/friends-requests')]
 final class FriendsRequestsController extends AbstractController
@@ -51,8 +52,11 @@ final class FriendsRequestsController extends AbstractController
         if (!$typeStr) {
             return $this->json(['error' => 'Type query parameter is required'], JsonResponse::HTTP_BAD_REQUEST);
         }
-
-        $type = FriendshipsTypeEnum::from($typeStr);
+        try {
+            $type = FriendshipsTypeEnum::from($typeStr);
+        } catch (ValueError $e) {
+            return $this->json(['error' => 'Invalid type parameter'], JsonResponse::HTTP_BAD_REQUEST);
+        }
 
         $userIds = $this->listFriendRequests->execute($currentUser->getId(), $type);
         $previews = $this->userApi->findPreviewsByIds($userIds);

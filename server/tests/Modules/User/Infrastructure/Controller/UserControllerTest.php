@@ -4,55 +4,26 @@ declare(strict_types=1);
 
 namespace Tests\Modules\User\Infrastructure\Controller;
 
-use App\Modules\User\Domain\Entity\User;
+use App\Tests\Support\ApiWebTestCase;
 use Doctrine\ORM\EntityManagerInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
-
-final class UserControllerTest extends WebTestCase
+final class UserControllerTest extends ApiWebTestCase
 {
-    protected function createUser(EntityManagerInterface $em, string $email = 'user@mail.com'): User
-    {
-        $user = new User();
-        $user->setEmail($email);
-        $user->setPassword('password');
-        $user->setUsername('username');
-        $user->setDateOfBirth(new \DateTimeImmutable('1990-01-01'));
-
-        $em->persist($user);
-        $em->flush();
-
-        return $user;
-    }
-
-    protected function authClient(KernelBrowser $client, User $user): KernelBrowser
-    {
-        $jwt = static::getContainer()
-            ->get(JWTTokenManagerInterface::class)
-            ->create($user);
-
-        $client->setServerParameter('HTTP_AUTHORIZATION', 'Bearer ' . $jwt);
-        $client->setServerParameter('CONTENT_TYPE', 'application/json');
-
-        return $client;
-    }
 
     public function testListRequiresAuth(): void
     {
         $client = static::createClient();
         $client->request('GET', '/api/users');
 
-        self::assertTrue(in_array($client->getResponse()->getStatusCode(), [401], true));
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_UNAUTHORIZED);
     }
 
     public function testListOk(): void
     {
-        $client = static::createClient();
-
-        $em = static::getContainer()->get(EntityManagerInterface::class);
-        $user = $this->createUser($em, 'anton@test.local');
+        [$client, $user] = $this->createAuthenticatedClient([
+            'email' => 'anton@test.com',
+        ]);
 
         $client = $this->authClient($client, $user);
 
@@ -64,10 +35,9 @@ final class UserControllerTest extends WebTestCase
 
     public function testUpdateProfileOk(): void
     {
-        $client = static::createClient();
-
-        $em = static::getContainer()->get(EntityManagerInterface::class);
-        $user = $this->createUser($em, 'anton@test.local');
+        [$client, $user] = $this->createAuthenticatedClient([
+            'email' => 'anton@test.com',
+        ]);
 
         $client = $this->authClient($client, $user);
 
@@ -85,11 +55,10 @@ final class UserControllerTest extends WebTestCase
 
     public function testUpdateAvatarOk(): void
     {
-        $client = static::createClient();
+        [$client, $user] = $this->createAuthenticatedClient([
+            'email' => 'anton@test.com',
+        ]);
 
-        $em = static::getContainer()->get(EntityManagerInterface::class);
-
-        $user = $this->createUser($em, 'anton@test.local');
         $client = $this->authClient($client, $user);
 
         $client->request('PUT', '/api/users/avatar', content: json_encode([
@@ -102,12 +71,10 @@ final class UserControllerTest extends WebTestCase
 
     public function testDeleteAccountOk(): void
     {
-        $client = static::createClient();
-
-        $em = static::getContainer()->get(EntityManagerInterface::class);
-        $user = $this->createUser($em, 'anton@test.local');
+        [$client, $user] = $this->createAuthenticatedClient([
+            'email' => 'anton@test.com',
+        ]);
         $client = $this->authClient($client, $user);
-
         $client->request('DELETE', '/api/users');
 
         self::assertResponseIsSuccessful();
@@ -116,12 +83,9 @@ final class UserControllerTest extends WebTestCase
 
     public function testGetProfileOk(): void
     {
-        $client = static::createClient();
-
-        $em = static::getContainer()->get(EntityManagerInterface::class);
-        $user = $this->createUser($em, 'anton@test.local');
-
-        $client = $this->authClient($client, $user);
+        [$client, $user] = $this->createAuthenticatedClient([
+            'email' => 'anton@test.com',
+        ]);
 
         $client->request('GET', '/api/users/' . $user->getId() . '/profile');
 
@@ -147,11 +111,15 @@ final class UserControllerTest extends WebTestCase
 
     public function testGetProfileError(): void
     {
-        $client = static::createClient();
+        [$client, $user] = $this->createAuthenticatedClient([
+            'email' => 'anton@test.com',
+        ]);
 
+        $fakeUser = $this->createUser( [
+            'email' => 'fake@test.com',
+        ]);
+        
         $em = static::getContainer()->get(EntityManagerInterface::class);
-        $user = $this->createUser($em, 'anton@test.local');
-        $fakeUser = $this->createUser($em, 'test@mail.com');
         $fakeUserId = $fakeUser->getId();
         $em->remove($fakeUser);
         $em->flush();
@@ -160,7 +128,7 @@ final class UserControllerTest extends WebTestCase
 
         $client->request('GET', '/api/users/' . $fakeUserId . '/profile');
 
-        
+
         self::assertResponseStatusCodeSame(404);
         self::assertJsonStringEqualsJsonString(json_encode([
             'error' => 'User not found.',
