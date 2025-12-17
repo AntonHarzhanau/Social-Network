@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Modules\User\Infrastructure\Controller;
 
-use App\Modules\User\Infrastructure\Persistence\Doctrine\Entity\DoctrineUser;
+use App\Modules\User\Domain\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -13,9 +13,9 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class UserControllerTest extends WebTestCase
 {
-    protected function createUser(EntityManagerInterface $em, string $email = 'user@mail.com'): DoctrineUser
+    protected function createUser(EntityManagerInterface $em, string $email = 'user@mail.com'): User
     {
-        $user = new DoctrineUser();
+        $user = new User();
         $user->setEmail($email);
         $user->setPassword('password');
         $user->setUsername('username');
@@ -27,7 +27,7 @@ final class UserControllerTest extends WebTestCase
         return $user;
     }
 
-    protected function authClient(KernelBrowser $client, DoctrineUser $user): KernelBrowser
+    protected function authClient(KernelBrowser $client, User $user): KernelBrowser
     {
         $jwt = static::getContainer()
             ->get(JWTTokenManagerInterface::class)

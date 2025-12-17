@@ -2,40 +2,82 @@
 
 namespace App\Modules\User\Domain\Entity;
 
+use App\Modules\User\Infrastructure\Persistence\Doctrine\Repository\UserRepository;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-
-class User
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Table(name: '`user`')]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_SLUG', fields: ['slug'])]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    protected ?\DateTimeImmutable $createdAt = null;
+    #[ORM\Id]
+    #[ORM\Column(type: UuidType::NAME, unique: true)]
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
+    private ?Uuid $id = null;
 
-    public function __construct(
-        protected ?Uuid $id = null,
-        protected ?string $email = null,
-        protected ?string $password = null,
-        protected ?\DateTimeImmutable $dateOfBirth = null,
-        protected ?string $username = null,
-        protected array $roles = [],
-        protected ?string $slug = null,
-        protected ?string $avatarUrl = null,
-        protected ?string $coverUrl = null,
-        protected ?string $location = null,
-        protected ?string $maritalStatus = null,
-        protected ?string $bio = null,
-        protected ?\DateTimeImmutable $lastLoginAt = null,
-        protected ?\DateTimeImmutable $emailVerifiedAt = null,
-    ) {
-        // $this->createdAt = new \DateTimeImmutable();
+    #[ORM\Column(length: 180)]
+    private ?string $email = null;
+
+    /**
+     * @var list<string> The user roles
+     */
+    #[ORM\Column]
+    private array $roles = [];
+
+    /**
+     * @var string The hashed password
+     */
+    #[ORM\Column]
+    private ?string $password = null;
+
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $slug = null;
+
+    #[ORM\Column(length: 100)]
+    private ?string $username = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $avatarUrl = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $coverUrl = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $location = null;
+
+    #[ORM\Column(length: 30, nullable: true)]
+    private ?string $maritalStatus = null;
+
+    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    private ?\DateTimeImmutable $dateOfBirth = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $bio = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $lastLoginAt = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $emailVerifiedAt = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
     }
-
+    
     public function getId(): ?Uuid
     {
         return $this->id;
-    }
-
-    public function setId(?Uuid $id): void
-    {
-        $this->id = $id;
     }
 
     public function getEmail(): ?string
@@ -43,49 +85,75 @@ class User
         return $this->email;
     }
 
-    public function setEmail(string $email): void
+    public function setEmail(string $email): static
     {
         $this->email = $email;
+
+        return $this;
     }
 
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    /**
+     * @param list<string> $roles
+     */
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
     public function getPassword(): ?string
     {
         return $this->password;
     }
 
-    public function setPassword(string $password): void
+    public function setPassword(string $password): static
     {
         $this->password = $password;
+
+        return $this;
     }
 
-    public function getUserName(): ?string
+    /**
+     * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
+     */
+    public function __serialize(): array
     {
-        return $this->username;
+        $data = (array) $this;
+        $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
+
+        return $data;
     }
 
-    public function setUserName(string $username): void
+    #[\Deprecated]
+    public function eraseCredentials(): void
     {
-        $this->username = $username;
-    }
-
-    public function getDateOfBirth(): ?\DateTimeImmutable
-    {
-        return $this->dateOfBirth;
-    }
-
-    public function setDateOfBirth(\DateTimeImmutable $dateOfBirth): void
-    {
-        $this->dateOfBirth = $dateOfBirth;
-    }
-
-    public function getAvatarUrl(): ?string
-    {
-        return $this->avatarUrl;
-    }
-
-    public function setAvatarUrl(?string $avatarUrl): void
-    {
-        $this->avatarUrl = $avatarUrl;
+        // @deprecated, to be removed when upgrading to Symfony 8
     }
 
     public function getSlug(): ?string
@@ -93,69 +161,35 @@ class User
         return $this->slug;
     }
 
-    public function setSlug(?string $slug): void
+    public function setSlug(?string $slug): static
     {
         $this->slug = $slug;
+
+        return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getUsername(): ?string
     {
-        return $this->createdAt;
+        return $this->username;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): void
+    public function setUsername(string $username): static
     {
-        $this->createdAt = $createdAt;
+        $this->username = $username;
+
+        return $this;
     }
 
-    public function getEmailVerifiedAt(): ?\DateTimeImmutable
+    public function getAvatarUrl(): ?string
     {
-        return $this->emailVerifiedAt;
+        return $this->avatarUrl;
     }
 
-    public function setEmailVerifiedAt(?\DateTimeImmutable $emailVerifiedAt): void
+    public function setAvatarUrl(?string $avatarUrl): static
     {
-        $this->emailVerifiedAt = $emailVerifiedAt;
-    }
+        $this->avatarUrl = $avatarUrl;
 
-    public function getLastLoginAt(): ?\DateTimeImmutable
-    {
-        return $this->lastLoginAt;
-    }
-
-    public function setLastLoginAt(?\DateTimeImmutable $lastLoginAt): void
-    {
-        $this->lastLoginAt = $lastLoginAt;
-    }
-
-    public function getLocation(): ?string
-    {
-        return $this->location;
-    }
-
-    public function setLocation(?string $location): void
-    {
-        $this->location = $location;
-    }
-
-    public function getMaritalStatus(): ?string
-    {
-        return $this->maritalStatus;
-    }
-
-    public function setMaritalStatus(?string $maritalStatus): void
-    {
-        $this->maritalStatus = $maritalStatus;
-    }
-
-    public function getBio(): ?string
-    {
-        return $this->bio;
-    }
-
-    public function setBio(?string $bio): void
-    {
-        $this->bio = $bio;
+        return $this;
     }
 
     public function getCoverUrl(): ?string
@@ -163,13 +197,94 @@ class User
         return $this->coverUrl;
     }
 
-    public function setCoverUrl(?string $coverUrl): void
+    public function setCoverUrl(?string $coverUrl): static
     {
         $this->coverUrl = $coverUrl;
+
+        return $this;
     }
 
-    public function getRoles(): array
+    public function getLocation(): ?string
     {
-        return $this->roles;
+        return $this->location;
+    }
+
+    public function setLocation(?string $location): static
+    {
+        $this->location = $location;
+
+        return $this;
+    }
+
+    public function getMaritalStatus(): ?string
+    {
+        return $this->maritalStatus;
+    }
+
+    public function setMaritalStatus(string $maritalStatus): static
+    {
+        $this->maritalStatus = $maritalStatus;
+
+        return $this;
+    }
+
+    public function getDateOfBirth(): ?\DateTimeImmutable
+    {
+        return $this->dateOfBirth;
+    }
+
+    public function setDateOfBirth(\DateTimeImmutable $dateOfBirth): static
+    {
+        $this->dateOfBirth = $dateOfBirth;
+
+        return $this;
+    }
+
+    public function getBio(): ?string
+    {
+        return $this->bio;
+    }
+
+    public function setBio(?string $bio): static
+    {
+        $this->bio = $bio;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getLastLoginAt(): ?\DateTimeImmutable
+    {
+        return $this->lastLoginAt;
+    }
+
+    public function setLastLoginAt(?\DateTimeImmutable $lastLoginAt): static
+    {
+        $this->lastLoginAt = $lastLoginAt;
+
+        return $this;
+    }
+
+    public function getEmailVerifiedAt(): ?\DateTimeImmutable
+    {
+        return $this->emailVerifiedAt;
+    }
+
+    public function setEmailVerifiedAt(?\DateTimeImmutable $emailVerifiedAt): static
+    {
+        $this->emailVerifiedAt = $emailVerifiedAt;
+
+        return $this;
     }
 }

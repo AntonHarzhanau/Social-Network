@@ -2,22 +2,26 @@
 
 namespace App\Modules\User\Infrastructure\Persistence\Doctrine\Repository;
 
-use App\Modules\User\Infrastructure\Persistence\Doctrine\Entity\DoctrineEmailVerification;
-use App\Modules\User\Infrastructure\Persistence\Doctrine\Entity\DoctrineUser;
+use App\Modules\User\Domain\Entity\EmailVerification;
+use App\Modules\User\Domain\Entity\User;
+use App\Modules\User\Domain\Repository\EmailVerificationRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<EmailVerification>
  */
-class EmailVerificationRepository extends ServiceEntityRepository
+class EmailVerificationRepository extends ServiceEntityRepository implements EmailVerificationRepositoryInterface
 {
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, DoctrineEmailVerification::class);
-    }
 
-    public function findByTokenHash(string $tokenHash): ?DoctrineEmailVerification
+    public function __construct(
+        ManagerRegistry $registry,
+    ) {
+        parent::__construct($registry, EmailVerification::class);
+    }
+    
+    public function findByTokenHash(string $tokenHash): ?EmailVerification
     {
         return $this->createQueryBuilder('ev')
             ->where('ev.tokenHash = :tokenHash')
@@ -26,7 +30,7 @@ class EmailVerificationRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    public function findLatestPendingForUser(DoctrineUser $user): ?DoctrineEmailVerification
+    public function findLatestPendingForUser(User $user): ?EmailVerification
     {
         return $this->createQueryBuilder('ev')
             ->where('ev.user = :user')
@@ -37,7 +41,7 @@ class EmailVerificationRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    public function deletePendingForUser(DoctrineUser $user): int
+    public function deletePendingForUser(User $user): int
     {
         return $this->createQueryBuilder('ev')
             ->delete()
@@ -48,7 +52,7 @@ class EmailVerificationRepository extends ServiceEntityRepository
             ->execute();
     }
 
-    public function save(DoctrineEmailVerification $emailVerification, bool $flush = true): void
+    public function save(EmailVerification $emailVerification, bool $flush = true): void
     {
         $em = $this->getEntityManager();
         $em->persist($emailVerification);

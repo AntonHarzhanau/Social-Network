@@ -16,7 +16,7 @@ final class GetMeAction
     
     public function __invoke(Uuid $userId): UserDetailsDTO
     {   
-        $user = $this->userRepository->findOneById($userId);    
+        $user = $this->userRepository->findById($userId->toRfc4122());    
         return $this->mapper->toDetails($user);
     }
 }

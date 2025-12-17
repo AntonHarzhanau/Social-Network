@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Modules\User\Infrastructure\Controller;
 
-use App\Modules\User\Infrastructure\Persistence\Doctrine\Entity\DoctrineUser;
+use App\Modules\User\Domain\Entity\User;
+use App\Modules\User\Infrastructure\Persistence\Doctrine\Mapper\DoctrineUserMapper;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -13,9 +14,9 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class AuthControllerTest extends WebTestCase
 {
-    protected function createUser(EntityManagerInterface $em, string $email = 'user@mail.com'): DoctrineUser
+    protected function createUser(EntityManagerInterface $em, string $email = 'user@mail.com'): User
     {
-        $user = new DoctrineUser();
+        $user = new User();
         $user->setEmail($email);
         $user->setPassword('password');
         $user->setUsername('username');
@@ -23,11 +24,10 @@ final class AuthControllerTest extends WebTestCase
 
         $em->persist($user);
         $em->flush();
-
         return $user;
     }
 
-    protected function authClient(KernelBrowser $client, DoctrineUser $user): KernelBrowser
+    protected function authClient(KernelBrowser $client, User $user): KernelBrowser
     {
         $jwt = static::getContainer()
             ->get(JWTTokenManagerInterface::class)
@@ -53,7 +53,6 @@ final class AuthControllerTest extends WebTestCase
 
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $user = $this->createUser($em, 'anton@test.local');
-
         $client = $this->authClient($client, $user);
 
         $client->request('GET', '/api/auth/me');
@@ -77,5 +76,4 @@ final class AuthControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertJsonStringEqualsJsonString(json_encode($expectedResponse), $client->getResponse()->getContent() ?? '');
     }
-
 }

@@ -35,36 +35,15 @@ final class RegisterUserAction
         }
 
         $username = trim($firstName . ' ' . $lastName);
-        $user = new User(
-            null,
-            $email,
-            $passwordHash,
-            new \DateTimeImmutable($dateOfBirthIso),
-            $username,
-            ['ROLE_USER'],
-        );
-        
+        $user = new User();
+        $user->setEmail($email);
+        $user->setUsername($username);
+        $user->setPassword($passwordHash);
+        $user->setDateOfBirth(new \DateTimeImmutable($dateOfBirthIso));
+
         $this->userRepository->save($user, true);
+        $user = $this->userRepository->findByEmail($email);
 
         return new UserRegistredEvent($user);
-
-        // $rawToken = bin2hex(random_bytes(32));
-        // $tokenHash = hash('sha256', $rawToken);
-
-        // $now = new \DateTimeImmutable();
-        // $expiresAt = $now->add(new \DateInterval('PT24H'));
-
-        // $ev = new EmailVerification();
-        // $ev->setUser($user);
-        // $ev->setTokenHash($tokenHash);
-        // $ev->setSentEmail($user->getEmail());
-        // $ev->setCreatedAt($now);
-        // $ev->setExpiresAt($expiresAt);
-        // $ev->setIp($ip);
-        // $ev->setUserAgent($userAgent);
-
-        // $this->emailVerifications->save($ev, true);
-
-        // return $rawToken;
     }
 }

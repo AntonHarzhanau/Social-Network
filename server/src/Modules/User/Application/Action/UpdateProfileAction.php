@@ -17,7 +17,7 @@ final class UpdateProfileAction
         ?string $coverUrl = null,
         ?string $maritalStatus = null,
     ): void {
-        $user = $this->userRepository->findOneById($userId->toRfc4122());
+        $user = $this->userRepository->findById($userId->toRfc4122());
         if ($username !== null) $user->setUsername($username);
         if ($location !== null) $user->setLocation($location);
         if ($bio !== null) $user->setBio($bio);

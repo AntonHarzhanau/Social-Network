@@ -11,7 +11,7 @@ final class UpdateUserAvatarAction
 
     public function __invoke(Uuid $userId, ?string $avatarUrl): void
     {
-        $user = $this->users->findOneById($userId->toRfc4122());
+        $user = $this->users->findById($userId->toRfc4122());
         if ($user === null) {
             throw new \RuntimeException('User not found.');
         }

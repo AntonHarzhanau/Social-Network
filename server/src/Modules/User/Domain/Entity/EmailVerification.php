@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\User\Infrastructure\Persistence\Doctrine\Entity;
+namespace App\Modules\User\Domain\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -10,7 +10,8 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Entity]
 #[ORM\UniqueConstraint(name: 'uniq_ev_token_hash', columns: ['token_hash'])]
 #[ORM\Index(name: 'idx_ev_user_expires', columns: ['user_id', 'expires_at'])]
-class DoctrineEmailVerification
+#[ORM\Table(name: 'email_verification')]
+class EmailVerification
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
@@ -18,9 +19,9 @@ class DoctrineEmailVerification
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id = null;
 
-    #[ORM\ManyToOne(targetEntity: DoctrineUser::class)]
+    #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private DoctrineUser $user;
+    private User $user;
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $tokenHash = null;
@@ -137,12 +138,12 @@ class DoctrineEmailVerification
         return $this;
     }
 
-    public function getUser(): DoctrineUser
+    public function getUser(): User
     {
         return $this->user;
     }
     
-    public function setUser(DoctrineUser $user): void
+    public function setUser(User $user): void
     {
         $this->user = $user;
     }

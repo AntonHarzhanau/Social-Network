@@ -16,7 +16,7 @@ final class FindUserProfileAction
 
     public function __invoke(string $userId): UserDetailsDTO
     {   
-        $user = $this->userRepository->findOneById($userId);
+        $user = $this->userRepository->findById($userId);
 
         if ($user === null) {
             throw new UserNotFoundException();

@@ -11,12 +11,12 @@ interface UserRepositoryInterface
 
     public function delete(User $user, bool $flush = true): void;
     
-    public function findOneById(string $id): ?User;
+    public function findById(string $id): ?User;
 
     public function findByEmail(string $email): ?User; 
     
     /** @return User[] */
-    public function findAllExcept(Uuid $excludedUserId): array;
+    public function findAllExcept(User $excludedUser): array;
 
     public function updateUser(User $user): void;
 }

@@ -5,9 +5,9 @@ namespace App\Modules\User\Infrastructure\Controller;
 use App\Modules\User\Application\Action\GetMeAction;
 use App\Modules\User\Application\Action\RegisterUserAction;
 use App\Modules\User\Application\Action\VerifyEmailAction;
+use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Infrastructure\Http\Request\RegisterRequest;
 use App\Modules\User\Infrastructure\Http\Request\VerifyEmailRequest;
-use App\Modules\User\Infrastructure\Persistence\Doctrine\Entity\DoctrineUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -55,9 +55,9 @@ final class AuthController extends AbstractController
 
     #[Route('/me', methods: ['GET'])]
     public function me(
-        #[CurrentUser] ?DoctrineUser $doctrineUser,
+        #[CurrentUser] ?User $user,
         GetMeAction $action,
     ): JsonResponse {
-        return $this->json($action($doctrineUser->getId()));
+        return $this->json($action($user->getId()));
     }
 }

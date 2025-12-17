@@ -11,7 +11,7 @@ class DeleteAccountAction
 
     public function __invoke(Uuid $userId): void {
 
-        $user = $this->userRepository->findOneById($userId->toRfc4122());
+        $user = $this->userRepository->findById($userId->toRfc4122());
         if ($user === null) {
             throw new \RuntimeException('User not found.');
         }

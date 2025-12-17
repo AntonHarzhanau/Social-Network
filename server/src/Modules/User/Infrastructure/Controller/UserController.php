@@ -7,10 +7,10 @@ use App\Modules\User\Application\Action\FindUserProfileAction;
 use App\Modules\User\Application\Action\FindUsersAction;
 use App\Modules\User\Application\Action\UpdateProfileAction;
 use App\Modules\User\Application\Action\UpdateUserAvatarAction;
+use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Domain\Exception\UserNotFoundException;
 use App\Modules\User\Infrastructure\Http\Request\UpdateAvatarRequest;
 use App\Modules\User\Infrastructure\Http\Request\UpdateProfileRequest;
-use App\Modules\User\Infrastructure\Persistence\Doctrine\Entity\DoctrineUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -22,16 +22,16 @@ final class UserController extends AbstractController
 {
     #[Route('', methods: ['GET'])]
     public function list(
-        #[CurrentUser] ?DoctrineUser $user,
+        #[CurrentUser] ?User $user,
         FindUsersAction $action,
     ): JsonResponse {
 
-        return $this->json($action($user->getId()));
+        return $this->json($action($user));
     }
 
     #[Route('/profile', methods: ['PUT'])]
     public function updateProfile(
-        #[CurrentUser] ?DoctrineUser $currentUser,
+        #[CurrentUser] ?User $currentUser,
         #[MapRequestPayload(validationFailedStatusCode: 422)] UpdateProfileRequest $dto,
         UpdateProfileAction $action,
     ): JsonResponse {
@@ -50,7 +50,7 @@ final class UserController extends AbstractController
 
     #[Route('/{userId}/profile', methods: ['GET'])]
     public function getProfile(
-        #[CurrentUser] ?DoctrineUser $currentUser,
+        #[CurrentUser] ?User $currentUser,
         string $userId,
         FindUserProfileAction $action,
     ): JsonResponse {
@@ -66,7 +66,7 @@ final class UserController extends AbstractController
 
     #[Route('/avatar', methods: ['PUT'])]
     public function updateAvatar(
-        #[CurrentUser] ?DoctrineUser $user,
+        #[CurrentUser] ?User $user,
         #[MapRequestPayload(validationFailedStatusCode: 422)] UpdateAvatarRequest $dto,
         UpdateUserAvatarAction $action,
     ): JsonResponse {
@@ -79,7 +79,7 @@ final class UserController extends AbstractController
 
     #[Route('', methods: ['DELETE'])]
     public function deleteAccount(
-        #[CurrentUser] ?DoctrineUser $user,
+        #[CurrentUser] ?User $user,
         DeleteAccountAction $action,
     ): JsonResponse {
         if (!$user) return $this->json(['error' => 'Unauthorized'], 401);

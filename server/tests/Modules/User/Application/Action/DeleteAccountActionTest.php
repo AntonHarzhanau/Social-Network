@@ -30,7 +30,7 @@ final class DeleteAccountActionTest extends TestCase
         $calledDeleteFlush = null;
 
         $repo->expects($this->once())
-            ->method('findOneById')
+            ->method('findById')
             ->willReturnCallback(function (string $id) use (&$calledFindArg, $domainUser) {
                 $calledFindArg = $id;
                 return $domainUser;
@@ -60,7 +60,7 @@ final class DeleteAccountActionTest extends TestCase
         $userId = Uuid::v4();
 
         $repo->expects($this->once())
-            ->method('findOneById')
+            ->method('findById')
             ->with($userId->toRfc4122())
             ->willReturn(null);
 
