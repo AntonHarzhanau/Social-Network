@@ -7,4 +7,7 @@ use App\Modules\User\Domain\Entity\User;
 interface UserApiInterface
 {
     public function findById(string $id): ?User;
+
+    /** @return list<UserPreview> */
+    public function findPreviewsByIds(array $ids): array;
 }

@@ -3,7 +3,6 @@
 namespace App\Modules\SocialGraph\Infrastructure\Controller;
 
 use App\Enum\FriendshipsTypeEnum;
-use App\Factory\User\UserFactory;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\SocialGraph\Application\Action\AcceptFriendRequestAction;
 use App\Modules\SocialGraph\Application\Action\CancelFriendRequestAction;
@@ -11,6 +10,7 @@ use App\Modules\SocialGraph\Application\Action\DeclineFriendRequestAction;
 use App\Modules\SocialGraph\Application\Action\ListFriendRequestsAction;
 use App\Modules\SocialGraph\Application\Action\SendFriendRequestAction;
 use App\Modules\SocialGraph\Infrastructure\Http\FriendIdRequest;
+use App\Modules\User\Api\UserApiInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,7 +28,7 @@ final class FriendsRequestsController extends AbstractController
         private readonly AcceptFriendRequestAction $acceptFriendRequest,
         private readonly DeclineFriendRequestAction $declineFriendRequest,
         private readonly CancelFriendRequestAction $cancelFriendRequest,
-        private readonly UserFactory $userFactory,
+        private readonly UserApiInterface $userApi,
     ) {}
 
 
@@ -54,10 +54,10 @@ final class FriendsRequestsController extends AbstractController
 
         $type = FriendshipsTypeEnum::from($typeStr);
 
-        $users = $this->listFriendRequests->execute($currentUser->getId(), $type);
+        $userIds = $this->listFriendRequests->execute($currentUser->getId(), $type);
+        $previews = $this->userApi->findPreviewsByIds($userIds);
 
-
-        return $this->json($this->mapUsers($users), JsonResponse::HTTP_OK, [], ['groups' => 'user:preview']);
+        return $this->json($previews, JsonResponse::HTTP_OK);
     }
 
 
@@ -83,10 +83,5 @@ final class FriendsRequestsController extends AbstractController
         $this->cancelFriendRequest->execute($currentUser->getId(), Uuid::fromString($addresseeId));
         return $this->json(['message' => 'Friend request canceled'], JsonResponse::HTTP_OK);
     }
-    
 
-    private function mapUsers(array $users): array
-    {
-        return array_map(fn(User $u) => $this->userFactory->toUserResponseDTO($u), $users);
-    }
 }

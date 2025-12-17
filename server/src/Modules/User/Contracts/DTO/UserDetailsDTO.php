@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\User\Application\DTO;
+namespace App\Modules\User\Contracts\DTO;
 
 final readonly class UserDetailsDTO
 {

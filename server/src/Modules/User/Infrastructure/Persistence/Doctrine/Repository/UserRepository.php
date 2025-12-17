@@ -3,6 +3,7 @@
 namespace App\Modules\User\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Modules\User\Api\UserApiInterface;
+use App\Modules\User\Contracts\DTO\UserPreviewDTO;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Domain\Repository\UserRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -89,5 +90,15 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     {
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
+    }
+
+    public function findPreviewsByIds(array $ids): array
+    {
+        $queryBuilder = $this->createQueryBuilder('u')
+            ->select(sprintf('NEW %s(u.id, u.username, u.avatarUrl, u.slug)', UserPreviewDTO::class))
+            ->andWhere('u.id IN (:ids)')
+            ->setParameter('ids', $ids);
+
+        return $queryBuilder->getQuery()->getResult();
     }
 }

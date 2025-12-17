@@ -12,17 +12,16 @@ final class DeclineFriendRequestAction
 {
     public function __construct(
         public readonly FriendshipRepositoryInterface $friendships,
-        public readonly UserDirectoryInterface $users,
     ) {}
 
     public function execute(Uuid $currentUserId, Uuid $requesterId): void
     {
-        $currentUser = $this->users->getUserEntityOrFail($currentUserId);
-        $requesterUser = $this->users->getUserEntityOrFail($requesterId);
 
-        $friendship = $this->friendships->findFriendship($currentUser, $requesterUser);
+        $friendship = $this->friendships->findFriendship($currentUserId, $requesterId);
 
-        if ($friendship === null || $friendship->getAddressee() !== $currentUser) {
+        if ($friendship === null 
+        || $friendship->getAddressee()->getId() !== $currentUserId 
+        || $friendship->getStatus() !== FriendshipStatusEnum::PENDING) {
             throw new PendingRequestNotFoundException(); 
         }
 

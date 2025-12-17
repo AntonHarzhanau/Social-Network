@@ -2,8 +2,8 @@
 
 namespace App\Modules\User\Application\Action;
 
-use App\Modules\User\Application\DTO\UserDetailsDTO;
 use App\Modules\User\Application\Mapper\UserMapper;
+use App\Modules\User\Contracts\DTO\UserDetailsDTO;
 use App\Modules\User\Domain\Exception\UserNotFoundException;
 use App\Modules\User\Domain\Repository\UserRepositoryInterface;
 

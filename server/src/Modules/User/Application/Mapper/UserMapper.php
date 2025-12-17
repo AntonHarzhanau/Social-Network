@@ -2,8 +2,8 @@
 
 namespace App\Modules\User\Application\Mapper;
 
-use App\Modules\User\Application\DTO\UserPreviewDTO;
-use App\Modules\User\Application\DTO\UserDetailsDTO;
+use App\Modules\User\Contracts\DTO\UserDetailsDTO;
+use App\Modules\User\Contracts\DTO\UserPreviewDTO;
 use App\Modules\User\Domain\Entity\User;
 
 final class UserMapper

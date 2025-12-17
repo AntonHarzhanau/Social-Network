@@ -17,12 +17,11 @@ final class AcceptFriendRequestAction
 
     public function execute(Uuid $currentUserId, Uuid $requesterId): void
     {
-        $currentUser = $this->users->getUserEntityOrFail($currentUserId);
-        $requester = $this->users->getUserEntityOrFail($requesterId);
+        $friendship = $this->friendships->findFriendship($currentUserId, $requesterId);
 
-        $friendship = $this->friendships->findFriendship($currentUser, $requester);
-
-        if ($friendship === null || $friendship->getAddressee() !== $currentUser) {
+        if ($friendship === null 
+        || $friendship->getAddressee()->getId() !== $currentUserId 
+        || $friendship->getStatus() !== FriendshipStatusEnum::PENDING) {
             throw new PendingRequestNotFoundException();
         }
 

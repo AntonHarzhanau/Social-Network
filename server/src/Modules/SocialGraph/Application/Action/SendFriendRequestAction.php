@@ -26,7 +26,7 @@ final class SendFriendRequestAction
         $requester = $this->users->getUserEntityOrFail($requesterId);
         $addressee = $this->users->getUserEntityOrFail($addresseeId);
 
-        if ($this->friendships->findFriendship($requester, $addressee) !== null) {
+        if ($this->friendships->findFriendship($requesterId, $addresseeId) !== null) {
             throw new FriendshipAlreadyExistsException(); 
         }
 

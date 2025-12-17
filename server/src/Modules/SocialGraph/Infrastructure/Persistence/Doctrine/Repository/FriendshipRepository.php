@@ -4,10 +4,10 @@ namespace App\Modules\SocialGraph\Infrastructure\Persistence\Doctrine\Repository
 
 use App\Modules\SocialGraph\Domain\Entity\Friendship;
 use App\Enum\FriendshipStatusEnum;
-use App\Modules\User\Domain\Entity\User;
 use App\Modules\SocialGraph\Domain\Repository\FriendshipRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends ServiceEntityRepository<Friendship>
@@ -37,12 +37,18 @@ class FriendshipRepository extends ServiceEntityRepository implements Friendship
         }
     }
 
-    public function findFriendship(User $userA, User $userB, ?FriendshipStatusEnum $status = null): ?Friendship
-    {
+    public function findFriendship(
+        Uuid $userAId,
+        Uuid $userBId,
+        ?FriendshipStatusEnum $status = null
+    ): ?Friendship {
         $qb = $this->createQueryBuilder('f')
-            ->where('(f.requester = :userA AND f.addressee = :userB) OR (f.requester = :userB AND f.addressee = :userA)')
-            ->setParameter('userA', $userA)
-            ->setParameter('userB', $userB);
+            ->where('
+            IDENTITY(f.requester) = :userA AND IDENTITY(f.addressee) = :userB 
+            OR IDENTITY(f.requester) = :userB AND IDENTITY(f.addressee) = :userA
+            ')
+            ->setParameter('userA', $userAId)
+            ->setParameter('userB', $userBId);
 
         if ($status !== null) {
             $qb->andWhere('f.status = :status')
@@ -53,12 +59,17 @@ class FriendshipRepository extends ServiceEntityRepository implements Friendship
     }
 
     /**
-     * @return Friendship[]
+     * @return list<string>
      */
-    public function findUserFriends(User $user): array
+    public function findUserFriends(Uuid $user): array
     {
         $qb = $this->createQueryBuilder('f')
-            ->where('f.requester = :user OR f.addressee = :user')
+            ->select('Case 
+                When IDENTITY(f.requester) = :user 
+                Then IDENTITY(f.addressee) 
+                Else IDENTITY(f.requester)
+                End as friendId')
+            ->where('IDENTITY(f.requester) = :user OR IDENTITY(f.addressee) = :user')
             ->andWhere('f.status = :status')
             ->setParameter('status', FriendshipStatusEnum::ACCEPTED)
             ->setParameter('user', $user);
@@ -67,17 +78,17 @@ class FriendshipRepository extends ServiceEntityRepository implements Friendship
     }
 
     /**
-     * @return Friendship[]
+     * @return list<string>
      */
-    public function findReceivedFriendRequests(User $user): array
+    public function findReceivedFriendRequests(Uuid $userId): array
     {
         $qb = $this->createQueryBuilder('f')
-            ->leftJoin('f.requester', 'r')
-            ->addSelect('r')
-            ->where('f.addressee = :user')
+            ->select('IDENTITY(f.requester) AS requesterId')
+            ->where('IDENTITY(f.addressee) = :user')
             ->andWhere('f.status = :status')
-            ->setParameter('user', $user)
+            ->setParameter('user', $userId)
             ->setParameter('status', FriendshipStatusEnum::PENDING);
+
 
         return $qb->getQuery()->getResult();
     }
@@ -85,14 +96,13 @@ class FriendshipRepository extends ServiceEntityRepository implements Friendship
     /**
      * @return Friendship[]
      */
-    public function findSentFriendRequests(User $user): array
+    public function findSentFriendRequests(Uuid $userId): array
     {
         $qb = $this->createQueryBuilder('f')
-            ->leftJoin('f.addressee', 'a')
-            ->addSelect('a')
-            ->where('f.requester = :user')
+            ->select('IDENTITY(f.addressee) AS addresseeId')
+            ->where('IDENTITY(f.requester) = :user')
             ->andWhere('f.status = :status')
-            ->setParameter('user', $user)
+            ->setParameter('user', $userId)
             ->setParameter('status', FriendshipStatusEnum::PENDING);
 
         return $qb->getQuery()->getResult();

@@ -2,10 +2,10 @@
 
 namespace App\Modules\SocialGraph\Infrastructure\Controller;
 
-use App\Factory\User\UserFactory;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\SocialGraph\Application\Action\ListFriendsAction;
 use App\Modules\SocialGraph\Application\Action\RemoveFriendAction;
+use App\Modules\User\Api\UserApiInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
@@ -18,15 +18,16 @@ final class FriendsController extends AbstractController
     public function __construct(
         private readonly ListFriendsAction $listFriends,
         private readonly RemoveFriendAction $removeFriend,
-        private readonly UserFactory $userFactory,
+        private readonly UserApiInterface $userApi,
     ) {}
 
     #[Route('', name: 'friends_list', methods: ['GET'], format: 'json')]
     public function list(#[CurrentUser] User $currentUser): JsonResponse
     {
-        $friends = $this->listFriends->execute($currentUser->getId());
+        $userIds = $this->listFriends->execute($currentUser->getId());
+        $previews = $this->userApi->findPreviewsByIds($userIds);
 
-        return $this->json($this->mapUsers($friends), JsonResponse::HTTP_OK, [], ['groups' => 'user:preview']);
+        return $this->json($previews, JsonResponse::HTTP_OK);
     }
 
 
@@ -41,8 +42,4 @@ final class FriendsController extends AbstractController
         return $this->json(['message' => 'Friend removed'], JsonResponse::HTTP_OK);
     }
 
-    private function mapUsers(array $users): array
-    {
-        return array_map(fn(User $user) => $this->userFactory->toUserResponseDTO($user), $users);
-    }
 }

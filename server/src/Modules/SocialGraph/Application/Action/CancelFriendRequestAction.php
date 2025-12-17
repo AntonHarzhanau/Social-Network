@@ -2,6 +2,7 @@
 
 namespace App\Modules\SocialGraph\Application\Action;
 
+use App\Enum\FriendshipStatusEnum;
 use App\Modules\SocialGraph\Application\Exception\PendingRequestNotFoundException;
 use App\Modules\SocialGraph\Application\Port\UserDirectoryInterface;
 use App\Modules\SocialGraph\Domain\Repository\FriendshipRepositoryInterface;
@@ -16,12 +17,10 @@ final class CancelFriendRequestAction
 
     public function execute(Uuid $currentUserId, Uuid $addresseeId): void
     {
-        $currentUser = $this->users->getUserEntityOrFail($currentUserId);
-        $addressee = $this->users->getUserEntityOrFail($addresseeId);
 
-        $friendship = $this->friendships->findFriendship($currentUser, $addressee);
+        $friendship = $this->friendships->findFriendship($currentUserId, $addresseeId, FriendshipStatusEnum::PENDING);
 
-        if ($friendship === null || $friendship->getRequester() !== $currentUser) {
+        if ($friendship === null || $friendship->getRequester()->getId() !== $currentUserId) {
             throw new PendingRequestNotFoundException(); 
         }
 
