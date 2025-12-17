@@ -4,7 +4,7 @@ namespace App\Modules\Chat\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Repository\ChatRepositoryInterface;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 use Doctrine\Persistence\ManagerRegistry;
@@ -49,6 +49,13 @@ class ChatRepository extends ServiceEntityRepository implements ChatRepositoryIn
         $chats = $qb->getQuery()->getResult();
 
         return $chats;
+    }
+
+    public function save(Chat $chat): void
+    {
+        $em = $this->getEntityManager();
+        $em->persist($chat);
+        $em->flush();
     }
 
 }

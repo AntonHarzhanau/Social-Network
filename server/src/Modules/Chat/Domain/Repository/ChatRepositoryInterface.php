@@ -2,7 +2,8 @@
 
 namespace App\Modules\Chat\Domain\Repository;
 
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\Chat\Domain\Entity\Chat;
+use App\Modules\User\Domain\Entity\User;
 
 interface ChatRepositoryInterface
 {
@@ -11,4 +12,6 @@ interface ChatRepositoryInterface
         int $page = 1,
         int $limit = 10
     ): array;
+
+    public function save(Chat $chat): void;
 }

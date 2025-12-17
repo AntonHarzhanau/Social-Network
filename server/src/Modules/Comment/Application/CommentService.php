@@ -7,7 +7,7 @@ use App\Factory\Comment\CommentFactory;
 use App\Modules\Comment\Domain\Entity\Comment;
 use App\Modules\Comment\Domain\Repository\CommentRepositoryInterface;
 use App\Modules\Feed\Domain\Entity\Post;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class CommentService

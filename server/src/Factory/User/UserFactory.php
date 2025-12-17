@@ -3,7 +3,7 @@
 namespace App\Factory\User;
 
 use App\DTO\User\UserResponseDTO;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 
 final readonly class UserFactory
 {

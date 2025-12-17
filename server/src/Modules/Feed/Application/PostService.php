@@ -7,10 +7,9 @@ use App\DTO\Post\PostFeedItemDTO;
 use App\DTO\Post\PostLikeResponseDTO;
 use App\DTO\Post\UpdatePostDTO;
 use App\Factory\Post\PostFactory;
-use App\Moduleds\Feed\Domain\Repository\PostRepositoryInterface;
 use App\Modules\Feed\Domain\Entity\Post;
-use App\Modules\Feed\Domain\Repository\PostRepositoryInterface as RepositoryPostRepositoryInterface;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
+use App\Modules\User\Domain\Entity\User;
 use App\Modules\Media\Domain\Entity\PostMediaBinding;
 use App\Modules\Media\Infrastructure\Persistence\Doctrine\Repository\MediaAssetRepository;
 use App\Modules\Media\Infrastructure\Persistence\Doctrine\Repository\PostMediaBindingRepository;
@@ -19,7 +18,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 class PostService
 {
     public function __construct(
-        private readonly RepositoryPostRepositoryInterface $postRepository,
+        private readonly PostRepositoryInterface $postRepository,
         private readonly PostFactory $postFactory,
         private readonly MediaAssetRepository $mediaAssetRepository,
         private readonly PostMediaBindingRepository $postMediaBindingRepository,

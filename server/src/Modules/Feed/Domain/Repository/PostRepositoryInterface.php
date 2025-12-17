@@ -3,7 +3,7 @@
 namespace App\Modules\Feed\Domain\Repository;
 
 use App\Modules\Feed\Domain\Entity\Post;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 
 interface PostRepositoryInterface
 {

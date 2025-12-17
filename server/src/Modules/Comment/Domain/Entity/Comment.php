@@ -3,7 +3,7 @@
 namespace App\Modules\Comment\Domain\Entity;
 
 use App\Modules\Feed\Domain\Entity\Post;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;

@@ -2,6 +2,7 @@
 
 namespace App\Modules\User\Infrastructure\Persistence\Doctrine\Repository;
 
+use App\Modules\User\Api\UserApiInterface;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Domain\Repository\UserRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -13,7 +14,7 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 /**
  * @extends ServiceEntityRepository<User>
  */
-class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface, UserRepositoryInterface
+class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface, UserRepositoryInterface, UserApiInterface
 {
     public function __construct(ManagerRegistry $registry)
     {

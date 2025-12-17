@@ -8,7 +8,7 @@ use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Entity\ChatParticipant;
 use App\Modules\Chat\Domain\Entity\DirectChatIndex;
 use App\Modules\Chat\Domain\Repository\DirectChatIndexRepositoryInterface;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 

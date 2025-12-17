@@ -8,8 +8,8 @@ use App\Factory\Chat\ChatFactory;
 use App\Modules\Chat\Application\ChatService;
 use App\Modules\Chat\Application\DirectChatService;
 use App\Modules\Chat\Application\MessageService;
-use App\Modules\Identity\Domain\Entity\User;
-use App\Modules\Identity\Infrastructure\Persistence\Doctrine\Repository\UserRepository;
+use App\Modules\User\Domain\Entity\User;
+use App\Modules\User\Domain\Repository\UserRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,9 +21,9 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 final class ChatController extends AbstractController
 {
     public function __construct(
-        private readonly UserRepository $userRepository,
+        private readonly UserRepositoryInterface $userRepository,
         private readonly ChatService $chatService,
-        private readonly EntityManagerInterface $em,
+        // private readonly EntityManagerInterface $em,
         private readonly ChatFactory $chatFactory,
     ) {}
 
@@ -108,7 +108,7 @@ final class ChatController extends AbstractController
             return $this->json(['error' => 'Participant ID and content are required'], JsonResponse::HTTP_BAD_REQUEST);
         }
 
-        $otherUser = $this->userRepository->find($id);
+        $otherUser = $this->userRepository->findById($id);
         if (!$otherUser) {
             return $this->json(['error' => 'Participant not found'], JsonResponse::HTTP_NOT_FOUND);
         }
@@ -117,8 +117,7 @@ final class ChatController extends AbstractController
 
         $message = $messageService->createMessage($chat, $currentUser, $content);
         $chat->setLastMessage($message);
-        $this->em->persist($chat);
-        $this->em->flush();
+        $this->chatService->saveChat($chat); 
 
         return $this->json([
             'id' => $chat->getId(),
@@ -161,8 +160,7 @@ final class ChatController extends AbstractController
 
         $message = $messageService->createMessage($chat, $currentUser, $content);
         $chat->setLastMessage($message);
-        $this->em->persist($chat);
-        $this->em->flush();
+        $this->chatService->saveChat($chat);
 
         return $this->json($message, JsonResponse::HTTP_CREATED, [], ['groups' => 'message:detail']);
     }

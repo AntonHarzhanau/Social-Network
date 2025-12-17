@@ -7,7 +7,7 @@ use App\DTO\Message\MessageResponseDTO;
 use App\DTO\User\UserResponseDTO;
 use App\Enum\ChatTypeEnum;
 use App\Modules\Chat\Domain\Entity\Chat;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 
 class ChatFactory
 {

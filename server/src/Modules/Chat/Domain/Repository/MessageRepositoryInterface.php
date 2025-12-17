@@ -4,7 +4,7 @@ namespace App\Modules\Chat\Domain\Repository;
 
 use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Entity\Message;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 
 interface MessageRepositoryInterface
 {

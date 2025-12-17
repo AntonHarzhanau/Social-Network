@@ -3,7 +3,7 @@
 namespace App\Modules\Chat\Domain\Entity;
 
 use App\Enum\ChatParticipantRoleEnum;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;

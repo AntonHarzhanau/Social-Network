@@ -3,7 +3,7 @@
 namespace App\Modules\Chat\Domain\Entity;
 
 use App\Enum\ChatTypeEnum;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;

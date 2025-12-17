@@ -5,7 +5,7 @@ namespace App\Modules\Chat\Infrastructure\Persistence\Doctrine\Repository;
 use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Entity\Message;
 use App\Modules\Chat\Domain\Repository\MessageRepositoryInterface;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Schema\Exception\NotImplemented;
 use Doctrine\Persistence\ManagerRegistry;

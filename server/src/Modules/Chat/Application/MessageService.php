@@ -5,7 +5,7 @@ namespace App\Modules\Chat\Application;
 use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Entity\Message;
 use App\Modules\Chat\Domain\Repository\MessageRepositoryInterface;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 
 class MessageService
 {

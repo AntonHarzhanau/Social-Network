@@ -2,7 +2,7 @@
 
 namespace App\Modules\Media\Infrastructure\Controller;
 
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use App\Modules\Media\Application\MediaStorageService;
 use App\Modules\Media\Domain\Entity\MediaAsset;
 use Doctrine\ORM\EntityManagerInterface;

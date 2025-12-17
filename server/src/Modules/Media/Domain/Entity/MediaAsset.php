@@ -3,7 +3,7 @@
 namespace App\Modules\Media\Domain\Entity;
 
 use App\Enum\FileTypeEnum;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;

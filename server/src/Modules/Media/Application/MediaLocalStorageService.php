@@ -3,7 +3,7 @@
 namespace App\Modules\Media\Application;
 
 use App\Enum\FileTypeEnum;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use App\Modules\Media\Domain\Entity\MediaAsset;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;

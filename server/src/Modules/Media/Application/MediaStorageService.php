@@ -5,7 +5,7 @@ namespace App\Modules\Media\Application;
 use App\DTO\Media\MediaResponseDTO;
 use App\Enum\FileTypeEnum;
 use App\Factory\Media\MediaFactory;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use App\Modules\Media\Domain\Entity\MediaAsset;
 use Aws\S3\S3Client;
 use Doctrine\ORM\EntityManagerInterface;

@@ -6,7 +6,7 @@ use App\DTO\Message\MessageResponseDTO;
 use App\DTO\User\UserResponseDTO;
 use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Entity\Message;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use App\Modules\Shared\Infrastructure\ChatNotifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

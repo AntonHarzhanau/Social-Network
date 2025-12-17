@@ -5,7 +5,7 @@ namespace App\Modules\Comment\Infrastructure\Persistence\Doctrine\Repository;
 use App\Modules\Comment\Domain\Entity\Comment;
 use App\Modules\Comment\Domain\Repository\CommentRepositoryInterface;
 use App\Modules\Feed\Domain\Entity\Post;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

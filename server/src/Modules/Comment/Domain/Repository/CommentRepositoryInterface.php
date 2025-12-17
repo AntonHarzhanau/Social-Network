@@ -4,7 +4,7 @@ namespace App\Modules\Comment\Domain\Repository;
 
 use App\Modules\Comment\Domain\Entity\Comment;
 use App\Modules\Feed\Domain\Entity\Post;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 
 interface CommentRepositoryInterface
 {

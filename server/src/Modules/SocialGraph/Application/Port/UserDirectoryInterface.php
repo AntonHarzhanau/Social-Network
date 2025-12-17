@@ -2,10 +2,10 @@
 
 namespace App\Modules\SocialGraph\Application\Port;
 
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use Symfony\Component\Uid\Uuid;
 
 interface UserDirectoryInterface
 {
-    public function getUserEntityOrFail(Uuid $userId): User;
+    public function getUserEntityOrFail(string $userId): User;
 }

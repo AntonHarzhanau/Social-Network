@@ -10,7 +10,7 @@ use App\Factory\Post\PostFactory;
 use App\Modules\Comment\Application\CommentService;
 use App\Modules\Feed\Application\PostService;
 use App\Modules\Feed\Domain\Entity\Post;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

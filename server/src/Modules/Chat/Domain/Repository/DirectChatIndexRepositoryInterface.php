@@ -3,7 +3,7 @@
 namespace App\Modules\Chat\Domain\Repository;
 
 use App\Modules\Chat\Domain\Entity\DirectChatIndex;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 
 interface DirectChatIndexRepositoryInterface
 {

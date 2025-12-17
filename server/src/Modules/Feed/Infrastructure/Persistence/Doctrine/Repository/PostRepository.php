@@ -5,7 +5,7 @@ namespace App\Modules\Feed\Infrastructure\Persistence\Doctrine\Repository;
 use App\DTO\Post\PostWithLikeFlagDTO;
 use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
 use App\Modules\Feed\Domain\Entity\Post;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

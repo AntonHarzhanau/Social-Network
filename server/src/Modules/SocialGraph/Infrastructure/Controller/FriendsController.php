@@ -3,7 +3,7 @@
 namespace App\Modules\SocialGraph\Infrastructure\Controller;
 
 use App\Factory\User\UserFactory;
-use App\Modules\Identity\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\User;
 use App\Modules\SocialGraph\Application\Action\ListFriendsAction;
 use App\Modules\SocialGraph\Application\Action\RemoveFriendAction;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
