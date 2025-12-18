@@ -2,6 +2,6 @@
 
 namespace App\Modules\Media\Domain\Repository;
 
-interface MediaassetRepositoryInterface
+interface UserMediaBindingRepositoryInterface
 {
 }

@@ -2,10 +2,13 @@
 
 namespace App\Modules\Media\Infrastructure\Controller;
 
-use App\Modules\User\Domain\Entity\User;
-use App\Modules\Media\Application\MediaStorageService;
+use App\Modules\Media\Application\Action\DeleteMediaAction;
+use App\Modules\Media\Application\Action\GetMediaDownLoadUrlAction;
+use App\Modules\Media\Application\Action\ListMyMediaAction;
+use App\Modules\Media\Application\Action\UploadMediaAction;
 use App\Modules\Media\Domain\Entity\MediaAsset;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Modules\User\Domain\Entity\User;
+use App\Modules\Media\Domain\Repository\MediaAssetRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -13,14 +16,18 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\Uid\Uuid;
 
 #[Route('/api/media')]
 final class MediaController extends AbstractController
 {
 
     public function __construct(
-        private readonly MediaStorageService $mediaStorage,
-        private EntityManagerInterface $em,
+        private readonly UploadMediaAction $uploadMedia,
+        private readonly ListMyMediaAction $listMyMedia,
+        private readonly DeleteMediaAction $deleteMedia,
+        private readonly GetMediaDownLoadUrlAction $getDownLoadUrl,
+        private readonly MediaAssetRepositoryInterface $mediaAssetRepository,
     ) {}
 
     #[Route('', name: 'upload_media', methods: ['POST'], format: 'json')]
@@ -32,17 +39,25 @@ final class MediaController extends AbstractController
             return $this->json(['error' => 'No file uploaded'], 400);
         }
 
-        $media = $this->mediaStorage->storeFile($file, $user);
+        $media = ($this->uploadMedia)($file, $user);
 
-        return $this->json($media, JsonResponse::HTTP_CREATED);
+        return $this->json([
+            'id' => $media->getId(),
+            'fileType' => $media->getFileType(),
+            'mimeType' => $media->getMimeType(),
+            'sizeByte' => $media->getSizeByte(),
+            'url' => ($this->getDownLoadUrl)($media),
+            'createdAt' => $media->getCreatedAt()->format(\DateTime::ATOM),
+        ], JsonResponse::HTTP_CREATED);
     }
 
     #[Route('', name: 'list_media', methods: ['GET'], format: 'json')]
-    public function listMedia(#[CurrentUser] User $user): JsonResponse
+    public function listMedia(#[CurrentUser] User $user, Request $request): JsonResponse
     {
-        $repo = $this->em->getRepository(MediaAsset::class);
+        $limit = max(1, min(100, (int) $request->query->get('limit', '20')));
+        $offset = max(0, (int) $request->query->get('offset', '0'));
 
-        $items = $repo->findAll();
+        $items = ($this->listMyMedia)($user->getId(), $limit, $offset);
 
         $data = array_map(function (MediaAsset $media) {
             return [
@@ -50,39 +65,52 @@ final class MediaController extends AbstractController
                 'fileType' => $media->getFileType(),
                 'mimeType' => $media->getMimeType(),
                 'sizeByte' => $media->getSizeByte(),
-                'url' => $this->mediaStorage->getPublicUrl($media),
+                'url' => ($this->getDownLoadUrl)($media),
                 'createdAt' => $media->getCreatedAt()->format(\DateTime::ATOM),
             ];
         }, $items);
-        return $this->json($data);
+        return $this->json($data, JsonResponse::HTTP_OK);
     }
 
-    
+
     #[Route('/{id}', name: 'download_media', methods: ['GET'], format: 'json')]
-    public function download(string $id): Response
+    public function download(string $id, #[CurrentUser] User $user, Request $request): Response
     {
-        $repo = $this->em->getRepository(MediaAsset::class);
-        $media = $repo->find($id);
+       try {
+        $uuid = Uuid::fromString($id);
+       } catch (\Throwable $e) {
+        return $this->json(['error' => 'Not found'], JsonResponse::HTTP_NOT_FOUND);
+       }
 
-        if (!$media || $media->getDeletedAt()) {
-            return $this->json(['error' => 'Not found'], 404);
-        }
+       $media = $this->mediaAssetRepository->findById($uuid);
+       if (!$media || $media->getOwner()->getId() !== $user->getId()) {
+        return $this->json(['error' => 'Not found'], JsonResponse::HTTP_NOT_FOUND);
+       }
 
-        $url = $this->mediaStorage->getPublicUrl($media);
+       $signed = (bool) $request->query->get('signed', false);
+       $url = ($this->getDownLoadUrl)($media, $signed);
+       return new RedirectResponse($url, Response::HTTP_FOUND);
 
-        return new RedirectResponse($url, 302);
     }
 
 
     #[Route('/{id}', name: 'delete_media', methods: ['DELETE'], format: 'json')]
-    public function delete(MediaAsset $media): JsonResponse
+    public function delete(string $id, #[CurrentUser] User $user): JsonResponse
     {
-        if ($media->getDeletedAt()) {
-            return $this->json(['error' => 'Not found'], 404);
-        }
+       try {
+        $uuid = Uuid::fromString($id);
+       } catch (\Throwable $e) {
+        return $this->json(['error' => 'Not found'], JsonResponse::HTTP_NOT_FOUND);
+       }
 
-        $this->mediaStorage->delete($media);
+       $media = $this->mediaAssetRepository->findById($uuid);
+       if (!$media || $media->getOwner()->getId() !== $user->getId()) {
+        return $this->json(['error' => 'Not found'], JsonResponse::HTTP_NOT_FOUND);
+       }
 
-        return $this->json(null, 204);
+       ($this->deleteMedia)($media);
+
+       return $this->json(null, JsonResponse::HTTP_NO_CONTENT);
     }
+
 }

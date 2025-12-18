@@ -6,6 +6,7 @@ use App\Modules\Media\Domain\Entity\MediaAsset;
 use App\Modules\Media\Domain\Repository\MediaassetRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends ServiceEntityRepository<MediaAsset>
@@ -17,4 +18,40 @@ class MediaAssetRepository extends ServiceEntityRepository implements Mediaasset
         parent::__construct($registry, MediaAsset::class);
     }
 
+    public function save(MediaAsset $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function delete(MediaAsset $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function findById(Uuid $id): ?MediaAsset
+    {
+        return $this->find($id);
+    }
+
+    public function findByOwnerId(Uuid $ownerId, int $limit = 20, int $offset = 0): array
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.ownerId = :ownerId')
+            ->setParameter('ownerId', $ownerId)
+            ->orderBy('m.createdAt', 'DESC')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    
 }
