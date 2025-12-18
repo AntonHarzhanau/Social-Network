@@ -5,7 +5,6 @@ namespace App\Modules\SocialGraph\Infrastructure\Controller;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\SocialGraph\Application\Action\ListFriendsAction;
 use App\Modules\SocialGraph\Application\Action\RemoveFriendAction;
-use App\Modules\User\Api\UserApiInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
@@ -18,14 +17,13 @@ final class FriendsController extends AbstractController
     public function __construct(
         private readonly ListFriendsAction $listFriends,
         private readonly RemoveFriendAction $removeFriend,
-        private readonly UserApiInterface $userApi,
     ) {}
 
     #[Route('', name: 'friends_list', methods: ['GET'], format: 'json')]
     public function list(#[CurrentUser] User $currentUser): JsonResponse
     {
-        $userIds = $this->listFriends->execute($currentUser->getId());
-        $previews = $this->userApi->findPreviewsByIds($userIds);
+        $previews = $this->listFriends->execute($currentUser->getId());
+            
         
         return $this->json($previews, JsonResponse::HTTP_OK);
     }

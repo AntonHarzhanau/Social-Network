@@ -20,4 +20,10 @@ final class UserDirectoryAdapter implements UserDirectoryInterface
 
         return $user;
     }
+
+    /** @return list<UserPreview> */
+    public function findPreviewsByIds(array $ids): array
+    {
+        return $this->userService->findPreviewsByIds($ids);
+    }
 }

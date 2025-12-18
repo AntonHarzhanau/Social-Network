@@ -10,12 +10,15 @@ final class ListFriendsAction
 {
     public function __construct(
         private readonly FriendshipRepositoryInterface $friendships,
+        private readonly UserDirectoryInterface $users,
     ) {}
 
-    /** @return User[] */
+    /** @return UserPreview[] */
     public function execute(Uuid $currentUserId): array
     {
         $friendIds = $this->friendships->findUserFriends($currentUserId);
-        return $friendIds;
+
+        $previews = $this->users->findPreviewsByIds($friendIds);
+        return $previews;
     }
 }

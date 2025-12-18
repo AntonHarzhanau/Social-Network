@@ -154,20 +154,106 @@ final class FriendsRequestsControllerTest extends ApiWebTestCase
             json_encode(['message' => 'Friend request canceled'], JSON_THROW_ON_ERROR),
             $client->getResponse()->getContent() ?? ''
         );
-
     }
 
-    // public function testFriendsDeleteInvalidUuidReturns500(): void
-    // {
-    //     [$client] = $this->createAuthenticatedClient();
+    public function testFriendsDeleteInvalidUuidReturns500(): void
+    {
+        [$client] = $this->createAuthenticatedClient();
 
-    //     $client->request('DELETE', '/api/friends/not-a-uuid');
+        $client->request('DELETE', '/api/friends-requests/not-a-uuid');
 
-    //     // Текущее поведение контроллера: try/catch ловит Throwable и отдаёт 500
-    //     self::assertResponseStatusCodeSame(JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        //Currently, invalid UUIDs lead to a 500 error due to exception in controller.
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
 
-    //     $json = json_decode($client->getResponse()->getContent() ?? '', true);
-    //     self::assertIsArray($json);
-    //     self::assertArrayHasKey('error', $json);
-    // }
+        $json = json_decode($client->getResponse()->getContent() ?? '', true, 512, JSON_THROW_ON_ERROR);
+        self::assertArrayHasKey('error', $json);
+        // self::assertStringContainsString('Invalid UUID string', $json['error']);
+    }
+
+    public function testFriendsSendRequest(): void
+    {
+        [$client, $currentUser] = $this->createAuthenticatedClient(
+            ['email' => 'anton@test.local']
+        );
+
+        $fakeFriendId = Uuid::v4();
+        $client->request('POST', '/api/friends-requests', [
+            'friendId' => (string) $fakeFriendId,
+        ]);
+
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_NOT_FOUND);
+        
+
+        $friend = $this->createUser([
+            'email' => 'friend@test.local',
+            'username' => 'friend',
+        ]);
+
+        $client->request('POST', '/api/friends-requests', [
+            'friendId' => (string) $friend->getId(),
+        ]);
+
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_OK);
+
+        self::assertJsonStringEqualsJsonString(
+            json_encode(['message' => 'Friend request sent'], JSON_THROW_ON_ERROR),
+            $client->getResponse()->getContent() ?? ''
+        );
+    }
+
+    public function testFriendsAcceptRequest(): void
+    {
+        [$client, $currentUser] = $this->createAuthenticatedClient(
+            ['email' => 'anton@test.local']
+        );
+
+        $friend = $this->createUser([
+            'email' => 'friend@test.local',
+            'username' => 'friend',
+        ]);
+
+        $this->createFriendship(
+            static::getContainer()->get(EntityManagerInterface::class),
+            $friend,
+            $currentUser,
+            FriendshipStatusEnum::PENDING
+        );
+
+        $client->request('POST', '/api/friends-requests/' . (string) $friend->getId() . '/accept');
+
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_OK);
+
+        self::assertJsonStringEqualsJsonString(
+            json_encode(['message' => 'Friend request accepted'], JSON_THROW_ON_ERROR),
+            $client->getResponse()->getContent() ?? ''
+        );
+    }
+
+    public function testFriendsDeclineRequest(): void
+    {
+        [$client, $currentUser] = $this->createAuthenticatedClient(
+            ['email' => 'anton@test.local']
+        );
+
+        $friend = $this->createUser([
+            'email' => 'friend@test.local',
+            'username' => 'friend',
+        ]);
+
+        $this->createFriendship(
+            static::getContainer()->get(EntityManagerInterface::class),
+            $friend,
+            $currentUser,
+            FriendshipStatusEnum::PENDING
+        );
+
+        $client->request('POST', '/api/friends-requests/' . (string) $friend->getId() . '/decline');
+
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_OK);
+
+        self::assertJsonStringEqualsJsonString(
+            json_encode(['message' => 'Friend request declined'], JSON_THROW_ON_ERROR),
+            $client->getResponse()->getContent() ?? ''
+        );
+    }
 }

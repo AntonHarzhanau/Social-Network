@@ -10,7 +10,6 @@ use App\Modules\SocialGraph\Application\Action\DeclineFriendRequestAction;
 use App\Modules\SocialGraph\Application\Action\ListFriendRequestsAction;
 use App\Modules\SocialGraph\Application\Action\SendFriendRequestAction;
 use App\Modules\SocialGraph\Infrastructure\Http\FriendIdRequest;
-use App\Modules\User\Api\UserApiInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,7 +28,6 @@ final class FriendsRequestsController extends AbstractController
         private readonly AcceptFriendRequestAction $acceptFriendRequest,
         private readonly DeclineFriendRequestAction $declineFriendRequest,
         private readonly CancelFriendRequestAction $cancelFriendRequest,
-        private readonly UserApiInterface $userApi,
     ) {}
 
 
@@ -58,8 +56,7 @@ final class FriendsRequestsController extends AbstractController
             return $this->json(['error' => 'Invalid type parameter'], JsonResponse::HTTP_BAD_REQUEST);
         }
 
-        $userIds = $this->listFriendRequests->execute($currentUser->getId(), $type);
-        $previews = $this->userApi->findPreviewsByIds($userIds);
+        $previews = $this->listFriendRequests->execute($currentUser->getId(), $type);
 
         return $this->json($previews, JsonResponse::HTTP_OK);
     }
@@ -84,8 +81,12 @@ final class FriendsRequestsController extends AbstractController
     #[Route('/{addresseeId}', methods: ['DELETE'])]
     public function cancel(#[CurrentUser] User $currentUser, string $addresseeId): JsonResponse
     {
-        $this->cancelFriendRequest->execute($currentUser->getId(), Uuid::fromString($addresseeId));
+        try {
+            $this->cancelFriendRequest->execute($currentUser->getId(), Uuid::fromString($addresseeId));
+        } catch (\Throwable $e) {
+            // TODO: change to proper error handling
+            return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
         return $this->json(['message' => 'Friend request canceled'], JsonResponse::HTTP_OK);
     }
-
 }

@@ -4,7 +4,6 @@ namespace App\Modules\SocialGraph\Application\Action;
 
 use App\Enum\FriendshipStatusEnum;
 use App\Modules\SocialGraph\Application\Exception\PendingRequestNotFoundException;
-use App\Modules\SocialGraph\Application\Port\UserDirectoryInterface;
 use App\Modules\SocialGraph\Domain\Repository\FriendshipRepositoryInterface;
 use Symfony\Component\Uid\Uuid;
 
