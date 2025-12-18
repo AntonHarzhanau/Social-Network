@@ -138,7 +138,9 @@ final class FriendsRequestsControllerTest extends ApiWebTestCase
 
     public function testFriendsDeleteOk(): void
     {
-        [$client, $currentUser] = $this->createAuthenticatedClient();
+        [$client, $currentUser] = $this->createAuthenticatedClient(
+            ['email' => 'anton@test.local']
+        );
 
         $em = static::getContainer()->get(EntityManagerInterface::class);
 
@@ -182,7 +184,7 @@ final class FriendsRequestsControllerTest extends ApiWebTestCase
         ]);
 
         self::assertResponseStatusCodeSame(JsonResponse::HTTP_NOT_FOUND);
-        
+
 
         $friend = $this->createUser([
             'email' => 'friend@test.local',

@@ -7,7 +7,7 @@ use Symfony\Component\Uid\Uuid;
 
 interface UserDirectoryInterface
 {
-    public function getUserEntityOrFail(string $userId): User;
+    public function getUser(string $userId): ?User;
     
     /** @return list<UserPreview> */
     public function findPreviewsByIds(array $ids): array;

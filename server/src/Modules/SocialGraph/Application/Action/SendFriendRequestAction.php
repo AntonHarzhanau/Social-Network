@@ -23,8 +23,12 @@ final class SendFriendRequestAction
            throw new CannotFriendYourselfException(); 
         }
 
-        $requester = $this->users->getUserEntityOrFail($requesterId);
-        $addressee = $this->users->getUserEntityOrFail($addresseeId);
+        $requester = $this->users->getUser($requesterId);
+        $addressee = $this->users->getUser($addresseeId);
+
+        if (!$requester || !$addressee) {
+            throw new \InvalidArgumentException('Requester or addressee user not found');
+        }
 
         if ($this->friendships->findFriendship($requesterId, $addresseeId) !== null) {
             throw new FriendshipAlreadyExistsException(); 

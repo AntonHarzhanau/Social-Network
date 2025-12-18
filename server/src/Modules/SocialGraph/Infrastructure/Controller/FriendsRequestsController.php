@@ -36,7 +36,11 @@ final class FriendsRequestsController extends AbstractController
         #[CurrentUser] User $currentUser,
         #[MapRequestPayload] FriendIdRequest $req
     ): JsonResponse {
+       try {
         $this->sendFriendRequest->execute($currentUser->getId(), Uuid::fromString($req->friendId));
+       } catch (\Throwable $e) {
+        return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_NOT_FOUND);
+       } 
 
         return $this->json(['message' => 'Friend request sent'], JsonResponse::HTTP_OK);
     }

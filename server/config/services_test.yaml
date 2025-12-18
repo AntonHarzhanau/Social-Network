@@ -1,0 +1,5 @@
+services:
+  App\Tests\Modules\Media\FakeMediaStorage: ~
+
+  App\Modules\Media\Application\Port\MediaStorageInterface:
+    alias: App\Tests\Modules\Media\FakeMediaStorage

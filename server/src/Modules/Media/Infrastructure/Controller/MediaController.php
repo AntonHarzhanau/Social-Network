@@ -36,14 +36,14 @@ final class MediaController extends AbstractController
 
         $file = $request->files->get('file');
         if (!$file) {
-            return $this->json(['error' => 'No file uploaded'], 400);
+            return $this->json(['error' => 'No file uploaded'], JsonResponse::HTTP_BAD_REQUEST);
         }
 
         $media = ($this->uploadMedia)($file, $user);
 
         return $this->json([
-            'id' => $media->getId(),
-            'fileType' => $media->getFileType(),
+            'id' => $media->getId()->toRfc4122(),
+            'fileType' => $media->getFileType()?->value,
             'mimeType' => $media->getMimeType(),
             'sizeByte' => $media->getSizeByte(),
             'url' => ($this->getDownLoadUrl)($media),
@@ -61,8 +61,8 @@ final class MediaController extends AbstractController
 
         $data = array_map(function (MediaAsset $media) {
             return [
-                'id' => $media->getId(),
-                'fileType' => $media->getFileType(),
+                'id' => $media->getId()->toRfc4122(),
+                'fileType' => $media->getFileType()?->value,
                 'mimeType' => $media->getMimeType(),
                 'sizeByte' => $media->getSizeByte(),
                 'url' => ($this->getDownLoadUrl)($media),
@@ -76,41 +76,39 @@ final class MediaController extends AbstractController
     #[Route('/{id}', name: 'download_media', methods: ['GET'], format: 'json')]
     public function download(string $id, #[CurrentUser] User $user, Request $request): Response
     {
-       try {
-        $uuid = Uuid::fromString($id);
-       } catch (\Throwable $e) {
-        return $this->json(['error' => 'Not found'], JsonResponse::HTTP_NOT_FOUND);
-       }
+        try {
+            $uuid = Uuid::fromString($id);
+        } catch (\Throwable $e) {
+            return $this->json(['error' => 'Not found'], JsonResponse::HTTP_NOT_FOUND);
+        }
 
-       $media = $this->mediaAssetRepository->findById($uuid);
-       if (!$media || $media->getOwner()->getId() !== $user->getId()) {
-        return $this->json(['error' => 'Not found'], JsonResponse::HTTP_NOT_FOUND);
-       }
+        $media = $this->mediaAssetRepository->findById($uuid);
+        if (!$media || $media->getOwner()->getId() !== $user->getId()) {
+            return $this->json(['error' => 'Not found'], JsonResponse::HTTP_NOT_FOUND);
+        }
 
-       $signed = (bool) $request->query->get('signed', false);
-       $url = ($this->getDownLoadUrl)($media, $signed);
-       return new RedirectResponse($url, Response::HTTP_FOUND);
-
+        $signed = (bool) $request->query->get('signed', false);
+        $url = ($this->getDownLoadUrl)($media, $signed);
+        return new RedirectResponse($url, Response::HTTP_FOUND);
     }
 
 
     #[Route('/{id}', name: 'delete_media', methods: ['DELETE'], format: 'json')]
     public function delete(string $id, #[CurrentUser] User $user): JsonResponse
     {
-       try {
-        $uuid = Uuid::fromString($id);
-       } catch (\Throwable $e) {
-        return $this->json(['error' => 'Not found'], JsonResponse::HTTP_NOT_FOUND);
-       }
+        try {
+            $uuid = Uuid::fromString($id);
+        } catch (\Throwable $e) {
+            return $this->json(['error' => 'Not found'], JsonResponse::HTTP_NOT_FOUND);
+        }
 
-       $media = $this->mediaAssetRepository->findById($uuid);
-       if (!$media || $media->getOwner()->getId() !== $user->getId()) {
-        return $this->json(['error' => 'Not found'], JsonResponse::HTTP_NOT_FOUND);
-       }
+        $media = $this->mediaAssetRepository->findById($uuid);
+        if (!$media || $media->getOwner()->getId() !== $user->getId()) {
+            return $this->json(['error' => 'Not found'], JsonResponse::HTTP_NOT_FOUND);
+        }
 
-       ($this->deleteMedia)($media);
+        ($this->deleteMedia)($media);
 
-       return $this->json(null, JsonResponse::HTTP_NO_CONTENT);
+        return $this->json(null, JsonResponse::HTTP_NO_CONTENT);
     }
-
 }

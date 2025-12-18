@@ -3,7 +3,7 @@
 namespace App\Modules\Media\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Modules\Media\Domain\Entity\MediaAsset;
-use App\Modules\Media\Domain\Repository\MediaassetRepositoryInterface;
+use App\Modules\Media\Domain\Repository\MediaAssetRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
@@ -11,7 +11,7 @@ use Symfony\Component\Uid\Uuid;
 /**
  * @extends ServiceEntityRepository<MediaAsset>
  */
-class MediaAssetRepository extends ServiceEntityRepository implements MediaassetRepositoryInterface
+class MediaAssetRepository extends ServiceEntityRepository implements MediaAssetRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -44,7 +44,7 @@ class MediaAssetRepository extends ServiceEntityRepository implements Mediaasset
     public function findByOwnerId(Uuid $ownerId, int $limit = 20, int $offset = 0): array
     {
         return $this->createQueryBuilder('m')
-            ->andWhere('m.ownerId = :ownerId')
+            ->andWhere('m.owner = :ownerId')
             ->setParameter('ownerId', $ownerId)
             ->orderBy('m.createdAt', 'DESC')
             ->setFirstResult($offset)

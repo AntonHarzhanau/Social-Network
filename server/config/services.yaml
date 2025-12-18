@@ -22,7 +22,7 @@ services:
           secret: "%env(AWS_SECRET_ACCESS_KEY)%"
   App\Modules\Media\Application\Port\MediaStorageInterface:
       alias: App\Modules\Media\Infrastructure\Storage\S3MediaStorage
-      # или:
+      # or use local storage:
       # alias: App\Modules\Media\Infrastructure\Storage\LocalMediaStorage
 
   # makes classes in src/ available to be used as services
