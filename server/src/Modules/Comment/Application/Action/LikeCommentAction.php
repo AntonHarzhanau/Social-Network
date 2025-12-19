@@ -2,21 +2,21 @@
 
 namespace App\Modules\Comment\Application\Action;
 use App\Modules\Comment\Domain\Repository\CommentRepositoryInterface;
-use App\Modules\User\Api\UserApiInterface;
+use App\Modules\Feed\Application\Port\UserDirectoryInterface;
 use Symfony\Component\Uid\Uuid;
 
 final class LikeCommentAction
 {
     public function __construct(
         private readonly CommentRepositoryInterface $commentRepository,
-        private readonly UserApiInterface $userApi,
+        private readonly UserDirectoryInterface $userApi,
     ) {}
 
     public function __invoke(Uuid $comment, Uuid $currentUser): array
     {
         $comment = $this->commentRepository->findById($comment);
 
-        $user = $this->userApi->findById($currentUser);
+        $user = $this->userApi->getUser($currentUser);
         if ($comment === null) {
             throw new \InvalidArgumentException('Comment not found.');
         }

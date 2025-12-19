@@ -2,9 +2,9 @@
 
 namespace App\Modules\Comment\Application\Action;
 
+use App\Modules\Comment\Application\Port\PostDirectoryInterface;
 use App\Modules\Comment\Application\ReadModel\CommentView;
 use App\Modules\Comment\Domain\Repository\CommentRepositoryInterface;
-use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
 use App\Modules\User\Contracts\DTO\UserPreviewDTO;
 use Symfony\Component\Uid\Uuid;
 
@@ -12,12 +12,12 @@ final class GetPostCommentsAction
 {
     public function __construct(
         private readonly CommentRepositoryInterface $commentRepository,
-        private readonly PostRepositoryInterface $postRepository,
+        private readonly PostDirectoryInterface $postDirectory,
     ) {}
 
     public function __invoke(Uuid $postId, Uuid $currentUserId, int $page = 1, int $limit = 10): array
     {
-        $post = $this->postRepository->findOneById($postId);
+        $post = $this->postDirectory->getPost($postId);
         if ($post === null) {
             throw new \InvalidArgumentException('Post not found.');
         }
