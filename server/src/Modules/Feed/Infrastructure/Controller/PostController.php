@@ -2,11 +2,9 @@
 
 namespace App\Modules\Feed\Infrastructure\Controller;
 
-// use App\DTO\Comment\CreateCommentDTO;
 use App\DTO\Post\CreatePostDTO;
 use App\DTO\Post\UpdatePostDTO;
 use App\Enum\VisibilityEnum;
-// use App\Modules\Comment\Application\CommentService;
 use App\Modules\Feed\Application\Action\CreatePostAction;
 use App\Modules\Feed\Application\Action\DeletePostAction;
 use App\Modules\Feed\Application\Action\GetAllPostsAction;
@@ -28,9 +26,7 @@ use Symfony\Component\Uid\Uuid;
 #[Route('/api/posts')]
 final class PostController extends AbstractController
 {
-    public function __construct(
-        // private readonly CommentService $commentService,
-    ) {}
+    public function __construct() {}
 
 
     #[Route('', name: 'create_post', methods: ['POST'], format: 'json')]
@@ -143,27 +139,4 @@ final class PostController extends AbstractController
         $responseDTO = $toggleLike(Uuid::fromString($postId), $user);
         return $this->json($responseDTO, JsonResponse::HTTP_OK);
     }
-
-
-    // #[Route('/{id}/comments', name: 'get_comments_for_post', methods: ['GET'], format: 'json')]
-    // public function getRootCommentsForPost(Post $post, #[CurrentUser] User $currentUser, Request $request): JsonResponse
-    // {
-    //     $page = max(1, (int) $request->query->get('page', 1));
-    //     $limit = max(1, (int) $request->query->get('limit', 2));
-    //     $comments = $this->commentService->getCommentsForPost($post, $currentUser, $page, $limit);
-
-    //     return $this->json($comments, JsonResponse::HTTP_OK, []);
-    // }
-
-
-    // #[Route('/{id}/comments', name: 'add_comment_to_post', methods: ['POST'], format: 'json')]
-    // public function addCommentToPost(
-    //     Post $post,
-    //     #[MapRequestPayload] CreateCommentDTO $dto,
-    //     #[CurrentUser] User $author
-    // ): JsonResponse {
-    //     $this->commentService->create($dto, $author, $post);
-
-    //     return $this->json(['message' => 'Comment added successfully'], JsonResponse::HTTP_CREATED);
-    // }
 }

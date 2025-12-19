@@ -4,10 +4,9 @@ namespace App\Modules\Comment\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Modules\Comment\Domain\Entity\Comment;
 use App\Modules\Comment\Domain\Repository\CommentRepositoryInterface;
-use App\Modules\Feed\Domain\Entity\Post;
-use App\Modules\User\Domain\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends ServiceEntityRepository<Comment>
@@ -36,52 +35,60 @@ class CommentRepository extends ServiceEntityRepository implements CommentReposi
     }
 
     public function findRootForPost(
-        Post $post,
-        ?User $currentUser, 
-        int $page, 
+        Uuid $post,
+        Uuid $currentUser,
+        int $page,
         int $limit
-    ): array
-    {
+    ): array {
         $qb = $this->createQueryBuilder('c')
-            ->select('c')
+            ->select('c AS comment')
             ->addSelect(
                 '(SELECT COUNT(c2.id) 
-                FROM App\Entity\Comment c2
+                FROM App\Modules\Comment\Domain\Entity\Comment c2
                 WHERE c2.parent = c) AS replyCount'
             )
-            ->andWhere('c.post = :post')
+            ->andWhere('IDENTITY(c.post) = :post')
             ->andWhere('c.parent IS NULL')
             ->setParameter('post', $post)
             ->orderBy('c.createdAt', 'DESC')
             ->setFirstResult(($page - 1) * $limit)
-            ->setMaxResults($limit);
-        
-        if ($currentUser !== null) {
-            $qb->addSelect(
+            ->setMaxResults($limit)
+            ->addSelect(
                 'CASE WHEN :currentUser MEMBER OF c.likeBy 
                 THEN true ELSE false END AS likedByCurrentUser'
             )
             ->setParameter('currentUser', $currentUser);
-        } else {
-            $qb->addSelect('false AS likedByCurrentUser');
-        }
 
         $comments = $qb->getQuery()->getResult();
         return $comments;
     }
 
-    public function findReplies(Comment $parentComment, int $page, int $limit): array
+    public function findReplies(Comment $parentComment, Uuid $currentUser, int $page, int $limit): array
     {
         $qb = $this->createQueryBuilder('c')
-        ->andWhere('c.parent = :parentComment')
-        ->setParameter('parentComment', $parentComment)
-        ->orderBy('c.createdAt', 'ASC')
-        ->setFirstResult(($page - 1) * $limit)
-        ->setMaxResults($limit);
+            ->select('c AS comment')
+            ->addSelect(
+                '(SELECT COUNT(c2.id) 
+                FROM App\Modules\Comment\Domain\Entity\Comment c2
+                WHERE c2.parent = c) AS replyCount'
+            )
+            ->andWhere('c.parent = :parentComment')
+            ->setParameter('parentComment', $parentComment)
+            ->orderBy('c.createdAt', 'ASC')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit)
+            ->addSelect(
+                'CASE WHEN :currentUser MEMBER OF c.likeBy 
+                THEN true ELSE false END AS likedByCurrentUser'
+            )
+            ->setParameter('currentUser', $currentUser);
 
         $comments = $qb->getQuery()->getResult();
-
         return $comments;
     }
-    
+
+    public function findById(Uuid $id): ?Comment
+    {
+        return $this->find($id);
+    }
 }

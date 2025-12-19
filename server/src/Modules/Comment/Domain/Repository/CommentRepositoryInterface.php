@@ -3,8 +3,7 @@
 namespace App\Modules\Comment\Domain\Repository;
 
 use App\Modules\Comment\Domain\Entity\Comment;
-use App\Modules\Feed\Domain\Entity\Post;
-use App\Modules\User\Domain\Entity\User;
+use Symfony\Component\Uid\Uuid;
 
 interface CommentRepositoryInterface
 {
@@ -13,15 +12,18 @@ interface CommentRepositoryInterface
     public function remove(Comment $comment, bool $flush = true): void;
 
     public function findRootForPost(
-        Post $post,
-        ?User $currentUser,
+        Uuid $post,
+        Uuid $currentUser,
         int $page,
         int $limit
     ): array;
 
     public function findReplies(
         Comment $parentComment,
+        Uuid $currentUser,
         int $page,
         int $limit
     ): array;
+
+    public function findById(Uuid $id): ?Comment;
 }

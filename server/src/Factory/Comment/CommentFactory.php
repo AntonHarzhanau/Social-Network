@@ -3,8 +3,8 @@
 namespace App\Factory\Comment;
 
 use App\DTO\Comment\CommentViewDTO;
-use App\Entity\Comment;
 use App\Factory\User\UserFactory;
+use App\Modules\Comment\Domain\Entity\Comment;
 
 class CommentFactory
 {
