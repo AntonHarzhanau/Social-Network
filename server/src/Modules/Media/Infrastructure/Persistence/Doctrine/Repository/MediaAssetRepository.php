@@ -41,6 +41,15 @@ class MediaAssetRepository extends ServiceEntityRepository implements MediaAsset
         return $this->find($id);
     }
 
+    public function findByIds(array $ids): array
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findByOwnerId(Uuid $ownerId, int $limit = 20, int $offset = 0): array
     {
         return $this->createQueryBuilder('m')

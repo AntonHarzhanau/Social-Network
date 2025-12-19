@@ -47,7 +47,7 @@ final class UploadMediaAction
             try {
                 $this->storage->delete($storageKey);
             } catch (\Throwable) {
-                // Ignore cleanup failure
+                // Ignore cleanup failur
             }
             throw $e;
         }

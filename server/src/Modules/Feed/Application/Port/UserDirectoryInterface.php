@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\SocialGraph\Application\Port;
+namespace App\Modules\Feed\Application\Port;
 
 use App\Modules\User\Domain\Entity\User;
 

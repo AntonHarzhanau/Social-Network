@@ -3,11 +3,15 @@
 namespace App\Modules\Feed\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\DTO\Post\PostWithLikeFlagDTO;
+use App\Modules\Comment\Domain\Entity\Comment;
+use App\Modules\Feed\Application\DTO\PostFeedItem;
 use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
 use App\Modules\Feed\Domain\Entity\Post;
+use App\Modules\User\Contracts\DTO\UserPreviewDTO;
 use App\Modules\User\Domain\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends ServiceEntityRepository<Post>
@@ -18,8 +22,6 @@ class PostRepository extends ServiceEntityRepository implements PostRepositoryIn
     {
         parent::__construct($registry, Post::class);
     }
-
-
 
     public function save(Post $post, bool $flush = true): void
     {
@@ -39,23 +41,27 @@ class PostRepository extends ServiceEntityRepository implements PostRepositoryIn
 
     public function findPosts(
         User $currentUser,
-        ?User $author = null,
+        ?Uuid $authorId = null,
         ?string $id = null,
         ?int $page = null,
         ?int $limit = null,
         ?array $visibilities = null
     ): array {
-        $qb = $this->createQueryBuilder('p')
-            ->select('NEW App\DTO\Post\PostWithLikeFlagDTO(
-            p,
-            CASE WHEN :currentUser MEMBER OF p.likeBy
-                THEN 
-                    true 
-                ELSE 
-                    false 
-                END
-            )')
-            ->setParameter('currentUser', $currentUser)
+        $qb = $this->createQueryBuilder('p')->select(sprintf(
+            'NEW %s(
+            p.id,
+            p.content,
+            p.likeCount,
+            p.commentCount,
+            CASE WHEN :me MEMBER OF p.likeBy THEN true ELSE false END,
+            p.createdAt,
+            NEW %s(a.id, a.username, a.avatarUrl, a.slug)
+        )',
+            PostFeedItem::class,
+            UserPreviewDTO::class
+        ))
+            ->join('p.author', 'a')
+            ->setParameter('me', $currentUser)
             ->orderBy('p.createdAt', 'DESC')
             ->addOrderBy('p.id', 'DESC');
 
@@ -64,9 +70,9 @@ class PostRepository extends ServiceEntityRepository implements PostRepositoryIn
                 ->setParameter('id', $id);
         }
 
-        if ($author) {
-            $qb->andWhere('p.author = :author')
-                ->setParameter('author', $author);
+        if ($authorId) {
+            $qb->andWhere('p.author = :authorId')
+                ->setParameter('authorId', $authorId);
         }
 
         if ($visibilities !== null && $visibilities !== []) {
@@ -82,5 +88,10 @@ class PostRepository extends ServiceEntityRepository implements PostRepositoryIn
         /** @var PostWithLikeFlagDTO[] $results */
         $results = $qb->getQuery()->getResult();
         return $results;
+    }
+
+    public function findOneById(Uuid $id): ?Post
+    {
+        return $this->find($id);
     }
 }

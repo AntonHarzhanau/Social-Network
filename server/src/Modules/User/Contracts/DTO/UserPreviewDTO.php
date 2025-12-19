@@ -7,8 +7,8 @@ final readonly class UserPreviewDTO
     public function __construct(
         public readonly string $id,
         public readonly string $username,
-        public readonly ?string $avatarUrl,
-        public readonly ?string $slug,
+        public readonly ?string $slug = null,
+        public readonly ?string $avatarUrl = null,
     ) {
     }
 }

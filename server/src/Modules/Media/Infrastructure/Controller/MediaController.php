@@ -3,7 +3,7 @@
 namespace App\Modules\Media\Infrastructure\Controller;
 
 use App\Modules\Media\Application\Action\DeleteMediaAction;
-use App\Modules\Media\Application\Action\GetMediaDownLoadUrlAction;
+use App\Modules\Media\Application\Action\GetMediaUrl;
 use App\Modules\Media\Application\Action\ListMyMediaAction;
 use App\Modules\Media\Application\Action\UploadMediaAction;
 use App\Modules\Media\Domain\Entity\MediaAsset;
@@ -26,7 +26,7 @@ final class MediaController extends AbstractController
         private readonly UploadMediaAction $uploadMedia,
         private readonly ListMyMediaAction $listMyMedia,
         private readonly DeleteMediaAction $deleteMedia,
-        private readonly GetMediaDownLoadUrlAction $getDownLoadUrl,
+        private readonly GetMediaUrl $getMediaUrl,
         private readonly MediaAssetRepositoryInterface $mediaAssetRepository,
     ) {}
 
@@ -46,7 +46,7 @@ final class MediaController extends AbstractController
             'fileType' => $media->getFileType()?->value,
             'mimeType' => $media->getMimeType(),
             'sizeByte' => $media->getSizeByte(),
-            'url' => ($this->getDownLoadUrl)($media),
+            'url' => ($this->getMediaUrl)($media),
             'createdAt' => $media->getCreatedAt()->format(\DateTime::ATOM),
         ], JsonResponse::HTTP_CREATED);
     }
@@ -65,7 +65,7 @@ final class MediaController extends AbstractController
                 'fileType' => $media->getFileType()?->value,
                 'mimeType' => $media->getMimeType(),
                 'sizeByte' => $media->getSizeByte(),
-                'url' => ($this->getDownLoadUrl)($media),
+                'url' => ($this->getMediaUrl)($media),
                 'createdAt' => $media->getCreatedAt()->format(\DateTime::ATOM),
             ];
         }, $items);
@@ -88,7 +88,7 @@ final class MediaController extends AbstractController
         }
 
         $signed = (bool) $request->query->get('signed', false);
-        $url = ($this->getDownLoadUrl)($media, $signed);
+        $url = ($this->getMediaUrl)($media, $signed);
         return new RedirectResponse($url, Response::HTTP_FOUND);
     }
 

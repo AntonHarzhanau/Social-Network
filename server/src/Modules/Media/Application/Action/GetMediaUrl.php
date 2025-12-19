@@ -5,7 +5,7 @@ namespace App\Modules\Media\Application\Action;
 use App\Modules\Media\Application\Port\MediaStorageInterface;
 use App\Modules\Media\Domain\Entity\MediaAsset;
 
-final class GetMediaDownLoadUrlAction
+final class GetMediaUrl
 {
     public function __construct(
         private readonly MediaStorageInterface $mediaStorage,

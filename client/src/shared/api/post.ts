@@ -16,17 +16,18 @@ export interface Author {
   id: string;
   username: string;
   avatarUrl: string | null;
+  slug: string | null;
 }
 
 export interface Post {
   id: string;
-  author: Author;
   content: string;
-  date: string;
   likeCount: number;
   commentCount: number;
   isLikedByCurrentUser: boolean;
-  media: MediaResponse[];
+  date: string;
+  author: Author;
+  media: MediaResponse[] | null;
 }
 
 export interface ToggleLikeResponse {
@@ -59,13 +60,13 @@ export const fetchPosts = async ({
   authorId = null,
   page = 1,
   limit = 10,
-}: FetchPostsParams = {}): Promise<Post[]> => {
-    const authorIdParam = authorId ? `/author/${authorId}` : "";
+}: FetchPostsParams = {}): Promise<PostsResponse> => {
+  const authorIdParam = authorId ? `/author/${authorId}` : "";
   const response = await apiClient.get<PostsResponse>(
     `/posts${authorIdParam}?page=${page}&limit=${limit}`,
   );
 
-  return response.data.posts;
+  return response.data;
 };
 
 export const createPost = async (
