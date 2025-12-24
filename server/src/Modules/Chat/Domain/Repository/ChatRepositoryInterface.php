@@ -3,15 +3,16 @@
 namespace App\Modules\Chat\Domain\Repository;
 
 use App\Modules\Chat\Domain\Entity\Chat;
-use App\Modules\User\Domain\Entity\User;
+use Symfony\Component\Uid\Uuid;
 
 interface ChatRepositoryInterface
 {
     public function findUserChatsWithLastMessage(
-        User $user,
+        Uuid $user,
         int $page = 1,
         int $limit = 10
     ): array;
-
+    
+    public function findById(Uuid $chatId): ?Chat;
     public function save(Chat $chat): void;
 }

@@ -20,23 +20,22 @@ class MessageRepository extends ServiceEntityRepository implements MessageReposi
         parent::__construct($registry, Message::class);
     }
 
-    public function createMessage(Chat $chat, User $sender, string $content): Message
+    public function save(Message $message): Message
     {
-        $message = new Message();
-        $message->setChat($chat);
-        $message->setSender($sender);
-        $message->setContent($content);
-        $message->setCreatedAt(new \DateTimeImmutable());
-
         $this->getEntityManager()->persist($message);
         $this->getEntityManager()->flush();
 
         return $message;
     }
 
+    public function delete(Message $message): void
+    {
+        $this->getEntityManager()->remove($message);
+        $this->getEntityManager()->flush();
+    }
+
     public function getUnreadMessageCountForUserByChats(User $user, array $chatsIds): array
     {
-       throw new NotImplemented();
-       
+        throw new NotImplemented();
     }
 }

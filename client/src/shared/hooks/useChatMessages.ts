@@ -28,7 +28,7 @@ export const useChatMessages = (chatId: string) => {
   const handleMercureMessage = useCallback(
     (payload: ChatMercureEvent) => {
       if (payload.type !== "message_created") return;
-
+        console.log("New message received via Mercure:", payload);
       const newMsg = payload.message;
       addLiveMessage(chatId, newMsg);
     },

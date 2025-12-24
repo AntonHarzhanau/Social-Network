@@ -4,7 +4,7 @@ namespace App\Modules\Chat\Application;
 
 use App\DTO\Message\MessageResponseDTO;
 use App\DTO\User\UserResponseDTO;
-use App\Factory\Chat\ChatFactory;
+use App\Modules\Chat\Application\ReadModel\Chat\ChatFactory;
 use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Repository\ChatParticipantRepositoryInterface;
 use App\Modules\Chat\Domain\Repository\ChatRepositoryInterface;
@@ -23,13 +23,14 @@ class ChatService
 
     public function getChatList(User $currentUser, int $page = 1, int $limit = 20): array
     {
-        $chats = $this->chatRepository->findUserChatsWithLastMessage($currentUser, $page, $limit);
+        $chats = $this->chatRepository->findUserChatsWithLastMessage($currentUser->getId(), $page, $limit);
+    
         $items = [];
 
         foreach ($chats as $chat) {
             $items[] = $this->chatFactory->toChatResponseDTO($chat, $currentUser);
         }
-
+        // dd($items);
         return $items;
     }
 
@@ -42,12 +43,16 @@ class ChatService
             throw new AccessDeniedException('You are not a participant of this chat.');
         }
 
-        $data = $this->messageRepository->findBy([
-            'chat' => $chat,
-        ],
-        [
-            'createdAt' => 'DESC',
-        ], $limit, ($page - 1) * $limit);
+        $data = $this->messageRepository->findBy(
+            [
+                'chat' => $chat,
+            ],
+            [
+                'createdAt' => 'DESC',
+            ],
+            $limit,
+            ($page - 1) * $limit
+        );
 
         $messages = [];
         foreach ($data as $message) {
@@ -59,7 +64,7 @@ class ChatService
                     username: $message->getSender()->getUsername(),
                     avatarUrl: $message->getSender()->getAvatarUrl(),
                 ),
-                createdAt: $message->getCreatedAt()->format(DATE_ATOM),
+                createdAt: $message->getCreatedAt()->format(\DateTime::ATOM),
             );
         }
 
@@ -70,5 +75,4 @@ class ChatService
     {
         $this->chatRepository->save($chat);
     }
-
 }

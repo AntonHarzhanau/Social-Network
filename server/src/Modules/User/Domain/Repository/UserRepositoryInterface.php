@@ -11,6 +11,8 @@ interface UserRepositoryInterface
 
     public function delete(User $user, bool $flush = true): void;
     
+    public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
+
     public function findById(string $id): ?User;
 
     public function findByEmail(string $email): ?User; 
@@ -19,4 +21,6 @@ interface UserRepositoryInterface
     public function findAllExcept(User $excludedUser): array;
 
     public function updateUser(User $user): void;
+
+    public function findPreviewsByIds(array $ids): array;
 }

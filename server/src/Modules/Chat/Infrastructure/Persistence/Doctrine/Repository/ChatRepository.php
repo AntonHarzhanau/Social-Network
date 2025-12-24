@@ -8,6 +8,7 @@ use App\Modules\User\Domain\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends ServiceEntityRepository<Chat>
@@ -20,21 +21,19 @@ class ChatRepository extends ServiceEntityRepository implements ChatRepositoryIn
     }
 
     public function findUserChatsWithLastMessage(
-        User $user,
+        Uuid $user,
         int $page = 1,
         int $limit = 10
     ): array {
         $offset = ($page - 1) * $limit;
 
         $qb = $this->createQueryBuilder('c')
- 
+
             ->innerJoin('c.chatParticipants', 'cpCurrent', 'WITH', 'cpCurrent.user = :user')
             ->setParameter('user', $user)
 
-     
             ->leftJoin('c.lastMessage', 'lm')
             ->leftJoin('lm.sender', 'lmSender')
-
 
             ->addSelect('PARTIAL c.{id, type, title, avatarUrl, createdAt, updatedAt}')
             ->addSelect('PARTIAL lm.{id, content, createdAt}')
@@ -44,10 +43,7 @@ class ChatRepository extends ServiceEntityRepository implements ChatRepositoryIn
             ->addOrderBy('c.createdAt', 'DESC')
             ->setFirstResult($offset)
             ->setMaxResults($limit);
-
- 
         $chats = $qb->getQuery()->getResult();
-
         return $chats;
     }
 
@@ -56,6 +52,11 @@ class ChatRepository extends ServiceEntityRepository implements ChatRepositoryIn
         $em = $this->getEntityManager();
         $em->persist($chat);
         $em->flush();
+    }
+
+    public function findById(Uuid $chatId): ?Chat
+    {
+        return $this->find($chatId);
     }
 
 }

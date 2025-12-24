@@ -2,66 +2,85 @@
 
 namespace App\Modules\Chat\Infrastructure\Controller;
 
-use App\DTO\Message\MessageResponseDTO;
-use App\DTO\User\UserResponseDTO;
-use App\Modules\Chat\Domain\Entity\Chat;
-use App\Modules\Chat\Domain\Entity\Message;
+use App\Modules\Chat\Application\Action\Message\DeleteMessageAction;
+use App\Modules\Chat\Application\Action\Message\EditMessageAction;
+use App\Modules\Chat\Application\Action\Message\SendMessageToChatAction;
+use App\Modules\Chat\Application\Action\Message\SendMessageToUserAction;
+use App\Modules\Chat\Infrastructure\Http\Mapper\NewMessageRequestMapper;
+use App\Modules\Chat\Infrastructure\Http\Request\NewMessageRequest;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\Shared\Infrastructure\ChatNotifier;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\Uid\Uuid;
 
 #[Route('/api/messages')]
 final class MessageController extends AbstractController
 {
     public function __construct() {}
-    #[Route('/{chat}', methods: ['POST'])]
-    public function send(
-        Chat $chat,
-        Request $request,
-        EntityManagerInterface $em,
-        ChatNotifier $notifier,
+
+    #[Route('/{chatId}/chat', methods: ['POST'], format: 'json')]
+    public function sendtoChat(
+        string $chatId,
+        #[MapRequestPayload] NewMessageRequest $data,
         #[CurrentUser] User $user,
+        SendMessageToChatAction $sendMessage,
+        NewMessageRequestMapper $mapper,
+        ChatNotifier $notifier,
     ): JsonResponse {
 
-        if (!$chat) {
-            return $this->json(['error' => 'Chat not found'], 404);
-        }
+        $message = $sendMessage(Uuid::fromString($chatId), $user->getId(), $mapper::map($data));
 
-        $data = json_decode($request->getContent(), true);
-        $content = $data['content'] ?? null;
+        // $notifier->notifyNewMessage($message);
 
-        if (!$content) {
-            return $this->json(['error' => 'Content is required'], 422);
-        }
+        return $this->json(['message' => 'Message sent successfully'], JsonResponse::HTTP_CREATED);
+    }
 
+    #[Route('/{userId}/direct', methods: ['POST'], format: 'json')]
+    public function sendtoUser(
+        string $userId,
+        #[MapRequestPayload] NewMessageRequest $data,
+        #[CurrentUser] User $currentUser,
+        SendMessageToUserAction $sendMessage,
+        NewMessageRequestMapper $mapper,
+        // ChatNotifier $notifier,
+    ): JsonResponse {
 
-        $message = new Message();
-        $message->setSender($user);
-        $message->setContent($content);
-        $chat->addMessage($message);
+        $message = $sendMessage($currentUser->getId(), Uuid::fromString($userId), $mapper::map($data));
 
-        $em->persist($message);
-        $em->flush();
+        // $notifier->notifyNewMessage($message);
 
+        return $this->json(['message' => 'Message sent successfully'], JsonResponse::HTTP_CREATED);
+    }
 
-        $notifier->notifyNewMessage($message);
-        $message = new MessageResponseDTO(
+    #[Route('/{messageId}', methods: ['PUT'], format: 'json')]
+    public function editMessage(
+        string $messageId,
+        #[MapRequestPayload] NewMessageRequest $data,
+        #[CurrentUser] User $currentUser,
+        EditMessageAction $editMessage,
+        NewMessageRequestMapper $mapper,
+        // ChatNotifier $notifier,
+    ): JsonResponse {
 
-            id: $message->getId(),
-            chatId: $chat->getId(),
-            sender: new UserResponseDTO(
-                id: $user->getId(),
-                username: $user->getUsername(),
-                avatarUrl: $user->getAvatarUrl(),
-            ),
-            content: $message->getContent(),
-            createdAt: $message->getCreatedAt()->format(DATE_ATOM),
-        );
-        return $this->json($message, 201, [], ['groups' => 'message:list']);
+        $editMessage(Uuid::fromString($messageId), $currentUser->getId(), $mapper::map($data));
+
+        return $this->json(['message' => 'Message edited successfully'], JsonResponse::HTTP_OK);
+    }
+
+    #[Route('/{messageId}', methods: ['DELETE'], format: 'json')]
+    public function deleteMessage(
+        string $messageId,
+        #[CurrentUser] User $currentUser,
+        DeleteMessageAction $deleteMessage,
+        // ChatNotifier $notifier,
+    ): JsonResponse {
+
+        $deleteMessage(Uuid::fromString($messageId), $currentUser->getId());
+
+        return $this->json(['message' => 'Message deleted successfully'], JsonResponse::HTTP_OK);
     }
 }

@@ -29,8 +29,13 @@ export const useMercure = <TPayload = unknown>({
 
     const eventSource = new EventSource(url.toString());
 
+    eventSource.onopen = () => {
+      console.log("Mercure connected:", url.toString());
+    };
+
     eventSource.onmessage = (event) => {
       try {
+        console.log("Mercure message received:", event);
         const data = parse
           ? parse(event)
           : (JSON.parse(event.data) as TPayload);
@@ -51,7 +56,6 @@ export const useMercure = <TPayload = unknown>({
     };
   }, [topic, enable, onMessage, parse, onError]);
 };
-
 
 // example usage:
 

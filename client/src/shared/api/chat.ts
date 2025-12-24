@@ -61,7 +61,7 @@ export const sendMessage = async (
   chatId: string,
   content: string,
 ): Promise<void> => {
-  await apiClient.post(`/messages/${chatId}`, { content });
+  await apiClient.post(`/messages/${chatId}/chat`, { content });
 };
 
 interface CreateDirectChatParams {
@@ -80,8 +80,7 @@ interface CreateDirectChatResponse extends ChatResponse {
 export const createDirectChat = async (
   params: CreateDirectChatParams): Promise<CreateDirectChatResponse> => {
   const { participantId, content } = params;
-  const response = await apiClient.post<CreateDirectChatResponse>("/chats/direct", {
-    participantId,
+  const response = await apiClient.post<CreateDirectChatResponse>(`/messages/${participantId}/direct`, {
     content,
   });
   return response.data;

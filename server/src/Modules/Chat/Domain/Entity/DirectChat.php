@@ -13,10 +13,10 @@ use Symfony\Component\Uid\Uuid;
     columns: ['user1_id', 'user2_id']
 )]
 #[ORM\UniqueConstraint(
-    name: 'uniq_direct_chat_chat',
+    name: 'uniq_direct_chat',
     columns: ['chat_id']
 )]
-class DirectChatIndex
+class DirectChat
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]

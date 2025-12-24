@@ -2,16 +2,21 @@
 
 namespace App\Modules\Chat\Domain\Repository;
 
-use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Entity\Message;
 use App\Modules\User\Domain\Entity\User;
 
 interface MessageRepositoryInterface
 {
-    public function createMessage(Chat $chat, User $sender, string $content): Message;
+    public function save(Message $message): Message;
+
+    public function delete(Message $message): void;
 
     public function getUnreadMessageCountForUserByChats(User $user, array $chatsIds): array;
 
-    public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
-
+    public function findBy(
+        array $criteria,
+        ?array $orderBy = null,
+        ?int $limit = null,
+        ?int $offset = null
+    ): array;    
 }

@@ -23,7 +23,6 @@ final class Version20251204204812 extends AbstractMigration
         $this->addSql('CREATE TABLE direct_chat_index (id UUID NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, user1_id UUID NOT NULL, user2_id UUID NOT NULL, chat_id UUID NOT NULL, PRIMARY KEY (id))');
         $this->addSql('CREATE INDEX IDX_962B4F4956AE248B ON direct_chat_index (user1_id)');
         $this->addSql('CREATE INDEX IDX_962B4F49441B8B65 ON direct_chat_index (user2_id)');
-        $this->addSql('CREATE UNIQUE INDEX unique_user_pair ON direct_chat_index (user1_id, user2_id)');
         $this->addSql('CREATE UNIQUE INDEX uniq_direct_chat_chat ON direct_chat_index (chat_id)');
         $this->addSql('ALTER TABLE direct_chat_index ADD CONSTRAINT FK_962B4F4956AE248B FOREIGN KEY (user1_id) REFERENCES "user" (id) NOT DEFERRABLE');
         $this->addSql('ALTER TABLE direct_chat_index ADD CONSTRAINT FK_962B4F49441B8B65 FOREIGN KEY (user2_id) REFERENCES "user" (id) NOT DEFERRABLE');

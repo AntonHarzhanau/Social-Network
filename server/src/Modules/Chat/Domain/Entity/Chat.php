@@ -45,7 +45,7 @@ class Chat
     /**
      * @var Collection<int, ChatParticipant>
      */
-    #[ORM\OneToMany(targetEntity: ChatParticipant::class, mappedBy: 'chat', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: ChatParticipant::class, mappedBy: 'chat', orphanRemoval: true, cascade: ['persist'])]
     private Collection $chatParticipants;
 
     #[ORM\ManyToOne]

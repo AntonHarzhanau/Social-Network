@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Factory\Chat;
+namespace App\Modules\Chat\Application\ReadModel\Chat;
 
 use App\DTO\Chat\ChatResponseDTO;
 use App\DTO\Message\MessageResponseDTO;
@@ -14,19 +14,20 @@ class ChatFactory
     public function __construct() {}
 
     public function toChatResponseDTO(Chat $chat, User $currentUser, ?int $unreadMessageCount = null): ChatResponseDTO
-    {   
+    {   $lastMessage = null;
         $lastMessageEntity = $chat->getLastMessage();
-        $lastMessage = $lastMessageEntity
-            ? new MessageResponseDTO(
-                id: $lastMessageEntity->getId(),
-                sender: new UserResponseDTO(
-                    id: $chat->getLastMessage()->getSender()->getId(),
-                    username: $chat->getLastMessage()->getSender()->getUsername(),
-                    avatarUrl: $chat->getLastMessage()->getSender()->getAvatarUrl(),
-                ),
-                content: $chat->getLastMessage()->getContent(),
-                createdAt: $chat->getLastMessage()->getCreatedAt()->format('Y-m-d H:i:s'),
-            ) : null;
+            $lastMessage = $lastMessageEntity
+                ? new MessageResponseDTO(
+                    id: $lastMessageEntity->getId(),
+                    sender: new UserResponseDTO(
+                        id: $chat->getLastMessage()->getSender()->getId(),
+                        username: $chat->getLastMessage()->getSender()->getUsername(),
+                        avatarUrl: $chat->getLastMessage()->getSender()->getAvatarUrl(),
+                    ),
+                    content: $chat->getLastMessage()->getContent(),
+                    createdAt: $chat->getLastMessage()->getCreatedAt()->format('Y-m-d H:i:s'),
+                ) : null;
+
 
         $title = $this->resolveChatTitle($chat, $currentUser);
         $avatarUrl = $this->resolveChatAvatarUrl($chat, $currentUser);
@@ -39,7 +40,7 @@ class ChatFactory
             lastMessage: $lastMessage,
             createdAt: $chat->getCreatedAt() ? $chat->getCreatedAt()->format('Y-m-d H:i:s') : null,
             updatedAt: $chat->getUpdatedAt() ? $chat->getUpdatedAt()->format('Y-m-d H:i:s') : null,
-            lastMessageAt: $chat->getLastMessage()->getCreatedAt()->format('Y-m-d H:i:s'),
+            lastMessageAt: $chat->getLastMessage() ? $chat->getLastMessage()->getCreatedAt()->format('Y-m-d H:i:s'): null,
             unreadMessageCount: $unreadMessageCount,
         );
     }

@@ -10,6 +10,7 @@ services:
   _defaults:
     autowire: true # Automatically injects dependencies in your services.
     autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
   Aws\S3\S3Client:
     factory: ['Aws\S3\S3Client', "factory"]
     arguments:
@@ -20,10 +21,14 @@ services:
         credentials:
           key: "%env(AWS_ACCESS_KEY_ID)%"
           secret: "%env(AWS_SECRET_ACCESS_KEY)%"
+
   App\Modules\Media\Application\Port\MediaStorageInterface:
-      alias: App\Modules\Media\Infrastructure\Storage\S3MediaStorage
-      # or use local storage:
-      # alias: App\Modules\Media\Infrastructure\Storage\LocalMediaStorage
+    alias: App\Modules\Media\Infrastructure\Storage\S3MediaStorage
+    # or use local storage:
+    # alias: App\Modules\Media\Infrastructure\Storage\LocalMediaStorage
+
+  App\Modules\Shared\Application\Port\RealtimePublisherInterface:
+    alias: App\Modules\Shared\Infrastructure\Realtime\MessengerRealtimePublisher
 
   # makes classes in src/ available to be used as services
   # this creates a service per class whose id is the fully-qualified class name

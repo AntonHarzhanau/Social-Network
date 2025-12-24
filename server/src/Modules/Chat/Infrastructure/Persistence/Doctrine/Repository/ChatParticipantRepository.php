@@ -39,4 +39,5 @@ class ChatParticipantRepository extends ServiceEntityRepository implements ChatP
 
         return $qb->getQuery()->getResult();
     }
+
 }
