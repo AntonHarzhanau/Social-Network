@@ -96,7 +96,7 @@ final class UserControllerTest extends ApiWebTestCase
             'createdAt' => $user->getCreatedAt()->format(\DateTimeInterface::ATOM),
             'dateOfBirth' => $user->getDateOfBirth()->format('Y-m-d'),
             'email' => $user->getEmail(),
-            'emailVerifiedAt' => $user->getEmailVerifiedAt(),
+            'emailVerifiedAt' => $user->getEmailVerifiedAt()->format(\DateTimeInterface::ATOM),
             'id' => (string) $user->getId(),
             'lastLoginAt' => $user->getLastLoginAt(),
             'location' => $user->getLocation(),

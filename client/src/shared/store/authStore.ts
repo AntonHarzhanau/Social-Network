@@ -33,8 +33,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       const me = await AuthApi.me();
       set({ user: me.data });
     } catch (error) {
-      console.error("Login failed:", error);
-      set({ isAuthenticated: false });
+      throw error;
     } finally {
       set({ isLoading: false });
     }

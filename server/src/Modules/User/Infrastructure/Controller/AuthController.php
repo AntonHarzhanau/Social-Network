@@ -4,15 +4,13 @@ namespace App\Modules\User\Infrastructure\Controller;
 
 use App\Modules\User\Application\Action\ConfirmAccountRecoveryAction;
 use App\Modules\User\Application\Action\GetMeAction;
-use App\Modules\User\Application\Action\RecoveryAccountRequestAction;
 use App\Modules\User\Application\Action\RegisterUserAction;
 use App\Modules\User\Application\Action\RequestAccountRecoveryAction;
-use App\Modules\User\Application\Action\RestoreAccountAction;
+use App\Modules\User\Application\Action\ResendEmailVerificationAction;
 use App\Modules\User\Application\Action\VerifyEmailAction;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Infrastructure\Http\Request\RecoveryAccountRequest;
 use App\Modules\User\Infrastructure\Http\Request\RegisterRequest;
-use App\Modules\User\Infrastructure\Http\Request\VerifyEmailRequest;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -58,12 +56,35 @@ final class AuthController extends AbstractController
         return $this->json(['ok' => true], JsonResponse::HTTP_CREATED);
     }
 
-    #[Route('/verify-email', methods: ['POST'])]
+    #[Route('/verify-email', name: 'api_auth_email_verify', methods: ['GET'])]
     public function verifyEmail(
-        #[MapRequestPayload(validationFailedStatusCode: JsonResponse::HTTP_UNPROCESSABLE_ENTITY)] VerifyEmailRequest $dto,
         VerifyEmailAction $action,
+        Request $request,
+    ): Response {
+        try {
+            $action($request->query->get('token'));
+            return $this->redirect($this->frontendBaseUrl . '?email-verify-status=ok');
+        } catch (\Throwable $th) {
+            return $this->redirect($this->frontendBaseUrl . '?email-verify-status=invalid');
+        }
+
+
+        return $this->json(['ok' => true]);
+    }
+
+    #[Route('/resend-email-verification', name: 'api_auth_resend_email_verification', methods: ['POST'])]
+    public function resendVerifyEmail(
+        Request $request,
+        ResendEmailVerificationAction $action,
+        EventDispatcherInterface $eventDispatcher,
     ): JsonResponse {
-        $action($dto->token);
+        $email = json_decode($request->getContent(), true)['email'] ?? null;
+        $userIp = $request->getClientIp();
+        $userAgent = $request->headers->get('User-Agent');
+        $event = $action($email, $userIp, $userAgent);
+
+        $eventDispatcher->dispatch($event);
+
         return $this->json(['ok' => true]);
     }
 

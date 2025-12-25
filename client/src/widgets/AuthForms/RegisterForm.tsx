@@ -34,13 +34,18 @@ const RegisterForm = ({ switchToLogin }: { switchToLogin: () => void }) => {
   const handleSubmit = async (data: RegisterFormSchema) => {
     const payload = registerApiSchema.parse(data);
     try {
-        const result = await register(payload);
-        console.log("Registration result:", result);
-        toast.success("Registration successful! Please log in.", { closeButton: true });
-        switchToLogin();
+      await register(payload);
+      
+      toast.success("Registration successful! Please log in.", {
+        closeButton: true,
+      });
+      switchToLogin();
     } catch (error: AxiosError | any) {
-        console.error("Registration error:", error);
-        toast.error(`Registration failed: ${error.response?.data?.error || error.message}`, { closeButton: true });
+      console.error("Registration error:", error);
+      toast.error(
+        `Registration failed: ${error.response?.data?.error || error.message}`,
+        { closeButton: true },
+      );
     }
   };
 
@@ -107,7 +112,9 @@ const RegisterForm = ({ switchToLogin }: { switchToLogin: () => void }) => {
         </div>
 
         <Field>
-          <Button type="submit" disabled={form.formState.isSubmitting}>Create Account</Button>
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            Create Account
+          </Button>
         </Field>
 
         <FieldDescription className="text-center md:mb-2">

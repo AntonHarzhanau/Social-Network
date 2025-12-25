@@ -20,7 +20,7 @@ class EmailVerificationRepository extends ServiceEntityRepository implements Ema
     ) {
         parent::__construct($registry, EmailVerification::class);
     }
-    
+
     public function findByTokenHash(string $tokenHash): ?EmailVerification
     {
         return $this->createQueryBuilder('ev')
@@ -59,5 +59,22 @@ class EmailVerificationRepository extends ServiceEntityRepository implements Ema
         if ($flush) {
             $em->flush();
         }
+    }
+
+    public function delete(EmailVerification $emailVerification, bool $flush = true): void
+    {
+        $em = $this->getEntityManager();
+        $em->remove($emailVerification);
+        if ($flush) {
+            $em->flush();
+        }
+    }
+    public function getEmailVerificationByEmail(string $email): ?EmailVerification
+    {
+        return $this->createQueryBuilder('ev')
+            ->where('ev.sentEmail = :email')
+            ->setParameter('email', $email)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

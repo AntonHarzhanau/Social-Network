@@ -9,6 +9,7 @@ use App\Modules\User\Domain\Event\UserRegistredEvent;
 use App\Modules\User\Domain\Repository\EmailVerificationRepositoryInterface;
 use App\Modules\User\Domain\Service\EmailVerificationTokenGenerator;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class OnUserRegisteredSubscriber implements EventSubscriberInterface
 {
@@ -16,6 +17,7 @@ final class OnUserRegisteredSubscriber implements EventSubscriberInterface
         private EmailVerificationRepositoryInterface $emailVerificationRepository,
         private EmailVerificationTokenGenerator $tokenGenerator,
         private EmailSenderInterface $mailer,
+        private readonly UrlGeneratorInterface $urlGenerator,
         private string $frontendBaseUrl = 'http://localhost:5173',
     ) {}
 
@@ -43,7 +45,15 @@ final class OnUserRegisteredSubscriber implements EventSubscriberInterface
 
         $this->emailVerificationRepository->save($emailVerification, true);
 
-        $verifyLink = rtrim($this->frontendBaseUrl, '/') . '/verify-email?token=' . urlencode($rawToken);
+        // $verifyLink = rtrim($this->frontendBaseUrl, '/') . '/verify-email?token=' . urlencode($rawToken);
+
+        $verifyLink = $this->urlGenerator->generate(
+            'api_auth_email_verify',
+            [
+                'token' => $rawToken,
+            ],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
 
         $body = sprintf(
             '<p>Welcome to Social Network!</p><p>Please verify your email address by clicking the link below:</p><p><a href="%s">%s</a></p>',

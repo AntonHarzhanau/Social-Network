@@ -22,6 +22,7 @@ abstract class ApiWebTestCase extends WebTestCase
             'password' => 'password',
             'username' => 'username',
             'dateOfBirth' => new \DateTimeImmutable('1996-08-16'),
+            
         ];
 
         $data = array_merge($defaults, $overrides);
@@ -31,6 +32,7 @@ abstract class ApiWebTestCase extends WebTestCase
         $user->setPassword($data['password']);
         $user->setUsername($data['username']);
         $user->setDateOfBirth($data['dateOfBirth']);
+        $user->setEmailVerifiedAt(new \DateTimeImmutable());
 
         $em = $this->em();
         $em->persist($user);

@@ -34,7 +34,6 @@ final class VerifyEmailAction
         $user = $ev->getUser();
         $user->setEmailVerifiedAt($now);
 
-        // Одна транзакция/flush: можно так
         $this->emailVerifications->save($ev, false);
         $this->users->save($user, true);
     }

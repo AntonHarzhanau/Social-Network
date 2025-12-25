@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Modules\User\Domain\Entity\User;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusException;
 use Symfony\Component\Security\Core\Exception\DisabledException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -22,6 +23,11 @@ final class UserStatusChecker implements UserCheckerInterface
 
     public function checkPostAuth(UserInterface $user): void
     {
-        // TODO: Implement after email verification
+        if (!$user instanceof User) {
+            return;
+        }
+        if ($user->getEmailVerifiedAt() === null) {
+            throw new CustomUserMessageAccountStatusException('Email not verified.');
+        }
     }
 }
