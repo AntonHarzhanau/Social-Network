@@ -2,11 +2,11 @@
 
 namespace App\Modules\Chat\Infrastructure\Controller;
 
+use App\Modules\Chat\Application\Action\Chat\AddUserToChat;
 use App\Modules\Chat\Application\Action\Chat\CreateGroupChat;
-use App\Modules\Chat\Domain\Entity\Chat;
-use App\Modules\Chat\Domain\Entity\ChatParticipant;
-use App\Modules\Chat\Application\ChatService;
-use App\Modules\Chat\Application\ReadModel\Chat\ChatFactory;
+use App\Modules\Chat\Application\Action\Chat\GetChat;
+use App\Modules\Chat\Application\Action\Chat\GetChatList;
+use App\Modules\Chat\Application\Action\Chat\GetChatMessages;
 use App\Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
 use App\Modules\User\Domain\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,23 +15,20 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\Uid\Uuid;
 
 #[Route('/api/chats')]
 final class ChatController extends AbstractController
 {
-    public function __construct(
-        private readonly ChatService $chatService,
-        private readonly ChatFactory $chatFactory,
-    ) {}
+    public function __construct() {}
 
     #[Route('', name: 'new_chat', methods: ['POST'], format: 'json')]
     public function createGroupChat(
-        Request $request, 
+        Request $request,
         #[CurrentUser] $currentUser,
         #[MapRequestPayload] CreateChatRequest $data,
         CreateGroupChat $createGroupChat
-    ): JsonResponse
-    {
+    ): JsonResponse {
         $data = json_decode($request->getContent(), true);
         $createGroupChat(
             $currentUser->getId(),
@@ -47,13 +44,16 @@ final class ChatController extends AbstractController
     }
 
     #[Route('', name: 'get_chats', methods: ['GET'], format: 'json')]
-    public function getAll(#[CurrentUser] User $user, Request $request): JsonResponse
-    {
+    public function getAll(
+        #[CurrentUser] User $user,
+        Request $request,
+        GetChatList $getChatList,
+    ): JsonResponse {
 
         $page = max(1, (int) $request->query->get('page', 1));
         $limit = max(1, (int) $request->query->get('limit', 10));
-        
-        $dto = $this->chatService->getChatList($user, $page, $limit);
+
+        $dto = $getChatList($user->getId(), $page, $limit);
 
         return $this->json(
             $dto,
@@ -64,16 +64,13 @@ final class ChatController extends AbstractController
     }
 
 
-    #[Route('/{id}', name: 'get_chat', methods: ['GET'], format: 'json')]
-    public function getOne(#[CurrentUser] User $user, Chat $chat): JsonResponse
-    {
-        if (!$chat->getChatParticipants()->exists(function ($key, ChatParticipant $participant) use ($user) {
-            return $participant->getUser()->getId() === $user->getId();
-        })) {
-            return $this->json(['error' => 'Access denied to this chat'], JsonResponse::HTTP_FORBIDDEN);
-        }
-
-        $dto = $this->chatFactory->toChatResponseDTO($chat, $user);
+    #[Route('/{chatId}', name: 'get_chat', methods: ['GET'], format: 'json')]
+    public function getOne(
+        #[CurrentUser] User $user,
+        string $chatId,
+        GetChat $getChat
+    ): JsonResponse {
+        $dto = $getChat(Uuid::fromString($chatId), $user->getId());
         return $this->json(
             $dto,
             JsonResponse::HTTP_OK,
@@ -101,17 +98,32 @@ final class ChatController extends AbstractController
     }
 
 
-    #[Route('/{id}/messages', name: 'get_chat_messages', methods: ['GET'], format: 'json')]
+    #[Route('/{chatId}/messages', name: 'get_chat_messages', methods: ['GET'], format: 'json')]
     public function getChatMessages(
-        Chat $chat, 
-        #[CurrentUser] User $currentUser, 
-        Request $request): JsonResponse
-    {
+        string $chatId,
+        #[CurrentUser] User $currentUser,
+        Request $request,
+        GetChatMessages $getChatMessages
+    ): JsonResponse {
         $page = max(1, (int) $request->query->get('page', 1));
         $limit = max(1, (int) $request->query->get('limit', 30));
 
-        $messages = $this->chatService->getMessagesByChat($chat, $currentUser, $page, $limit);
+        $messages = $getChatMessages(Uuid::fromString($chatId), $currentUser->getId(), $page, $limit);
         return $this->json($messages, JsonResponse::HTTP_OK, [], ['groups' => 'message:list']);
     }
 
+    #[Route('/{chatId}/add', name: 'add_user_to_chat', methods: ['POST'], format: 'json')]
+    public function addUserToChat(
+        string $chatId,
+        #[CurrentUser] User $currentUser,
+        Request $request,
+        AddUserToChat $addUserToChat
+    ): JsonResponse {
+        $ids = json_decode($request->getContent(), true);
+
+        $addUserToChat($ids['newParticipantIds'], Uuid::fromString($chatId), $currentUser->getId());
+
+       
+        return $this->json(['message' => 'User(s) added to chat'], JsonResponse::HTTP_OK, [], ['groups' => 'message:list']);
+    }
 }

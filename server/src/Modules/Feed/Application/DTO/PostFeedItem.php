@@ -13,7 +13,7 @@ final  class PostFeedItem
         public int $commentCount,
         public bool $isLikedByCurrentUser,
         public \DateTimeImmutable $date,
-        public UserPreviewDTO $author,
+        public ?UserPreviewDTO $author = null,
         public array $media = [],
     ) {}
 }

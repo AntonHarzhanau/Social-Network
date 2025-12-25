@@ -6,7 +6,6 @@ use App\Modules\Feed\Application\DTO\PostFeedItem;
 use App\Modules\Feed\Application\Port\MediaAssetDirectoryInterface;
 use App\Modules\Feed\Application\Port\UserDirectoryInterface;
 use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
-use App\Modules\Media\Application\Action\GetMediaDownLoadUrlAction;
 use Symfony\Component\Uid\Uuid;
 
 final class GetAllPostsAction
@@ -31,6 +30,7 @@ final class GetAllPostsAction
         $postIds = array_map(fn(PostFeedItem $post) => $post->id, $data);
         $media = $this->mediaAssetDirectory->getBindingsByPostIds($postIds);
         $posts = [];
+        
         foreach ($data as $post) {
             $postMedia = $media[$post->id] ?? [];
             $posts[] = new PostFeedItem(

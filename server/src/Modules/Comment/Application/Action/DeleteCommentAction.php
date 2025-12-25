@@ -22,7 +22,8 @@ final class DeleteCommentAction
          && $comment->getPost()->getAuthor()->getId() !== $currentUser) {
             throw new \InvalidArgumentException('You do not have permission to delete this comment.');
         }
-
+        $post = $comment->getPost();
+        $post->removeComment($comment);
         $this->commentRepository->remove($comment);
     }
 }

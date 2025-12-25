@@ -2,6 +2,7 @@
 
 namespace App\Modules\Chat\Infrastructure\Persistence\Doctrine\Repository;
 
+use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Entity\ChatParticipant;
 use App\Modules\Chat\Domain\Repository\ChatParticipantRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -17,9 +18,20 @@ class ChatParticipantRepository extends ServiceEntityRepository implements ChatP
         parent::__construct($registry, ChatParticipant::class);
     }
 
-    public function findOneBy(array $criteria, array|null $orderBy = null): object|null
+    public function findOneBy(array $criteria, array|null $orderBy = null): ?ChatParticipant
     {
         return parent::findOneBy($criteria);
+    }
+
+    public function getAllUsersByChatId(Chat $chat): array
+    {
+        $qb = $this->createQueryBuilder('cp')
+            ->select('cp', 'u')
+            ->innerJoin('cp.user', 'u')
+            ->andWhere('cp.chat = :chat')
+            ->setParameter('chat', $chat);
+
+        return $qb->getQuery()->getResult();
     }
 
     public function findUserChatsWithLastMessage(int $userId): array
@@ -39,5 +51,4 @@ class ChatParticipantRepository extends ServiceEntityRepository implements ChatP
 
         return $qb->getQuery()->getResult();
     }
-
 }

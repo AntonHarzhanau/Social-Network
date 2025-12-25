@@ -18,7 +18,7 @@ final class FindUserProfileAction
     {   
         $user = $this->userRepository->findById($userId);
 
-        if ($user === null) {
+        if ($user === null || $user->getDeletedAt() !== null) {
             throw new UserNotFoundException();
         }
         return $this->mapper->toDetails($user);

@@ -2,7 +2,7 @@
 
 namespace App\Modules\Media\Application\Service;
 
-use App\Enum\FileTypeEnum;
+use App\Modules\Shared\Domain\Enum\FileTypeEnum;
 
 final class FileTypeDetector
 {

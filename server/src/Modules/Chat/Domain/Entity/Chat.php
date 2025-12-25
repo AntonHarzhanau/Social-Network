@@ -2,7 +2,7 @@
 
 namespace App\Modules\Chat\Domain\Entity;
 
-use App\Enum\ChatTypeEnum;
+use App\Modules\Shared\Domain\Enum\ChatTypeEnum;
 use App\Modules\User\Domain\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

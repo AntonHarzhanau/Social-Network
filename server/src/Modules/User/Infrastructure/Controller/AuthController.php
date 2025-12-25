@@ -3,9 +3,12 @@
 namespace App\Modules\User\Infrastructure\Controller;
 
 use App\Modules\User\Application\Action\GetMeAction;
+use App\Modules\User\Application\Action\RecoveryAccountRequestAction;
 use App\Modules\User\Application\Action\RegisterUserAction;
+use App\Modules\User\Application\Action\RestoreAccountAction;
 use App\Modules\User\Application\Action\VerifyEmailAction;
 use App\Modules\User\Domain\Entity\User;
+use App\Modules\User\Infrastructure\Http\Request\RecoveryAccountRequest;
 use App\Modules\User\Infrastructure\Http\Request\RegisterRequest;
 use App\Modules\User\Infrastructure\Http\Request\VerifyEmailRequest;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -59,5 +62,22 @@ final class AuthController extends AbstractController
         GetMeAction $action,
     ): JsonResponse {
         return $this->json($action($user->getId()));
+    }
+
+    #[Route('/recovery/request', methods: ['POST'])]
+    public function recoveryRequest(
+        #[MapRequestPayload(validationFailedStatusCode: JsonResponse::HTTP_UNPROCESSABLE_ENTITY)] RecoveryAccountRequest $dto,
+        RecoveryAccountRequestAction $action,
+    ): JsonResponse {
+        $action($dto->email);
+        return $this->json(['message' => 'Recovery email sent'], JsonResponse::HTTP_ACCEPTED);
+    }
+
+    #[Route('/recovery/confirm', methods: ['POST'])]
+    public function recoveryConfirm(
+        #[MapRequestPayload(validationFailedStatusCode: JsonResponse::HTTP_UNPROCESSABLE_ENTITY)] VerifyEmailRequest $dto,
+       
+    ): JsonResponse {
+        return $this->json(['message' => 'Recovery email sent'], JsonResponse::HTTP_ACCEPTED);
     }
 }

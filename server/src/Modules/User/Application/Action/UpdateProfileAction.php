@@ -24,6 +24,6 @@ final class UpdateProfileAction
         if ($coverUrl !== null) $user->setCoverUrl($coverUrl);
         if ($maritalStatus !== null) $user->setMaritalStatus($maritalStatus);
 
-        $this->userRepository->updateUser($user);
+        $this->userRepository->save($user);
     }
 }

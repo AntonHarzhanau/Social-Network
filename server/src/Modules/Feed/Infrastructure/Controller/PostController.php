@@ -4,7 +4,6 @@ namespace App\Modules\Feed\Infrastructure\Controller;
 
 use App\DTO\Post\CreatePostDTO;
 use App\DTO\Post\UpdatePostDTO;
-use App\Enum\VisibilityEnum;
 use App\Modules\Feed\Application\Action\CreatePostAction;
 use App\Modules\Feed\Application\Action\DeletePostAction;
 use App\Modules\Feed\Application\Action\GetAllPostsAction;
@@ -12,6 +11,7 @@ use App\Modules\Feed\Application\Action\GetPostByIdAction;
 use App\Modules\Feed\Application\Action\GetPostsByAuthor;
 use App\Modules\Feed\Application\Action\ToggleLikeAction;
 use App\Modules\Feed\Application\Action\UpdatePostAction;
+use App\Modules\Shared\Domain\Enum\VisibilityEnum;
 use App\Modules\User\Domain\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;

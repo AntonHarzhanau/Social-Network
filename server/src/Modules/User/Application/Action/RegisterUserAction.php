@@ -44,6 +44,6 @@ final class RegisterUserAction
         $this->userRepository->save($user, true);
         $user = $this->userRepository->findByEmail($email);
 
-        return new UserRegistredEvent($user);
+        return new UserRegistredEvent($user, $ip, $userAgent);
     }
 }

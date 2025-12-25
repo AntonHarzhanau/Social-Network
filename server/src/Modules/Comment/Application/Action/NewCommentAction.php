@@ -31,6 +31,7 @@ final class NewCommentAction
         $comment->setContent($cmd->content);
         $comment->setAuthor($author);
         $comment->setPost($post);
+        $post->addComment($comment);
         $this->commentRepository->save($comment);
 
     }

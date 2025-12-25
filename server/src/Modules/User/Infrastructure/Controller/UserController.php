@@ -25,7 +25,6 @@ final class UserController extends AbstractController
         #[CurrentUser] ?User $user,
         FindUsersAction $action,
     ): JsonResponse {
-
         return $this->json($action($user));
     }
 

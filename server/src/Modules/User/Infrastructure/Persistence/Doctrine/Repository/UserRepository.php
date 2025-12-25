@@ -38,18 +38,19 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
     public function findById(string $id): ?User
     {
-        return $this->find($id);
+        return $this->findBy(['id' => $id, 'deletedAt' => null])[0] ?? null;
     }
 
+    /** @return array<User> */
     public function findAllExcept(User $excludedUser): array
     {
         $queryBuilder = $this->createQueryBuilder('u')
         ->where('u != :excludedUser')
+        ->andWhere('u.deletedAt IS NULL')
         ->setParameter('excludedUser', $excludedUser);
 
         return $queryBuilder->getQuery()->getResult();
     }
-
 
     public function findByEmail(string $email): ?User
     {
@@ -86,17 +87,13 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         }
     }
 
-    public function updateUser(User $user): void
-    {
-        $this->getEntityManager()->persist($user);
-        $this->getEntityManager()->flush();
-    }
-
+    /** @return array<UserPreviewDTO> */
     public function findPreviewsByIds(array $ids): array
     {
         $queryBuilder = $this->createQueryBuilder('u')
             ->select(sprintf('NEW %s(u.id, u.username, u.avatarUrl, u.slug)', UserPreviewDTO::class))
             ->andWhere('u.id IN (:ids)')
+            ->andWhere('u.deletedAt IS NULL')
             ->setParameter('ids', $ids);
 
         return $queryBuilder->getQuery()->getResult();

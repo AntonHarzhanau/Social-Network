@@ -16,7 +16,10 @@ final class GetMeAction
     
     public function __invoke(Uuid $userId): UserDetailsDTO
     {   
-        $user = $this->userRepository->findById($userId->toRfc4122());    
+        $user = $this->userRepository->findById($userId->toRfc4122());
+        if ($user === null || $user->getDeletedAt() !== null) {
+            throw new \RuntimeException('User not found.');
+        }   
         return $this->mapper->toDetails($user);
     }
 }

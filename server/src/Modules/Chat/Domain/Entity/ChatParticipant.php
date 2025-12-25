@@ -2,7 +2,7 @@
 
 namespace App\Modules\Chat\Domain\Entity;
 
-use App\Enum\ChatParticipantRoleEnum;
+use App\Modules\Shared\Domain\Enum\ChatParticipantRoleEnum;
 use App\Modules\User\Domain\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;

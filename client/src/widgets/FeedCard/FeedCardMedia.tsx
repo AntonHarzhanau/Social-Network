@@ -11,7 +11,7 @@ import type { MediaResponse } from "@/shared/types/mediaResponseTypes";
 import { useState } from "react";
 
 interface FeedCardMediaProps {
-  media: MediaResponse[];
+  media: MediaResponse[] | null;
 }
 
 const FeedCardMedia = ({ media }: FeedCardMediaProps) => {
@@ -19,7 +19,7 @@ const FeedCardMedia = ({ media }: FeedCardMediaProps) => {
   const isTouch =
     typeof window !== "undefined" &&
     ("ontouchstart" in window || navigator.maxTouchPoints > 0);
-  if (media.length === 0) {
+  if (!media || media.length === 0) {
     return null;
   }
 

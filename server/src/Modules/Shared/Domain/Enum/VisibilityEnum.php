@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enum;
+namespace App\Modules\Shared\Domain\Enum;
 
 enum VisibilityEnum: string
 {

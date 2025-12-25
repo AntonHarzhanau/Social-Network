@@ -3,7 +3,6 @@
 namespace App\Modules\Feed\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\DTO\Post\PostWithLikeFlagDTO;
-use App\Modules\Comment\Domain\Entity\Comment;
 use App\Modules\Feed\Application\DTO\PostFeedItem;
 use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
 use App\Modules\Feed\Domain\Entity\Post;
@@ -48,20 +47,26 @@ class PostRepository extends ServiceEntityRepository implements PostRepositoryIn
         ?array $visibilities = null
     ): array {
         $qb = $this->createQueryBuilder('p')->select(sprintf(
-            'NEW %s(
+            '
+            NEW %s(
             p.id,
             p.content,
             p.likeCount,
             p.commentCount,
             CASE WHEN :me MEMBER OF p.likeBy THEN true ELSE false END,
             p.createdAt,
-            NEW %s(a.id, a.username, a.avatarUrl, a.slug)
+            NEW %s(a.id, 
+            CASE WHEN a.deletedAt IS NULL THEN a.username ELSE :deletedName END, 
+            CASE WHEN a.deletedAt IS NULL THEN a.avatarUrl ELSE :deletedName END, 
+            CASE WHEN a.deletedAt IS NULL THEN a.slug ELSE :deletedName END
+            )
         )',
             PostFeedItem::class,
             UserPreviewDTO::class
         ))
             ->join('p.author', 'a')
             ->setParameter('me', $currentUser)
+            ->setParameter('deletedName', '[deleted]')
             ->orderBy('p.createdAt', 'DESC')
             ->addOrderBy('p.id', 'DESC');
 
@@ -71,7 +76,7 @@ class PostRepository extends ServiceEntityRepository implements PostRepositoryIn
         }
 
         if ($authorId) {
-            $qb->andWhere('p.author = :authorId')
+            $qb->andWhere('IDENTITY(p.author) = :authorId')
                 ->setParameter('authorId', $authorId);
         }
 

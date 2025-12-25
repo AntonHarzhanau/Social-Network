@@ -2,12 +2,12 @@
 
 namespace App\Modules\Chat\Application\Action\Chat;
 
-use App\Enum\ChatParticipantRoleEnum;
-use App\Enum\ChatTypeEnum;
 use App\Modules\Chat\Application\Port\UserDirectoryInterface;
 use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Entity\ChatParticipant;
 use App\Modules\Chat\Domain\Repository\ChatRepositoryInterface;
+use App\Modules\Shared\Domain\Enum\ChatParticipantRoleEnum;
+use App\Modules\Shared\Domain\Enum\ChatTypeEnum;
 use Symfony\Component\Uid\Uuid;
 
 final class CreateGroupChat

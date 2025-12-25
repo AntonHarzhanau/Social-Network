@@ -12,10 +12,11 @@ class DeleteAccountAction
     public function __invoke(Uuid $userId): void {
 
         $user = $this->userRepository->findById($userId->toRfc4122());
-        if ($user === null) {
+        if ($user === null || $user->getDeletedAt() !== null) {
             throw new \RuntimeException('User not found.');
         }
 
-        $this->userRepository->delete($user, true);
+        $user->setDeletedAt(new \DateTimeImmutable());
+        $this->userRepository->save($user);
     }
 }

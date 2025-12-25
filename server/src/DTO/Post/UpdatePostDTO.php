@@ -2,7 +2,7 @@
 
 namespace App\DTO\Post;
 
-use App\Enum\VisibilityEnum;
+use App\Modules\Shared\Domain\Enum\VisibilityEnum;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class UpdatePostDTO
