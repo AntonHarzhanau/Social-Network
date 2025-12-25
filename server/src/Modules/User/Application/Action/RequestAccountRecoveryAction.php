@@ -15,7 +15,6 @@ final class RequestAccountRecoveryAction
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly UriSigner $uriSigner,
         private readonly EmailSenderInterface $emailSender,
-        private string $frontendBaseUrl = 'http://localhost:5173',
     ) {}
 
     public function __invoke(string $email): void

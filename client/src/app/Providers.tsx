@@ -9,9 +9,9 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <QueryClientProvider client={queryClient}>
+        <Toaster richColors />
         {children}
         <ReactQueryDevtools initialIsOpen={false} />
-        <Toaster richColors />
       </QueryClientProvider>
     </ThemeProvider>
   );

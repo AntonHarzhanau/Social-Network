@@ -26,7 +26,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 final class AuthController extends AbstractController
 {
     public function __construct(
-        private readonly string $frontendBaseUrl = 'http://localhost:5173'
+        private readonly string $frontendBaseUrl = 'http://localhost:5173/auth'
     ) {}
 
     #[Route('/register', methods: ['POST'])]
@@ -39,15 +39,19 @@ final class AuthController extends AbstractController
         $userIp = $request->getClientIp();
         $userAgent = $request->headers->get('User-Agent');
 
-        $event = $action(
-            $dto->email,
-            $dto->firstName,
-            $dto->lastName,
-            $dto->password,
-            $dto->dateOfBirth,
-            $userIp,
-            $userAgent,
-        );
+        try {
+            $event = $action(
+                $dto->email,
+                $dto->firstName,
+                $dto->lastName,
+                $dto->password,
+                $dto->dateOfBirth,
+                $userIp,
+                $userAgent,
+            );
+        } catch (\DomainException $e) {
+            return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_CONFLICT);
+        }
 
         $eventDispatcher->dispatch($event);
 
@@ -88,10 +92,10 @@ Check your email.'], JsonResponse::HTTP_ACCEPTED);
     ): Response {
         try {
             $action($request);
-        
-            return $this->redirect($this->frontendBaseUrl . '/restore-account?status=ok');
+
+            return $this->redirect($this->frontendBaseUrl . '?restore-account-status=ok');
         } catch (\InvalidArgumentException $e) {
-            return $this->redirect($this->frontendBaseUrl . '/restore-account?status=invalid');
+            return $this->redirect($this->frontendBaseUrl . '?restore-account-status=invalid');
         }
     }
 }

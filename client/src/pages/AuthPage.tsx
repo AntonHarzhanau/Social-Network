@@ -3,12 +3,31 @@ import { Card, CardContent } from "@/shared/components/ui/card";
 import { FieldDescription } from "@/shared/components/ui/field";
 import LoginForm from "@/widgets/AuthForms/LoginForm";
 import RegisterForm from "@/widgets/AuthForms/RegisterForm";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 
 type Authmode = "login" | "register";
 
 const AuthPage = () => {
   const [mode, setMode] = useState<Authmode>("login");
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const restoreAccountStatus = searchParams.get("restore-account-status");
+
+  useEffect(() => {
+    if (!restoreAccountStatus) return;
+    
+    if (restoreAccountStatus === "ok") {
+      toast.success("Account restored successfully", { closeButton: true });
+    } else if (restoreAccountStatus === "invalid") {
+      toast.error("Invalid or expired recovery link", { closeButton: true });
+    } else {
+      toast.error("Unexpected recovery status", { closeButton: true });
+    }
+    searchParams.delete("restore-account-status");
+    setSearchParams(searchParams);
+  }, [restoreAccountStatus, setSearchParams, setSearchParams]);
 
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10 relative">
@@ -19,7 +38,9 @@ const AuthPage = () => {
               <div className="bg-muted relative hidden md:block">
                 <div className="flex flex-col justify-center items-center h-full">
                   <h1 className="text-5xl font-extrabold">LOGO</h1>
-                  <h1 className="text-3xl text-bold">Simple. Clear. Friendly.</h1>
+                  <h1 className="text-3xl text-bold">
+                    Simple. Clear. Friendly.
+                  </h1>
                 </div>
               </div>
               {mode === "login" ? (
@@ -27,7 +48,6 @@ const AuthPage = () => {
               ) : (
                 <RegisterForm switchToLogin={() => setMode("login")} />
               )}
-
             </CardContent>
           </Card>
 

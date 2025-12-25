@@ -45,7 +45,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await AuthApi.register(registerData);
     } catch (error) {
-      console.error("Registration failed:", error);
+      throw error;
     } finally {
       set({ isLoading: false });
     }
