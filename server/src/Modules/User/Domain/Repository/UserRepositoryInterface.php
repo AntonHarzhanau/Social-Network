@@ -10,6 +10,7 @@ interface UserRepositoryInterface
 
     public function delete(User $user, bool $flush = true): void;
     
+    /** @return User[] */
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
 
     public function findById(string $id): ?User;
@@ -21,4 +22,8 @@ interface UserRepositoryInterface
 
     /** @return UserPreviewDTO[] */
     public function findPreviewsByIds(array $ids): array;
+
+    /** @return User|null */
+    public function findOneBy(array $criteria, ?array $orderBy = null): ?object;
+    
 }

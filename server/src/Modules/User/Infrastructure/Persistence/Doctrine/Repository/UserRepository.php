@@ -2,7 +2,6 @@
 
 namespace App\Modules\User\Infrastructure\Persistence\Doctrine\Repository;
 
-use App\Modules\User\Api\UserApiInterface;
 use App\Modules\User\Contracts\DTO\UserPreviewDTO;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Domain\Repository\UserRepositoryInterface;
@@ -45,9 +44,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function findAllExcept(User $excludedUser): array
     {
         $queryBuilder = $this->createQueryBuilder('u')
-        ->where('u != :excludedUser')
-        ->andWhere('u.deletedAt IS NULL')
-        ->setParameter('excludedUser', $excludedUser);
+            ->where('u != :excludedUser')
+            ->andWhere('u.deletedAt IS NULL')
+            ->setParameter('excludedUser', $excludedUser);
 
         return $queryBuilder->getQuery()->getResult();
     }
@@ -97,5 +96,11 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->setParameter('ids', $ids);
 
         return $queryBuilder->getQuery()->getResult();
+    }
+
+    /** @return User|null */
+    public function findOneBy(array $criteria, ?array $orderBy = null): ?object
+    {
+        return parent::findOneBy($criteria, $orderBy);
     }
 }
