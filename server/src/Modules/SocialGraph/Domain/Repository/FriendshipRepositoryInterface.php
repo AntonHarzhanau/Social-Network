@@ -2,7 +2,7 @@
 
 namespace App\Modules\SocialGraph\Domain\Repository;
 
-use App\Modules\Shared\Domain\Enum\FriendshipStatusEnum;
+use App\Modules\SocialGraph\Domain\Enum\FriendshipStatusEnum;
 use App\Modules\SocialGraph\Domain\Entity\Friendship;
 use Symfony\Component\Uid\Uuid;
 

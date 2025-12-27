@@ -2,7 +2,7 @@
 
 namespace App\Modules\SocialGraph\Infrastructure\Persistence\Doctrine\Repository;
 
-use App\Modules\Shared\Domain\Enum\FriendshipStatusEnum;
+use App\Modules\SocialGraph\Domain\Enum\FriendshipStatusEnum;
 use App\Modules\SocialGraph\Domain\Entity\Friendship;
 use App\Modules\SocialGraph\Domain\Repository\FriendshipRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;

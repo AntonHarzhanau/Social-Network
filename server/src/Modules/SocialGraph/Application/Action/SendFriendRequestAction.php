@@ -2,7 +2,7 @@
 
 namespace App\Modules\SocialGraph\Application\Action;
 
-use App\Modules\Shared\Domain\Enum\FriendshipStatusEnum;
+use App\Modules\SocialGraph\Domain\Enum\FriendshipStatusEnum;
 use App\Modules\SocialGraph\Application\Exception\CannotFriendYourselfException;
 use App\Modules\SocialGraph\Application\Exception\FriendshipAlreadyExistsException;
 use App\Modules\SocialGraph\Application\Port\UserDirectoryInterface;

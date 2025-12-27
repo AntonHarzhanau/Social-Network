@@ -2,10 +2,10 @@
 
 namespace App\Modules\Feed\Application\Action;
 
-use App\DTO\Post\PostLikeResponseDTO;
 use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
 use App\Modules\User\Domain\Entity\User;
 use Symfony\Component\Uid\Uuid;
+use App\Modules\Feed\Application\DTO\PostLikeResponse;
 
 final class ToggleLikeAction
 {
@@ -13,7 +13,7 @@ final class ToggleLikeAction
         private readonly PostRepositoryInterface $postRepository,
     ) {}
 
-    public function __invoke(Uuid $postId, User $user): PostLikeResponseDTO
+    public function __invoke(Uuid $postId, User $user): PostLikeResponse
     {
         $post = $this->postRepository->findOneById($postId);
         if ($post->getLikeBy()->contains($user)) {
@@ -26,7 +26,7 @@ final class ToggleLikeAction
 
         $this->postRepository->save($post);
 
-        $dto = new PostLikeResponseDTO(
+        $dto = new PostLikeResponse(
             postId: $post->getId(),
             likeCount: $post->getLikeCount(),
             isLikedByCurrentUser: $post->getLikeBy()->contains($user)

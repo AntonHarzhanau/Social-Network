@@ -2,7 +2,6 @@
 
 namespace App\Modules\Feed\Infrastructure\Persistence\Doctrine\Repository;
 
-use App\DTO\Post\PostWithLikeFlagDTO;
 use App\Modules\Feed\Application\DTO\PostFeedItem;
 use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
 use App\Modules\Feed\Domain\Entity\Post;
@@ -90,7 +89,6 @@ class PostRepository extends ServiceEntityRepository implements PostRepositoryIn
                 ->setMaxResults($limit);
         }
 
-        /** @var PostWithLikeFlagDTO[] $results */
         $results = $qb->getQuery()->getResult();
         return $results;
     }

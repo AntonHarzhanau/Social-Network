@@ -2,7 +2,7 @@
 
 namespace App\Modules\Media\Domain\Entity;
 
-use App\Modules\Shared\Domain\Enum\FileTypeEnum;
+use App\Modules\Media\Domain\Enum\FileTypeEnum;
 use App\Modules\User\Domain\Entity\User;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;

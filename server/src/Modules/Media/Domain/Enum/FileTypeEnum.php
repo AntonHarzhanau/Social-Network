@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Shared\Domain\Enum;
+namespace App\Modules\Media\Domain\Enum;
 
 enum FileTypeEnum: string
 {

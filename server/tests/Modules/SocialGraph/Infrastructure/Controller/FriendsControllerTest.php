@@ -2,7 +2,7 @@
 
 namespace Tests\Modules\SocialGraph\Infrastructure\Controller;
 
-use App\Modules\Shared\Domain\Enum\FriendshipStatusEnum;
+use App\Modules\SocialGraph\Domain\Enum\FriendshipStatusEnum;
 use App\Modules\SocialGraph\Domain\Entity\Friendship;
 use App\Modules\User\Domain\Entity\User;
 use App\Tests\Support\ApiWebTestCase;

@@ -2,7 +2,7 @@
 
 namespace App\Modules\SocialGraph\Infrastructure\Controller;
 
-use App\Modules\Shared\Domain\Enum\FriendshipsTypeEnum;
+use App\Modules\SocialGraph\Domain\Enum\FriendshipsTypeEnum;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\SocialGraph\Application\Action\AcceptFriendRequestAction;
 use App\Modules\SocialGraph\Application\Action\CancelFriendRequestAction;

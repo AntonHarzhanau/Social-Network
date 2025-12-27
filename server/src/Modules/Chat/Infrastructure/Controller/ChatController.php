@@ -30,17 +30,14 @@ final class ChatController extends AbstractController
         CreateGroupChat $createGroupChat
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
-        $createGroupChat(
+        $id = $createGroupChat(
             $currentUser->getId(),
             $data['title'],
             $data['avatarUrl'] ?? null,
             $data['participantIds']
         );
 
-        return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/ChatController.php',
-        ]);
+        return $this->json(['chatId' => $id], JsonResponse::HTTP_CREATED);
     }
 
     #[Route('', name: 'get_chats', methods: ['GET'], format: 'json')]
@@ -83,18 +80,16 @@ final class ChatController extends AbstractController
     public function update(): JsonResponse
     {
         return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/ChatController.php',
-        ]);
+            'error' => 'Not implemented yet',
+        ], JsonResponse::HTTP_NOT_IMPLEMENTED);
     }
 
     #[Route('', name: 'delete_chat', methods: ['DELETE'], format: 'json')]
     public function delete(): JsonResponse
     {
         return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/ChatController.php',
-        ]);
+            'error' => 'Not implemented yet',
+        ], JsonResponse::HTTP_NOT_IMPLEMENTED);
     }
 
 
@@ -123,7 +118,7 @@ final class ChatController extends AbstractController
 
         $addUserToChat($ids['newParticipantIds'], Uuid::fromString($chatId), $currentUser->getId());
 
-       
+
         return $this->json(['message' => 'User(s) added to chat'], JsonResponse::HTTP_OK, [], ['groups' => 'message:list']);
     }
 }

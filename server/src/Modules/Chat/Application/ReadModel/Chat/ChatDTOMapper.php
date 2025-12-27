@@ -3,7 +3,7 @@
 namespace App\Modules\Chat\Application\ReadModel\Chat;
 
 use App\Modules\Chat\Domain\Entity\Chat;
-use App\Modules\Shared\Domain\Enum\ChatTypeEnum;
+use App\Modules\Chat\Domain\Enum\ChatTypeEnum;
 use App\Modules\User\Domain\Entity\User;
 use Symfony\Component\Uid\Uuid;
 

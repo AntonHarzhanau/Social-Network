@@ -14,7 +14,11 @@ import ProfileVideoContent from "./ProfileVideoContent";
 import FeedsList from "../FeedsList";
 import { useAuthStore } from "@/shared/store/authStore";
 
-const ProfileColumn = () => {
+interface ProfileColumnProps {
+  userId?: string;
+}
+
+const ProfileColumn = ({ userId }: ProfileColumnProps) => {
     const { id } = useAuthStore(s => s.user?.id ? s.user : { id: null });
   const contentTabs = {
     tabs: [
@@ -48,7 +52,7 @@ const ProfileColumn = () => {
       </Card>
 
       <CreatePostDIalog className="mt-2" />
-      <FeedsList authorId={id} />
+      <FeedsList authorId={userId} />
     </div>
   );
 };

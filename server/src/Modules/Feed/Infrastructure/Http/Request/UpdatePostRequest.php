@@ -1,11 +1,11 @@
 <?php
 
-namespace App\DTO\Post;
+namespace App\Modules\Feed\Infrastructure\Http\Request;
 
-use App\Modules\Shared\Domain\Enum\VisibilityEnum;
+use App\Modules\Feed\Domain\Enum\VisibilityEnum;
 use Symfony\Component\Validator\Constraints as Assert;
 
-final readonly class UpdatePostDTO
+final readonly class UpdatePostRequest
 {
     public function __construct(
         #[Assert\Length(max: 3000)]

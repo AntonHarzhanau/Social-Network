@@ -31,7 +31,7 @@ const ProfilePage = () => {
       />
       <div className="flex gap-2 mt-4">
         <section className="flex flex-col flex-5 gap-2">
-          <ProfileColumn />
+          <ProfileColumn userId={params.userId} />
         </section>
 
         <aside className="flex-3 sticky h-fit top-14">

@@ -2,7 +2,7 @@
 
 namespace App\Modules\Media\Application\DTO;
 
-use App\Modules\Shared\Domain\Enum\FileTypeEnum;
+use App\Modules\Media\Domain\Enum\FileTypeEnum;
 
 final readonly class PostMediaItem
 {

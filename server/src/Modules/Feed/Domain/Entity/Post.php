@@ -5,7 +5,7 @@ namespace App\Modules\Feed\Domain\Entity;
 use App\Modules\Comment\Domain\Entity\Comment;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\Media\Domain\Entity\PostMediaBinding;
-use App\Modules\Shared\Domain\Enum\VisibilityEnum;
+use App\Modules\Feed\Domain\Enum\VisibilityEnum;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;

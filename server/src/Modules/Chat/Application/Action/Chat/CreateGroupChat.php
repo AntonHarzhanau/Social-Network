@@ -5,9 +5,9 @@ namespace App\Modules\Chat\Application\Action\Chat;
 use App\Modules\Chat\Application\Port\UserDirectoryInterface;
 use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Entity\ChatParticipant;
+use App\Modules\Chat\Domain\Enum\ChatParticipantRoleEnum;
+use App\Modules\Chat\Domain\Enum\ChatTypeEnum;
 use App\Modules\Chat\Domain\Repository\ChatRepositoryInterface;
-use App\Modules\Shared\Domain\Enum\ChatParticipantRoleEnum;
-use App\Modules\Shared\Domain\Enum\ChatTypeEnum;
 use Symfony\Component\Uid\Uuid;
 
 final class CreateGroupChat
@@ -23,7 +23,7 @@ final class CreateGroupChat
         string $title,
         ?string $avatarUrl = null,
         array $participantIds,
-    ): void {
+    ): string {
 
         $participantIds = array_filter($participantIds, fn($id) => $id !== $creatorId);
 
@@ -49,5 +49,7 @@ final class CreateGroupChat
         }
 
         $this->chatRepository->save($chat);
+
+        return (string) $chat->getId();
     }
 }

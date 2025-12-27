@@ -2,8 +2,6 @@
 
 namespace App\Modules\Chat\Application\Action\Chat;
 
-use App\Modules\Chat\Application\ReadModel\Chat\ChatDTOMapper;
-use App\Modules\Chat\Application\ReadModel\Chat\ChatFactory;
 use App\Modules\Chat\Domain\Repository\ChatParticipantRepositoryInterface;
 use App\Modules\Chat\Domain\Repository\MessageRepositoryInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -14,7 +12,6 @@ final readonly class GetChatMessages
     public function __construct(
         private readonly MessageRepositoryInterface $messageRepository,
         private readonly ChatParticipantRepositoryInterface $chatParticipantRepository,
-        private readonly ChatDTOMapper $chatDTOMapper,
     ) {}
 
     public function __invoke(Uuid $chatId, Uuid $userId, int $page = 1, int $limit = 30): array

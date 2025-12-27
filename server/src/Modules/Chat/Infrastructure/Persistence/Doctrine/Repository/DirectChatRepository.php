@@ -5,7 +5,6 @@ namespace App\Modules\Chat\Infrastructure\Persistence\Doctrine\Repository;
 use App\Modules\Chat\Application\Action\Exception\DirectChatAlreadyExists;
 use App\Modules\Chat\Domain\Entity\DirectChat;
 use App\Modules\Chat\Domain\Repository\DirectChatRepositoryInterface;
-use App\Modules\User\Domain\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\Persistence\ManagerRegistry;

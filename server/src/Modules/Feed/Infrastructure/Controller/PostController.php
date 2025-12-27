@@ -2,8 +2,6 @@
 
 namespace App\Modules\Feed\Infrastructure\Controller;
 
-use App\DTO\Post\CreatePostDTO;
-use App\DTO\Post\UpdatePostDTO;
 use App\Modules\Feed\Application\Action\CreatePostAction;
 use App\Modules\Feed\Application\Action\DeletePostAction;
 use App\Modules\Feed\Application\Action\GetAllPostsAction;
@@ -11,6 +9,8 @@ use App\Modules\Feed\Application\Action\GetPostByIdAction;
 use App\Modules\Feed\Application\Action\GetPostsByAuthor;
 use App\Modules\Feed\Application\Action\ToggleLikeAction;
 use App\Modules\Feed\Application\Action\UpdatePostAction;
+use App\Modules\Feed\Infrastructure\Http\Request\CreatePostRequest;
+use App\Modules\Feed\Infrastructure\Http\Request\UpdatePostRequest;
 use App\Modules\Shared\Domain\Enum\VisibilityEnum;
 use App\Modules\User\Domain\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,7 +31,7 @@ final class PostController extends AbstractController
 
     #[Route('', name: 'create_post', methods: ['POST'], format: 'json')]
     public function create(
-        #[MapRequestPayload] CreatePostDTO $dto,
+        #[MapRequestPayload] CreatePostRequest $dto,
         #[CurrentUser] User $user,
         CreatePostAction $create
     ): JsonResponse {
@@ -117,7 +117,7 @@ final class PostController extends AbstractController
     #[Route('/{postId}', name: 'update_post', methods: ['PUT'], format: 'json')]
     public function update(
         string $postId,
-        #[MapRequestPayload] UpdatePostDTO $dto,
+        #[MapRequestPayload] UpdatePostRequest $dto,
         #[CurrentUser] User $user,
         UpdatePostAction $update,
     ): JsonResponse {

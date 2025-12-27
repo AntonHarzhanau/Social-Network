@@ -4,7 +4,6 @@ namespace App\Modules\Chat\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Repository\ChatRepositoryInterface;
-use App\Modules\User\Domain\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 use Doctrine\Persistence\ManagerRegistry;

@@ -9,7 +9,6 @@ use App\Modules\Chat\Application\Action\Message\SendMessageToUserAction;
 use App\Modules\Chat\Infrastructure\Http\Mapper\NewMessageRequestMapper;
 use App\Modules\Chat\Infrastructure\Http\Request\NewMessageRequest;
 use App\Modules\User\Domain\Entity\User;
-use App\Modules\Shared\Infrastructure\ChatNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -29,13 +28,8 @@ final class MessageController extends AbstractController
         #[CurrentUser] User $user,
         SendMessageToChatAction $sendMessage,
         NewMessageRequestMapper $mapper,
-        ChatNotifier $notifier,
     ): JsonResponse {
-
-        $message = $sendMessage(Uuid::fromString($chatId), $user->getId(), $mapper::map($data));
-
-        // $notifier->notifyNewMessage($message);
-
+        $sendMessage(Uuid::fromString($chatId), $user->getId(), $mapper::map($data));
         return $this->json(['message' => 'Message sent successfully'], JsonResponse::HTTP_CREATED);
     }
 
@@ -46,12 +40,8 @@ final class MessageController extends AbstractController
         #[CurrentUser] User $currentUser,
         SendMessageToUserAction $sendMessage,
         NewMessageRequestMapper $mapper,
-        // ChatNotifier $notifier,
     ): JsonResponse {
-
-        $message = $sendMessage($currentUser->getId(), Uuid::fromString($userId), $mapper::map($data));
-
-        // $notifier->notifyNewMessage($message);
+        $sendMessage($currentUser->getId(), Uuid::fromString($userId), $mapper::map($data));
 
         return $this->json(['message' => 'Message sent successfully'], JsonResponse::HTTP_CREATED);
     }
@@ -63,7 +53,6 @@ final class MessageController extends AbstractController
         #[CurrentUser] User $currentUser,
         EditMessageAction $editMessage,
         NewMessageRequestMapper $mapper,
-        // ChatNotifier $notifier,
     ): JsonResponse {
 
         $editMessage(Uuid::fromString($messageId), $currentUser->getId(), $mapper::map($data));
@@ -76,9 +65,7 @@ final class MessageController extends AbstractController
         string $messageId,
         #[CurrentUser] User $currentUser,
         DeleteMessageAction $deleteMessage,
-        // ChatNotifier $notifier,
     ): JsonResponse {
-
         $deleteMessage(Uuid::fromString($messageId), $currentUser->getId());
 
         return $this->json(['message' => 'Message deleted successfully'], JsonResponse::HTTP_OK);

@@ -21,7 +21,6 @@ final class RemoveFriendAction
         $friendship = $this->friendships->findFriendship($userAId, $userBId);
 
         if ($friendship === null) {
-        // Текущее поведение контроллера: try/catch ловит Throwable и отдаёт 500
             throw new PendingRequestNotFoundException('No existing friendship between these users.');
         }
 

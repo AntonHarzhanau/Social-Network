@@ -6,7 +6,7 @@ use App\Modules\Feed\Application\Port\MediaAssetDirectoryInterface;
 use App\Modules\Feed\Application\Port\UserDirectoryInterface;
 use App\Modules\Feed\Domain\Entity\Post;
 use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
-use App\Modules\Shared\Domain\Enum\VisibilityEnum;
+use App\Modules\Feed\Domain\Enum\VisibilityEnum;
 use Symfony\Component\Uid\Uuid;
 
 final class CreatePostAction

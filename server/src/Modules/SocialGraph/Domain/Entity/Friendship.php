@@ -2,7 +2,7 @@
 
 namespace App\Modules\SocialGraph\Domain\Entity;
 
-use App\Modules\Shared\Domain\Enum\FriendshipStatusEnum;
+use App\Modules\SocialGraph\Domain\Enum\FriendshipStatusEnum;
 use App\Modules\User\Domain\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;

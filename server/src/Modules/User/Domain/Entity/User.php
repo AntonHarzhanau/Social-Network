@@ -73,6 +73,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $emailVerifiedAt = null;
 
+    #[ORM\OneToOne(mappedBy: 'userId', cascade: ['persist', 'remove'])]
+    private ?UserPrivacySettings $PrivacySettings = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -299,6 +302,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmailVerifiedAt(?\DateTimeImmutable $emailVerifiedAt): static
     {
         $this->emailVerifiedAt = $emailVerifiedAt;
+
+        return $this;
+    }
+
+    public function getPrivacySettings(): ?UserPrivacySettings
+    {
+        return $this->PrivacySettings;
+    }
+
+    public function setPrivacySettings(UserPrivacySettings $PrivacySettings): static
+    {
+        // set the owning side of the relation if necessary
+        if ($PrivacySettings->getUserId() !== $this) {
+            $PrivacySettings->setUserId($this);
+        }
+
+        $this->PrivacySettings = $PrivacySettings;
 
         return $this;
     }

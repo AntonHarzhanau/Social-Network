@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Shared\Domain\Enum;
+namespace App\Modules\Chat\Domain\Enum;
 
 enum ChatTypeEnum: string
 {
