@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\SocialGraph\Infrastructure\Controller;
+namespace App\Modules\SocialGraph\Infrastructure\Http\Controller;
 
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\SocialGraph\Application\Action\ListFriendsAction;

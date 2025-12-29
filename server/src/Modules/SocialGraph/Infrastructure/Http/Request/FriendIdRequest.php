@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\SocialGraph\Infrastructure\Http;
+namespace App\Modules\SocialGraph\Infrastructure\Http\Request;
 
 use Symfony\Component\Validator\Constraints as Assert;
 

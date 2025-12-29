@@ -2,7 +2,6 @@
 
 namespace App\Modules\Chat\Infrastructure\Persistence\Doctrine\Repository;
 
-use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Entity\Message;
 use App\Modules\Chat\Domain\Repository\MessageRepositoryInterface;
 use App\Modules\User\Domain\Entity\User;

@@ -17,8 +17,10 @@ interface UserRepositoryInterface
 
     public function findByEmail(string $email): ?User; 
     
-    /** @return User[] */
-    public function findAllExcept(User $excludedUser): array;
+    /**
+     * @param array<Uuid> $excludedUsers
+     * @return User[] */
+    public function findAllExcept(array $excludedUsers): array;
 
     /** @return UserPreviewDTO[] */
     public function findPreviewsByIds(array $ids): array;

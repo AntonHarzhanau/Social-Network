@@ -7,6 +7,7 @@ use App\Modules\Chat\Application\Port\UserDirectoryInterface;
 use App\Modules\Chat\Application\Service\DirectChatService;
 use App\Modules\Chat\Application\Service\MessageService;
 use App\Modules\Chat\Domain\Entity\Message;
+use App\Modules\SocialGraph\Api\SocialGraphApiInterface;
 use Symfony\Component\Uid\Uuid;
 
 final class SendMessageToUserAction
@@ -15,6 +16,7 @@ final class SendMessageToUserAction
         private readonly UserDirectoryInterface $userDirectory,
         private readonly DirectChatService $directChatService,
         private readonly MessageService $messageService,
+        private readonly SocialGraphApiInterface $socialGraphApi,
     ) {}
 
     public function __invoke(Uuid $currentUserId, Uuid $addresseeId, NewMessage $dto): Message
@@ -25,6 +27,10 @@ final class SendMessageToUserAction
             throw new \InvalidArgumentException('User not found.');
         }
 
+        if ($this->socialGraphApi->isUserBlockedByUser($addresseeId, $currentUserId)) {
+            throw new \RuntimeException('Cannot send message to a user who has blocked you.');
+        }
+        
         $chat = $this->directChatService->getOrCreateDirectChat($currentUser, $addressee);
 
         $message = $this->messageService->createMessage($chat->getId(), $currentUser->getId(), $dto->content);

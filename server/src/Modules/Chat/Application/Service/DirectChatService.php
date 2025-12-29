@@ -2,12 +2,12 @@
 
 namespace App\Modules\Chat\Application\Service;
 
-use App\Enum\ChatParticipantRoleEnum;
-use App\Enum\ChatTypeEnum;
 use App\Modules\Chat\Application\Action\Exception\DirectChatAlreadyExists;
 use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Entity\ChatParticipant;
 use App\Modules\Chat\Domain\Entity\DirectChat;
+use App\Modules\Chat\Domain\Enum\ChatParticipantRoleEnum;
+use App\Modules\Chat\Domain\Enum\ChatTypeEnum;
 use App\Modules\Chat\Domain\Repository\DirectChatRepositoryInterface;
 use App\Modules\User\Domain\Entity\User;
 

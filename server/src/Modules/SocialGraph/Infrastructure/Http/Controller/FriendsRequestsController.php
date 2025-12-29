@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\SocialGraph\Infrastructure\Controller;
+namespace App\Modules\SocialGraph\Infrastructure\Http\Controller;
 
 use App\Modules\SocialGraph\Domain\Enum\FriendshipsTypeEnum;
 use App\Modules\User\Domain\Entity\User;
@@ -9,7 +9,7 @@ use App\Modules\SocialGraph\Application\Action\CancelFriendRequestAction;
 use App\Modules\SocialGraph\Application\Action\DeclineFriendRequestAction;
 use App\Modules\SocialGraph\Application\Action\ListFriendRequestsAction;
 use App\Modules\SocialGraph\Application\Action\SendFriendRequestAction;
-use App\Modules\SocialGraph\Infrastructure\Http\FriendIdRequest;
+use App\Modules\SocialGraph\Infrastructure\Http\Request\FriendIdRequest;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
