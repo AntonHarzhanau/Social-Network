@@ -19,12 +19,12 @@ class GroupMember
     private ?Uuid $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $userId = null;
+    #[ORM\JoinColumn(nullable: false, name: 'user_id')]
+    private ?User $user = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Group $groupId = null;
+    #[ORM\JoinColumn(nullable: false, name: 'group_id', onDelete: 'CASCADE')]
+    private ?Group $group = null;
 
     #[ORM\Column(length: 255, enumType: GroupMemberRoleEnum::class)]
     private ?GroupMemberRoleEnum $role = null;
@@ -37,26 +37,26 @@ class GroupMember
         return $this->id;
     }
 
-    public function getUserId(): ?User
+    public function getUser(): ?User
     {
-        return $this->userId;
+        return $this->user;
     }
 
-    public function setUserId(?User $userId): static
+    public function setUser(?User $user): static
     {
-        $this->userId = $userId;
+        $this->user = $user;
 
         return $this;
     }
 
-    public function getGroupId(): ?Group
+    public function getGroup(): ?Group
     {
-        return $this->groupId;
+        return $this->group;
     }
 
-    public function setGroupId(?Group $groupId): static
+    public function setGroup(?Group $group): static
     {
-        $this->groupId = $groupId;
+        $this->group = $group;
 
         return $this;
     }

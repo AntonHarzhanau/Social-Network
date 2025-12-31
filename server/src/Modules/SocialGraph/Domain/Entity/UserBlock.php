@@ -2,13 +2,12 @@
 
 namespace App\Modules\SocialGraph\Domain\Entity;
 
-use App\Modules\SocialGraph\Infrastructure\Persistence\Doctrine\Repository\UserBlockRepository;
 use App\Modules\User\Domain\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: UserBlockRepository::class)]
+#[ORM\Entity]
 class UserBlock
 {
     #[ORM\Id]
