@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Media\Application\Action;
+namespace App\Modules\Media\Application\Service;
 
 use App\Modules\Media\Application\Port\MediaStorageInterface;
 use App\Modules\Media\Domain\Entity\MediaAsset;

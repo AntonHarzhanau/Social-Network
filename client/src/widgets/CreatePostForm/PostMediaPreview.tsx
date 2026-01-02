@@ -76,7 +76,6 @@ export function PostMediaPreview({
             </span>
           </div>
 
-          {/* крестик удалить */}
           <button
             type="button"
             onClick={() => onRemove(item.localId)}

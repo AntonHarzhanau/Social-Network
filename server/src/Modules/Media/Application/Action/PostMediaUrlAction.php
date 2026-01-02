@@ -2,7 +2,8 @@
 
 namespace App\Modules\Media\Application\Action;
 
-use App\Modules\Media\Application\DTO\PostMediaItem;
+use App\Modules\Media\Api\DTO\MediaItemDTO;
+use App\Modules\Media\Application\Service\GetMediaUrl;
 use App\Modules\Media\Infrastructure\Persistence\Doctrine\Repository\PostMediaBindingRepository;
 
 final class PostMediaUrlAction
@@ -22,11 +23,11 @@ final class PostMediaUrlAction
 
         foreach ($bindings as $binding) {
            $postId = (string) $binding->getPost()->getId();
-           $result[$postId][] = new PostMediaItem(
+           $result[$postId][] = new MediaItemDTO(
                 id: (string) $binding->getMedia()->getId(),
                 url: ($this->getMediaUrl)($binding->getMedia()),
-                fileType: $binding->getMedia()->getFileType(),
-                createdAt: $binding->getMedia()->getCreatedAt()->format(\DateTime::ATOM),
+                type: $binding->getMedia()->getFileType()->value,
+                createdAt: $binding->getMedia()->getCreatedAt(),
            );
         }
 

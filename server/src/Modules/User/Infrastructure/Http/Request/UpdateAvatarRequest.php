@@ -7,6 +7,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 final class UpdateAvatarRequest
 {
     // null = удалить аватар
-    #[Assert\Length(max: 2048)]
-    public ?string $avatarUrl = null;
+
+    public string $originalFileId;
+    
+    public string $previewFileId;
 }

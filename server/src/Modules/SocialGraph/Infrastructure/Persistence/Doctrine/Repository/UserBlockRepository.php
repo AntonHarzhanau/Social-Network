@@ -3,7 +3,7 @@
 namespace App\Modules\SocialGraph\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Modules\SocialGraph\Domain\Entity\UserBlock;
-use App\Modules\SocialGraph\Domain\Repository\userblockrepositoryinterface;
+use App\Modules\SocialGraph\Domain\Repository\UserBlockRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;

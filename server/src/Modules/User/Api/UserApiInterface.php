@@ -11,6 +11,6 @@ interface UserApiInterface
     /** @return list<User> */
     public function findManyByIds(array $ids): array; 
 
-    /** @return list<UserPreview> */
+    /** @return list<UserPreviewDTO> */
     public function findPreviewsByIds(array $ids): array;
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Chat\Infrastructure\Controller;
+namespace App\Modules\Chat\Infrastructure\Http\Controller;
 
 use App\Modules\Chat\Application\Action\Message\DeleteMessageAction;
 use App\Modules\Chat\Application\Action\Message\EditMessageAction;

@@ -21,3 +21,15 @@ export const fetchUserProfile = async (
   const response = await apiClient.get<UserProfile>(`/users/${userId}/profile`);
   return response.data;
 };
+
+export const uploadAvatar = async (
+    originalId: string,
+    previewId: string,
+  ): Promise<void> => {
+    console.log("uploadAvatar called with:", { originalId, previewId });
+    await apiClient.post("/users/avatar", {
+        originalFileId: originalId,
+        previewFileId: previewId,
+    })
+  };
+

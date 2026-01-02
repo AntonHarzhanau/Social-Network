@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\User\Infrastructure\Controller;
+namespace App\Modules\User\Infrastructure\Http\Controller;
 
 use App\Modules\User\Application\Action\DeleteAccountAction;
 use App\Modules\User\Application\Action\FindUserProfileAction;
@@ -63,7 +63,7 @@ final class UserController extends AbstractController
     }
 
 
-    #[Route('/avatar', methods: ['PUT'])]
+    #[Route('/avatar', methods: ['POST'])]
     public function updateAvatar(
         #[CurrentUser] ?User $user,
         #[MapRequestPayload(validationFailedStatusCode: 422)] UpdateAvatarRequest $dto,
@@ -71,7 +71,7 @@ final class UserController extends AbstractController
     ): JsonResponse {
         if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
 
-        $action($user->getId(), $dto->avatarUrl);
+        $action->execute($user->getId(), $dto->originalFileId, $dto->previewFileId);
 
         return $this->json(['ok' => true]);
     }

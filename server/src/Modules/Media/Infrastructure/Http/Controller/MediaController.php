@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Modules\Media\Infrastructure\Controller;
+namespace App\Modules\Media\Infrastructure\Http\Controller;
 
 use App\Modules\Media\Application\Action\DeleteMediaAction;
-use App\Modules\Media\Application\Action\GetMediaUrl;
+use App\Modules\Media\Application\Service\GetMediaUrl;
 use App\Modules\Media\Application\Action\ListMyMediaAction;
 use App\Modules\Media\Application\Action\UploadMediaAction;
 use App\Modules\Media\Domain\Entity\MediaAsset;
@@ -33,13 +33,12 @@ final class MediaController extends AbstractController
     #[Route('', name: 'upload_media', methods: ['POST'], format: 'json')]
     public function upload(Request $request, #[CurrentUser] User $user): JsonResponse
     {
-
         $file = $request->files->get('file');
         if (!$file) {
             return $this->json(['error' => 'No file uploaded'], JsonResponse::HTTP_BAD_REQUEST);
         }
 
-        $media = ($this->uploadMedia)($file, $user);
+        $media = ($this->uploadMedia)($file, $user->getId());
 
         return $this->json([
             'id' => $media->getId()->toRfc4122(),

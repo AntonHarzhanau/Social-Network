@@ -11,6 +11,8 @@ interface PostRepositoryInterface
     public function save(Post $post, bool $flush = true): void;
     public function findOneById(Uuid $id): ?Post;
     public function remove(Post $post, bool $flush = true): void;
+
+    /** @return list<PostFeedRowDTO> */
     public function findPosts(
         User $currentUser,
         ?Uuid $authorId = null,

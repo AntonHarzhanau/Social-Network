@@ -17,7 +17,6 @@ class UserDirectoryAdapter implements UserDirectoryInterface
         return $this->userApi->findById($userId);
     }
 
-    /** @return list<UserPreview> */
     public function findPreviewsByIds(array $ids): array
     {
         return $this->userApi->findPreviewsByIds($ids);

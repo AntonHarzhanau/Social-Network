@@ -32,16 +32,6 @@ final class UpdatePostAction
             $post->setVisibility($dto->visibility);
         }
 
-        // Note: Media updating logic or not
-
-        //     $hasContent = $post->getContent() !== null && trim($post->getContent()) !== '';
-        //     $hasMedia = $post->getBindedMedia()->count() > 0;
-
-        //     if (!$hasContent && !$hasMedia) {
-        //         throw new \InvalidArgumentException('Post must have content or media.');
-        //     }
-
-
         $this->postRepository->save($post);
     }
 }

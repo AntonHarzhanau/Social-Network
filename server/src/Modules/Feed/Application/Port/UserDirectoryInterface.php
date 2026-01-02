@@ -8,6 +8,5 @@ interface UserDirectoryInterface
 {
     public function getUser(string $userId): ?User;
     
-    /** @return list<UserPreview> */
     public function findPreviewsByIds(array $ids): array;
 }

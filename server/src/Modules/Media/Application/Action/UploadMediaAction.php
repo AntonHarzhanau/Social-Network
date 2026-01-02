@@ -6,7 +6,7 @@ use App\Modules\Media\Application\Port\MediaStorageInterface;
 use App\Modules\Media\Application\Service\FileTypeDetector;
 use App\Modules\Media\Domain\Entity\MediaAsset;
 use App\Modules\Media\Domain\Repository\MediaAssetRepositoryInterface;
-use App\Modules\User\Domain\Entity\User;
+use App\Modules\User\Api\UserApiInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
 
@@ -16,11 +16,13 @@ final class UploadMediaAction
         private readonly MediaAssetRepositoryInterface $mediaAssetRepository,
         private readonly MediaStorageInterface $storage,
         private readonly FileTypeDetector $fileTypeDetector,
+        private readonly UserApiInterface $userApi,
     ) {}
 
-    public function __invoke(UploadedFile $file, User $owner): MediaAsset
+    public function __invoke(UploadedFile $file, Uuid $ownerId): MediaAsset
     {
         $now = new \DateTimeImmutable();
+        $owner = $this->userApi->findById($ownerId);
 
         $size = $file->getSize() ?? 0;
         $mime = $file->getMimeType() ?? 'application/octet-stream';
@@ -30,7 +32,7 @@ final class UploadMediaAction
         $extension = $file->guessExtension() ?? 'bin';
 
         $storageKey = sprintf('%s/%s.%s', $subdir, $uuid, $extension);
-
+        
 
         $media = (new MediaAsset())
             ->setOwner($owner)

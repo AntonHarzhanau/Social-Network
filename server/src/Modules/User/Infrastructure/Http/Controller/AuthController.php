@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\User\Infrastructure\Controller;
+namespace App\Modules\User\Infrastructure\Http\Controller;
 
 use App\Modules\User\Application\Action\ConfirmAccountRecoveryAction;
 use App\Modules\User\Application\Action\GetMeAction;

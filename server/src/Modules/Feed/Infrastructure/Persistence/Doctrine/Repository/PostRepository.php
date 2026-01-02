@@ -3,6 +3,7 @@
 namespace App\Modules\Feed\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Modules\Feed\Application\DTO\PostFeedItem;
+use App\Modules\Feed\Application\DTO\PostFeedRowDTO;
 use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
 use App\Modules\Feed\Domain\Entity\Post;
 use App\Modules\User\Contracts\DTO\UserPreviewDTO;
@@ -45,29 +46,26 @@ class PostRepository extends ServiceEntityRepository implements PostRepositoryIn
         ?int $limit = null,
         ?array $visibilities = null
     ): array {
-        $qb = $this->createQueryBuilder('p')->select(sprintf(
+        $qb = $this->createQueryBuilder('p')
+            ->select(sprintf(
             '
             NEW %s(
             p.id,
             p.content,
             p.likeCount,
             p.commentCount,
-            CASE WHEN :me MEMBER OF p.likeBy THEN true ELSE false END,
+            CASE WHEN lb.id IS NOT NULL THEN true ELSE false END,
             p.createdAt,
-            NEW %s(a.id, 
-            CASE WHEN a.deletedAt IS NULL THEN a.username ELSE :deletedName END, 
-            CASE WHEN a.deletedAt IS NULL THEN a.avatarUrl ELSE :deletedName END, 
-            CASE WHEN a.deletedAt IS NULL THEN a.slug ELSE :deletedName END
-            )
+            a.id 
         )',
-            PostFeedItem::class,
-            UserPreviewDTO::class
+            PostFeedRowDTO::class,
         ))
             ->join('p.author', 'a')
+            ->leftJoin('p.likeBy', 'lb', 'WITH', 'lb = :me')
             ->setParameter('me', $currentUser)
-            ->setParameter('deletedName', '[deleted]')
             ->orderBy('p.createdAt', 'DESC')
             ->addOrderBy('p.id', 'DESC');
+
 
         if ($id) {
             $qb->andWhere('p.id = :id')
@@ -90,6 +88,7 @@ class PostRepository extends ServiceEntityRepository implements PostRepositoryIn
         }
 
         $results = $qb->getQuery()->getResult();
+        
         return $results;
     }
 

@@ -46,6 +46,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $avatarUrl = null;
 
+    #[ORM\OneToOne(targetEntity: UserAvatar::class)]
+    #[ORM\JoinColumn(name: 'current_avatar_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL', unique: true)]
+    private ?UserAvatar $currentAvatar = null;
+
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $coverUrl = null;
 
@@ -319,6 +323,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         $this->PrivacySettings = $PrivacySettings;
+
+        return $this;
+    }
+
+    public function getCurrentAvatar(): ?UserAvatar
+    {
+        return $this->currentAvatar;
+    }
+
+    public function setCurrentAvatar(?UserAvatar $currentAvatar): static
+    {
+        $this->currentAvatar = $currentAvatar;
 
         return $this;
     }

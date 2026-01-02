@@ -3,6 +3,7 @@
 namespace App\Modules\User\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Modules\User\Contracts\DTO\UserPreviewDTO;
+use App\Modules\User\Contracts\DTO\UserPreviewRowDTO;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Domain\Repository\UserRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -90,12 +91,14 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function findPreviewsByIds(array $ids): array
     {
         $queryBuilder = $this->createQueryBuilder('u')
-            ->select(sprintf('NEW %s(u.id, u.username, u.avatarUrl, u.slug)', UserPreviewDTO::class))
+            ->select(sprintf('NEW %s(u.id, u.username, p.id, u.slug)', UserPreviewRowDTO::class))
+            ->leftJoin('u.currentAvatar', 'ua')
+            ->leftJoin('ua.preview', 'p')
             ->andWhere('u.id IN (:ids)')
             ->andWhere('u.deletedAt IS NULL')
             ->setParameter('ids', $ids);
-
-        return $queryBuilder->getQuery()->getResult();
+        $result = $queryBuilder->getQuery()->getResult();
+        return $result;
     }
 
     /** @return User|null */

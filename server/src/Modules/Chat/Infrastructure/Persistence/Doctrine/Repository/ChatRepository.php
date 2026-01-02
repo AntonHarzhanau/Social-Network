@@ -43,6 +43,7 @@ class ChatRepository extends ServiceEntityRepository implements ChatRepositoryIn
             ->setFirstResult($offset)
             ->setMaxResults($limit);
         $chats = $qb->getQuery()->getResult();
+        
         return $chats;
     }
 

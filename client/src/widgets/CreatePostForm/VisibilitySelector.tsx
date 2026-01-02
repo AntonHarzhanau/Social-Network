@@ -1,12 +1,5 @@
 import { VISIBILITY_VALUES } from "@/shared/api/post";
-import { Field, FieldLabel } from "@/shared/components/ui/field";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/shared/components/ui/form";
+import { Field, FieldError } from "@/shared/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -36,7 +29,6 @@ const VisibilitySelector = <TFieldValues extends FieldValues>({
       name={name}
       render={({ field, fieldState }) => (
         <Field data-invalid={fieldState.invalid} orientation="responsive">
-
           <Select value={field.value} onValueChange={field.onChange}>
             <SelectTrigger>
               <SelectValue placeholder="Select visibility" />
@@ -48,9 +40,7 @@ const VisibilitySelector = <TFieldValues extends FieldValues>({
               <SelectItem value={VISIBILITY_VALUES.PRIVATE}>Private</SelectItem>
             </SelectContent>
           </Select>
-          {fieldState.error && (
-            <FormMessage>{fieldState.error.message}</FormMessage>
-          )}
+          {fieldState.error && <FieldError errors={[fieldState.error]} />}
         </Field>
       )}
     />

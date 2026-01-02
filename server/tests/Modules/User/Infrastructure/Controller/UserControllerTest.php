@@ -4,12 +4,32 @@ declare(strict_types=1);
 
 namespace Tests\Modules\User\Infrastructure\Controller;
 
+use App\Modules\Media\Application\Action\UploadMediaAction;
+use App\Modules\Media\Domain\Entity\MediaAsset;
+use App\Modules\Media\Domain\Repository\MediaAssetRepositoryInterface;
 use App\Tests\Support\ApiWebTestCase;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Uid\Uuid;
 
 final class UserControllerTest extends ApiWebTestCase
 {
+
+    private function makeTestJpegUpload(): UploadedFile
+    {
+        $tmp = tempnam(sys_get_temp_dir(), 'upl_');
+        file_put_contents($tmp, hex2bin('FFD8FFE000104A46494600010101006000600000FFD9'));
+
+        return new UploadedFile(
+            $tmp,
+            'test.jpg',
+            'image/jpeg',
+            null,
+            true
+        );
+    }
+
 
     public function testListRequiresAuth(): void
     {
@@ -61,8 +81,19 @@ final class UserControllerTest extends ApiWebTestCase
 
         $client = $this->authClient($client, $user);
 
-        $client->request('PUT', '/api/users/avatar', content: json_encode([
-            'avatarUrl' => 'https://cdn.test/a.png',
+        $originalFile = $this->makeTestJpegUpload();
+        $previewFile = $this->makeTestJpegUpload();
+
+        $action = static::getContainer()->get(UploadMediaAction::class);
+
+
+        
+        $originalFileId = $action($originalFile, $user->getId())->getId()->toRfc4122();
+        $previewFileId = $action($previewFile, $user->getId())->getId()->toRfc4122();
+
+        $client->request('POST', '/api/users/avatar', content: json_encode([
+            'originalFileId' => $originalFileId,
+            'previewFileId' => $previewFileId,
         ], JSON_THROW_ON_ERROR));
 
         self::assertResponseIsSuccessful();
@@ -115,10 +146,10 @@ final class UserControllerTest extends ApiWebTestCase
             'email' => 'anton@test.com',
         ]);
 
-        $fakeUser = $this->createUser( [
+        $fakeUser = $this->createUser([
             'email' => 'fake@test.com',
         ]);
-        
+
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $fakeUserId = $fakeUser->getId();
         $em->remove($fakeUser);

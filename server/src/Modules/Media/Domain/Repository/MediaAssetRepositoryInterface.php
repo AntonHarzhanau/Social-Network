@@ -14,5 +14,9 @@ interface MediaAssetRepositoryInterface
     public function findById(Uuid $id): ?MediaAsset;
 
     /** @return list<MediaAsset> */
+    public function findByIds(array $ids): array;
+
+    /** @return list<MediaAsset> */
     public function findByOwnerId(Uuid $ownerId, int $limit = 20, int $offset = 0): array;
+    
 }

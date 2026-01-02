@@ -1,7 +1,11 @@
 import { Button } from "@/shared/components/ui/button";
 import { UserAvatar } from "@/shared/components/UserAvatar";
 import { BriefcaseBusiness, GraduationCap, MapPin } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { AvatarCropDialog } from "../AvatarCropDialog";
+import { uploadMedia } from "@/shared/api/media";
+import { uploadAvatar } from "@/shared/api/user";
 
 const ProfileHeader = ({
   name,
@@ -10,6 +14,8 @@ const ProfileHeader = ({
   name: string;
   avatarUrl?: string | null;
 }) => {
+  const [open, setOpen] = useState(false);
+
   return (
     <div className="w-full  mx-auto rounded-2xl bg-secondary shadow overflow-hidden">
       {/* Cover */}
@@ -22,16 +28,23 @@ const ProfileHeader = ({
           Edit cover
         </Button>
 
-        <UserAvatar
-          imageUrl={avatarUrl}
-          name={name}
-          className="
-        absolute left-4 sm:left-6
-        -bottom-4 translate-y-1/2
-        h-32 w-32 sm:h-36 sm:w-36
-        rounded-full border-4 shadow-lg
-      "
-        />
+        <div
+          className="absolute left-4 sm:left-6 -bottom-4 translate-y-1/2"
+          role="button"
+          tabIndex={0}
+          onClick={() => setOpen(true)}
+          onKeyDown={(e) => e.key === "Enter" && setOpen(true)}
+        >
+          <UserAvatar
+            imageUrl={avatarUrl}
+            name={name}
+            className="
+              h-32 w-32 sm:h-36 sm:w-36
+              rounded-full border-4 shadow-lg
+              cursor-pointer
+            "
+          />
+        </div>
       </div>
 
       {/* Bottom section */}
@@ -50,7 +63,9 @@ const ProfileHeader = ({
             <h1 className="text-2xl font-bold text-secondary-foreground">
               {name}
             </h1>
-            <Button size="sm" className="">Edit profile</Button>
+            <Button size="sm" className="">
+              Edit profile
+            </Button>
           </div>
 
           <div className=" text-sm text-muted-foreground">
@@ -95,6 +110,18 @@ const ProfileHeader = ({
           </div>
         </div>
       </div>
+      <AvatarCropDialog
+        open={open}
+        onOpenChange={setOpen}
+        onSaved={async ({ original, preview }) => {
+
+          const originalRes = await uploadMedia(original)
+          const previewRes = await uploadMedia(preview)
+            
+              console.log("Uploading avatar with ids:", { originalRes, previewRes });
+              await uploadAvatar(originalRes.id, previewRes.id);
+        }}
+      />
     </div>
   );
 };

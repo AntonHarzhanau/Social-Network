@@ -2,7 +2,6 @@
 
 namespace App\Modules\Media\Api;
 
-use App\Modules\Media\Application\Action\GetMediasUrls;
 use App\Modules\Media\Application\Action\PostMediaUrlAction;
 use App\Modules\Media\Infrastructure\Persistence\Doctrine\Repository\PostMediaBindingRepository;
 use Symfony\Component\Uid\Uuid;

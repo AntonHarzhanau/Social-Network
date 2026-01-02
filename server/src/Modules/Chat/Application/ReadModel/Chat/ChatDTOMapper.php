@@ -4,12 +4,15 @@ namespace App\Modules\Chat\Application\ReadModel\Chat;
 
 use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Enum\ChatTypeEnum;
+use App\Modules\Media\Api\MediaApiInterface;
 use App\Modules\User\Domain\Entity\User;
 use Symfony\Component\Uid\Uuid;
 
 class ChatDTOMapper
 {
-    public function __construct() {}
+    public function __construct(
+        private readonly MediaApiInterface $mediaApi,
+    ) {}
 
     public function toChatResponseDTO(Chat $chat, Uuid $currentUserId, ?int $unreadMessageCount = null): array
     {
@@ -73,9 +76,17 @@ class ChatDTOMapper
     {
         return match ($chat->getType()) {
             ChatTypeEnum::SELF => null, //TODO: set saved avatar url
-            ChatTypeEnum::DIRECT => $this->getOtherParticipant($chat, $currentUserId)?->getAvatarUrl(),
+            ChatTypeEnum::DIRECT => $this->getAvatarUrl($this->getOtherParticipant($chat, $currentUserId)),
             ChatTypeEnum::GROUP => $chat->getAvatarUrl() ?: null,
             default => $chat->getAvatarUrl(),
         };
+    }
+
+    private function getAvatarUrl(User $user): ?string
+    {
+        $avatarId = $user->getCurrentAvatar()?->getPreview()->getId() ?? null;
+        $url = $this->mediaApi->getMediasByIds([$avatarId])[$avatarId->toRfc4122()]->url ?? null;
+ 
+        return $url;
     }
 }

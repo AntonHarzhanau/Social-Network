@@ -11,7 +11,7 @@ use App\Modules\Feed\Application\Action\ToggleLikeAction;
 use App\Modules\Feed\Application\Action\UpdatePostAction;
 use App\Modules\Feed\Infrastructure\Http\Request\CreatePostRequest;
 use App\Modules\Feed\Infrastructure\Http\Request\UpdatePostRequest;
-use App\Modules\Shared\Domain\Enum\VisibilityEnum;
+use App\Modules\Feed\Domain\Enum\VisibilityEnum;
 use App\Modules\User\Domain\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -73,6 +73,9 @@ final class PostController extends AbstractController
             postId: $id,
             currentUser: $currentUser,
         );
+        if ($post === null) {
+            return $this->json(['error' => 'Post not found'], JsonResponse::HTTP_NOT_FOUND);
+        }
         return $this->json($post, JsonResponse::HTTP_OK);
     }
 
