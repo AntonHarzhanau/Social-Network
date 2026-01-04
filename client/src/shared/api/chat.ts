@@ -23,7 +23,6 @@ export interface ChatResponse {
 }
 
 const CHAT_PAGE_SIZE = 20;
-const MESSAGE_PAGE_SIZE = 30;
 
 export const fetchChats = async (
   page: number = 1,
@@ -45,15 +44,12 @@ export const fetchChatById = async (chatId: string): Promise<ChatResponse> => {
 
 export const fetchMessages = async (
   chatId: string,
-  page: number = 1,
-  limit: number = MESSAGE_PAGE_SIZE,
-) => {
-  const response = await apiClient.get(`/chats/${chatId}/messages`, {
-    params: {
-      page,
-      limit,
-    },
-  });
+  params: { before?: string; limit?: number } = {},
+): Promise<MessageResponse[]> => {
+  const response = await apiClient.get<MessageResponse[]>(
+    `/chats/${chatId}/messages`,
+    { params }
+  )
   return response.data;
 };
 
@@ -62,6 +58,10 @@ export const sendMessage = async (
   content: string,
 ): Promise<void> => {
   await apiClient.post(`/messages/${chatId}/chat`, { content });
+};
+
+export const deleteMessage = async (messageId: string): Promise<void> => {
+  await apiClient.delete(`/messages/${messageId}`);
 };
 
 interface CreateDirectChatParams {
@@ -78,10 +78,14 @@ interface CreateDirectChatResponse extends ChatResponse {
 }
 
 export const createDirectChat = async (
-  params: CreateDirectChatParams): Promise<CreateDirectChatResponse> => {
+  params: CreateDirectChatParams,
+): Promise<CreateDirectChatResponse> => {
   const { participantId, content } = params;
-  const response = await apiClient.post<CreateDirectChatResponse>(`/messages/${participantId}/direct`, {
-    content,
-  });
+  const response = await apiClient.post<CreateDirectChatResponse>(
+    `/messages/${participantId}/direct`,
+    {
+      content,
+    },
+  );
   return response.data;
 };

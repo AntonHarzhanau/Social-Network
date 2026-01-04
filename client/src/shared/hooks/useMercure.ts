@@ -53,6 +53,7 @@ export const useMercure = <TPayload = unknown>({
 
     return () => {
       eventSource.close();
+      console.log("Mercure connection closed:", url.toString());
     };
   }, [topic, enable, onMessage, parse, onError]);
 };

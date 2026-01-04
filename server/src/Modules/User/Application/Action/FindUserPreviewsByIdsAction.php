@@ -32,7 +32,7 @@ final class FindUserPreviewsByIdsAction
 
         $result = [];
         foreach ($rows as $row) {
-            $result[] = new UserPreviewDTO(
+            $result[$row->id] = new UserPreviewDTO(
                 id: $row->id,
                 username: $row->username,
                 avatarUrl: $row->currentAvatar ? ($urlsById[$row->currentAvatar]->url ?? null) : null,

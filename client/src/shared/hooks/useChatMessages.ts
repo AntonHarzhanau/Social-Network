@@ -1,43 +1,43 @@
-import { useCallback, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { MessageResponse } from "../api/chat";
-import { useChatStore } from "../store/chatStore";
 import { useInfiniteMessages } from "./useChat";
+import { useCallback, useMemo } from "react";
+import {
+  addMessageToInfinite,
+  removeMessageFromInfinite,
+  type MessagesInfinite,
+} from "../lib/messagesCache";
 import { useMercure } from "./useMercure";
 
-interface ChatMercureEvent {
-  type: string;
-  message: MessageResponse;
-}
+type ChatMercureEvent =
+  | { type: "message_created"; message: MessageResponse & { chatId: string } }
+  | { type: "message_deleted"; messageId: string };
 
 export const useChatMessages = (chatId: string) => {
-  const liveMessages = useChatStore((s) => s.liveMessages[chatId]) ?? [];
-  const addLiveMessage = useChatStore((s) => s.addMessage);
-  const clearLiveMessages = useChatStore((s) => s.clearLiveMessages);
+  const queryClient = useQueryClient();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteMessages(chatId);
 
-  const historyMessages =
-    data?.pages
-      .flat()
-      .sort(
-        (a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-      ) ?? [];
-
   const handleMercureMessage = useCallback(
     (payload: ChatMercureEvent) => {
-      if (payload.type !== "message_created") return;
-        console.log("New message received via Mercure:", payload);
-      const newMsg = payload.message;
-      addLiveMessage(chatId, newMsg);
-    },
-    [chatId, addLiveMessage],
-  );
 
-  useEffect(() => {
-    clearLiveMessages(chatId);
-  }, [chatId, clearLiveMessages]);
+      if (payload.type === "message_created") {
+        queryClient.setQueryData<MessagesInfinite>(
+          ["messages", chatId],
+          (oldData) => addMessageToInfinite(oldData, payload.message),
+        );
+      }
+
+      if (payload.type === "message_deleted") {
+        queryClient.setQueryData<MessagesInfinite>(
+          ["messages", chatId],
+          (oldData) => removeMessageFromInfinite(oldData, payload.messageId),
+        );
+      }
+    },
+    [chatId, queryClient],
+  );
 
   useMercure<ChatMercureEvent>({
     topic: `https://qynso.local/chats/${chatId}`,
@@ -45,19 +45,21 @@ export const useChatMessages = (chatId: string) => {
     enable: !!chatId,
   });
 
-  const messages = [...historyMessages, ...liveMessages]
-    .filter(
-      (msg, index, arr) => arr.findIndex((m) => m.id === msg.id) === index,
-    )
-    .sort(
-      (a, b) =>
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-    );
+  const messages = useMemo(() => {
+    const flat = data?.pages.flat() ?? [];
 
-    return { 
-        messages,
-        fetchNextPage,
-        hasNextPage,
-        isFetchingNextPage
-    }
+    return [...flat].sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      if (dateA !== dateB) return dateA - dateB;
+      return a.id.localeCompare(b.id);
+    });
+  }, [data]);
+
+  return {
+    messages,
+    fetchNextPage,
+    hasNextPage: !!hasNextPage,
+    isFetchingNextPage,
+  };
 };

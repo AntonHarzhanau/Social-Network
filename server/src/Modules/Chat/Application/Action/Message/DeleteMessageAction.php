@@ -2,6 +2,7 @@
 
 namespace App\Modules\Chat\Application\Action\Message;
 
+use App\Modules\Chat\Application\Service\MessageService;
 use App\Modules\Chat\Domain\Repository\MessageRepositoryInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -9,6 +10,7 @@ final class DeleteMessageAction
 {
     public function __construct(
         private readonly MessageRepositoryInterface $messageRepository,
+        private readonly MessageService $messageService,
     ) {}
 
     public function __invoke(Uuid $messageId, Uuid $userId): void
@@ -20,16 +22,7 @@ final class DeleteMessageAction
         }
 
         $messageEntity = $message[0];
-        $lastMessage = $messageEntity->getChat()->getLastMessage();
-        if($messageEntity === $lastMessage) {
-            $newLastMessage = $this->messageRepository->findBy(
-                ['chat' => $messageEntity->getChat()->getId()],
-                ['createdAt' => 'DESC'],
-                1,
-                1
-            );
-            $messageEntity->getChat()->setLastMessage($newLastMessage[0] ?? null);  
-        }
-        $this->messageRepository->delete($messageEntity);
+        $this->messageService->deleteMessage($messageEntity);
+       
     }
 }

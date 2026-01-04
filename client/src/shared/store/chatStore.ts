@@ -11,6 +11,7 @@ interface ChatStoreState {
   changeCurrentChat: (id: string) => void;
 
   addMessage: (chatId: string, message: MessageResponse) => void;
+  removeMessage: (chatId: string, messageId: string) => void;
   clearLiveMessages: (chatId: string) => void;
 }
 
@@ -51,6 +52,20 @@ export const useChatStore = create<ChatStoreState>((set) => ({
         },
       };
     }),
+
+    removeMessage(chatId, messageId) {
+        set((state) => {
+            const prev = state.liveMessages[chatId] ?? [];
+            const exists = prev.some((m) => m.id === messageId);
+            console.log("Removing message:", { chatId, messageId, exists });
+            return {
+                liveMessages: {
+                    ...state.liveMessages,
+                    [chatId]: prev.filter((m) => m.id !== messageId),
+                },
+            };
+        })
+    },
 
   clearLiveMessages: (chatId) =>
     set((state) => {

@@ -7,6 +7,7 @@ use App\Modules\Chat\Application\Action\Chat\CreateGroupChat;
 use App\Modules\Chat\Application\Action\Chat\GetChat;
 use App\Modules\Chat\Application\Action\Chat\GetChatList;
 use App\Modules\Chat\Application\Action\Chat\GetChatMessages;
+use App\Modules\Chat\Application\Action\Chat\RemoveUserFromChat;
 use App\Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
 use App\Modules\User\Domain\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -100,14 +101,15 @@ final class ChatController extends AbstractController
         Request $request,
         GetChatMessages $getChatMessages
     ): JsonResponse {
-        $page = max(1, (int) $request->query->get('page', 1));
         $limit = max(1, (int) $request->query->get('limit', 30));
+        $before = $request->query->get('before');
+        $beforeDt = $before ? new \DateTimeImmutable($before) : null;
 
-        $messages = $getChatMessages(Uuid::fromString($chatId), $currentUser->getId(), $page, $limit);
+        $messages = $getChatMessages(Uuid::fromString($chatId), $currentUser->getId(), $limit, $beforeDt);
         return $this->json($messages, JsonResponse::HTTP_OK, [], ['groups' => 'message:list']);
     }
 
-    #[Route('/{chatId}/add', name: 'add_user_to_chat', methods: ['POST'], format: 'json')]
+    #[Route('/{chatId}/add-members', name: 'add_user_to_chat', methods: ['POST'], format: 'json')]
     public function addUserToChat(
         string $chatId,
         #[CurrentUser] User $currentUser,
@@ -120,5 +122,19 @@ final class ChatController extends AbstractController
 
 
         return $this->json(['message' => 'User(s) added to chat'], JsonResponse::HTTP_OK, [], ['groups' => 'message:list']);
+    }
+
+    #[Route('/{chatId}/remove-members', name: 'remove_user_from_chat', methods: ['POST'], format: 'json')]
+    public function removeUserFromChat(
+        string $chatId,
+        #[CurrentUser] User $currentUser,
+        Request $request,
+        RemoveUserFromChat $removeUserFromChat
+    ): JsonResponse {
+        $id = json_decode($request->getContent(), true);
+
+        $removeUserFromChat($currentUser->getId(), Uuid::fromString($id['userId']), Uuid::fromString($chatId));
+
+        return $this->json(['message' => 'User(s) removed from chat'], JsonResponse::HTTP_OK, [], ['groups' => 'message:list']);
     }
 }

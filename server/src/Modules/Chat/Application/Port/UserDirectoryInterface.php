@@ -10,4 +10,7 @@ interface UserDirectoryInterface
 
     /** @return User[] */
     public function findManyByIds(array $userIds): array;
+
+    /** @return UserPreviewDTO[] */
+    public function getPreviewsByIds(array $userIds): array;
 }

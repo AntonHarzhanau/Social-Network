@@ -9,5 +9,6 @@ interface ChatParticipantRepositoryInterface
 {
     public function findOneBy(array $criteria, array|null $orderBy = null): ?ChatParticipant;
     public function getAllUsersByChatId(Chat $chat): array;
+    public function delete(ChatParticipant $chatParticipant): void;
     
 }

@@ -30,16 +30,16 @@ final class CreateGroupChat
         $creator = $this->userDirectory->findById($creatorId);
         $participants = $this->userDirectory->findManyByIds($participantIds);
 
-        $chatAdmin = (new ChatParticipant())
+        $chatCreator = (new ChatParticipant())
             ->setUser($creator)
-            ->setRole(ChatParticipantRoleEnum::ADMIN);
+            ->setRole(ChatParticipantRoleEnum::OWNER);
 
         $chat = (new Chat())
             ->setTitle($title)
             ->setAvatarUrl($avatarUrl)
             ->setType(ChatTypeEnum::GROUP)
             ->setCreatedBy($creator)
-            ->addChatParticipant($chatAdmin);
+            ->addChatParticipant($chatCreator);
 
         foreach ($participants as $participant) {
             $chatParticipant = (new ChatParticipant())

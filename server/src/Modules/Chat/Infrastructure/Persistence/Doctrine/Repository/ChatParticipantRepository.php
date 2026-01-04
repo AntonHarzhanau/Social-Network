@@ -51,4 +51,11 @@ class ChatParticipantRepository extends ServiceEntityRepository implements ChatP
 
         return $qb->getQuery()->getResult();
     }
+
+    public function delete(ChatParticipant $chatParticipant): void
+    {
+        $em = $this->getEntityManager();
+        $em->remove($chatParticipant);
+        $em->flush();
+    }
 }

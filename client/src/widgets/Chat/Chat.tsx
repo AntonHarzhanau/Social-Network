@@ -1,15 +1,11 @@
-import {
-  Card,
-  CardAction,
-  CardContent,
-} from "@/shared/components/ui/card";
+import { Card, CardAction, CardContent } from "@/shared/components/ui/card";
 
 import { UserAvatar } from "@/shared/components/UserAvatar";
 import { useAuthStore } from "@/shared/store/authStore";
 import MessageList from "@/widgets/Message/MessageList";
-import { useChatStore } from "@/shared/store/chatStore";
 import { useChatMessages } from "@/shared/hooks/useChatMessages";
 import NewMessageForm from "./NewMessageForm";
+import { useOpenChatsStore } from "@/shared/store/openChatsStore";
 
 interface MessagesPageProps {
   chatId: string;
@@ -17,7 +13,9 @@ interface MessagesPageProps {
 
 const Chat = ({ chatId }: MessagesPageProps) => {
   const currentUserId = useAuthStore((state) => state.user?.id);
-  const chat = useChatStore((s) => s.chats.find((c) => c.id === chatId));
+    const chat = useOpenChatsStore((s) =>
+    s.openChats.find((c) => c.id === chatId),
+  );
   const { messages, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useChatMessages(chatId);
 
@@ -43,6 +41,7 @@ const Chat = ({ chatId }: MessagesPageProps) => {
           </div>
         )}
         <MessageList
+          chatId={chatId}
           messages={messages}
           currentUserId={currentUserId}
           hasMore={!!hasNextPage}

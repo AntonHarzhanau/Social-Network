@@ -1,18 +1,15 @@
 import {
-  useInfiniteQuery,
-  useQuery,
-  type InfiniteData,
-} from "@tanstack/react-query";
-import {
   fetchChats,
   fetchChatById,
-  fetchMessages,
   type ChatResponse,
   type MessageResponse,
+  fetchMessages,
 } from "@/shared/api/chat";
 
-const CHATS_PAGE_SIZE = 20;
-const MESSAGES_PAGE_SIZE = 10;
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+
+const CHATS_PAGE_SIZE = 15;
+const MESSAGES_PAGE_SIZE = 20;
 
 export const useInfiniteChats = () =>
   useInfiniteQuery<ChatResponse[]>({
@@ -34,12 +31,27 @@ export const useChatQuery = (chatId?: string) =>
 export const useInfiniteMessages = (chatId?: string) =>
   useInfiniteQuery<MessageResponse[]>({
     queryKey: ["messages", chatId],
-    queryFn: ({ pageParam = 1 }) =>
-      fetchMessages(chatId as string, pageParam as number, MESSAGES_PAGE_SIZE),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage.length === MESSAGES_PAGE_SIZE ? allPages.length + 1 : undefined,
     enabled: !!chatId,
-  });
 
-export type MessagesInfiniteData = InfiniteData<MessageResponse[]>;
+    initialPageParam: undefined as string | undefined,
+
+    queryFn: ({ pageParam }) =>
+      fetchMessages(chatId as string, {
+        before: pageParam as string | undefined,
+        limit: MESSAGES_PAGE_SIZE,
+      }),
+
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length < MESSAGES_PAGE_SIZE) {
+        return undefined;
+      }
+
+      const oldestMessages = lastPage[lastPage.length - 1];
+      return oldestMessages.createdAt;
+    },
+
+    // staleTime: 1000 * 60, // 1 minute
+    // gcTime: 1000 * 60 * 5, // 5 minutes
+    // refetchOnMount: false,
+    // refetchOnWindowFocus: false,
+  });
