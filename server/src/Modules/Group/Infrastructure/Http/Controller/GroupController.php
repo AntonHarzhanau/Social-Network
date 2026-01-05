@@ -6,6 +6,7 @@ use App\Modules\Group\Application\Action\CreateGroupAction;
 use App\Modules\Group\Application\Action\DeleteGroupAction;
 use App\Modules\Group\Application\Action\GetAllGroupsAction;
 use App\Modules\Group\Application\Action\GetOneGroupAction;
+use App\Modules\Group\Application\Action\SubscribeGroupAction;
 use App\Modules\Group\Infrastructure\Http\Request\CreateGroupRequest;
 use App\Modules\User\Domain\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -69,6 +70,20 @@ class GroupController extends AbstractController
         #[CurrentUser()] User $currentUser,
     ): JsonResponse {
         return $this->json(['error: Not implemented'], JsonResponse::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[Route('/{groupId}/subscribe', name: 'subscribe_group', methods: ['POST'], format: 'json')]
+    public function subscribe(
+        string $groupId,
+        #[CurrentUser()] User $currentUser,
+        SubscribeGroupAction $action,
+    ): JsonResponse {
+        try {
+            $action->execute($currentUser->getId(), Uuid::fromString($groupId));
+        } catch (\DomainException $e) {
+            return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_CONFLICT);
+        }
+        return $this->json([], JsonResponse::HTTP_CREATED);
     }
     
 }

@@ -3,6 +3,7 @@
 namespace App\Modules\Group\Domain\Repository;
 
 use App\Modules\Group\Domain\Entity\GroupMember;
+use Symfony\Component\Uid\Uuid;
 
 interface GroupMemberRepositoryInterface
 {
@@ -10,5 +11,5 @@ interface GroupMemberRepositoryInterface
 
     public function delete(GroupMember $entity, bool $flush = true): void;
 
-    public function findMembersByGroupId(string $groupId): array;
+    public function findMembersByGroupId(Uuid $groupId): array;
 }

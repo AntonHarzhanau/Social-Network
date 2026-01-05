@@ -4,7 +4,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { PlusCircleIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const ProfileVideoContent = () => {
+const MediaBoxVideoList = () => {
   return (
     <div className="flex flex-col gap-4 items-center">
       <Carousel className="w-full max-w-md">
@@ -61,4 +61,4 @@ const ProfileVideoContent = () => {
   );
 };
 
-export default ProfileVideoContent;
+export default MediaBoxVideoList;

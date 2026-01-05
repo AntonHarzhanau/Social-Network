@@ -32,6 +32,17 @@ class Group
     #[ORM\JoinColumn(nullable: false)]
     private ?User $owner = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $avatarUrl = null;
+
+    #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
+    private ?int $subscribersCount = 0;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $coverUrl = null;
+
+
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -131,6 +142,42 @@ class Group
     public function setDeletedAt(?\DateTimeImmutable $deletedAt): static
     {
         $this->deletedAt = $deletedAt;
+
+        return $this;
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return $this->avatarUrl;
+    }
+
+    public function setAvatarUrl(?string $avatarUrl): static
+    {
+        $this->avatarUrl = $avatarUrl;
+
+        return $this;
+    }
+
+    public function getSubscribersCount(): ?int
+    {
+        return $this->subscribersCount;
+    }
+
+    public function setSubscribersCount(int $subscribersCount): static
+    {
+        $this->subscribersCount = $subscribersCount;
+
+        return $this;
+    }
+
+    public function getCoverUrl(): ?string
+    {
+        return $this->coverUrl;
+    }
+
+    public function setCoverUrl(?string $coverUrl): static
+    {
+        $this->coverUrl = $coverUrl;
 
         return $this;
     }

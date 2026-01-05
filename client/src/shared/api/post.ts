@@ -60,9 +60,9 @@ export const fetchPosts = async ({
   authorId = null,
   page = 1,
   limit = 10,
-}: FetchPostsParams = {}): Promise<PostsResponse> => {
+}: FetchPostsParams = {}): Promise<Post[]> => {
   const authorIdParam = authorId ? `/author/${authorId}` : "";
-  const response = await apiClient.get<PostsResponse>(
+  const response = await apiClient.get<Post[]>(
     `/posts${authorIdParam}?page=${page}&limit=${limit}`,
   );
 

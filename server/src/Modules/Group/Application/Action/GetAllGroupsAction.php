@@ -18,7 +18,10 @@ final class GetAllGroupsAction
         foreach ($groups as $group) {
             $result[] = [
                 'id' => $group->getId()->toRfc4122(),
-                'name' => $group->getName(),           
+                'name' => $group->getName(), 
+                'slug' => $group->getSlug(),
+                'avatarUrl' => $group->getAvatarUrl(),
+                'subscribersCount' => $group->getSubscribersCount(),        
             ];
         }
 

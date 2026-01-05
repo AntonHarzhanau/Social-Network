@@ -44,6 +44,10 @@ export const router = createBrowserRouter([
         lazy: () => import("@/pages/GroupsPage"),
       },
       {
+        path: ROUTES.GROUP,
+        lazy: () => import("@/pages/GroupPage"),
+      },
+      {
         path: ROUTES.SETTINGS,
         lazy: () => import("@/pages/SettingsPage"),
       },

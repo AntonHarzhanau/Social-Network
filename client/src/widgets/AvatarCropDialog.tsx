@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -14,8 +14,6 @@ import { Slider } from "@/shared/components/ui/slider";
 type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-
-  // Вызывается, когда пользователь нажал Save
   onSaved: (data: {
     original: File;
     preview: File;
@@ -59,7 +57,6 @@ export function AvatarCropDialog({ open, onOpenChange, onSaved }: Props) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // базовая валидация
     if (!file.type.startsWith("image/")) return;
 
     // reset preview object url
@@ -191,7 +188,6 @@ export function AvatarCropDialog({ open, onOpenChange, onSaved }: Props) {
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
                 onCropComplete={onCropComplete}
-                // Квадратная область (как ты хочешь)
                 cropShape="rect"
                 showGrid={true}
               />

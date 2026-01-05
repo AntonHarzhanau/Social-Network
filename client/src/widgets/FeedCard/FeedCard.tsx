@@ -8,8 +8,8 @@ import { type Post } from "@/shared/api/post";
 import ExpandableDescription from "@/shared/components/ExpandableDescription";
 import { formatPostDate } from "@/shared/lib/date";
 import FeedCardHeader from "@/widgets/FeedCard/FeedCardHeader";
-import FeedCardMedia from "./FeedCardMedia";
 import FeedCardActions from "./FeedCardActions";
+import MediaCarousel from "../../shared/components/MediaCarousel";
 
 interface FeedCardProps {
   post: Post;
@@ -27,7 +27,7 @@ const FeedCard = ({ post }: FeedCardProps) => {
       />
 
       <CardContent className="w-full px-2">
-        <FeedCardMedia media={post.media} />
+        <MediaCarousel medias={post.media} />
         <CardDescription className="whitespace-pre-wrap break-all wrap-anywhere min-w-0 max-w-full text-sm mt-2">
           {post.content && (
             <ExpandableDescription content={post.content} limit={200} />

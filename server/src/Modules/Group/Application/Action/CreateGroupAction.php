@@ -35,8 +35,7 @@ final class CreateGroupAction
         $newMember = (new GroupMember())
             ->setGroup($group)
             ->setUser($creator)
-            ->setRole(GroupMemberRoleEnum::ADMIN)
-            ->setJoinedAt(new \DateTimeImmutable());
+            ->setRole(GroupMemberRoleEnum::OWNER);
 
         $this->groupMemberRepository->save($newMember, true);
     }

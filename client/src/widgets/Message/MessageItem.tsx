@@ -15,7 +15,6 @@ const MessageItem = ({ chatId, message, currentUserId }: MessageItemProps) => {
 
   return (
     <div
-      key={message.id}
       id={`msg-${message.id}`}
       data-message-id={message.id}
       className="mb-2"

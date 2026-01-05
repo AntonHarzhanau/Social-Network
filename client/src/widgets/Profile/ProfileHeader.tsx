@@ -6,6 +6,12 @@ import { Link } from "react-router-dom";
 import { AvatarCropDialog } from "../AvatarCropDialog";
 import { uploadMedia } from "@/shared/api/media";
 import { uploadAvatar } from "@/shared/api/user";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
 
 const ProfileHeader = ({
   name,
@@ -28,23 +34,26 @@ const ProfileHeader = ({
           Edit cover
         </Button>
 
-        <div
-          className="absolute left-4 sm:left-6 -bottom-4 translate-y-1/2"
-          role="button"
-          tabIndex={0}
-          onClick={() => setOpen(true)}
-          onKeyDown={(e) => e.key === "Enter" && setOpen(true)}
-        >
-          <UserAvatar
-            imageUrl={avatarUrl}
-            name={name}
-            className="
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className="absolute left-4 sm:left-6 -bottom-4 translate-y-1/2 border-none focus:ring-0"
+          >
+              <UserAvatar
+                imageUrl={avatarUrl}
+                name={name}
+                className="
               h-32 w-32 sm:h-36 sm:w-36
               rounded-full border-4 shadow-lg
               cursor-pointer
             "
-          />
-        </div>
+              />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem>Open photo</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setOpen(true)}>Upload photo</DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive">Delete photo</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Bottom section */}
@@ -114,12 +123,14 @@ const ProfileHeader = ({
         open={open}
         onOpenChange={setOpen}
         onSaved={async ({ original, preview }) => {
+          const originalRes = await uploadMedia(original);
+          const previewRes = await uploadMedia(preview);
 
-          const originalRes = await uploadMedia(original)
-          const previewRes = await uploadMedia(preview)
-            
-              console.log("Uploading avatar with ids:", { originalRes, previewRes });
-              await uploadAvatar(originalRes.id, previewRes.id);
+          console.log("Uploading avatar with ids:", {
+            originalRes,
+            previewRes,
+          });
+          await uploadAvatar(originalRes.id, previewRes.id);
         }}
       />
     </div>

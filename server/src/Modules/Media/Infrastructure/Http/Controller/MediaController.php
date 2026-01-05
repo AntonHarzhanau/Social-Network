@@ -3,8 +3,8 @@
 namespace App\Modules\Media\Infrastructure\Http\Controller;
 
 use App\Modules\Media\Application\Action\DeleteMediaAction;
+use App\Modules\Media\Application\Action\ListMediaAction;
 use App\Modules\Media\Application\Service\GetMediaUrl;
-use App\Modules\Media\Application\Action\ListMyMediaAction;
 use App\Modules\Media\Application\Action\UploadMediaAction;
 use App\Modules\Media\Domain\Entity\MediaAsset;
 use App\Modules\User\Domain\Entity\User;
@@ -24,7 +24,7 @@ final class MediaController extends AbstractController
 
     public function __construct(
         private readonly UploadMediaAction $uploadMedia,
-        private readonly ListMyMediaAction $listMyMedia,
+        private readonly ListMediaAction $listMyMedia,
         private readonly DeleteMediaAction $deleteMedia,
         private readonly GetMediaUrl $getMediaUrl,
         private readonly MediaAssetRepositoryInterface $mediaAssetRepository,

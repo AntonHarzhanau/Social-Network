@@ -266,10 +266,9 @@ const MessageList = ({
 
             <Button
               onClick={handleScrollToBottom}
-              size="icon"
-              className="absolute bottom-4 right-4 rounded-full bg-primary/40 px-3 py-1 text-xs text-primary-foreground shadow-md flex items-center gap-1"
+              className="absolute bottom-4 right-4 rounded-full bg-primary/40 px-3 py-1 text-xs text-primary-foreground shadow-md flex items-center gap-1 w-8 h-8"
             >
-              <ChevronDown size={16} />
+              <ChevronDown size={12} />
             </Button>
           </div>
         )}

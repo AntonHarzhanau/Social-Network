@@ -62,5 +62,11 @@ class MediaAssetRepository extends ServiceEntityRepository implements MediaAsset
             ->getResult();
     }
 
-    
+   public function findAll(): array
+   {
+       return $this->createQueryBuilder('m')
+           ->orderBy('m.createdAt', 'DESC')
+           ->getQuery()
+           ->getResult();
+   } 
 }

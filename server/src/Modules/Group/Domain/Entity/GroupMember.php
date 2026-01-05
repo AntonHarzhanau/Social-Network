@@ -9,7 +9,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
+
 #[ORM\Entity(repositoryClass: GroupMemberRepository::class)]
+#[ORM\UniqueConstraint(
+    name: 'uniq_group_member_user_per_group',
+    columns: ['user_id', 'group_id']
+)]
 class GroupMember
 {
     #[ORM\Id]
@@ -31,6 +36,11 @@ class GroupMember
 
     #[ORM\Column]
     private ?\DateTimeImmutable $joinedAt = null;
+
+    public function __construct()
+    {
+        $this->joinedAt = new \DateTimeImmutable();
+    }
 
     public function getId(): ?Uuid
     {

@@ -1,14 +1,14 @@
-import ProfileImageItem from "./ProfileImageItem";
 import { PlusCircleIcon } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
+import MediaBoxImageItem from "./MediaBoxImageItem";
 
-const ProfileImageContent = () => {
+const MediaBoxImageList = () => {
   return (
     <div className="flex flex-col">
       <div className="mb-4 flex justify-center">
         <div className="p-2 w-full">
           <div className="grid grid-cols-3 gap-1 rounded-2xl overflow-hidden">
-            <ProfileImageItem />
+            <MediaBoxImageItem />
           </div>
         </div>
       </div>
@@ -24,4 +24,4 @@ const ProfileImageContent = () => {
   );
 };
 
-export default ProfileImageContent;
+export default MediaBoxImageList;
