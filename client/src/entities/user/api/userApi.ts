@@ -1,5 +1,5 @@
-import { apiClient } from "./apiClient";
-import type { Me } from "./auth";
+import { apiClient } from "../../../shared/api/apiClient";
+import type { Me } from "../../../features/auth/api/authApi";
 
 export const fetchUsers = async (): Promise<Me[]> => {
   const response = await apiClient.get<Me[]>("/users");

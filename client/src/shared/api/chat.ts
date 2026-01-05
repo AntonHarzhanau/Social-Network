@@ -1,5 +1,5 @@
 import { apiClient } from "./apiClient";
-import type { Me } from "./auth";
+import type { Me } from "../../features/auth/api/authApi";
 
 export interface LastMessageResponse {
   id: string;

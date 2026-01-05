@@ -1,4 +1,4 @@
-import { fetchUserProfile, type UserProfile } from "@/shared/api/user";
+import { fetchUserProfile, type UserProfile } from "@/entities/user/api/userApi";
 import ProfileAside from "@/widgets/Profile/ProfileAside";
 import ProfileColumn from "@/widgets/Profile/ProfileColumn";
 import ProfileHeader from "@/widgets/Profile/ProfileHeader";

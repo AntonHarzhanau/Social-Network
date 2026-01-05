@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AvatarCropDialog } from "../AvatarCropDialog";
 import { uploadMedia } from "@/shared/api/media";
-import { uploadAvatar } from "@/shared/api/user";
+import { uploadAvatar } from "@/entities/user/api/userApi";
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -4,12 +4,12 @@ import {
   CardDescription,
   CardFooter,
 } from "@/shared/components/ui/card";
-import { type Post } from "@/shared/api/post";
+import { type Post } from "@/entities/post/api/postApi";
 import ExpandableDescription from "@/shared/components/ExpandableDescription";
 import { formatPostDate } from "@/shared/lib/date";
-import FeedCardHeader from "@/widgets/FeedCard/FeedCardHeader";
+import FeedCardHeader from "@/entities/post/ui/FeedCardHeader";
 import FeedCardActions from "./FeedCardActions";
-import MediaCarousel from "../../shared/components/MediaCarousel";
+import MediaCarousel from "../../../shared/components/MediaCarousel";
 
 interface FeedCardProps {
   post: Post;

@@ -1,7 +1,7 @@
 // import { LikeButton } from "@/shared/components/LikeButton";
 import { LikeButton } from "@/shared/components/LikeButton";
 import { Button } from "@/shared/components/ui/button";
-import { useToggleLikePost } from "@/shared/hooks/useToggleLikePost";
+import { useToggleLikePost } from "@/features/post/like/useToggleLikePost";
 import { MessageCircle, Share2 } from "lucide-react";
 
 interface FeedCardActionsProps {

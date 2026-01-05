@@ -1,6 +1,6 @@
-import type { Me } from "@/shared/api/auth";
+import type { Me } from "@/features/auth/api/authApi";
 import { fetchFriends, fetchFriendsRequest } from "@/shared/api/friends";
-import { fetchUsers } from "@/shared/api/user";
+import { fetchUsers } from "@/entities/user/api/userApi";
 import Aside from "@/shared/components/Aside";
 import MainSectionLayout from "@/shared/components/MainSectionLayout";
 import FriendsList from "@/widgets/Friend/FriendsList";

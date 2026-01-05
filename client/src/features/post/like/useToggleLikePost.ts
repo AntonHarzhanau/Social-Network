@@ -7,8 +7,8 @@ import {
   toggleLikePost,
   type Post,
   type ToggleLikeResponse,
-} from "../api/post";
-import { POSTS_QUERY_KEY } from "./useInfinitePosts";
+} from "@/entities/post/api/postApi";
+import { POSTS_QUERY_KEY } from "@/entities/post/model/useInfinitePosts";
 
 export const useToggleLikePost = () => {
   const queryClient = useQueryClient();

@@ -4,7 +4,7 @@ import {
   FieldDescription,
   FieldGroup,
 } from "@/shared/components/ui/field";
-import { useAuthStore } from "@/shared/store/authStore";
+import { useAuthStore } from "@/features/auth/model/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { FormInput } from "@/shared/components/FormInput";

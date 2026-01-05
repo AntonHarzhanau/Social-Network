@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { fetchPosts, type Post } from "../api/post";
+import { fetchPosts, type Post } from "../api/postApi";
 import { useEffect, useRef } from "react";  
 
 export const POSTS_QUERY_KEY = ["posts"] as const;

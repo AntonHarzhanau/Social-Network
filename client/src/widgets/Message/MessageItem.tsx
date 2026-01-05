@@ -1,7 +1,7 @@
 import { type MessageResponse } from "@/shared/api/chat";
 import { Button } from "@/shared/components/ui/button";
 import { UserAvatar } from "@/shared/components/UserAvatar";
-import { useDeleteMessage } from "@/shared/hooks/uesDeleteMessage";
+import { useDeleteMessage } from "@/shared/hooks/useDeleteMessage";
 import { cn } from "@/shared/lib/utils";
 
 interface MessageItemProps {

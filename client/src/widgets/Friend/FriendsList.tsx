@@ -2,7 +2,7 @@ import SearchInput from "@/shared/components/SearchInput";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import FriendListItem from "./FriendListItem";
-import type { Me } from "@/shared/api/auth";
+import type { Me } from "@/features/auth/api/authApi";
 
 interface FriendsListProps {
   users: Me[];

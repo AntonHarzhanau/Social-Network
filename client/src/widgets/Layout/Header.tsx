@@ -1,4 +1,4 @@
-import type { Me } from "@/shared/api/auth";
+import type { Me } from "@/features/auth/api/authApi";
 import { ModeToggle } from "@/shared/components/ModeToggle";
 import SearchInput from "@/shared/components/SearchInput";
 import { Button } from "@/shared/components/ui/button";

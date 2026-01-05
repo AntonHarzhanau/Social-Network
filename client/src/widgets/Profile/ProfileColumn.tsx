@@ -1,4 +1,4 @@
-import CreatePostDIalog from "../CreatePostForm/CreatePostDIalog";
+import CreatePostDIalog from "../../features/post/create/ui/CreatePostDIalog";
 import FeedsList from "../FeedsList";
 import MediaBox from "../MediaBox/MediaBox";
 

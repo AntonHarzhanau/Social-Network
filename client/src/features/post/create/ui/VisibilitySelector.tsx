@@ -1,4 +1,4 @@
-import { VISIBILITY_VALUES } from "@/shared/api/post";
+import { VISIBILITY_VALUES } from "@/entities/post/api/postApi";
 import { Field, FieldError } from "@/shared/components/ui/field";
 import {
   Select,

@@ -1,5 +1,5 @@
-import { useInfinitePosts } from "@/shared/hooks/useInfinitePosts";
-import FeedCard from "./FeedCard/FeedCard";
+import { useInfinitePosts } from "@/entities/post/model/useInfinitePosts";
+import FeedCard from "../entities/post/ui/FeedCard";
 
 const FeedsList = ({ authorId = null }: { authorId?: string | null }) => {
   const {

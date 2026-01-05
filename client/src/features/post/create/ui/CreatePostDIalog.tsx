@@ -10,7 +10,7 @@ import {
 } from "@/shared/components/ui/dialog";
 import { cn } from "@/shared/lib/utils";
 import { PlusCircleIcon } from "lucide-react";
-import { CreatePostForm } from "@/widgets/CreatePostForm/CreatePostForm";
+import { CreatePostForm } from "@/features/post/create/ui/CreatePostForm";
 import { useState } from "react";
 
 interface CreatePostDIalogProps {

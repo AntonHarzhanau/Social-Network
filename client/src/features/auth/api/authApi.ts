@@ -1,5 +1,5 @@
-import type { RegisterApiPayload } from "../types/registerApiSchema";
-import { apiClient } from "./apiClient";
+import type { RegisterApiPayload } from "@/shared/types/registerApiSchema";
+import { apiClient } from "@/shared/api/apiClient";
 
 export interface Me {
   id: string;

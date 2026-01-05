@@ -3,8 +3,8 @@ import {
   createPost,
   type CreatePostPayload,
   type Visibility,
-} from "../api/post";
-import { POSTS_QUERY_KEY } from "./useInfinitePosts";
+} from "@/entities/post/api/postApi";
+import { POSTS_QUERY_KEY } from "@/entities/post/model/useInfinitePosts";
 
 export interface CreatePostFormValues {
   content?: string;

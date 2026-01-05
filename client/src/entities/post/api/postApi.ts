@@ -1,5 +1,5 @@
-import type { MediaResponse } from "../types/mediaResponseTypes";
-import { apiClient } from "./apiClient";
+import type { MediaResponse } from "@/shared/types/mediaResponseTypes";
+import { apiClient } from "@/shared/api/apiClient";
 
 export const VISIBILITY_VALUES = {
   PUBLIC: "public",

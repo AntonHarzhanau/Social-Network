@@ -1,7 +1,7 @@
 import { Card, CardAction, CardContent } from "@/shared/components/ui/card";
 
 import { UserAvatar } from "@/shared/components/UserAvatar";
-import { useAuthStore } from "@/shared/store/authStore";
+import { useAuthStore } from "@/features/auth/model/authStore";
 import MessageList from "@/widgets/Message/MessageList";
 import { useChatMessages } from "@/shared/hooks/useChatMessages";
 import NewMessageForm from "./NewMessageForm";

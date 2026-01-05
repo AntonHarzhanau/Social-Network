@@ -1,8 +1,8 @@
 import { ModeToggle } from "@/shared/components/ModeToggle";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { FieldDescription } from "@/shared/components/ui/field";
-import LoginForm from "@/widgets/AuthForms/LoginForm";
-import RegisterForm from "@/widgets/AuthForms/RegisterForm";
+import LoginForm from "@/features/auth/ui/LoginForm";
+import RegisterForm from "@/features/auth/ui/RegisterForm";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";

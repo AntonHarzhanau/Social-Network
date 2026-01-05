@@ -4,7 +4,7 @@ import {
   UPLOADING_STATUS,
   type MediaItem,
 } from "@/shared/types/uploadMediaTypes";
-import { uploadMedia } from "../api/media";
+import { uploadMedia } from "@/shared/api/media";
 
 interface UsePostMediaUploadParams {
   onMediaIdsChange?: (mediaIds: string[]) => void;

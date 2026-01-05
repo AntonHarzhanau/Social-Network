@@ -1,6 +1,6 @@
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
-import CreatePostDIalog from "@/widgets/CreatePostForm/CreatePostDIalog";
+import CreatePostDIalog from "@/features/post/create/ui/CreatePostDIalog";
 import FeedsList from "@/widgets/FeedsList";
 
 const FeedsPage = () => {

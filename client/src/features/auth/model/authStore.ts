@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { AuthApi, type Me } from "../api/auth";
+import { AuthApi, type Me } from "@/features/auth/api/authApi";
 import type { RegisterApiPayload } from "@/shared/types/registerApiSchema";
 
 interface AuthState {
@@ -68,9 +68,16 @@ export const useAuthStore = create<AuthState>((set) => ({
       }
       const me = await AuthApi.me();
       set({ user: me.data, isAuthenticated: true });
-    } catch (error) {
-      console.error("Auth check failed:", error);
-      set({ user: null, isAuthenticated: false });
+    } catch (error: any) {
+        const status = error?.response?.status;
+        
+        set({ user: null, isAuthenticated: false });
+        
+        if (status === 401 || status === 403) {
+          localStorage.removeItem("token");
+          return;
+        }
+        throw error;
     } finally {
       set({ isLoading: false });
     }

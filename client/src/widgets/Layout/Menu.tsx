@@ -1,4 +1,4 @@
-import type { Me } from "@/shared/api/auth";
+import type { Me } from "@/features/auth/api/authApi";
 import { Button } from "@/shared/components/ui/button";
 import { MAIN_MENU } from "@/shared/constants/menu";
 import { ROUTES } from "@/shared/constants/routes";

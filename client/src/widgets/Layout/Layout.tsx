@@ -2,7 +2,7 @@ import { Outlet } from "react-router";
 import Header from "./Header";
 import Menu from "./Menu";
 import { useShallow } from "zustand/react/shallow";
-import { useAuthStore } from "@/shared/store/authStore";
+import { useAuthStore } from "@/features/auth/model/authStore";
 
 const Layout = () => {
   const { user, isLoading, logout } = useAuthStore(
