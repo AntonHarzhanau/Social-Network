@@ -1,4 +1,4 @@
-import { sendMessage } from "@/shared/api/chat";
+import { sendMessage } from "@/entities/chat/api/chat";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { useState } from "react";

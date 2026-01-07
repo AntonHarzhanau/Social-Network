@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
-import ChatListItem from "./ChatListItem";
-import { useInfiniteChats } from "@/shared/hooks/useChat";
+import ChatListItem from "@/entities/chat/ui/ChatListItem";
+import { useInfiniteChats } from "@/entities/chat/model/useChat";
 import { Card } from "@/shared/components/ui/card";
 
 const ChatList = () => {

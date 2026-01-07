@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteMessage } from "../api/chat";
+import { deleteMessage } from "@/entities/chat/api/chat";
 import {
   removeMessageFromInfinite,
   type MessagesInfinite,
-} from "../lib/messagesCache";
+} from "@/shared/lib/messagesCache";
 
 export const useDeleteMessage = () => {
   const queryClient = useQueryClient();

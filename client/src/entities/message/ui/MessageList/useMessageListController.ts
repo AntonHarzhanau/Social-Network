@@ -1,52 +1,54 @@
-import type { MessageResponse } from "@/shared/api/chat";
-import { Button } from "@/shared/components/ui/button";
-import { ChevronDown } from "lucide-react";
-import { useEffect, useRef, useState, useCallback } from "react";
-import MessageItem from "./MessageItem";
-import { useChatUiStore } from "@/shared/store/chatUiStore";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { Message } from "@/entities/chat/model/types";
 
-interface MessageListProps {
+interface UseMessageListControllerArgs {
   chatId: string;
-  messages: MessageResponse[];
-  currentUserId?: string;
+  messages: Message[];
+  cursorId: string | null;
+  setCursor: (chatId: string, messageId: string | null) => void;
+
   onLoadMore?: () => Promise<void> | void;
   hasMore?: boolean;
 }
 
-const MessageList = ({
+interface UseMessageListControllerReturn {
+  containerRef: React.RefObject<HTMLDivElement | null> ;
+  bottomRef: React.RefObject<HTMLDivElement | null> ;
+
+  isAtBottom: boolean;
+  hasUnread: boolean;
+
+  scrollToBottom: () => void;
+}
+
+export function useMessageListController({
   chatId,
   messages,
-  currentUserId,
+  cursorId,
+  setCursor,
   onLoadMore,
   hasMore,
-}: MessageListProps) => {
+}: UseMessageListControllerArgs): UseMessageListControllerReturn {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [hasUnread, setHasUnread] = useState(false);
 
-  const anchorId = useChatUiStore((s) => s.scrollAnchorByChat[chatId]);
-  const lastReadId = useChatUiStore((s) => s.lastReadByChat[chatId]);
-  const setAnchor = useChatUiStore((s) => s.setScrollAnchor);
-  const setLastRead = useChatUiStore((s) => s.setLastRead);
-
-  // --- защита от зацикливания ---
+  // guards
   const didRestoreRef = useRef(false);
   const programmaticScrollRef = useRef(false);
 
-  // для "новое сообщение"
+  // new message detector
   const prevLastIdRef = useRef<string | null>(null);
 
-  // для компенсации при подгрузке старых
+  // load-more compensation
   const isLoadingMoreRef = useRef(false);
   const prevScrollHeightRef = useRef(0);
   const prevScrollTopRef = useRef(0);
-
-  // анти-спам для loadMore
   const lastLoadMoreAtRef = useRef(0);
 
-  // сбрасываем флаги при смене чата
+  // reset per chat
   useEffect(() => {
     didRestoreRef.current = false;
     prevLastIdRef.current = null;
@@ -62,30 +64,36 @@ const MessageList = ({
     }, 250);
   };
 
-  // 1) Восстановление позиции: ТОЛЬКО ОДИН РАЗ после первой загрузки сообщений
+  /**
+   * 1) Restore once when messages exist
+   * cursor == null -> bottom
+   * cursor != null -> scroll to msg
+   *
+   * Depend on cursorId to support late server cursor,
+   * but guarded by didRestoreRef.
+   */
   useEffect(() => {
     if (didRestoreRef.current) return;
     if (messages.length === 0) return;
 
-    const target = anchorId ?? lastReadId;
-
     runProgrammaticScroll(() => {
-      if (target) {
-        const el = document.getElementById(`msg-${target}`);
+      if (cursorId) {
+        const el = document.getElementById(`msg-${cursorId}`);
         if (el) {
           el.scrollIntoView({ behavior: "auto", block: "center" });
           didRestoreRef.current = true;
           return;
         }
       }
-
-      // fallback: вниз
       bottomRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
       didRestoreRef.current = true;
     });
-  }, [messages.length]); // намеренно НЕ зависим от anchorId/lastReadId
+  }, [messages.length, cursorId]);
 
-  // 2) Отслеживаем bottom
+  /**
+   * 2) Observe bottom
+   * If at bottom -> cursor = null (semantic: open at bottom next time)
+   */
   useEffect(() => {
     const container = containerRef.current;
     const bottom = bottomRef.current;
@@ -95,10 +103,10 @@ const MessageList = ({
       ([entry]) => {
         const atBottom = entry.isIntersecting;
         setIsAtBottom(atBottom);
+
         if (atBottom) {
           setHasUnread(false);
-          const last = messages[messages.length - 1];
-          if (last) setLastRead(chatId, last.id);
+          setCursor(chatId, null);
         }
       },
       { root: container, threshold: 1.0 },
@@ -106,9 +114,11 @@ const MessageList = ({
 
     observer.observe(bottom);
     return () => observer.disconnect();
-  }, [chatId, messages, setLastRead]);
+  }, [chatId, setCursor]);
 
-  // 3) Пытаемся догружать старые по scrollTop (надежнее, чем IntersectionObserver для topRef)
+  /**
+   * 3) Load more when near top
+   */
   const maybeLoadMore = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -118,10 +128,8 @@ const MessageList = ({
     if (programmaticScrollRef.current) return;
     if (isLoadingMoreRef.current) return;
 
-    // “почти верх”
     if (container.scrollTop > 120) return;
 
-    // throttling
     const now = Date.now();
     if (now - lastLoadMoreAtRef.current < 500) return;
     lastLoadMoreAtRef.current = now;
@@ -132,8 +140,6 @@ const MessageList = ({
 
     const r = onLoadMore();
 
-    // safety: если по какой-то причине messages.length не изменится,
-    // сбросим флаг через таймаут, чтобы не "залипнуть"
     const finalize = () => {
       window.setTimeout(() => {
         if (isLoadingMoreRef.current) isLoadingMoreRef.current = false;
@@ -147,7 +153,9 @@ const MessageList = ({
     }
   }, [onLoadMore, hasMore]);
 
-  // 4) Компенсация скролла после подгрузки старых сообщений
+  /**
+   * 4) Compensation after load-more
+   */
   useEffect(() => {
     if (!isLoadingMoreRef.current) return;
 
@@ -164,12 +172,22 @@ const MessageList = ({
     isLoadingMoreRef.current = false;
   }, [messages.length]);
 
-  // 5) Сохраняем anchor (где остановился), но игнорируем programmatic scroll
-  const saveAnchorFromViewport = useCallback(() => {
+  /**
+   * 5) Save cursor from viewport
+   */
+  const saveCursorFromViewport = useCallback(() => {
     if (programmaticScrollRef.current) return;
 
     const container = containerRef.current;
     if (!container) return;
+
+    const isBottomNow =
+      container.scrollHeight - (container.scrollTop + container.clientHeight) < 2;
+
+    if (isBottomNow) {
+      setCursor(chatId, null);
+      return;
+    }
 
     const rect = container.getBoundingClientRect();
     const x = rect.left + 16;
@@ -179,10 +197,12 @@ const MessageList = ({
     const msgEl = el?.closest?.("[data-message-id]") as HTMLElement | null;
     const id = msgEl?.dataset.messageId;
 
-    if (id) setAnchor(chatId, id);
-  }, [chatId, setAnchor]);
+    if (id) setCursor(chatId, id);
+  }, [chatId, setCursor]);
 
-  // scroll listener: loadMore + anchor
+  /**
+   * Scroll listener: loadMore + cursor (debounced)
+   */
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -192,12 +212,10 @@ const MessageList = ({
     const onScroll = () => {
       if (programmaticScrollRef.current) return;
 
-      // 1) сперва пытаемся догрузить старые
       maybeLoadMore();
 
-      // 2) затем (debounced) сохраняем anchor
       if (t) window.clearTimeout(t);
-      t = window.setTimeout(saveAnchorFromViewport, 150);
+      t = window.setTimeout(saveCursorFromViewport, 150);
     };
 
     container.addEventListener("scroll", onScroll, { passive: true });
@@ -205,9 +223,11 @@ const MessageList = ({
       container.removeEventListener("scroll", onScroll);
       if (t) window.clearTimeout(t);
     };
-  }, [saveAnchorFromViewport, maybeLoadMore]);
+  }, [maybeLoadMore, saveCursorFromViewport]);
 
-  // 6) Новое сообщение: не реагируем на первый рендер
+  /**
+   * 6) New messages indicator / auto scroll
+   */
   useEffect(() => {
     const last = messages[messages.length - 1];
     if (!last) return;
@@ -221,10 +241,7 @@ const MessageList = ({
     if (last.id !== prev) {
       if (isAtBottom) {
         runProgrammaticScroll(() => {
-          bottomRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "end",
-          });
+          bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
         });
       } else {
         setHasUnread(true);
@@ -233,48 +250,19 @@ const MessageList = ({
     }
   }, [messages, isAtBottom]);
 
-  const handleScrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     runProgrammaticScroll(() => {
       bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     });
     setHasUnread(false);
+    setCursor(chatId, null);
+  }, [chatId, setCursor]);
+
+  return {
+    containerRef,
+    bottomRef,
+    isAtBottom,
+    hasUnread,
+    scrollToBottom,
   };
-
-  return (
-    <div className="relative h-[65vh] w-full">
-      <div ref={containerRef} className="h-full w-full overflow-y-auto p-0">
-        {messages.map((message) => (
-          <MessageItem
-            key={message.id}
-            chatId={chatId}
-            message={message}
-            currentUserId={currentUserId}
-          />
-        ))}
-        <div ref={bottomRef} />
-
-        {!isAtBottom && (
-          <div>
-            {hasUnread && (
-              <div
-                onClick={handleScrollToBottom}
-                className="absolute bottom-0 left-0 w-full h-12 flex justify-center items-center bg-muted/50"
-              >
-                New Messages
-              </div>
-            )}
-
-            <Button
-              onClick={handleScrollToBottom}
-              className="absolute bottom-4 right-4 rounded-full bg-primary/40 px-3 py-1 text-xs text-primary-foreground shadow-md flex items-center gap-1 w-8 h-8"
-            >
-              <ChevronDown size={12} />
-            </Button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default MessageList;
+}

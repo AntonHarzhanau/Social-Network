@@ -1,6 +1,6 @@
 import type z from "zod";
-import { toDateOnly } from "../lib/todayOnly";
 import { registerFormSchema } from "./registerFormSchema";
+import { toDateOnly } from "@/shared/lib/todayOnly";
 
 export const registerApiSchema = registerFormSchema
   .omit({ confirmPassword: true })

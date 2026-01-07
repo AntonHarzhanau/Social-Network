@@ -1,11 +1,10 @@
 import { Card, CardAction, CardContent } from "@/shared/components/ui/card";
-
 import { UserAvatar } from "@/shared/components/UserAvatar";
 import { useAuthStore } from "@/features/auth/model/authStore";
-import MessageList from "@/widgets/Message/MessageList";
-import { useChatMessages } from "@/shared/hooks/useChatMessages";
-import NewMessageForm from "./NewMessageForm";
-import { useOpenChatsStore } from "@/shared/store/openChatsStore";
+import MessageList from "@/entities/message/ui/MessageList/MessageList";
+import { useChatMessages } from "@/entities/chat/model/useChatMessages";
+import NewMessageForm from "@/entities/message/ui/NewMessageForm";
+import { useOpenChatsStore } from "@/entities/chat/model/openChatsStore";
 
 interface MessagesPageProps {
   chatId: string;

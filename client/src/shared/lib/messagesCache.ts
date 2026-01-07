@@ -1,7 +1,7 @@
 import type { InfiniteData } from "@tanstack/react-query";
-import type { MessageResponse } from "../api/chat";
+import type { Message } from "@/entities/chat/model/types";
 
-export type MessagesInfinite = InfiniteData<MessageResponse[]>;
+export type MessagesInfinite = InfiniteData<Message[]>;
 
 export function removeMessageFromInfinite(
   oldMessages: MessagesInfinite | undefined,
@@ -19,7 +19,7 @@ export function removeMessageFromInfinite(
 
 export function addMessageToInfinite(
   oldestMessages: MessagesInfinite | undefined,
-  newMessage: MessageResponse,
+  newMessage: Message,
 ): MessagesInfinite | undefined {
   if (!oldestMessages) {
     return { pages: [[newMessage]], pageParams: [undefined] };

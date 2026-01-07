@@ -1,12 +1,12 @@
-import { type MessageResponse } from "@/shared/api/chat";
 import { Button } from "@/shared/components/ui/button";
 import { UserAvatar } from "@/shared/components/UserAvatar";
-import { useDeleteMessage } from "@/shared/hooks/useDeleteMessage";
 import { cn } from "@/shared/lib/utils";
+import type { Message } from "@/entities/chat/model/types";
+import { useDeleteMessage } from "@/entities/message/model/useDeleteMessage";
 
 interface MessageItemProps {
   chatId: string;
-  message: MessageResponse;
+  message: Message;
   currentUserId?: string;
 }
 

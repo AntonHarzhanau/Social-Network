@@ -1,11 +1,6 @@
-import type { RegisterApiPayload } from "@/shared/types/registerApiSchema";
 import { apiClient } from "@/shared/api/apiClient";
-
-export interface Me {
-  id: string;
-  username: string;
-  avatarUrl?: string | null;
-}
+import type { RegisterApiPayload } from "../model/registerApiSchema";
+import type { UserPreview } from "@/entities/user/model/types";
 
 export const AuthApi = {
   login(email: string, password: string) {
@@ -25,7 +20,7 @@ export const AuthApi = {
     return apiClient.post<{ token: string }>("/auth/refresh");
   },
   me() {
-    const response = apiClient.get<Me>("/auth/me");
+    const response = apiClient.get<UserPreview>("/auth/me");
     return response;
   },
 };

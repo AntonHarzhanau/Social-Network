@@ -1,16 +1,16 @@
 import { useQueryClient } from "@tanstack/react-query";
-import type { MessageResponse } from "../api/chat";
-import { useInfiniteMessages } from "./useChat";
+import type { Message } from "@/entities/chat/model/types";
+import { useInfiniteMessages } from "@/entities/chat/model/useChat";
 import { useCallback, useMemo } from "react";
 import {
   addMessageToInfinite,
   removeMessageFromInfinite,
   type MessagesInfinite,
-} from "../lib/messagesCache";
-import { useMercure } from "./useMercure";
+} from "@/shared/lib/messagesCache";
+import { useMercure } from "@/shared/hooks/useMercure";
 
 type ChatMercureEvent =
-  | { type: "message_created"; message: MessageResponse & { chatId: string } }
+  | { type: "message_created"; message: Message & { chatId: string } }
   | { type: "message_deleted"; messageId: string };
 
 export const useChatMessages = (chatId: string) => {

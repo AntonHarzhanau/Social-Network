@@ -11,11 +11,11 @@ import { FormInput } from "@/shared/components/FormInput";
 import {
   registerFormSchema,
   type RegisterFormSchema,
-} from "@/shared/types/registerFormSchema";
-import { registerApiSchema } from "@/shared/types/registerApiSchema";
+} from "@/features/auth/model/registerFormSchema";
 import { DatePicker } from "@/shared/components/DatePicker";
 import type { AxiosError } from "axios";
 import { toast } from "sonner";
+import { registerApiSchema } from "@/features/auth/model/registerApiSchema";
 
 const RegisterForm = ({ switchToLogin }: { switchToLogin: () => void }) => {
   const form = useForm<RegisterFormSchema>({

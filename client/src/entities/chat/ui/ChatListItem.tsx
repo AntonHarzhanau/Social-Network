@@ -1,12 +1,12 @@
-import type { ChatResponse } from "@/shared/api/chat";
+import type { Chat } from "@/entities/chat/model/types";
 import DropDownButton from "@/shared/components/DropDownButton";
 import { Item, ItemMedia } from "@/shared/components/ui/item";
 import { UserAvatar } from "@/shared/components/UserAvatar";
-import { useOpenChatsStore } from "@/shared/store/openChatsStore";
+import { useOpenChatsStore } from "@/entities/chat/model/openChatsStore";
 import { Link } from "react-router-dom";
 
 interface ChatListItemProps {
-  chat: ChatResponse;
+  chat: Chat;
 }
 
 const ChatListItem = ({ chat }: ChatListItemProps) => {

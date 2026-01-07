@@ -1,11 +1,15 @@
 import { create } from "zustand";
-import { AuthApi, type Me } from "@/features/auth/api/authApi";
-import type { RegisterApiPayload } from "@/shared/types/registerApiSchema";
+import { useOpenChatsStore } from "@/entities/chat/model/openChatsStore";
+import { queryClient } from "@/shared/lib/queryClient";
+import { useChatUiStore } from "@/entities/chat/model/chatUiStore";
+import type { UserPreview } from "@/entities/user/model/types";
+import type { RegisterApiPayload } from "./registerApiSchema";
+import { AuthApi } from "../api/authApi";
 
 interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user?: Me | null;
+  user?: UserPreview | null;
 
   login: (email: string, password: string) => Promise<void>;
   register: (registerData: RegisterApiPayload) => Promise<void>;
@@ -53,6 +57,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: () => {
     localStorage.removeItem("token");
     set({ isAuthenticated: false, user: null });
+    useOpenChatsStore.getState().reset();
+    useChatUiStore.getState().reset();
+    queryClient.clear();
   },
 
   checkAuth: async () => {

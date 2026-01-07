@@ -1,4 +1,4 @@
-import { createDirectChat } from "@/shared/api/chat";
+import { createDirectChat } from "@/entities/chat/api/chat";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -32,11 +32,10 @@ const NewMessageDialog = ({
     e.preventDefault();
     console.log("Submitting new message to user:", userId, newMessage);
     if (!userId || !newMessage.trim()) return;
-    const response = await createDirectChat({
+    await createDirectChat({
       participantId: userId,
       content: newMessage,
     });
-    console.log("Created chat:", response);
     setNewMessage("");
   };
 

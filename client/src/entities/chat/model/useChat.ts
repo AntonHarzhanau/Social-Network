@@ -1,10 +1,10 @@
 import {
   fetchChats,
   fetchChatById,
-  type ChatResponse,
-  type MessageResponse,
   fetchMessages,
-} from "@/shared/api/chat";
+} from "@/entities/chat/api/chat";
+import type { Chat, Message } from "@/entities/chat/model/types";
+
 
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
@@ -12,7 +12,7 @@ const CHATS_PAGE_SIZE = 15;
 const MESSAGES_PAGE_SIZE = 20;
 
 export const useInfiniteChats = () =>
-  useInfiniteQuery<ChatResponse[]>({
+  useInfiniteQuery<Chat[]>({
     queryKey: ["chats"],
     queryFn: ({ pageParam = 1 }) =>
       fetchChats(pageParam as number, CHATS_PAGE_SIZE),
@@ -29,7 +29,7 @@ export const useChatQuery = (chatId?: string) =>
   });
 
 export const useInfiniteMessages = (chatId?: string) =>
-  useInfiniteQuery<MessageResponse[]>({
+  useInfiniteQuery<Message[]>({
     queryKey: ["messages", chatId],
     enabled: !!chatId,
 

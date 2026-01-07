@@ -14,7 +14,7 @@ import { FormInput } from "@/shared/components/FormInput";
 import {
   loginFormSchema,
   type LoginFormSchema,
-} from "@/shared/types/loginFormSchema";
+} from "@/features/auth/model/loginFormSchema";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/shared/constants/routes";
 import { toast } from "sonner";

@@ -1,19 +1,18 @@
-import type { ChatResponse } from "../api/chat";
+import type { Chat } from "@/entities/chat/model/types";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 interface OpenChatsState {
-  openChats: ChatResponse[];
-  openChat: (chat: ChatResponse) => void;
+  openChats: Chat[];
+  openChat: (chat: Chat) => void;
   closeChat: (chatId: string) => void;
-  setOpenChats: (chats: ChatResponse[]) => void;
+  setOpenChats: (chats: Chat[]) => void;
+  reset: () => void;
 }
 
-export const useOpenChatsStore = create<OpenChatsState>()(
-  persist(
+export const useOpenChatsStore = create<OpenChatsState>(
     (set) => ({
       openChats: [],
-
+      reset: () => set({ openChats: [] }),
       openChat: (chat) =>
         set((s) => {
           if (s.openChats.some((c) => c.id === chat.id)) {
@@ -29,6 +28,4 @@ export const useOpenChatsStore = create<OpenChatsState>()(
 
       setOpenChats: (chats) => set({ openChats: chats }),
     }),
-    { name: "open-chats" },
-  ),
 );

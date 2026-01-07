@@ -72,8 +72,6 @@ final class ChatController extends AbstractController
         return $this->json(
             $dto,
             JsonResponse::HTTP_OK,
-            [],
-            ['groups' => 'chat:detail']
         );
     }
 
@@ -106,7 +104,7 @@ final class ChatController extends AbstractController
         $beforeDt = $before ? new \DateTimeImmutable($before) : null;
 
         $messages = $getChatMessages(Uuid::fromString($chatId), $currentUser->getId(), $limit, $beforeDt);
-        return $this->json($messages, JsonResponse::HTTP_OK, [], ['groups' => 'message:list']);
+        return $this->json($messages, JsonResponse::HTTP_OK);
     }
 
     #[Route('/{chatId}/add-members', name: 'add_user_to_chat', methods: ['POST'], format: 'json')]
