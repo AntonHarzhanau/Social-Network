@@ -40,7 +40,9 @@ class FriendshipRepository extends ServiceEntityRepository implements Friendship
     public function findFriendship(
         Uuid $userAId,
         Uuid $userBId,
-        ?FriendshipStatusEnum $status = null
+        ?array $status = null,
+        ?int $page = null,
+        ?int $limit = null,
     ): ?Friendship {
         $qb = $this->createQueryBuilder('f')
             ->where('
@@ -51,17 +53,20 @@ class FriendshipRepository extends ServiceEntityRepository implements Friendship
             ->setParameter('userB', $userBId);
 
         if ($status !== null) {
-            $qb->andWhere('f.status = :status')
+            $qb->andWhere('f.status IN (:status)')
                 ->setParameter('status', $status);
         }
-
+        if ($page !== null && $limit !== null) {
+            $qb->setFirstResult(($page - 1) * $limit)
+                ->setMaxResults($limit);
+        }
         return $qb->getQuery()->getOneOrNullResult();
     }
 
     /**
      * @return list<string>
      */
-    public function findUserFriends(Uuid $user): array
+    public function findUserFriends(Uuid $user, ?int $page = null, ?int $limit = null): array
     {
         $qb = $this->createQueryBuilder('f')
             ->select('Case 
@@ -72,7 +77,14 @@ class FriendshipRepository extends ServiceEntityRepository implements Friendship
             ->where('IDENTITY(f.requester) = :user OR IDENTITY(f.addressee) = :user')
             ->andWhere('f.status = :status')
             ->setParameter('status', FriendshipStatusEnum::ACCEPTED)
-            ->setParameter('user', $user);
+            ->setParameter('user', $user)
+            ->orderBy('f.createdAt', 'ASC')
+            ->addOrderBy('f.id', 'ASC');
+
+        if ($page !== null && $limit !== null) {
+            $qb->setFirstResult(($page - 1) * $limit)
+                ->setMaxResults($limit);
+        }
 
         return $qb->getQuery()->getResult();
     }
@@ -80,15 +92,22 @@ class FriendshipRepository extends ServiceEntityRepository implements Friendship
     /**
      * @return list<string>
      */
-    public function findReceivedFriendRequests(Uuid $userId): array
+    public function findReceivedFriendRequests(Uuid $userId, ?int $page = null, ?int $limit = null): array
     {
         $qb = $this->createQueryBuilder('f')
             ->select('IDENTITY(f.requester) AS requesterId')
             ->where('IDENTITY(f.addressee) = :user')
             ->andWhere('f.status = :status')
             ->setParameter('user', $userId)
-            ->setParameter('status', FriendshipStatusEnum::PENDING);
+            ->setParameter('status', FriendshipStatusEnum::PENDING)
+            ->orderBy('f.createdAt', 'ASC')
+            ->addOrderBy('f.id', 'ASC')
+        ;
 
+        if ($page !== null && $limit !== null) {
+            $qb->setFirstResult(($page - 1) * $limit)
+                ->setMaxResults($limit);
+        }
 
         return $qb->getQuery()->getResult();
     }
@@ -96,14 +115,22 @@ class FriendshipRepository extends ServiceEntityRepository implements Friendship
     /**
      * @return Friendship[]
      */
-    public function findSentFriendRequests(Uuid $userId): array
+    public function findSentFriendRequests(Uuid $userId, ?int $page = null, ?int $limit = null): array
     {
         $qb = $this->createQueryBuilder('f')
             ->select('IDENTITY(f.addressee) AS addresseeId')
             ->where('IDENTITY(f.requester) = :user')
             ->andWhere('f.status = :status')
             ->setParameter('user', $userId)
-            ->setParameter('status', FriendshipStatusEnum::PENDING);
+            ->setParameter('status', FriendshipStatusEnum::PENDING)
+            ->orderBy('f.createdAt', 'ASC')
+            ->addOrderBy('f.id', 'ASC')
+        ;
+
+        if ($page !== null && $limit !== null) {
+            $qb->setFirstResult(($page - 1) * $limit)
+                ->setMaxResults($limit);
+        }
 
         return $qb->getQuery()->getResult();
     }

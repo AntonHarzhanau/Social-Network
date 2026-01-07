@@ -1,19 +1,20 @@
-import { fetchUserProfile, type UserProfile } from "@/entities/user/api/userApi";
-import ProfileAside from "@/widgets/Profile/ProfileAside";
+import { fetchUserProfile } from "@/entities/user/api/userApi";
+import type { UserProfile } from "@/entities/user/model/types";
+import FriendsWidget from "@/widgets/Profile/FriendsWidget";
 import ProfileColumn from "@/widgets/Profile/ProfileColumn";
 import ProfileHeader from "@/widgets/Profile/ProfileHeader";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 const ProfilePage = () => {
-  const params = useParams<{ userId: string }>();
+  const { userId } = useParams<{ userId: string }>();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     const loadUserProfile = async () => {
-      if (params.userId) {
+      if (userId) {
         try {
-          const profile = await fetchUserProfile(params.userId);
+          const profile = await fetchUserProfile(userId);
           setUserProfile(profile);
         } catch (error) {
           console.error("Failed to load user profile:", error);
@@ -21,7 +22,7 @@ const ProfilePage = () => {
       }
     };
     loadUserProfile();
-  }, [params.userId]);
+  }, [userId]);
 
   return (
     <div>   
@@ -31,11 +32,11 @@ const ProfilePage = () => {
       />
       <div className="flex gap-2 mt-4">
         <section className="flex flex-col flex-5 gap-2">
-          <ProfileColumn userId={params.userId} />
+          <ProfileColumn userId={userId} />
         </section>
 
         <aside className="flex-3 sticky h-fit top-14">
-          <ProfileAside />
+          <FriendsWidget userId={userId} />
         </aside>
       </div>
     </div>

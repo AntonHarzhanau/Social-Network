@@ -29,7 +29,12 @@ final class UserDirectoryAdapter implements UserDirectoryInterface
     public function getPreviewsByIds(array $userIds): array
     {
         $previews = $this->userService->findPreviewsByIds($userIds);
+        
+        $result = [];
+        foreach ($previews as $preview) {
+            $result[$preview->id] = $preview;
+        }
 
-        return $previews;
+        return $result;
     }
 }

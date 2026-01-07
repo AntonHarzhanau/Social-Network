@@ -13,6 +13,7 @@ use App\Modules\User\Infrastructure\Http\Request\UpdateAvatarRequest;
 use App\Modules\User\Infrastructure\Http\Request\UpdateProfileRequest;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
@@ -23,9 +24,12 @@ final class UserController extends AbstractController
     #[Route('', methods: ['GET'])]
     public function list(
         #[CurrentUser] ?User $user,
+        Request $request,
         FindUsersAction $action,
     ): JsonResponse {
-        return $this->json($action($user));
+        $page = min((int) $request->query->get('page', 1), 1);
+        $limit = min(max((int) $request->query->get('limit', 20), 1), 50);
+        return $this->json($action($user, $page, $limit));
     }
 
     #[Route('/profile', methods: ['PUT'])]

@@ -18,7 +18,7 @@ final class CancelFriendRequestAction
     public function execute(Uuid $currentUserId, Uuid $addresseeId): void
     {
 
-        $friendship = $this->friendships->findFriendship($currentUserId, $addresseeId, FriendshipStatusEnum::PENDING);
+        $friendship = $this->friendships->findFriendship($currentUserId, $addresseeId, [FriendshipStatusEnum::PENDING]);
 
         if ($friendship === null || $friendship->getRequester()->getId() !== $currentUserId) {
             throw new PendingRequestNotFoundException(); 

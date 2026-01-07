@@ -24,9 +24,6 @@ final class DeclineFriendRequestAction
             throw new PendingRequestNotFoundException(); 
         }
 
-        $friendship->setStatus(FriendshipStatusEnum::DECLINED);
-        $friendship->setUpdatedAt(new \DateTimeImmutable());
-
-        $this->friendships->save($friendship);
+        $this->friendships->remove($friendship);
     }
 }

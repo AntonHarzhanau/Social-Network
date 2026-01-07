@@ -8,7 +8,9 @@ import {
   type Post,
   type ToggleLikeResponse,
 } from "@/entities/post/api/postApi";
-import { POSTS_QUERY_KEY } from "@/entities/post/model/useInfinitePosts";
+import { postKeys } from "@/entities/post/model/queryKeys";
+import { patchPostInInfinite } from "@/entities/post/model/patchPostInfinite";
+
 
 export const useToggleLikePost = () => {
   const queryClient = useQueryClient();
@@ -17,26 +19,14 @@ export const useToggleLikePost = () => {
     mutationFn: (postId: string) => toggleLikePost(postId),
 
     onSuccess: (data: ToggleLikeResponse) => {
-      queryClient.setQueryData<InfiniteData<Post[]>>(
-        POSTS_QUERY_KEY,
-        (oldData) => {
-          if (!oldData) return oldData;
-
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page) =>
-              page.map((post) =>
-                post.id === data.postId
-                  ? {
-                      ...post,
-                      likeCount: data.likeCount,
-                      isLikedByCurrentUser: data.isLikedByCurrentUser,
-                    }
-                  : post,
-              ),
-            ),
-          };
-        },
+      queryClient.setQueriesData<InfiniteData<Post[]>>(
+        { queryKey: postKeys.lists() },
+        (old) =>
+          patchPostInInfinite(old, data.postId, (p) => ({
+            ...p,
+            likeCount: data.likeCount,
+            isLikedByCurrentUser: data.isLikedByCurrentUser,
+          })),
       );
     },
   });

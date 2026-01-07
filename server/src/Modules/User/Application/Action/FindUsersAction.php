@@ -16,14 +16,17 @@ final class FindUsersAction
     ) {}
 
     /** @return list<UserPreviewDTO> */
-    public function __invoke(User $currentUser): array
+    public function __invoke(User $currentUser, ?int $page = null, ?int $limit = null): array
     {
         $exceptUserIds = array_merge(
             [$currentUser->getId()],
             $this->socialGraphApi->getBlockedUsersIdsForUser($currentUser->getId())
         );
-        // dd($exceptUserIds);
-        $items = $this->users->findAllExcept($exceptUserIds);
+        $userFriendIds = $this->socialGraphApi->getFriendsIdsForUser($currentUser->getId());
+ 
+        $exceptUserIds = array_merge($exceptUserIds, $userFriendIds);
+        $items = $this->users->findAllExcept($exceptUserIds, $page, $limit);
+
         return array_map(
             fn(User $user) => $this->mapper->toPreview($user),
             $items

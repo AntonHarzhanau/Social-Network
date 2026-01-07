@@ -12,7 +12,7 @@ final class FindUserPreviewsByIdsAction
 {
     public function __construct(
         private readonly UserRepositoryInterface $users,
-        private readonly MediaApiInterface $media, // порт в Media модуль
+        private readonly MediaApiInterface $media,
     ) {}
 
     /** @return array<UserPreviewDTO> */
@@ -25,14 +25,13 @@ final class FindUserPreviewsByIdsAction
             array_map(fn(DTOUserPreviewRowDTO $r) => $r->currentAvatar, $rows)
         )));
 
-        // 1 батч-вызов вместо N вызовов
         $urlsById = $previewIds
             ? $this->media->getMediasByIds($previewIds)
             : [];
 
         $result = [];
         foreach ($rows as $row) {
-            $result[$row->id] = new UserPreviewDTO(
+            $result[] = new UserPreviewDTO(
                 id: $row->id,
                 username: $row->username,
                 avatarUrl: $row->currentAvatar ? ($urlsById[$row->currentAvatar]->url ?? null) : null,

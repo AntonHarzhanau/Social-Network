@@ -15,16 +15,17 @@ final class ListFriendRequestsAction
     ) {}
 
     /** @return UserPreview[] */
-    public function execute(Uuid $currentUserId, FriendshipsTypeEnum $type): array
+    public function execute(Uuid $currentUserId, FriendshipsTypeEnum $type, int $page, int $limit): array
     {
 
         $ids = match ($type) {
-            FriendshipsTypeEnum::SENT => $this->friendships->findSentFriendRequests($currentUserId),
-            FriendshipsTypeEnum::RECEIVED => $this->friendships->findReceivedFriendRequests($currentUserId),
+            FriendshipsTypeEnum::SENT => $this->friendships->findSentFriendRequests($currentUserId, $page, $limit),
+            FriendshipsTypeEnum::RECEIVED => $this->friendships->findReceivedFriendRequests($currentUserId, $page, $limit),
             default => throw new \InvalidArgumentException('Invalid friendship type'),
         };
 
         $previews = $this->users->findPreviewsByIds($ids);
+
         return $previews;
     }
 }

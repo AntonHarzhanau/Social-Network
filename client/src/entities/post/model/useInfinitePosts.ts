@@ -1,14 +1,17 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchPosts, type Post } from "../api/postApi";
-import { useEffect, useRef } from "react";  
+import { useEffect, useRef } from "react";
+import { postKeys } from "./queryKeys";
 
-export const POSTS_QUERY_KEY = ["posts"] as const;
-
-export const useInfinitePosts = (limit = 10, authorId: string | null = null) => {
+export const POSTS_QUERY_KEY = "posts";
+export const useInfinitePosts = (
+  limit = 10,
+  authorId: string | null = null,
+) => {
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const query = useInfiniteQuery<Post[]>({
-    queryKey: POSTS_QUERY_KEY,
+    queryKey: postKeys.list({ authorId, limit }),
     initialPageParam: 1,
     queryFn: ({ pageParam }) =>
       fetchPosts({
@@ -32,22 +35,20 @@ export const useInfinitePosts = (limit = 10, authorId: string | null = null) => 
     if (!target) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry.isIntersecting) {
-          query.fetchNextPage();
-        }
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        if (query.isFetchingNextPage) return;
+        query.fetchNextPage();
       },
-      { threshold: 1.0 },
+      { threshold: 0, rootMargin: "200px" },
     );
 
     observer.observe(target);
 
     return () => {
-      observer.unobserve(target);
       observer.disconnect();
     };
-  }, [query.hasNextPage, query.fetchNextPage]);
+  }, [query.hasNextPage, query.fetchNextPage, query.isFetchingNextPage]);
 
   const posts = query.data?.pages.flatMap((page) => page) ?? [];
 

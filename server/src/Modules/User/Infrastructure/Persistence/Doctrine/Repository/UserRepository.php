@@ -42,12 +42,19 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /** @return array<User> */
-    public function findAllExcept(array $excludedUsers): array
+    public function findAllExcept(array $excludedUsers, ?int $page = null, ?int $limit = null): array
     {
         $queryBuilder = $this->createQueryBuilder('u')
             ->where('u.id NOT IN (:excludedUsers)')
             ->andWhere('u.deletedAt IS NULL')
-            ->setParameter('excludedUsers', $excludedUsers);
+            ->setParameter('excludedUsers', $excludedUsers)
+            ->orderBy('u.createdAt', 'DESC')
+            ->addOrderBy('u.id', 'DESC');
+
+        if ($limit !== null && $page !== null) {
+            $queryBuilder->setMaxResults($limit)
+                ->setFirstResult(($page - 1) * $limit);
+        }
 
         return $queryBuilder->getQuery()->getResult();
     }

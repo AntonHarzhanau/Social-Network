@@ -4,7 +4,7 @@ import {
   type CreatePostPayload,
   type Visibility,
 } from "@/entities/post/api/postApi";
-import { POSTS_QUERY_KEY } from "@/entities/post/model/useInfinitePosts";
+import { postKeys } from "@/entities/post/model/queryKeys";
 
 export interface CreatePostFormValues {
   content?: string;
@@ -29,7 +29,7 @@ export const useCreatePost = () => {
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: POSTS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: postKeys.all });
     },
   });
 };

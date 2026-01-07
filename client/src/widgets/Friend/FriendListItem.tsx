@@ -2,17 +2,36 @@ import { Item, ItemMedia } from "@/shared/components/ui/item";
 import { UserAvatar } from "@/shared/components/UserAvatar";
 import NewMessageDialog from "../NewMessageDialog";
 import { Link } from "react-router-dom";
-import DropDownButton from "@/shared/components/DropDownButton";
+import type { UserPreview } from "@/entities/user/model/types";
+import { Button } from "@/shared/components/ui/button";
+
+import {
+  useAcceptFriendRequestMutation,
+  useCancelFriendRequestMutation,
+  useDeclineFriendRequestMutation,
+  useRemoveFriendMutation,
+  useSendFriendRequestMutation,
+} from "@/entities/friends/model/useFriendMutation";
 
 interface FriendListItemProps {
-  user: {
-    id: string;
-    username: string;
-    avatarUrl?: string | null;
-  };
+  user: UserPreview;
+  filter?: string;
 }
 
-const FriendListItem = ({ user }: FriendListItemProps) => {
+const FriendListItem = ({ user, filter }: FriendListItemProps) => {
+  const sendMutation = useSendFriendRequestMutation();
+  const cancelMutation = useCancelFriendRequestMutation();
+  const acceptMutation = useAcceptFriendRequestMutation();
+  const declineMutation = useDeclineFriendRequestMutation();
+  const removeMutation = useRemoveFriendMutation();
+
+  const isBusy =
+    sendMutation.isPending ||
+    cancelMutation.isPending ||
+    acceptMutation.isPending ||
+    declineMutation.isPending ||
+    removeMutation.isPending;
+
   return (
     <Item
       variant="default"
@@ -45,7 +64,61 @@ const FriendListItem = ({ user }: FriendListItemProps) => {
           avatarUrl={user.avatarUrl}
         />
       </div>
-      <DropDownButton className="ml-auto"/>
+      {filter === "received" && (
+        <div className="ml-auto flex gap-2">
+          <Button disabled={isBusy} onClick={() => acceptMutation.mutate(user.id)}>
+            {acceptMutation.isPending ? "Accepting..." : "Accept"}
+          </Button>
+          <Button
+            variant="outline"
+            disabled={isBusy}
+            onClick={() => declineMutation.mutate(user.id)}
+          >
+            {declineMutation.isPending ? "Rejecting..." : "Reject"}
+          </Button>
+        </div>
+      )}
+
+      {filter === "sent" && (
+        <div className="ml-auto">
+          <Button
+            variant="outline"
+            disabled={isBusy}
+            onClick={() => cancelMutation.mutate(user.id)}
+          >
+            {cancelMutation.isPending ? "Canceling..." : "Cancel Request"}
+          </Button>
+        </div>
+      )}
+
+      {filter === "" && (
+        <div className="ml-auto">
+          <Button disabled={isBusy} onClick={() => sendMutation.mutate(user.id)}>
+            {sendMutation.isPending ? "Sending..." : "Add to Friends"}
+          </Button>
+        </div>
+      )}
+
+      {filter === "all" && (
+        <div className="ml-auto">
+          <Button
+            variant="outline"
+            disabled={isBusy}
+            onClick={() => removeMutation.mutate(user.id)}
+          >
+            {removeMutation.isPending ? "Removing..." : "Remove from Friends"}
+          </Button>
+        </div>
+      )}
+
+      {/* Ошибки (опционально) */}
+      {(sendMutation.isError ||
+        cancelMutation.isError ||
+        acceptMutation.isError ||
+        declineMutation.isError ||
+        removeMutation.isError) && (
+        <div className="text-xs text-destructive ml-auto">Action failed</div>
+      )}
     </Item>
   );
 };

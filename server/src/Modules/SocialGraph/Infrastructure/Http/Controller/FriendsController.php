@@ -7,6 +7,7 @@ use App\Modules\SocialGraph\Application\Action\ListFriendsAction;
 use App\Modules\SocialGraph\Application\Action\RemoveFriendAction;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Uid\Uuid;
@@ -19,10 +20,16 @@ final class FriendsController extends AbstractController
         private readonly RemoveFriendAction $removeFriend,
     ) {}
 
-    #[Route('', name: 'friends_list', methods: ['GET'], format: 'json')]
-    public function list(#[CurrentUser] User $currentUser): JsonResponse
+    #[Route('/{userId}', name: 'friends_list', methods: ['GET'], format: 'json')]
+    public function list(
+        string $userId,
+        Request $request,
+    ): JsonResponse
     {
-        $previews = $this->listFriends->execute($currentUser->getId());
+
+        $page = min((int) $request->query->get('page', 1), 1);
+        $limit = min(max((int) $request->query->get('limit', 20), 1), 50);
+        $previews = $this->listFriends->execute(Uuid::fromString($userId), $page, $limit);
             
         
         return $this->json($previews, JsonResponse::HTTP_OK);

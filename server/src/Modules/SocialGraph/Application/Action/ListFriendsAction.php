@@ -14,9 +14,9 @@ final class ListFriendsAction
     ) {}
 
     /** @return UserPreview[] */
-    public function execute(Uuid $currentUserId): array
+    public function execute(Uuid $currentUserId, int $page, int $limit): array
     {
-        $friendIds = $this->friendships->findUserFriends($currentUserId);
+        $friendIds = $this->friendships->findUserFriends($currentUserId, $page, $limit);
 
         $previews = $this->users->findPreviewsByIds($friendIds);
         return $previews;

@@ -2,36 +2,84 @@ import SearchInput from "@/shared/components/SearchInput";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import FriendListItem from "./FriendListItem";
-import type { Me } from "@/features/auth/api/authApi";
+import { useFriendsFilterStore } from "./useFriendsFilterStore";
+import { usePeopleListInfinite } from "@/entities/friends/model/usePeopleListInfinite";
+import { useInfiniteScrollSentinel } from "@/shared/hooks/useInfiniteScrollSentinel";
 
 interface FriendsListProps {
-  users: Me[];
+  userId: string | undefined;
 }
 
-const FriendsList = ({ users }: FriendsListProps) => {
+const FriendsList = ({ userId }: FriendsListProps) => {
+  const filter = useFriendsFilterStore((state) => state.filter);
+
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = usePeopleListInfinite(filter, userId, 10);
+
+  const users = data?.pages.flat() ?? [];
+
+  const sentinelRef = useInfiniteScrollSentinel({
+    enabled: !isLoading && !isError,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  });
+
   return (
     <Card className="flex flex-col w-full gap-2 px-2">
       <div className="flex gap-2">
-        <Button variant="outline" className="">
+        <Button variant="outline">
           <div className="flex gap-2">
-            <h3 className="">All</h3>
-            <p className="text-sm text-muted-foreground">{177}</p>
+            <h3>All</h3>
+            <p className="text-sm text-muted-foreground">{/* можно total с сервера */}</p>
           </div>
         </Button>
-        <Button variant="outline" className="">
+
+        <Button variant="outline">
           <div className="flex gap-2">
-            <h3 className="">Online</h3>
-            <p className="text-sm text-muted-foreground">{20}</p>
+            <h3>Online</h3>
+            <p className="text-sm text-muted-foreground">{/* online count */}</p>
           </div>
         </Button>
+
         <Button className="ml-auto">Find Friends</Button>
       </div>
+
       <SearchInput />
-      {users.map((user) => (
-        <FriendListItem key={user.id} user={user} />
+
+      {isLoading && <div className="p-4 text-sm text-muted-foreground">Loading...</div>}
+
+      {isError && (
+        <div className="p-4 text-sm">
+          <div className="text-destructive">Failed to load</div>
+          <pre className="text-xs opacity-70">{String(error)}</pre>
+          <Button onClick={() => refetch()} variant="outline" className="mt-2">
+            Retry
+          </Button>
+        </div>
+      )}
+
+      {!isLoading && !isError && users.map((user) => (
+        <FriendListItem key={user.id} user={user} filter={filter} />
       ))}
+
+      {/* sentinel для infinite scroll */}
+      <div ref={sentinelRef} className="h-10" />
+
+      {isFetchingNextPage && (
+        <div className="p-4 text-sm text-muted-foreground">Loading more...</div>
+      )}
     </Card>
   );
 };
+
 
 export default FriendsList;

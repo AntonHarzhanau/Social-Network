@@ -1,15 +1,14 @@
-import { Button } from "./ui/button";
-import { Card } from "./ui/card";
+import { Button } from "../../shared/components/ui/button";
+import { Card } from "../../shared/components/ui/card";
+import { useFriendsFilterStore } from "./useFriendsFilterStore";
 
-interface AsideProps {
-  setFilter: (filter: string) => void;
-}
 
-const Aside = ({ setFilter }: AsideProps) => {
+const FriendsFilter = () => {
+    const setFilter = useFriendsFilterStore((state) => state.setFilter);
   return (
     <Card className="p-1 gap-2">
       <Button
-        onClick={() => setFilter("")}
+        onClick={() => setFilter("all")}
         variant="ghost"
         className="w-full justify-start"
       >
@@ -30,7 +29,7 @@ const Aside = ({ setFilter }: AsideProps) => {
         ReceiverRequests
       </Button>
             <Button
-        onClick={() => setFilter("all")}
+        onClick={() => setFilter("")}
         variant="ghost"
         className="w-full justify-start"
       >
@@ -41,4 +40,4 @@ const Aside = ({ setFilter }: AsideProps) => {
   );
 };
 
-export default Aside;
+export default FriendsFilter;

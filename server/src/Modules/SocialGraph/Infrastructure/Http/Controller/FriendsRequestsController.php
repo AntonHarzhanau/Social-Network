@@ -50,6 +50,8 @@ final class FriendsRequestsController extends AbstractController
     public function list(#[CurrentUser] User $currentUser, Request $request): JsonResponse
     {
         $typeStr = $request->query->get('type');
+        $page = min((int) $request->query->get('page', 1), 1);
+        $limit = min(max((int) $request->query->get('limit', 20), 1), 100);
 
         if (!$typeStr) {
             return $this->json(['error' => 'Type query parameter is required'], JsonResponse::HTTP_BAD_REQUEST);
@@ -60,7 +62,7 @@ final class FriendsRequestsController extends AbstractController
             return $this->json(['error' => 'Invalid type parameter'], JsonResponse::HTTP_BAD_REQUEST);
         }
 
-        $previews = $this->listFriendRequests->execute($currentUser->getId(), $type);
+        $previews = $this->listFriendRequests->execute($currentUser->getId(), $type, $page, $limit);
 
         return $this->json($previews, JsonResponse::HTTP_OK);
     }
