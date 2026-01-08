@@ -11,6 +11,7 @@ use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Domain\Exception\UserNotFoundException;
 use App\Modules\User\Infrastructure\Http\Request\UpdateAvatarRequest;
 use App\Modules\User\Infrastructure\Http\Request\UpdateProfileRequest;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,14 +22,17 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 #[Route('/api/users')]
 final class UserController extends AbstractController
 {
+    public function __construct() {}
+
     #[Route('', methods: ['GET'])]
     public function list(
         #[CurrentUser] ?User $user,
         Request $request,
         FindUsersAction $action,
     ): JsonResponse {
-        $page = min((int) $request->query->get('page', 1), 1);
+        $page = max((int) $request->query->get('page', 1), 1);
         $limit = min(max((int) $request->query->get('limit', 20), 1), 50);
+        
         return $this->json($action($user, $page, $limit));
     }
 

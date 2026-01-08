@@ -36,11 +36,11 @@ final class FriendsRequestsController extends AbstractController
         #[CurrentUser] User $currentUser,
         #[MapRequestPayload] FriendIdRequest $req
     ): JsonResponse {
-       try {
-        $this->sendFriendRequest->execute($currentUser->getId(), Uuid::fromString($req->friendId));
-       } catch (\Throwable $e) {
-        return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_NOT_FOUND);
-       } 
+        try {
+            $this->sendFriendRequest->execute($currentUser->getId(), Uuid::fromString($req->friendId));
+        } catch (\Throwable $e) {
+            return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_NOT_FOUND);
+        }
 
         return $this->json(['message' => 'Friend request sent'], JsonResponse::HTTP_OK);
     }
@@ -50,8 +50,8 @@ final class FriendsRequestsController extends AbstractController
     public function list(#[CurrentUser] User $currentUser, Request $request): JsonResponse
     {
         $typeStr = $request->query->get('type');
-        $page = min((int) $request->query->get('page', 1), 1);
-        $limit = min(max((int) $request->query->get('limit', 20), 1), 100);
+        $page = max((int) $request->query->get('page', 1), 1);
+        $limit = min(max((int) $request->query->get('limit', 20), 1), 50);
 
         if (!$typeStr) {
             return $this->json(['error' => 'Type query parameter is required'], JsonResponse::HTTP_BAD_REQUEST);

@@ -24,14 +24,13 @@ final class FriendsController extends AbstractController
     public function list(
         string $userId,
         Request $request,
-    ): JsonResponse
-    {
+    ): JsonResponse {
 
-        $page = min((int) $request->query->get('page', 1), 1);
+        $page = max((int) $request->query->get('page', 1), 1);
         $limit = min(max((int) $request->query->get('limit', 20), 1), 50);
         $previews = $this->listFriends->execute(Uuid::fromString($userId), $page, $limit);
-            
-        
+
+
         return $this->json($previews, JsonResponse::HTTP_OK);
     }
 

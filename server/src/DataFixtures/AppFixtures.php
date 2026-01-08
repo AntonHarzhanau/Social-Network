@@ -2,10 +2,9 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\Comment;
-use App\Entity\Post;
-use App\Entity\User;
-use App\Repository\UserRepository;
+use App\Modules\Comment\Domain\Entity\Comment;
+use App\Modules\Feed\Domain\Entity\Post;
+use App\Modules\User\Domain\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -22,21 +21,17 @@ class AppFixtures extends Fixture
         $conn = $manager->getConnection();
         $conn->executeStatement('TRUNCATE TABLE post, "user" CASCADE');
 
+        $anton = (new User())
+            ->setEmail('anton.harzhanau@gmail.com');
+        $anton->setUsername('Anton Harzhanau');
+        $anton->setPassword($this->passwordHasher->hashPassword($anton, '1234'));
+        $anton->setDateOfBirth(\DateTimeImmutable::createFromMutable(
+            new \DateTime('-29 years')
+        ));
+        $manager->persist($anton);
 
-        for ($i=0; $i < 5; $i++) { 
+        for ($i=0; $i < 30; $i++) { 
             $user = $this->createUser();
-            for ($j=0; $j < 10; $j++) { 
-                $post = $this->createPost();
-                $user->addPost($post);
-                $manager->persist($post);
-                
-                for ($k=0; $k < 3; $k++) { 
-                    $comment = $this->createComment();
-                    $post->addComment($comment);
-                    $comment->setAuthor($user);
-                    $manager->persist($comment);
-                }
-            }
             $manager->persist($user);
         }
 
@@ -48,7 +43,7 @@ class AppFixtures extends Fixture
         $faker = \Faker\Factory::create();
         $user = new User();
         $user->setEmail($faker->unique()->safeEmail());
-        $user->setUsername($faker->userName());
+        $user->setUsername($faker->firstName() . " " . $faker->lastName());
         $user->setPassword($this->passwordHasher->hashPassword($user, '1234'));
         $user->setDateOfBirth(\DateTimeImmutable::createFromMutable(
             $faker->dateTimeBetween('-30 years', '-18 years')
