@@ -1,5 +1,6 @@
 import { useInfinitePosts } from "@/entities/post/model/useInfinitePosts";
 import FeedCard from "../entities/post/ui/FeedCard";
+import { useInfiniteScrollSentinel } from "@/shared/hooks/useInfiniteScrollSentinel";
 
 const FeedsList = ({ authorId = null }: { authorId?: string | null }) => {
   const {
@@ -8,8 +9,16 @@ const FeedsList = ({ authorId = null }: { authorId?: string | null }) => {
     isError,
     hasNextPage,
     isFetchingNextPage,
-    loadMoreRef,
+    fetchNextPage,
   } = useInfinitePosts(10, authorId);
+
+    const sentinelRef = useInfiniteScrollSentinel({
+      enabled: !isLoading && !isError,
+      hasNextPage,
+      isFetchingNextPage,
+      fetchNextPage,
+    });
+  
 
   if (isLoading && posts.length === 0) {
     return Array.from({ length: 5 }).map((_, index) => (
@@ -32,8 +41,8 @@ const FeedsList = ({ authorId = null }: { authorId?: string | null }) => {
           Loding more...
         </div>
       )}
-
-      {hasNextPage && <div ref={loadMoreRef} className="h-4 w-full" />}
+      
+       <div ref={sentinelRef} className="h-10" />
     </div>
   );
 };

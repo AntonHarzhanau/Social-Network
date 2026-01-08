@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\User\Application\Action;
+namespace App\Modules\User\Application\Action\Auth;
 
 use App\Modules\User\Infrastructure\Persistence\Doctrine\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,7 +13,7 @@ final class ConfirmAccountRecoveryAction
         private readonly UriSigner $uriSigner,
     ) {}
 
-    public function __invoke(Request $request): void
+    public function execute(Request $request): void
     {
         if (!$this->uriSigner->checkRequest($request)) {
             throw new \InvalidArgumentException('Invalid signature.');

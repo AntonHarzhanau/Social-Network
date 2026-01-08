@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\User\Application\Action;
+namespace App\Modules\User\Application\Action\Auth;
 
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Domain\Event\UserRegistredEvent;
@@ -15,7 +15,7 @@ final class RegisterUserAction
         private PasswordHasher $passwordHasher,
     ) {}
 
-    public function __invoke(
+    public function execute(
         string $email,
         string $firstName,
         string $lastName,

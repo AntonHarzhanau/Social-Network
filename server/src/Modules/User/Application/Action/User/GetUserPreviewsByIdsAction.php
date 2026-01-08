@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\User\Application\Action;
+namespace App\Modules\User\Application\Action\User;
 
 use App\Modules\Media\Api\MediaApiInterface;
 use App\Modules\User\Contracts\DTO\UserPreviewDTO;
@@ -8,7 +8,7 @@ use App\Modules\User\Application\DTO\UserPreviewRowDTO;
 use App\Modules\User\Contracts\DTO\UserPreviewRowDTO as DTOUserPreviewRowDTO;
 use App\Modules\User\Domain\Repository\UserRepositoryInterface;
 
-final class FindUserPreviewsByIdsAction
+final class GetUserPreviewsByIdsAction
 {
     public function __construct(
         private readonly UserRepositoryInterface $users,

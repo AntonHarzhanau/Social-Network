@@ -17,7 +17,6 @@ const FriendsWidget = ({ userId }: FriendsWidgetProps) => {
         fetchFriends(userId).then(setFriends);
     }, [userId]);
 
-console.log(userId)
 
   return (
     <div>

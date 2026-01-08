@@ -5,6 +5,8 @@ import FriendListItem from "./FriendListItem";
 import { useFriendsFilterStore } from "./useFriendsFilterStore";
 import { usePeopleListInfinite } from "@/entities/friends/model/usePeopleListInfinite";
 import { useInfiniteScrollSentinel } from "@/shared/hooks/useInfiniteScrollSentinel";
+import { useState } from "react";
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 
 interface FriendsListProps {
   userId: string | undefined;
@@ -13,18 +15,21 @@ interface FriendsListProps {
 const FriendsList = ({ userId }: FriendsListProps) => {
   const filter = useFriendsFilterStore((state) => state.filter);
 
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search, 500);
+
   const {
-    data,
+    data: users,
     isLoading,
     isError,
     error,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    refetch,
-  } = usePeopleListInfinite(filter, userId, 10);
 
-  const users = data?.pages.flat() ?? [];
+    refetch,
+  } = usePeopleListInfinite(filter, userId, 10, debouncedSearch);
+
 
   const sentinelRef = useInfiniteScrollSentinel({
     enabled: !isLoading && !isError,
@@ -53,7 +58,7 @@ const FriendsList = ({ userId }: FriendsListProps) => {
         <Button className="ml-auto">Find Friends</Button>
       </div>
 
-      <SearchInput />
+      <SearchInput value={search} onChange={setSearch}/>
 
       {isLoading && <div className="p-4 text-sm text-muted-foreground">Loading...</div>}
 
@@ -71,7 +76,7 @@ const FriendsList = ({ userId }: FriendsListProps) => {
         <FriendListItem key={user.id} user={user} filter={filter} />
       ))}
 
-      {/* sentinel для infinite scroll */}
+    
       <div ref={sentinelRef} className="h-10" />
 
       {isFetchingNextPage && (

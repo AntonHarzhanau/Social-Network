@@ -42,40 +42,48 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /** @return array<User> */
-    public function findAllExcept(array $excludedUsers, ?int $page = null, ?int $limit = null): array
+    public function findAllExcept(array $excludedUsers, ?int $page = null, ?int $limit = null, ?string $query = null): array
     {
-        $queryBuilder = $this->createQueryBuilder('u')
+        $qb = $this->createQueryBuilder('u')
             ->where('u.id NOT IN (:excludedUsers)')
             ->andWhere('u.deletedAt IS NULL')
             ->setParameter('excludedUsers', $excludedUsers)
             ->orderBy('u.createdAt', 'DESC')
             ->addOrderBy('u.id', 'DESC');
 
+            if ($query !== null && $query !== '') {
+               $escaped = addcslashes($query, '%_\\');
+               $qb->andWhere('LOWER(u.username) LIKE :query')
+                    ->setParameter('query', '%' . mb_strtolower($escaped) . '%');
+            }
+
         if ($limit !== null && $page !== null) {
-            $queryBuilder->setMaxResults($limit)
+            $qb->setMaxResults($limit)
                 ->setFirstResult(($page - 1) * $limit);
         }
 
-        return $queryBuilder->getQuery()->getResult();
+
+
+        return $qb->getQuery()->getResult();
     }
 
     public function findByEmail(string $email): ?User
     {
-        $queryBuilder = $this->createQueryBuilder('u')
+        $qb = $this->createQueryBuilder('u')
             ->andWhere('u.email = :email')
             ->setParameter('email', $email)
             ->setMaxResults(1);
 
-        return $queryBuilder->getQuery()->getOneOrNullResult();
+        return $qb->getQuery()->getOneOrNullResult();
     }
 
     public function findByUsername(string $username): ?User
     {
-        $queryBuilder = $this->createQueryBuilder('u')
+        $qb = $this->createQueryBuilder('u')
             ->andWhere('u.username = :username')
             ->setParameter('username', $username)
             ->setMaxResults(1);
-        return $queryBuilder->getQuery()->getOneOrNullResult();
+        return $qb->getQuery()->getOneOrNullResult();
     }
 
     public function save(User $user, bool $flush = true): void
@@ -97,14 +105,14 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     /** @return array<UserPreviewDTO> */
     public function findPreviewsByIds(array $ids): array
     {
-        $queryBuilder = $this->createQueryBuilder('u')
+        $qb = $this->createQueryBuilder('u')
             ->select(sprintf('NEW %s(u.id, u.username, p.id, u.slug)', UserPreviewRowDTO::class))
             ->leftJoin('u.currentAvatar', 'ua')
             ->leftJoin('ua.preview', 'p')
             ->andWhere('u.id IN (:ids)')
             ->andWhere('u.deletedAt IS NULL')
             ->setParameter('ids', $ids);
-        $result = $queryBuilder->getQuery()->getResult();
+        $result = $qb->getQuery()->getResult();
         return $result;
     }
 

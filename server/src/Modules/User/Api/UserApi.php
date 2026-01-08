@@ -2,7 +2,7 @@
 
 namespace App\Modules\User\Api;
 
-use App\Modules\User\Application\Action\FindUserPreviewsByIdsAction;
+use App\Modules\User\Application\Action\User\GetUserPreviewsByIdsAction;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Domain\Repository\UserRepositoryInterface;
 
@@ -10,7 +10,7 @@ final class UserApi implements UserApiInterface
 {
     public function __construct(
         private readonly UserRepositoryInterface $userRepository,
-        private readonly FindUserPreviewsByIdsAction $findUserPreviewsByIdsAction,
+        private readonly GetUserPreviewsByIdsAction $findUserPreviewsByIdsAction,
     ) {}
 
     public function findById(string $id): ?User

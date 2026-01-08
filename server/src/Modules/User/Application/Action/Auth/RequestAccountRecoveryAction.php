@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\User\Application\Action;
+namespace App\Modules\User\Application\Action\Auth;
 
 use App\Modules\Shared\Application\Message\SendEmailMessage;
 use App\Modules\Shared\Application\Port\EmailSenderInterface;
@@ -17,7 +17,7 @@ final class RequestAccountRecoveryAction
         private readonly EmailSenderInterface $emailSender,
     ) {}
 
-    public function __invoke(string $email): void
+    public function execute(string $email): void
     {
         $email = mb_strtolower(trim($email));
         $user = $this->userRepository->findByEmail($email);

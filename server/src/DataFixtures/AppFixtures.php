@@ -31,23 +31,24 @@ class AppFixtures extends Fixture
         $manager->persist($anton);
 
         for ($i=0; $i < 30; $i++) { 
-            $user = $this->createUser();
+            $user = $this->createUser($i);
             $manager->persist($user);
         }
 
         $manager->flush();
     }
 
-    public function createUser(): User
+    public function createUser(int $i): User
     {
         $faker = \Faker\Factory::create();
         $user = new User();
-        $user->setEmail($faker->unique()->safeEmail());
-        $user->setUsername($faker->firstName() . " " . $faker->lastName());
+        $user->setEmail("user{$i}@mail.com");
+        $user->setUsername("User{$i}" . " " . $faker->lastName());
         $user->setPassword($this->passwordHasher->hashPassword($user, '1234'));
         $user->setDateOfBirth(\DateTimeImmutable::createFromMutable(
             $faker->dateTimeBetween('-30 years', '-18 years')
         ));
+        $user->setEmailVerifiedAt(new \DateTimeImmutable());
 
         return $user;
     }

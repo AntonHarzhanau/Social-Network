@@ -20,7 +20,7 @@ interface UserRepositoryInterface
     /**
      * @param array<Uuid> $excludedUsers
      * @return User[] */
-    public function findAllExcept(array $excludedUsers, ?int $page = null, ?int $limit = null): array;
+    public function findAllExcept(array $excludedUsers, ?int $page = null, ?int $limit = null, ?string $query = null): array;
 
     /** @return UserPreviewDTO[] */
     public function findPreviewsByIds(array $ids): array;

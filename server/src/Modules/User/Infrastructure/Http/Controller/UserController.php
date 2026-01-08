@@ -2,22 +2,23 @@
 
 namespace App\Modules\User\Infrastructure\Http\Controller;
 
-use App\Modules\User\Application\Action\DeleteAccountAction;
-use App\Modules\User\Application\Action\FindUserProfileAction;
-use App\Modules\User\Application\Action\FindUsersAction;
-use App\Modules\User\Application\Action\UpdateProfileAction;
-use App\Modules\User\Application\Action\UpdateUserAvatarAction;
+use App\Modules\User\Application\Action\User\DeleteAccountAction;
+use App\Modules\User\Application\Action\User\GetUserAvatarsAction;
+use App\Modules\User\Application\Action\User\GetUserProfileAction;
+use App\Modules\User\Application\Action\User\GetUsersAction;
+use App\Modules\User\Application\Action\User\UpdateProfileAction;
+use App\Modules\User\Application\Action\User\UpdateUserAvatarAction;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Domain\Exception\UserNotFoundException;
 use App\Modules\User\Infrastructure\Http\Request\UpdateAvatarRequest;
 use App\Modules\User\Infrastructure\Http\Request\UpdateProfileRequest;
-use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\Uid\Uuid;
 
 #[Route('/api/users')]
 final class UserController extends AbstractController
@@ -28,12 +29,14 @@ final class UserController extends AbstractController
     public function list(
         #[CurrentUser] ?User $user,
         Request $request,
-        FindUsersAction $action,
+        GetUsersAction $action,
     ): JsonResponse {
         $page = max((int) $request->query->get('page', 1), 1);
         $limit = min(max((int) $request->query->get('limit', 20), 1), 50);
-        
-        return $this->json($action($user, $page, $limit));
+        $username = trim((string) $request->query->get('username', ''));
+        $username = $username !== '' ? $username : null;
+
+        return $this->json($action->execute($user, $page, $limit, $username));
     }
 
     #[Route('/profile', methods: ['PUT'])]
@@ -43,12 +46,12 @@ final class UserController extends AbstractController
         UpdateProfileAction $action,
     ): JsonResponse {
         if (!$currentUser) return $this->json(['error' => 'Unauthorized'], 401);
-        $action(
+        $action->execute(
             $currentUser->getId(),
             $dto->username,
             $dto->location,
             $dto->bio,
-            $dto->coverUrl,
+            // $dto->coverUrl,
             $dto->maritalStatus
         );
 
@@ -59,11 +62,11 @@ final class UserController extends AbstractController
     public function getProfile(
         #[CurrentUser] ?User $currentUser,
         string $userId,
-        FindUserProfileAction $action,
+        GetUserProfileAction $action,
     ): JsonResponse {
 
         try {
-            $user = $action($userId);
+            $user = $action->execute($userId);
             return $this->json($user);
         } catch (UserNotFoundException $e) {
             return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_NOT_FOUND);
@@ -91,7 +94,21 @@ final class UserController extends AbstractController
     ): JsonResponse {
         if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
 
-        $action($user->getId());
+        $action->execute($user->getId());
         return $this->json(['ok' => true]);
+    }
+
+    #[Route('/{userId}/avatars', methods: ['GET'])]
+    public function getUserAvatars(
+        string $userId,
+        #[CurrentUser()] ?User $currentUser,
+        GetUserAvatarsAction $action,
+    ): JsonResponse {
+        try {
+            $avatars = $action->execute(Uuid::fromString($userId), $currentUser->getId());
+            return $this->json($avatars, JsonResponse::HTTP_OK);
+        } catch (UserNotFoundException $e) {
+            return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_NOT_FOUND);
+        }
     }
 }

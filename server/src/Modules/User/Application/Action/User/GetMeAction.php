@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\User\Application\Action;
+namespace App\Modules\User\Application\Action\User;
 
 use App\Modules\User\Application\Mapper\UserMapper;
 use App\Modules\User\Contracts\DTO\UserDetailsDTO;
@@ -14,7 +14,7 @@ final class GetMeAction
         private UserRepositoryInterface $userRepository,
     ) {}
     
-    public function __invoke(Uuid $userId): UserDetailsDTO
+    public function execute(Uuid $userId): UserDetailsDTO
     {   
         $user = $this->userRepository->findById($userId->toRfc4122());
         if ($user === null || $user->getDeletedAt() !== null) {

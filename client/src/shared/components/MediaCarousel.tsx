@@ -105,7 +105,10 @@ export default function MediaCarousel({
             aspectRatioByMediaId[mediaItem.id] ?? FALLBACK_ASPECT_RATIO;
 
           return (
-            <CarouselItem key={mediaItem.id} className="flex justify-center items-center p-0 rounded-none ">
+            <CarouselItem
+              key={mediaItem.id}
+              className="flex justify-center items-center p-0 rounded-none "
+            >
               <AspectRatio
                 ratio={aspectRatio}
                 className="flex bg-muted overflow-hidden"

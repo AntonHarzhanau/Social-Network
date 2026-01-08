@@ -2,12 +2,12 @@
 
 namespace App\Modules\User\Infrastructure\Http\Controller;
 
-use App\Modules\User\Application\Action\ConfirmAccountRecoveryAction;
-use App\Modules\User\Application\Action\GetMeAction;
-use App\Modules\User\Application\Action\RegisterUserAction;
-use App\Modules\User\Application\Action\RequestAccountRecoveryAction;
-use App\Modules\User\Application\Action\ResendEmailVerificationAction;
-use App\Modules\User\Application\Action\VerifyEmailAction;
+use App\Modules\User\Application\Action\Auth\ConfirmAccountRecoveryAction;
+use App\Modules\User\Application\Action\Auth\RegisterUserAction;
+use App\Modules\User\Application\Action\Auth\RequestAccountRecoveryAction;
+use App\Modules\User\Application\Action\Auth\ResendEmailVerificationAction;
+use App\Modules\User\Application\Action\Auth\VerifyEmailAction;
+use App\Modules\User\Application\Action\User\GetMeAction;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Infrastructure\Http\Request\RecoveryAccountRequest;
 use App\Modules\User\Infrastructure\Http\Request\RegisterRequest;
@@ -38,7 +38,7 @@ final class AuthController extends AbstractController
         $userAgent = $request->headers->get('User-Agent');
 
         try {
-            $event = $action(
+            $event = $action->execute(
                 $dto->email,
                 $dto->firstName,
                 $dto->lastName,
@@ -62,7 +62,7 @@ final class AuthController extends AbstractController
         Request $request,
     ): Response {
         try {
-            $action($request->query->get('token'));
+            $action->execute($request->query->get('token'));
             return $this->redirect($this->frontendBaseUrl . '?email-verify-status=ok');
         } catch (\Throwable $th) {
             return $this->redirect($this->frontendBaseUrl . '?email-verify-status=invalid');
@@ -81,7 +81,7 @@ final class AuthController extends AbstractController
         $email = json_decode($request->getContent(), true)['email'] ?? null;
         $userIp = $request->getClientIp();
         $userAgent = $request->headers->get('User-Agent');
-        $event = $action($email, $userIp, $userAgent);
+        $event = $action->execute($email, $userIp, $userAgent);
 
         $eventDispatcher->dispatch($event);
 
@@ -93,7 +93,7 @@ final class AuthController extends AbstractController
         #[CurrentUser] ?User $user,
         GetMeAction $action,
     ): JsonResponse {
-        return $this->json($action($user->getId()));
+        return $this->json($action->execute($user->getId()));
     }
 
     #[Route('/recovery/request', methods: ['POST'])]
@@ -101,7 +101,7 @@ final class AuthController extends AbstractController
         #[MapRequestPayload(validationFailedStatusCode: JsonResponse::HTTP_UNPROCESSABLE_ENTITY)] RecoveryAccountRequest $dto,
         RequestAccountRecoveryAction $action,
     ): JsonResponse {
-        $action($dto->email);
+        $action->execute($dto->email);
         return $this->json(['message' => 'A recovery request has been sent to the specified address.
 Check your email.'], JsonResponse::HTTP_ACCEPTED);
     }
@@ -112,7 +112,7 @@ Check your email.'], JsonResponse::HTTP_ACCEPTED);
         Request $request,
     ): Response {
         try {
-            $action($request);
+            $action->execute($request);
 
             return $this->redirect($this->frontendBaseUrl . '?restore-account-status=ok');
         } catch (\InvalidArgumentException $e) {

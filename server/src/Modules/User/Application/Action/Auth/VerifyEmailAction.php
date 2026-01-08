@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\User\Application\Action;
+namespace App\Modules\User\Application\Action\Auth;
 
 use App\Modules\User\Domain\Exception\EmailVerificationExpiredException;
 use App\Modules\User\Domain\Exception\EmailVerificationInvalidException;
@@ -14,7 +14,7 @@ final class VerifyEmailAction
         private UserRepositoryInterface $users,
     ) {}
 
-    public function __invoke(string $rawToken): void
+    public function execute(string $rawToken): void
     {
         $tokenHash = hash('sha256', $rawToken);
 

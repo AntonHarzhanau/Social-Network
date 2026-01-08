@@ -12,15 +12,31 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuthStore } from "@/features/auth/model/authStore";
+import MediaModal from "@/shared/components/MediaModal";
+import type { UserProfile } from "@/entities/user/model/types";
+import type { MediaResponse } from "@/shared/types/mediaResponseTypes";
+import { useUserProfile } from "@/entities/user/model/useUserProfile";
+import EditProfileForm from "@/entities/user/ui/EditProfileForm";
 
-const ProfileHeader = ({
-  name,
-  avatarUrl,
-}: {
-  name: string;
-  avatarUrl?: string | null;
-}) => {
+interface ProfileHeaderProps {
+  userId: string | undefined;
+}
+
+const ProfileHeader = ({ userId }: ProfileHeaderProps) => {
   const [open, setOpen] = useState(false);
+  const [mediaOpen, setMediaOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const user = useAuthStore((state) => state.user);
+
+  const {
+    data: userProfile,
+    isError,
+    error,
+    isLoading,
+  } = useUserProfile(userId);
+  console.log("userProfile:", userProfile);
 
   return (
     <div className="w-full  mx-auto rounded-2xl bg-secondary shadow overflow-hidden">
@@ -35,23 +51,37 @@ const ProfileHeader = ({
         </Button>
 
         <DropdownMenu>
-          <DropdownMenuTrigger
-            className="absolute left-4 sm:left-6 -bottom-4 translate-y-1/2 border-none focus:ring-0"
-          >
-              <UserAvatar
-                imageUrl={avatarUrl}
-                name={name}
-                className="
+          <DropdownMenuTrigger className="absolute left-4 sm:left-6 -bottom-4 translate-y-1/2 border-none focus:ring-0">
+            <UserAvatar
+              imageUrl={userProfile?.avatarUrl}
+              name={userProfile?.username || ""}
+              className="
               h-32 w-32 sm:h-36 sm:w-36
               rounded-full border-4 shadow-lg
               cursor-pointer
             "
-              />
+            />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem>Open photo</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setOpen(true)}>Upload photo</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">Delete photo</DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                if (!userId) return;
+                setMediaOpen(true);
+              }}
+            >
+              Open photo
+            </DropdownMenuItem>
+            {user?.id === userId && (
+              <>
+                <DropdownMenuItem onClick={() => setOpen(true)}>
+                  Upload photo
+                </DropdownMenuItem>
+                <DropdownMenuItem className="text-destructive">
+                  Delete photo
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -70,11 +100,11 @@ const ProfileHeader = ({
         <div className="flex flex-col w-full">
           <div className="flex justify-between items-center w-full">
             <h1 className="text-2xl font-bold text-secondary-foreground">
-              {name}
+              {userProfile?.username || ""}
             </h1>
-            <Button size="sm" className="">
-              Edit profile
-            </Button>
+            {user?.id === userId && (
+              <EditProfileForm profileData={userProfile} userId={userId} />
+            )}
           </div>
 
           <div className=" text-sm text-muted-foreground">
@@ -85,10 +115,12 @@ const ProfileHeader = ({
                   className="px-0"
                   style={{ paddingInline: 0 }}
                 >
-                  <div className="flex gap-1 items-center">
-                    <MapPin />
-                    Minsk
-                  </div>
+                  {userProfile?.location && (
+                    <div className="flex gap-1 items-center">
+                      <MapPin />
+                      {userProfile?.location}
+                    </div>
+                  )}
                 </Button>
               </Link>
 
@@ -123,16 +155,47 @@ const ProfileHeader = ({
         open={open}
         onOpenChange={setOpen}
         onSaved={async ({ original, preview }) => {
+          if (!userId) return;
+
           const originalRes = await uploadMedia(original);
           const previewRes = await uploadMedia(preview);
 
-          console.log("Uploading avatar with ids:", {
-            originalRes,
-            previewRes,
-          });
           await uploadAvatar(originalRes.id, previewRes.id);
+
+          // 1) моментально обновить аватар в профиле
+          queryClient.setQueryData<UserProfile>(
+            ["userProfile", userId],
+            (old) => (old ? { ...old, avatarUrl: previewRes.url } : old),
+          );
+
+          // 2) моментально обновить список аватарок (если он уже загружен)
+          queryClient.setQueryData<MediaResponse[]>(
+            ["userAvatars", userId],
+            (old) => (old ? [previewRes, ...old] : old),
+          );
+
+          // 3) на всякий случай синхронизироваться с сервером
+          await Promise.all([
+            queryClient.invalidateQueries({
+              queryKey: ["userProfile", userId],
+            }),
+            queryClient.invalidateQueries({
+              queryKey: ["userAvatars", userId],
+            }),
+
+            useAuthStore.getState().checkAuth(),
+          ]);
+
+          setOpen(false);
         }}
       />
+      {userId && (
+        <MediaModal
+          userId={userId}
+          open={mediaOpen}
+          onOpenChange={setMediaOpen}
+        />
+      )}
     </div>
   );
 };
