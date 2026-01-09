@@ -108,11 +108,6 @@ export function MediaAssetModal({
 
               {/* Bottom control panel: 48px */}
               <div className="h-12 shrink-0 border-t border-white/10 bg-zinc-950/40 flex items-center justify-between px-4">
-                {/* <div className="text-sm text-zinc-300">
-                  {medias.length > 0
-                    ? `Фото • ${ + 1} из ${medias.length}`
-                    : ""}
-                </div> */}
 
                 <div className="flex items-center gap-2">
                   <Button

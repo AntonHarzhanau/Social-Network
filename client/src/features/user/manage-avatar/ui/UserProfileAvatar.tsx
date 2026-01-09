@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUserAvatar } from "../model/useUserAvatar";
 import {
   DropdownMenu,
@@ -8,7 +8,6 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 import { UserAvatar } from "@/shared/components/UserAvatar";
 import { AvatarCropDialog } from "@/widgets/AvatarCropDialog";
-import MediaModal from "@/shared/components/MediaModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +18,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
+import { MediaAssetModal } from "@/shared/components/MediaAssetModal";
+import { fetchUserAvatars } from "@/entities/user/api/userApi";
+import type { MediaResponse } from "@/entities/media/model/mediaResponseTypes";
 
 interface UserProfileAvatarProps {
   userId?: string;
@@ -36,8 +38,22 @@ const UserProfileAvatar = ({
   const [cropOpen, setCropOpen] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-
+    const [avatars, setAvatars] = useState<MediaResponse[]>([]);
   const { uploadNewAvatar, deleteAvatar } = useUserAvatar(userId);
+
+useEffect(() => {
+    const loadAvatars = async () => {
+      if (!userId) return;
+      try {
+        const fetchedAvatars = await fetchUserAvatars(userId);
+        setAvatars(fetchedAvatars);
+      } catch (error) {
+        console.error("Error fetching user avatars:", error);
+      }
+    };
+
+    loadAvatars();
+  }, [userId, avatarUrl]);
 
   return (
     <>
@@ -100,10 +116,16 @@ const UserProfileAvatar = ({
       />
 
       {userId && (
-        <MediaModal
-          userId={userId}
+        <MediaAssetModal
           open={galleryOpen}
           onOpenChange={setGalleryOpen}
+          author={{
+            id: userId,
+            username: username || "",
+            avatarUrl: avatarUrl || undefined,
+          }}
+          medias={avatars}
+          initialIndex={0}
         />
       )}
 
