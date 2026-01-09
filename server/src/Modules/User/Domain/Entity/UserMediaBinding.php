@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Modules\Media\Domain\Entity;
+namespace App\Modules\User\Domain\Entity;
 
-use App\Modules\User\Domain\Entity\User;
+use App\Modules\Media\Domain\Entity\MediaAsset;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;

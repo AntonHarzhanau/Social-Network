@@ -1,6 +1,6 @@
 import FriendsWidget from "@/widgets/Profile/FriendsWidget";
 import ProfileColumn from "@/widgets/Profile/ProfileColumn";
-import ProfileHeader from "@/widgets/Profile/ProfileHeader";
+import UserProfileHeader from "@/widgets/Profile/UserProfileHeader";
 import { useParams } from "react-router-dom";
 
 const ProfilePage = () => {
@@ -8,7 +8,7 @@ const ProfilePage = () => {
 
   return (
     <div>
-      <ProfileHeader userId={userId} />
+      <UserProfileHeader userId={userId} />
       <div className="flex gap-2 mt-4">
         <section className="flex flex-col flex-5 gap-2">
           <ProfileColumn userId={userId} />

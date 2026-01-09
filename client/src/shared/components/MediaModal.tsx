@@ -1,7 +1,7 @@
-import MediaCarousel from "./MediaCarousel";
+import MediaCarousel from "./PostMediaCarousel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { useQuery } from "@tanstack/react-query";
-import type { MediaResponse } from "../types/mediaResponseTypes";
+import type { MediaResponse } from "../../entities/media/model/mediaResponseTypes";
 import { fetchUserAvatars } from "@/entities/user/api/userApi";
 
 interface MediaModalProps {

@@ -16,12 +16,17 @@ final class UpdateUserAvatarAction
         private MediaAssetRepositoryInterface $mediaAssets,
     ) {}
 
-    public function execute(Uuid $userId, string $originalFileId, string $previewFileId): void
+    public function execute(Uuid $userId, ?string $originalFileId, ?string $previewFileId): void
     {
 
         $user = $this->users->findById($userId->toRfc4122());
         if ($user === null) {
             throw new \RuntimeException('User not found.');
+        }
+        if ($originalFileId === null || $previewFileId === null) {
+            $user->setCurrentAvatar(null);
+            $this->users->save($user);
+            return;
         }
 
         $originaliFile = $this->mediaAssets->findById(Uuid::fromString($originalFileId));

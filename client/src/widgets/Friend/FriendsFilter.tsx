@@ -1,6 +1,6 @@
 import { Button } from "../../shared/components/ui/button";
 import { Card } from "../../shared/components/ui/card";
-import { useFriendsFilterStore } from "./useFriendsFilterStore";
+import { useFriendsFilterStore } from "../../entities/friends/model/useFriendsFilterStore";
 
 
 const FriendsFilter = () => {

@@ -7,9 +7,9 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/shared/components/ui/carousel";
+import type { MediaResponse } from "@/entities/media/model/mediaResponseTypes";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "../lib/utils";
-import type { MediaResponse } from "@/entities/media/model/mediaResponseTypes";
 
 interface FeedCardMediaProps {
   medias: MediaResponse[] | null;

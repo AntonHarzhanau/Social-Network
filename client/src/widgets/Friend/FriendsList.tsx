@@ -1,8 +1,8 @@
 import SearchInput from "@/shared/components/SearchInput";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
-import FriendListItem from "./FriendListItem";
-import { useFriendsFilterStore } from "./useFriendsFilterStore";
+import FriendListItem from "../../entities/friends/ui/FriendListItem";
+import { useFriendsFilterStore } from "../../entities/friends/model/useFriendsFilterStore";
 import { usePeopleListInfinite } from "@/entities/friends/model/usePeopleListInfinite";
 import { useInfiniteScrollSentinel } from "@/shared/hooks/useInfiniteScrollSentinel";
 import { useState } from "react";

@@ -6,9 +6,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 final class UpdateAvatarRequest
 {
-    // null = удалить аватар
+    // null = delete avatar 
 
-    public string $originalFileId;
+    public ?string $originalFileId = null;
     
-    public string $previewFileId;
+    public ?string $previewFileId = null;
 }

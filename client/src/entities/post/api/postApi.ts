@@ -1,4 +1,4 @@
-import type { MediaResponse } from "@/shared/types/mediaResponseTypes";
+import type { MediaResponse } from "@/entities/media/model/mediaResponseTypes";
 import { apiClient } from "@/shared/api/apiClient";
 
 export const VISIBILITY_VALUES = {

@@ -1,5 +1,5 @@
 
-import { UPLOADING_STATUS, type MediaItem } from "@/shared/types/uploadMediaTypes";
+import { UPLOADING_STATUS, type MediaItem } from "@/entities/media/model/uploadMediaTypes";
 import { AlertCircle, CheckCircle2, Loader2, X } from "lucide-react";
 
 interface PostMediaPreviewProps {

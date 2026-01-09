@@ -1,6 +1,6 @@
 import { apiClient } from "@/shared/api/apiClient";
 import type { UserPreview, UserProfile } from "@/entities/user/model/types";
-import type { MediaResponse } from "@/shared/types/mediaResponseTypes";
+import type { MediaResponse } from "@/entities/media/model/mediaResponseTypes";
 
 export const fetchUsers = async (
   page = 1,
@@ -24,8 +24,8 @@ export const fetchUserProfile = async (
 };
 
 export const uploadAvatar = async (
-  originalId: string,
-  previewId: string,
+  originalId?: string | null,
+  previewId?: string | null,
 ): Promise<void> => {
   console.log("uploadAvatar called with:", { originalId, previewId });
   await apiClient.post("/users/avatar", {

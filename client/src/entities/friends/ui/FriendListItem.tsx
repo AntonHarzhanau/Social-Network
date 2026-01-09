@@ -1,6 +1,6 @@
 import { Item, ItemMedia } from "@/shared/components/ui/item";
 import { UserAvatar } from "@/shared/components/UserAvatar";
-import NewMessageDialog from "../NewMessageDialog";
+import NewMessageDialog from "../../../widgets/NewMessageDialog";
 import { Link } from "react-router-dom";
 import type { UserPreview } from "@/entities/user/model/types";
 import { Button } from "@/shared/components/ui/button";

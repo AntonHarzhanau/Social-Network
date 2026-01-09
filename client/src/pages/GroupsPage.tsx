@@ -12,23 +12,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shared/components/ui/dialog";
-import { Input } from "@/shared/components/ui/input";
 import { Item } from "@/shared/components/ui/item";
-import { Label } from "@/shared/components/ui/label";
 import { UserAvatar } from "@/shared/components/UserAvatar";
-import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useGroups } from "@/entities/group/model/useGroups";
 
-type GroupResponse = {
-  id: string;
-  name: string;
-  slug?: string | undefined | null;
-  avatarUrl?: string | undefined | null;
-  subscribersCount: number;
-};
+
 
 const GroupsPage = () => {
   return (
@@ -43,22 +35,15 @@ export default GroupsPage;
 export const Component = GroupsPage;
 
 const PageContent = () => {
-  const [group, setGroups] = useState<GroupResponse[]>([]);
-  const fetchGroups = async () => {
-    apiClient.get<GroupResponse[]>("/groups").then((response) => {
-      setGroups(response.data);
-    });
-  };
-
-  useEffect(() => {
-    fetchGroups();
-  }, []);
+  const {
+    groups
+  } = useGroups();
 
   return (
     <div className="flex flex-col">
       Groups Page
       <div className="mt-4 flex flex-col gap-2">
-        {group.map((group) => (
+        {groups.map((group) => (
           <Link key={group.id} to={`/group/${group.id}`}>
             <Item variant="outline">
               <UserAvatar
