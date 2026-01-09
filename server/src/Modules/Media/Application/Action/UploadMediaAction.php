@@ -2,6 +2,7 @@
 
 namespace App\Modules\Media\Application\Action;
 
+use App\Modules\Media\Application\Port\MediaMetadataExtractorInterface;
 use App\Modules\Media\Application\Port\MediaStorageInterface;
 use App\Modules\Media\Application\Service\FileTypeDetector;
 use App\Modules\Media\Domain\Entity\MediaAsset;
@@ -17,6 +18,7 @@ final class UploadMediaAction
         private readonly MediaStorageInterface $storage,
         private readonly FileTypeDetector $fileTypeDetector,
         private readonly UserApiInterface $userApi,
+        private readonly MediaMetadataExtractorInterface $metadataExtractor,
     ) {}
 
     public function __invoke(UploadedFile $file, Uuid $ownerId): MediaAsset
@@ -27,20 +29,27 @@ final class UploadMediaAction
         $size = $file->getSize() ?? 0;
         $mime = $file->getMimeType() ?? 'application/octet-stream';
 
+        $fileType = $this->fileTypeDetector->detect($mime);
+
+        $localPath = $file->getPathname(); // временный файл на диске
+        $meta = $this->metadataExtractor->extract($localPath, $fileType, $mime);
+
         $subdir = $now->format('Y/m/d');
         $uuid = Uuid::v4()->toRfc4122();
         $extension = $file->guessExtension() ?? 'bin';
 
         $storageKey = sprintf('%s/%s.%s', $subdir, $uuid, $extension);
-        
 
         $media = (new MediaAsset())
             ->setOwner($owner)
             ->setStorageKey($storageKey)
             ->setMimeType($mime)
             ->setSizeByte($size)
-            ->setFileType($this->fileTypeDetector->detect($mime))
-            ->setCreatedAt($now);
+            ->setFileType($fileType)
+            ->setCreatedAt($now)
+            ->setWidth($meta->width)
+            ->setHeight($meta->height)
+            ->setDurationSeconds($meta->durationSeconds);
 
         try {
             $this->storage->store($file, $storageKey, $mime);
@@ -49,7 +58,6 @@ final class UploadMediaAction
             try {
                 $this->storage->delete($storageKey);
             } catch (\Throwable) {
-                // Ignore cleanup failur
             }
             throw $e;
         }

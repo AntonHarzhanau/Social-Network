@@ -9,5 +9,8 @@ final class MediaItemDTO
         public readonly string $url,
         public readonly string $type,
         public readonly \DateTimeImmutable $createdAt,
+        public readonly ?int $width = null,
+        public readonly ?int $height = null,
+        public readonly ?float $durationSeconds = null,
     ) {}
 }

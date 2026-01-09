@@ -47,6 +47,9 @@ final class MediaController extends AbstractController
             'sizeByte' => $media->getSizeByte(),
             'url' => ($this->getMediaUrl)($media),
             'createdAt' => $media->getCreatedAt()->format(\DateTime::ATOM),
+            'width' => $media->getWidth(),
+            'height' => $media->getHeight(),
+            'durationSeconds' => $media->getDurationSeconds(),
         ], JsonResponse::HTTP_CREATED);
     }
 
@@ -58,17 +61,7 @@ final class MediaController extends AbstractController
 
         $items = ($this->listMyMedia)($user->getId(), $limit, $offset);
 
-        $data = array_map(function (MediaAsset $media) {
-            return [
-                'id' => $media->getId()->toRfc4122(),
-                'fileType' => $media->getFileType()?->value,
-                'mimeType' => $media->getMimeType(),
-                'sizeByte' => $media->getSizeByte(),
-                'url' => ($this->getMediaUrl)($media),
-                'createdAt' => $media->getCreatedAt()->format(\DateTime::ATOM),
-            ];
-        }, $items);
-        return $this->json($data, JsonResponse::HTTP_OK);
+        return $this->json($items, JsonResponse::HTTP_OK);
     }
 
 

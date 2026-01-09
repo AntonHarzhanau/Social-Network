@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -9,28 +10,30 @@ import ExpandableDescription from "@/shared/components/ExpandableDescription";
 import { formatPostDate } from "@/shared/lib/date";
 import FeedCardHeader from "@/entities/post/ui/FeedCardHeader";
 import FeedCardActions from "./FeedCardActions";
-import { MediaCarousel } from "@/shared/components/MediaCarousel";
-import { useMemo, useState } from "react";
+import MediaCarousel from "../../../shared/components/MediaCarousel";
 import { MediaAssetModal } from "@/shared/components/MediaAssetModal";
-import { Button } from "@/shared/components/ui/button";
+import type { MediaResponse } from "@/entities/media/model/mediaResponseTypes";
+import { AspectRatio } from "@/shared/components/ui/aspect-ratio";
 
 interface FeedCardProps {
   post: Post;
 }
 
 const FeedCard = ({ post }: FeedCardProps) => {
-  const authorName = post.author.username;
-  const [mediaOpen, setMediaOpen] = useState(false);
+  const [isMediaOpen, setIsMediaOpen] = useState(false);
   const [initialIndex, setInitialIndex] = useState(0);
-  const medias = post.media ?? [];
+
+  const authorName = post.author.username;
+
+  const medias = post.media as MediaResponse[] | null;
 
   const author = useMemo(
     () => ({
       id: post.author.id,
       username: post.author.username,
-      avatarUrl: post.author.avatarUrl,
+      avatarUrl: post.author.avatarUrl ?? null,
     }),
-    [post.author],
+    [post.author.id, post.author.username, post.author.avatarUrl],
   );
 
   return (
@@ -45,23 +48,22 @@ const FeedCard = ({ post }: FeedCardProps) => {
 
         <CardContent className="w-full px-2">
           <MediaCarousel
-            items={post.media}
-            toAsset={(m) => ({
-              id: m.id,
-              url: m.url,
-              type: m.fileType === "video" ? "video" : "image",
-            })}
-            onItemClick={(_, idx) => {
-              setInitialIndex(idx);
-              setMediaOpen(true);
+            layout="feed"
+            medias={medias}
+            onItemClick={(_, index) => {
+              setInitialIndex(index);
+              setIsMediaOpen(true);
             }}
+            className="w-full"
           />
+
           <CardDescription className="whitespace-pre-wrap break-all wrap-anywhere min-w-0 max-w-full text-sm mt-2">
             {post.content && (
               <ExpandableDescription content={post.content} limit={200} />
             )}
           </CardDescription>
         </CardContent>
+
         <CardFooter className="flex items-center">
           <FeedCardActions
             postId={post.id}
@@ -70,33 +72,16 @@ const FeedCard = ({ post }: FeedCardProps) => {
             isLikedByCurrentUser={post.isLikedByCurrentUser}
           />
         </CardFooter>
-        {/* Модалка медиа ассета */}
       </Card>
 
-      {medias.length > 0 && (
+      {/* MODAL */}
+      {medias && medias.length > 0 && (
         <MediaAssetModal
-          open={mediaOpen}
-          onOpenChange={setMediaOpen}
+          open={isMediaOpen}
+          onOpenChange={setIsMediaOpen}
           author={author}
           medias={medias}
           initialIndex={initialIndex}
-          title={post.content?.slice(0, 60) || undefined}
-          renderBottomActions={({ activeMedia }) => (
-            <>
-              <Button
-                variant="secondary"
-                onClick={() => console.log("save", activeMedia.id)}
-              >
-                Сохранить себе
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => console.log("share", activeMedia.id)}
-              >
-                Поделиться
-              </Button>
-            </>
-          )}
         />
       )}
     </>

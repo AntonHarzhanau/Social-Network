@@ -28,6 +28,9 @@ final class PostMediaUrlAction
                 url: ($this->getMediaUrl)($binding->getMedia()),
                 type: $binding->getMedia()->getFileType()->value,
                 createdAt: $binding->getMedia()->getCreatedAt(),
+                width: $binding->getMedia()->getWidth(),
+                height: $binding->getMedia()->getHeight(),
+                durationSeconds: $binding->getMedia()->getDurationSeconds(),
            );
         }
 

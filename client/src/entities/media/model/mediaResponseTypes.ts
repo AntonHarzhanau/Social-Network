@@ -5,4 +5,7 @@ export interface MediaResponse {
   fileType: FileType;
   url: string;
   createdAt: string;
+  width?: number | null;
+  height?: number | null;
+  durationSeconds?: number | null;
 }

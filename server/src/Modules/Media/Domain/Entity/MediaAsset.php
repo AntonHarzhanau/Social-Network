@@ -40,6 +40,15 @@ class MediaAsset
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $deletedAt = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $width = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $height = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $durationSeconds = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -131,6 +140,36 @@ class MediaAsset
     {
         $this->deletedAt = $deletedAt;
 
+        return $this;
+    }
+
+    public function getWidth(): ?int
+    {
+        return $this->width;
+    }
+    public function setWidth(?int $width): static
+    {
+        $this->width = $width;
+        return $this;
+    }
+
+    public function getHeight(): ?int
+    {
+        return $this->height;
+    }
+    public function setHeight(?int $height): static
+    {
+        $this->height = $height;
+        return $this;
+    }
+
+    public function getDurationSeconds(): ?float
+    {
+        return $this->durationSeconds;
+    }
+    public function setDurationSeconds(?float $durationSeconds): static
+    {
+        $this->durationSeconds = $durationSeconds;
         return $this;
     }
 }
