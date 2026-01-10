@@ -1,16 +1,15 @@
 import { PlusCircleIcon } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import MediaBoxImageItem from "./MediaBoxImageItem";
 import { useEffect, useState } from "react";
 import { fetchUserAvatars } from "@/entities/user/api/userApi";
 import { sessionUser } from "@/entities/session/model/sessionStore";
-import { MediaAssetModal } from "@/widgets/media-modal/MediaAssetModal";
 import type { MediaResponse } from "@/entities/media/model/types";
+import { useMediaViewerStore } from "@/features/media/viewer/useMediaViewerStore";
+import MediaBoxImageItem from "./MediaBoxImageItem";
 
 const MediaBoxImageList = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const user = sessionUser();
+  const openViewer = useMediaViewerStore((s) => s.openViewer);
   const [avatars, setAvatars] = useState<MediaResponse[]>([]);
   useEffect(() => {
     const loadAvatars = async () => {
@@ -31,20 +30,17 @@ const MediaBoxImageList = () => {
         <div className="p-2 w-full">
           <div className="grid grid-cols-3 gap-1 rounded-2xl overflow-hidden">
             {avatars?.map((avatar) => (
-              //   <MediaBoxImageItem key={avatar.id} media={avatar} />
-              <div className="aspect-square bg-amber-800">
-                <img
-                  src={avatar?.url}
-                  alt=""
-                  loading="lazy"
-                  draggable={false}
-                  className="w-full h-full object-cover"
-                  onClick={() => {
-                    setSelectedIndex(avatars.indexOf(avatar));
-                    setIsModalOpen(true);
-                  }}
-                />
-              </div>
+              <MediaBoxImageItem
+                key={avatar.id}
+                media={avatar}
+                onClick={() =>
+                  openViewer({
+                    author: user,
+                    medias: avatars,
+                    initialIndex: avatars.findIndex((a) => a.id === avatar.id),
+                  })
+                }
+              />
             ))}
           </div>
         </div>
@@ -57,19 +53,6 @@ const MediaBoxImageList = () => {
         </Button>
         <Button className="flex-1">All photos</Button>
       </div>
-      {avatars?.length > 0 && (
-        <MediaAssetModal
-          open={isModalOpen}
-          onOpenChange={setIsModalOpen}
-          author={{
-            id: user?.id || "",
-            username: user?.username || "",
-            avatarUrl: user?.avatarUrl || undefined,
-          }}
-          medias={avatars}
-          initialIndex={selectedIndex}
-        />
-      )}
     </div>
   );
 };

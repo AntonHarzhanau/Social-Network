@@ -11,10 +11,12 @@ function safeRedirectTo(value: string | null): string | null {
 }
 
 export async function guestLoader({ request }: LoaderFunctionArgs) {
+  const { user, status } = sessionStore.getState();
+  if (user && status === "ready") return null;
   await authActions.checkAuth();
 
-  const { user, status } = sessionStore.getState();
-  const isAuth = !!user && status === "ready";
+  const st = sessionStore.getState();
+  const isAuth = !!st.user && st.status === "ready";
   if (!isAuth) return null;
 
   const url = new URL(request.url);

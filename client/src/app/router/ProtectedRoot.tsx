@@ -11,7 +11,7 @@ import AuthEventBridge from "./AuthEventBridge";
 const ProtectedRoot = () => {
   const status = sessionStatus();
   const isAuth = isAuthenticated();
-  if (status === "loading") {
+  if (status === "loading" ) {
     return <FullScreenLoader />;
   }
   if (!isAuth) {

@@ -18,9 +18,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
-import { MediaAssetModal } from "@/widgets/media-modal/MediaAssetModal";
 import { fetchUserAvatars } from "@/entities/user/api/userApi";
 import type { MediaResponse } from "@/entities/media/model/types";
+import { useMediaViewerStore } from "@/features/media/viewer/useMediaViewerStore";
 
 interface UserProfileAvatarProps {
   userId?: string;
@@ -36,9 +36,9 @@ const UserProfileAvatar = ({
   isOwner,
 }: UserProfileAvatarProps) => {
   const [cropOpen, setCropOpen] = useState(false);
-  const [galleryOpen, setGalleryOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
     const [avatars, setAvatars] = useState<MediaResponse[]>([]);
+    const openViewer = useMediaViewerStore((s) => s.openViewer);
   const { uploadNewAvatar, deleteAvatar } = useUserAvatar(userId);
 
 useEffect(() => {
@@ -75,7 +75,15 @@ useEffect(() => {
             onSelect={(e) => {
               e.preventDefault();
               if (!userId) return;
-              setGalleryOpen(true);
+              openViewer({
+                author: {
+                    id: userId,
+                    username: username || "",
+                    avatarUrl: avatarUrl || undefined,
+                },
+                medias: avatars ?? [],
+                initialIndex: 0,
+              })
             }}
           >
             Open photo
@@ -115,20 +123,7 @@ useEffect(() => {
         }}
       />
 
-      {userId && (
-        <MediaAssetModal
-          open={galleryOpen}
-          onOpenChange={setGalleryOpen}
-          author={{
-            id: userId,
-            username: username || "",
-            avatarUrl: avatarUrl || undefined,
-          }}
-          medias={avatars}
-          initialIndex={0}
-        />
-      )}
-
+ 
       {/* Подтверждение удаления */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>

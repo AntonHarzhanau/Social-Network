@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+
 import {
   Card,
   CardContent,
@@ -10,30 +10,16 @@ import { formatPostDate } from "@/shared/lib/date";
 import FeedCardHeader from "@/entities/post/ui/FeedCardHeader";
 import FeedCardActions from "./FeedCardActions";
 import MediaCarousel from "../../media/ui/MediaCarousel";
-import { MediaAssetModal } from "@/widgets/media-modal/MediaAssetModal";
-import type { MediaResponse } from "@/entities/media/model/types";
 import type { Post } from "../model/types";
+import { useMediaViewerStore } from "@/features/media/viewer/useMediaViewerStore";
 
 interface FeedCardProps {
   post: Post;
 }
 
 const FeedCard = ({ post }: FeedCardProps) => {
-  const [isMediaOpen, setIsMediaOpen] = useState(false);
-  const [initialIndex, setInitialIndex] = useState(0);
-
+    const openViewer = useMediaViewerStore((s) => s.openViewer);
   const authorName = post.author.username;
-
-  const medias = post.media as MediaResponse[] | null;
-
-  const author = useMemo(
-    () => ({
-      id: post.author.id,
-      username: post.author.username,
-      avatarUrl: post.author.avatarUrl ?? null,
-    }),
-    [post.author.id, post.author.username, post.author.avatarUrl],
-  );
 
   return (
     <>
@@ -48,10 +34,13 @@ const FeedCard = ({ post }: FeedCardProps) => {
         <CardContent className="w-full px-2">
           <MediaCarousel
             layout="feed"
-            medias={medias}
+            medias={post.media}
             onItemClick={(_, index) => {
-              setInitialIndex(index);
-              setIsMediaOpen(true);
+              openViewer({
+                author: post.author,
+                medias: post.media ?? [],
+                initialIndex: index,
+              });
             }}
             className="w-full"
           />
@@ -72,17 +61,6 @@ const FeedCard = ({ post }: FeedCardProps) => {
           />
         </CardFooter>
       </Card>
-
-      {/* MODAL */}
-      {medias && medias.length > 0 && (
-        <MediaAssetModal
-          open={isMediaOpen}
-          onOpenChange={setIsMediaOpen}
-          author={author}
-          medias={medias}
-          initialIndex={initialIndex}
-        />
-      )}
     </>
   );
 };
