@@ -1,17 +1,17 @@
 import { Card, CardAction, CardContent } from "@/shared/components/ui/card";
 import { UserAvatar } from "@/shared/components/UserAvatar";
-import { useAuthStore } from "@/features/auth/model/authStore";
 import MessageList from "@/entities/message/ui/MessageList/MessageList";
 import { useChatMessages } from "@/entities/chat/model/useChatMessages";
 import NewMessageForm from "@/entities/message/ui/NewMessageForm";
 import { useOpenChatsStore } from "@/entities/chat/model/openChatsStore";
+import { sessionUser } from "@/entities/session/model/sessionStore";
 
 interface MessagesPageProps {
   chatId: string;
 }
 
 const Chat = ({ chatId }: MessagesPageProps) => {
-  const currentUserId = useAuthStore((state) => state.user?.id);
+  const currentUserId = sessionUser()?.id;
     const chat = useOpenChatsStore((s) =>
     s.openChats.find((c) => c.id === chatId),
   );

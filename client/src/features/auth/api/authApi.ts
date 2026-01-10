@@ -1,8 +1,8 @@
 import { apiClient } from "@/shared/api/apiClient";
-import type { RegisterApiPayload } from "../model/registerApiSchema";
+import type { RegisterApiPayload } from "@/features/auth/model/registerApiSchema";
 import type { UserPreview } from "@/entities/user/model/types";
 
-export const AuthApi = {
+export const authApi = {
   login(email: string, password: string) {
     return apiClient.post<{ token: string }>("/auth/login", {
       email,
@@ -15,9 +15,6 @@ export const AuthApi = {
   },
   logout() {
     return apiClient.post("/auth/logout");
-  },
-  refresh() {
-    return apiClient.post<{ token: string }>("/auth/refresh");
   },
   me() {
     const response = apiClient.get<UserPreview>("/auth/me");

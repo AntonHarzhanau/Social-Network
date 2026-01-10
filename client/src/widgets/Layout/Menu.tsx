@@ -1,4 +1,4 @@
-import type { Me } from "@/features/auth/api/authApi";
+import type { UserPreview } from "@/entities/user/model/types";
 import { Button } from "@/shared/components/ui/button";
 import { MAIN_MENU } from "@/shared/constants/menu";
 import { ROUTES } from "@/shared/constants/routes";
@@ -7,7 +7,7 @@ import { User } from "lucide-react";
 import { href, Link } from "react-router-dom";
 
 interface MenuProps {
-  user?: Me | null;
+  user?: UserPreview | null;
   className?: string;
 }
 const Menu = ({ user, className }: MenuProps) => {

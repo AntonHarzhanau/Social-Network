@@ -1,4 +1,4 @@
-import { VISIBILITY_VALUES } from "@/entities/post/api/postApi";
+import { VISIBILITY_VALUES } from "@/entities/post/model/types";
 import { Field, FieldError } from "@/shared/components/ui/field";
 import {
   Select,
@@ -36,7 +36,6 @@ const VisibilitySelector = <TFieldValues extends FieldValues>({
             <SelectContent>
               <SelectItem value={VISIBILITY_VALUES.PUBLIC}>Public</SelectItem>
               <SelectItem value={VISIBILITY_VALUES.FRIENDS}>Friends</SelectItem>
-              <SelectItem value={VISIBILITY_VALUES.GROUP}>Group</SelectItem>
               <SelectItem value={VISIBILITY_VALUES.PRIVATE}>Private</SelectItem>
             </SelectContent>
           </Select>

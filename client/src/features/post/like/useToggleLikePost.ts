@@ -5,11 +5,10 @@ import {
 } from "@tanstack/react-query";
 import {
   toggleLikePost,
-  type Post,
-  type ToggleLikeResponse,
 } from "@/entities/post/api/postApi";
 import { postKeys } from "@/entities/post/model/queryKeys";
 import { patchPostInInfinite } from "@/entities/post/model/patchPostInfinite";
+import type { Post, ToggleLikeResponse } from "@/entities/post/model/types";
 
 
 export const useToggleLikePost = () => {

@@ -2,7 +2,6 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { createPostSchema, type CreatePostFormValues } from "../model/schema";
-import { VISIBILITY_VALUES } from "@/entities/post/api/postApi";
 import DnDZone from "./DnDZone";
 import { PostMediaPreview } from "./PostMediaPreview";
 import VisibilitySelector from "./VisibilitySelector";
@@ -11,6 +10,7 @@ import { toast } from "sonner";
 import { useCreatePost } from "@/features/post/create/model/useCreatePost";
 import { Button } from "@/shared/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/shared/components/ui/field";
+import { VISIBILITY_VALUES } from "@/entities/post/model/types";
 
 interface CreatePostFormProps {
   onSuccess?: () => void;

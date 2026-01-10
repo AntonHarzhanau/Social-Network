@@ -1,20 +1,13 @@
 import { Outlet } from "react-router";
 import Header from "./Header";
 import Menu from "./Menu";
-import { useShallow } from "zustand/react/shallow";
-import { useAuthStore } from "@/features/auth/model/authStore";
+import { sessionUser } from "@/entities/session/model/sessionStore";
 
 const Layout = () => {
-  const { user, isLoading, logout } = useAuthStore(
-    useShallow((state) => ({
-      user: state.user,
-      isLoading: state.isLoading,
-      logout: state.logout,
-    })),
-  );
+    const user = sessionUser();
   return (
     <div className="flex flex-col overflow-visible">
-      <Header user={user} isLoading={isLoading} logout={logout} />
+      <Header user={user} />
       <div className="flex max-w-[1100px] w-full h-full mx-auto gap-2">
         <div className="flex-1">
           <Menu user={user} />

@@ -5,15 +5,14 @@ import {
   CardDescription,
   CardFooter,
 } from "@/shared/components/ui/card";
-import { type Post } from "@/entities/post/api/postApi";
 import ExpandableDescription from "@/shared/components/ExpandableDescription";
 import { formatPostDate } from "@/shared/lib/date";
 import FeedCardHeader from "@/entities/post/ui/FeedCardHeader";
 import FeedCardActions from "./FeedCardActions";
-import MediaCarousel from "../../../shared/components/MediaCarousel";
-import { MediaAssetModal } from "@/shared/components/MediaAssetModal";
-import type { MediaResponse } from "@/entities/media/model/mediaResponseTypes";
-import { AspectRatio } from "@/shared/components/ui/aspect-ratio";
+import MediaCarousel from "../../media/ui/MediaCarousel";
+import { MediaAssetModal } from "@/widgets/media-modal/MediaAssetModal";
+import type { MediaResponse } from "@/entities/media/model/types";
+import type { Post } from "../model/types";
 
 interface FeedCardProps {
   post: Post;

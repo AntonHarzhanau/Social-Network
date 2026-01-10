@@ -1,10 +1,7 @@
 import { useState } from "react";
 
-import {
-  UPLOADING_STATUS,
-  type MediaItem,
-} from "@/entities/media/model/uploadMediaTypes";
-import { uploadMedia } from "@/entities/media/api/media";
+import { uploadMedia } from "@/entities/media/api/mediaApi";
+import { UPLOADING_STATUS, type MediaItem } from "@/entities/media/model/types";
 
 interface UsePostMediaUploadParams {
   onMediaIdsChange?: (mediaIds: string[]) => void;

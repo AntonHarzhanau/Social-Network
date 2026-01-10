@@ -4,7 +4,6 @@ import {
   FieldDescription,
   FieldGroup,
 } from "@/shared/components/ui/field";
-import { useAuthStore } from "@/features/auth/model/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { FormInput } from "@/shared/components/FormInput";
@@ -16,6 +15,7 @@ import { DatePicker } from "@/shared/components/DatePicker";
 import type { AxiosError } from "axios";
 import { toast } from "sonner";
 import { registerApiSchema } from "@/features/auth/model/registerApiSchema";
+import { authActions } from "@/features/auth/model/authActions";
 
 const RegisterForm = ({ switchToLogin }: { switchToLogin: () => void }) => {
   const form = useForm<RegisterFormSchema>({
@@ -29,13 +29,10 @@ const RegisterForm = ({ switchToLogin }: { switchToLogin: () => void }) => {
       confirmPassword: "",
     },
   });
-  const { register } = useAuthStore();
-
   const handleSubmit = async (data: RegisterFormSchema) => {
     const payload = registerApiSchema.parse(data);
     try {
-      await register(payload);
-      
+      await authActions.register(payload);
       toast.success("Registration successful! Please log in.", {
         closeButton: true,
       });

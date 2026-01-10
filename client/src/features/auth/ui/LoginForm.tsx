@@ -7,7 +7,6 @@ import {
   FieldGroup,
   FieldSeparator,
 } from "@/shared/components/ui/field";
-import { useAuthStore } from "@/features/auth/model/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { FormInput } from "@/shared/components/FormInput";
@@ -15,12 +14,20 @@ import {
   loginFormSchema,
   type LoginFormSchema,
 } from "@/features/auth/model/loginFormSchema";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ROUTES } from "@/shared/constants/routes";
 import { toast } from "sonner";
 import type { AxiosError } from "axios";
 import { useState } from "react";
 import EmailVerificationNotice from "@/features/auth/ui/EmailVerificationNotice";
+import { authActions } from "@/features/auth/model/authActions";
+
+function safeRedirectTo(value: string | null): string | null {
+  if (!value) return null;
+  if (!value.startsWith("/")) return null;
+  if (value.startsWith("//")) return null;
+  return value;
+}
 
 const LoginForm = ({
   onSwitchToRegister,
@@ -34,15 +41,17 @@ const LoginForm = ({
       password: "",
     },
   });
-  const { login } = useAuthStore();
+
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [emailVerification, setEmailVerification] = useState(false);
 
   const handleSubmit = async (data: LoginFormSchema) => {
     try {
-      await login(data.email, data.password);
-      console.log("Login successful, redirecting...");
-      navigate(ROUTES.HOME, { replace: true });
+      await authActions.login(data);
+
+      const redirectTo = safeRedirectTo(searchParams.get("redirectTo"));
+      navigate(redirectTo ?? ROUTES.HOME, { replace: true });
     } catch (error: AxiosError | any) {
       const message = error.response?.data?.message || error.message;
       if (message === "Email not verified.") {

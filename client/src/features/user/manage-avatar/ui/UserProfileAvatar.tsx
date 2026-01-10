@@ -18,9 +18,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
-import { MediaAssetModal } from "@/shared/components/MediaAssetModal";
+import { MediaAssetModal } from "@/widgets/media-modal/MediaAssetModal";
 import { fetchUserAvatars } from "@/entities/user/api/userApi";
-import type { MediaResponse } from "@/entities/media/model/mediaResponseTypes";
+import type { MediaResponse } from "@/entities/media/model/types";
 
 interface UserProfileAvatarProps {
   userId?: string;

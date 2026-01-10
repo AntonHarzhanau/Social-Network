@@ -4,10 +4,12 @@ import RouteErrorPage from "@/app/router/RouteErrorPage";
 import ProtectedRoot from "@/app/router/ProtectedRoot";
 import { requireAuthLoader } from "@/app/router/requireAuthLoader";
 import FullScreenLoader from "@/shared/components/FullScreenLoader";
+import { guestLoader } from "./guestLoader";
 
 export const router = createBrowserRouter([
   {
     path: ROUTES.AUTH,
+    loader: guestLoader,
     lazy: async () => {
       const { default: Component } = await import("@/pages/AuthPage");
       return { Component };
@@ -16,7 +18,7 @@ export const router = createBrowserRouter([
     errorElement: <RouteErrorPage />,
   },
   {
-    path: "/",
+    path: ROUTES.HOME,
     loader: requireAuthLoader,
     element: <ProtectedRoot />,
     HydrateFallback: FullScreenLoader,
@@ -30,11 +32,7 @@ export const router = createBrowserRouter([
       { path: ROUTES.GROUPS, lazy: () => import("@/pages/GroupsPage") },
       { path: ROUTES.GROUP, lazy: () => import("@/pages/GroupPage") },
       { path: ROUTES.SETTINGS, lazy: () => import("@/pages/SettingsPage") },
+      { path: "*", lazy: () => import("@/pages/NotFoundPage") },
     ],
-  },
-  {
-    path: "*",
-    lazy: () => import("@/pages/NotFoundPage"),
-    errorElement: <RouteErrorPage />,
   },
 ]);

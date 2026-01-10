@@ -1,7 +1,7 @@
 import { uploadAvatar } from "@/entities/user/api/userApi";
-import { useAuthStore } from "@/features/auth/model/authStore";
-import { uploadMedia } from "@/entities/media/api/media";
+import { uploadMedia } from "@/entities/media/api/mediaApi";
 import { useQueryClient } from "@tanstack/react-query";
+import { authActions } from "@/features/auth/model/authActions";
 
 export const useUserAvatar = (userId?: string) => {
   const queryClient = useQueryClient();
@@ -10,7 +10,7 @@ export const useUserAvatar = (userId?: string) => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ["userProfile", userId] }),
       queryClient.invalidateQueries({ queryKey: ["userAvatars", userId] }),
-      useAuthStore.getState().checkAuth(),
+      authActions.refreshMe(), 
     ]);
   };
   async function uploadNewAvatar(original: File, preview: File) {

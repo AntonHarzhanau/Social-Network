@@ -1,15 +1,29 @@
-import { useAuthStore } from "@/features/auth/model/authStore"
+import {
+  isAuthenticated,
+  sessionStatus,
+} from "@/entities/session/model/sessionStore";
+import FullScreenLoader from "@/shared/components/FullScreenLoader";
 import { ROUTES } from "@/shared/constants/routes";
 import Layout from "@/widgets/Layout/Layout";
 import { Navigate } from "react-router-dom";
+import AuthEventBridge from "./AuthEventBridge";
 
 const ProtectedRoot = () => {
-    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const status = sessionStatus();
+  const isAuth = isAuthenticated();
+  if (status === "loading") {
+    return <FullScreenLoader />;
+  }
+  if (!isAuth) {
+    return <Navigate to={ROUTES.AUTH} replace />;
+  }
 
-    if (!isAuthenticated) {
-        return <Navigate to={ROUTES.AUTH} replace />;
-    }
-  return <Layout />;
-}
+  return (
+    <>
+      <AuthEventBridge />
+      <Layout />
+    </>
+  );
+};
 
-export default ProtectedRoot
+export default ProtectedRoot;

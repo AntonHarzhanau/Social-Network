@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchMedia } from "@/entities/media/api/media";
+import { fetchMedia } from "@/entities/media/api/mediaApi";
 
 export const useMedia = (mediaId?: string | null) => {
   return useQuery({

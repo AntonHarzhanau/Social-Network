@@ -1,5 +1,5 @@
 import type { InfiniteData } from "@tanstack/react-query";
-import type { Post } from "../api/postApi";
+import type { Post } from "./types";
 
 export function patchPostInInfinite(
   old: InfiniteData<Post[]> | undefined,

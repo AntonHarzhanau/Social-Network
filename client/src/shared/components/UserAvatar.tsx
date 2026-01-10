@@ -8,7 +8,7 @@ import { Skeleton } from "./ui/skeleton";
 import { cn } from "../lib/utils";
 import { useState } from "react";
 
-interface UserAvatarProps {
+interface AvatarProps {
   imageUrl?: string | null;
   name?: string | null;
   alt?: string;
@@ -20,7 +20,7 @@ export const UserAvatar = ({
   name,
   alt,
   className,
-}: UserAvatarProps) => {
+}: AvatarProps) => {
   const initials = getInitials(name);
   const [status, setStatus] = useState<"idle" | "loading" | "loaded" | "error">(
     "loading",

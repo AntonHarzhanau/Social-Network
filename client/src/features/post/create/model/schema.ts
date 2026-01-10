@@ -1,4 +1,4 @@
-import { VISIBILITY_VALUES } from "@/entities/post/api/postApi";
+import { VISIBILITY_VALUES } from "@/entities/post/model/types";
 import { z } from "zod";
 
 export const createPostSchema = z

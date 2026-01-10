@@ -1,9 +1,9 @@
-import type { Me } from "@/features/auth/api/authApi";
+import type { UserPreview } from "@/entities/user/model/types";
 
 export interface Message {
   id: string;
   content: string;
-  sender: Me;
+  sender: UserPreview;
   createdAt: string;
 }
 

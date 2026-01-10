@@ -1,4 +1,3 @@
-// entities/friends/model/useFriendMutations.ts
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   acceptFriendRequest,
@@ -7,7 +6,7 @@ import {
   removeFriend,
   sendFriendRequest,
 } from "@/entities/friends/api/friends";
-import { PEOPLE_KEY } from "./quetyKeys";
+import { PEOPLE_KEY } from "./queryKeys";
 
 function invalidatePeople(qc: ReturnType<typeof useQueryClient>) {
   return qc.invalidateQueries({ queryKey: PEOPLE_KEY });

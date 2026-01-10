@@ -17,7 +17,6 @@ import type { UserProfile } from "../model/types";
 import { useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateUserProfile } from "../api/userApi";
-import { useMutationUserProfile } from "../model/useMutationUserProfile";
 
 interface EditProfileFormProps {
   profileData?: UserProfile;

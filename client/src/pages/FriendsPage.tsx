@@ -1,10 +1,10 @@
-import { useAuthStore } from "@/features/auth/model/authStore";
 import FriendsFilter from "@/widgets/Friend/FriendsFilter";
 import MainSectionLayout from "@/shared/components/MainSectionLayout";
 import FriendsList from "@/widgets/Friend/FriendsList";
+import { sessionUser } from "@/entities/session/model/sessionStore";
 
 const FriendsPage = () => {
-  const user = useAuthStore((state) => state.user);
+  const user = sessionUser();
 
   return (
     <MainSectionLayout

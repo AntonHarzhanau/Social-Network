@@ -3,9 +3,8 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
-import { useMemo, useState } from "react";
-import type { MediaResponse } from "@/entities/media/model/mediaResponseTypes";
-import MediaCarousel from "@/shared/components/MediaCarousel";
+import { useState } from "react";
+import MediaCarousel from "@/entities/media/ui/MediaCarousel";
 import { cn } from "@/shared/lib/utils";
 
 import {
@@ -18,7 +17,7 @@ import { Input } from "@/shared/components/ui/input";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 
 import { Heart, Share2, X } from "lucide-react";
-import { AspectRatio } from "@radix-ui/react-aspect-ratio";
+import type { MediaResponse } from "@/entities/media/model/types";
 
 export type MediaModalAuthor = {
   id: string;
@@ -53,15 +52,12 @@ export function MediaAssetModal({
   medias,
   initialIndex,
   createdAtText = "",
-  likeCount = 0,
-  isLiked = false,
   onToggleLike,
   onShare,
   comments = [],
   onSendComment,
 }: Props) {
-
-
+  const likeCount = 15; // TODO: replace
   const [comment, setComment] = useState("");
 
   const submitComment = () => {
@@ -108,7 +104,6 @@ export function MediaAssetModal({
 
               {/* Bottom control panel: 48px */}
               <div className="h-12 shrink-0 border-t border-white/10 bg-zinc-950/40 flex items-center justify-between px-4">
-
                 <div className="flex items-center gap-2">
                   <Button
                     type="button"

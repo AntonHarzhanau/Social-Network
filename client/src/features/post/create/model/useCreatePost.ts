@@ -1,10 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  createPost,
-  type CreatePostPayload,
-  type Visibility,
-} from "@/entities/post/api/postApi";
+import { createPost } from "@/entities/post/api/postApi";
 import { postKeys } from "@/entities/post/model/queryKeys";
+import type { CreatePostPayload, Visibility } from "@/entities/post/model/types";
 
 export interface CreatePostFormValues {
   content?: string;

@@ -1,6 +1,10 @@
 import { apiClient } from "@/shared/api/apiClient";
 import type { UserPreview, UserProfile } from "@/entities/user/model/types";
-import type { MediaResponse } from "@/entities/media/model/mediaResponseTypes";
+import type { MediaResponse } from "@/entities/media/model/types";
+
+export const userApi = {
+    
+}
 
 export const fetchUsers = async (
   page = 1,
