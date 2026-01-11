@@ -2,6 +2,7 @@
 
 namespace App\Modules\Feed\Application\Action;
 
+use App\Modules\Feed\Application\DTO\PostMutationResponse;
 use App\Modules\Feed\Application\Port\MediaAssetDirectoryInterface;
 use App\Modules\Feed\Application\Port\UserDirectoryInterface;
 use App\Modules\Feed\Domain\Entity\Post;
@@ -17,7 +18,7 @@ final class CreatePostAction
         private readonly UserDirectoryInterface $userDirectory,
     ) {}
 
-    public function __invoke(?string $content, array $mediaIds, Uuid $authorId, VisibilityEnum $visibility): void
+    public function __invoke(?string $content, array $mediaIds, Uuid $authorId, VisibilityEnum $visibility): PostMutationResponse
     {
         $post = new Post();
         $author = $this->userDirectory->getUser($authorId->toRfc4122());
@@ -31,5 +32,7 @@ final class CreatePostAction
 
 
         $this->mediaAssetDirectory->addMediaToPost($mediaIds ?? [], $post->getId());
+
+        return new PostMutationResponse($post->getId()->toRfc4122());
     }
 }

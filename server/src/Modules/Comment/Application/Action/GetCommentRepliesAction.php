@@ -2,7 +2,7 @@
 
 namespace App\Modules\Comment\Application\Action;
 
-use App\Modules\Comment\Application\ReadModel\CommentView;
+use App\Modules\Comment\Application\DTO\CommentResponse;
 use App\Modules\Comment\Domain\Repository\CommentRepositoryInterface;
 use App\Modules\User\Contracts\DTO\UserPreviewDTO;
 use Symfony\Component\Uid\Uuid;
@@ -13,7 +13,7 @@ final class GetCommentRepliesAction
         private readonly CommentRepositoryInterface $commentRepository,
     ) {}
 
-    public function __invoke(Uuid $commentId, Uuid $currentUser, int $page, int $limit)
+    public function execute(Uuid $commentId, Uuid $currentUser, int $page, int $limit)
     {
         $parentComment = $this->commentRepository->findById($commentId);
         if ($parentComment === null) {
@@ -24,7 +24,7 @@ final class GetCommentRepliesAction
 
         $replies = [];
         foreach ($rows as $row) {
-            $replies[] = new CommentView(
+            $replies[] = new CommentResponse(
                 id: $row['comment']->getId()->toRfc4122(),
                 content: $row['comment']->getContent(),
                 author: new UserPreviewDTO(

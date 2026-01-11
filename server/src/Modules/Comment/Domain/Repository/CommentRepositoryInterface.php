@@ -11,9 +11,9 @@ interface CommentRepositoryInterface
 
     public function remove(Comment $comment, bool $flush = true): void;
 
-    public function findRootForPost(
-        Uuid $post,
-        Uuid $currentUser,
+    public function findByThreadId(
+        Uuid $threadId,
+        Uuid $currentUserId,
         int $page,
         int $limit
     ): array;

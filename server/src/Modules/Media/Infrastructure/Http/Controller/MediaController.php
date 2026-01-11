@@ -6,7 +6,6 @@ use App\Modules\Media\Application\Action\DeleteMediaAction;
 use App\Modules\Media\Application\Action\ListMediaAction;
 use App\Modules\Media\Application\Service\GetMediaUrl;
 use App\Modules\Media\Application\Action\UploadMediaAction;
-use App\Modules\Media\Domain\Entity\MediaAsset;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\Media\Domain\Repository\MediaAssetRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

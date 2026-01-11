@@ -13,7 +13,7 @@ final class UpdateCommentAction
         private readonly CommentRepositoryInterface $commentRepository,
     ) {}
 
-    public function __invoke(Uuid $commentId, Uuid $currentUserId, AddComment $cmd): void
+    public function execute(Uuid $commentId, Uuid $currentUserId, AddComment $cmd): void
     {
         $comment = $this->commentRepository->findById($commentId);
         if ($comment === null) {

@@ -20,6 +20,7 @@ final class ListMediaAction
     ): array 
     {
         $meidas = $this->mediaAssetRepository->findAll();
+        dd($meidas);
         $result = [];
         foreach ($meidas as $media) {
             $result[] = new MediaItemDTO(

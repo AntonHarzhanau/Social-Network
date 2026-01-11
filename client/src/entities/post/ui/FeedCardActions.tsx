@@ -1,6 +1,6 @@
+import { useToggleLikePost } from "@/features/post/like/useToggleLikePost";
 import { LikeButton } from "@/shared/components/LikeButton";
 import { Button } from "@/shared/components/ui/button";
-import { useToggleLikePost } from "@/features/post/like/useToggleLikePost";
 import { MessageCircle, Share2 } from "lucide-react";
 
 interface FeedCardActionsProps {
@@ -8,6 +8,7 @@ interface FeedCardActionsProps {
   likeCount: number;
   commentCount: number;
   isLikedByCurrentUser: boolean;
+  onCommentClick?: () => void;
 }
 
 const FeedCardActions = ({
@@ -15,6 +16,7 @@ const FeedCardActions = ({
   likeCount,
   commentCount,
   isLikedByCurrentUser,
+  onCommentClick,
 }: FeedCardActionsProps) => {
   const toggleLike = useToggleLikePost();
   return (
@@ -29,7 +31,7 @@ const FeedCardActions = ({
         variant="ghost"
         size="sm"
         className="flex items-center gap-2 px-2"
-        // onClick={onCommentClick}
+        onClick={onCommentClick}
       >
         <MessageCircle className="h-4 w-4" />
         <span className="text-xs">{commentCount}</span>

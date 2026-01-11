@@ -24,9 +24,9 @@ class Comment
     #[ORM\JoinColumn(name: 'author_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?User $author = null;
 
-    #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'comments')]
-    #[ORM\JoinColumn(name: 'post_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private ?Post $post = null;
+    #[ORM\ManyToOne(targetEntity: CommentThread::class, inversedBy: 'comments')]
+    #[ORM\JoinColumn(name: 'thread_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    private ?CommentThread $thread = null;
 
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'replies')]
     #[ORM\JoinColumn(name: 'parent_comment_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
@@ -80,14 +80,14 @@ class Comment
         return $this;
     }
 
-    public function getPost(): ?Post
+    public function getThread(): ?CommentThread
     {
-        return $this->post;
+        return $this->thread;
     }
 
-    public function setPost(?Post $post): static
+    public function setThread(?CommentThread $thread): static
     {
-        $this->post = $post;
+        $this->thread = $thread;
 
         return $this;
     }

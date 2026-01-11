@@ -14,6 +14,7 @@ final  class PostFeedItem
         public bool $isLikedByCurrentUser,
         public \DateTimeImmutable $date,
         public ?UserPreviewDTO $author = null,
+        public string $commentThreadId,
         public array $media = [],
     ) {}
 }

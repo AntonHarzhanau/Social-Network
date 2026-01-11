@@ -24,6 +24,7 @@ class PostFactory
             isLikedByCurrentUser: $dto->isLikedByCurrentUser,
             date: $dto->createdAt,
             author: $author ?? null,
+            commentThreadId: $dto->commentThreadId->toRfc4122(),
             media: $postMedia
         );
     }
@@ -54,7 +55,6 @@ class PostFactory
                 postMedia: $postMedia
             );
         }
-
         return $posts;
     }
 }

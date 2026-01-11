@@ -17,4 +17,18 @@ final class PostDirectoryAdapter implements PostDirectoryInterface
 
         return $post;
     }
+
+    public function getPostByAuthor(Uuid $authorId): ?Post
+    {
+        $post = $this->postService->getPostsByAuthor($authorId);
+
+        return $post;
+    }
+
+    public function getPostByCommentThreadId(Uuid $threadId): ?Post
+    {
+        $post = $this->postService->getPostByCommentThreadId($threadId);
+
+        return $post;
+    }
 }

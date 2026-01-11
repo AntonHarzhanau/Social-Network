@@ -21,4 +21,6 @@ interface PostRepositoryInterface
         ?int $limit = null,
         ?array $visibilities = null
     ): array;
+
+    public function findOneBy(array $criteria, array|null $orderBy = null): object|null;
 }

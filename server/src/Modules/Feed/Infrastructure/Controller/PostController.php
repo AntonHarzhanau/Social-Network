@@ -51,8 +51,8 @@ final class PostController extends AbstractController
     #[Route('', name: 'get_posts', methods: ['GET'], format: 'json')]
     public function getAll(Request $request, #[CurrentUser] User $user, GetAllPostsAction $getAll): JsonResponse
     {
-        $page = max(1, (int) $request->query->get('page', 1));
-        $limit = max(1, (int) $request->query->get('limit', 1));
+        $page = max((int) $request->query->get('page', 1), 1);
+        $limit = min(max((int) $request->query->get('limit', 20), 1), 50);
         $visibilities = [VisibilityEnum::PUBLIC];
 
         $posts = $getAll(

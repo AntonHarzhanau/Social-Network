@@ -1,4 +1,5 @@
 import type { MediaResponse } from "@/entities/media/model/types";
+import type { UserPreview } from "@/entities/user/model/types";
 
 export const VISIBILITY_VALUES = {
   PUBLIC: "public",
@@ -10,13 +11,6 @@ export const VISIBILITY_VALUES = {
 export type Visibility =
   (typeof VISIBILITY_VALUES)[keyof typeof VISIBILITY_VALUES];
 
-export interface Author {
-  id: string;
-  username: string;
-  avatarUrl: string | null;
-  slug: string | null;
-}
-
 export interface Post {
   id: string;
   content: string;
@@ -24,18 +18,23 @@ export interface Post {
   commentCount: number;
   isLikedByCurrentUser: boolean;
   date: string;
-  author: Author;
+  author: UserPreview;
+  commentThreadId: string;
   media: MediaResponse[] | null;
 }
 
-export interface ToggleLikeResponse {
-  postId: string;
+export interface ToggleLikePostResponse {
+  id: string;
   likeCount: number;
   isLikedByCurrentUser: boolean;
 }
 
-export interface PostsResponse {
+export interface PostsQueryResponse {
   posts: Post[];
+}
+
+export interface PostMutationResponse {
+  id: string;
 }
 
 export interface FetchPostsParams {
@@ -48,8 +47,4 @@ export interface CreatePostPayload {
   content?: string;
   visibility?: Visibility;
   mediaIds?: string[];
-}
-
-export interface CreatePostResponse {
-  message: string;
 }

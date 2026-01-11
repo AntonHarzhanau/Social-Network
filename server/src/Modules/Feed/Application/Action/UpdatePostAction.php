@@ -2,6 +2,7 @@
 
 namespace App\Modules\Feed\Application\Action;
 
+use App\Modules\Feed\Application\DTO\PostMutationResponse;
 use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -13,7 +14,7 @@ final class UpdatePostAction
         private readonly PostRepositoryInterface $postRepository,
     ) {}
 
-    public function __invoke(Uuid $postId, $dto, $user): void
+    public function __invoke(Uuid $postId, $dto, $user): PostMutationResponse
     {
         $post = $this->postRepository->findOneById($postId);
 
@@ -33,5 +34,7 @@ final class UpdatePostAction
         }
 
         $this->postRepository->save($post);
+
+        return new PostMutationResponse($post->getId()->toRfc4122());
     }
 }

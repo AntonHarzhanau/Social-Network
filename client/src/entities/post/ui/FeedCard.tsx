@@ -12,6 +12,8 @@ import FeedCardActions from "./FeedCardActions";
 import MediaCarousel from "../../media/ui/MediaCarousel";
 import type { Post } from "../model/types";
 import { useMediaViewerStore } from "@/features/media/viewer/useMediaViewerStore";
+import FeedDetails from "./FeedDetails";
+import { useState } from "react";
 
 interface FeedCardProps {
   post: Post;
@@ -19,8 +21,9 @@ interface FeedCardProps {
 
 const FeedCard = ({ post }: FeedCardProps) => {
     const openViewer = useMediaViewerStore((s) => s.openViewer);
+    const [feedDetailsOpen, setFeedDetailsOpen] = useState(false);
+    
   const authorName = post.author.username;
-
   return (
     <>
       <Card className="max-w-full bg-card">
@@ -58,9 +61,11 @@ const FeedCard = ({ post }: FeedCardProps) => {
             likeCount={post.likeCount}
             commentCount={post.commentCount}
             isLikedByCurrentUser={post.isLikedByCurrentUser}
+            onCommentClick={() => setFeedDetailsOpen(true)}
           />
         </CardFooter>
       </Card>
+      <FeedDetails post={post} open={feedDetailsOpen} onOpenChange={setFeedDetailsOpen} />
     </>
   );
 };

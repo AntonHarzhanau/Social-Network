@@ -14,5 +14,6 @@ final class PostFeedRowDTO
         public bool $isLikedByCurrentUser,
         public \DateTimeImmutable $createdAt,
         public Uuid $authorId,
+        public Uuid $commentThreadId,
     ) {}
 }

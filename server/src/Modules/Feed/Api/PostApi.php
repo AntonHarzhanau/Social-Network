@@ -13,4 +13,14 @@ class PostApi implements PostApiInterface
     {
         return $this->postRepository->findOneById($postId);
     }
+
+    public function getPostsByAuthor(Uuid $authorId): ?Post
+    {
+        return $this->postRepository->findOneBy(['author' => $authorId]);
+    }
+
+    public function getPostByCommentThreadId(Uuid $threadId): ?Post
+    {
+        return $this->postRepository->findOneBy(['commentThread' => $threadId]);
+    }
 }

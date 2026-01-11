@@ -7,10 +7,10 @@ import { PostMediaPreview } from "./PostMediaPreview";
 import VisibilitySelector from "./VisibilitySelector";
 import { usePostMediaUpload } from "@/features/post/create/model/usePostMediaUpload";
 import { toast } from "sonner";
-import { useCreatePost } from "@/features/post/create/model/useCreatePost";
 import { Button } from "@/shared/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/shared/components/ui/field";
 import { VISIBILITY_VALUES } from "@/entities/post/model/types";
+import { useCreatePost } from "@/entities/post/model/usePostMutations";
 
 interface CreatePostFormProps {
   onSuccess?: () => void;
@@ -102,3 +102,5 @@ export const CreatePostForm = ({ onSuccess }: CreatePostFormProps) => {
     </form>
   );
 };
+
+

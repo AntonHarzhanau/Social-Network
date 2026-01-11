@@ -15,7 +15,7 @@ final class ReplyToCommentAction
         private readonly UserApiInterface $userApi,
     ) {}
 
-    public function __invoke(
+    public function execute(
         Uuid $parentCommentId,
         Uuid $currentUserId,
         AddComment $cmd
@@ -31,7 +31,7 @@ final class ReplyToCommentAction
         $comment->setContent($cmd->content);
         $comment->setAuthor($author);
         $comment->setParent($parentComment);
-        $comment->setPost($parentComment->getPost());
-        $this->commentRepository->save($comment);
+        $parentComment->addReply($comment);
+        $this->commentRepository->save($parentComment);
     }
 }

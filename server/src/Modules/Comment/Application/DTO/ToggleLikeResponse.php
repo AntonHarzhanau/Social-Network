@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Modules\Feed\Application\DTO;
+namespace App\Modules\Comment\Application\DTO;
 
-final readonly class PostLikeResponse
+final readonly class ToggleLikeResponse
 {
     public function __construct(
-        public string $postId,
+        public string $commentId,
         public int $likeCount,
         public bool $isLikedByCurrentUser,
     ) {}

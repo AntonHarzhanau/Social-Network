@@ -2,7 +2,7 @@
 
 namespace App\Modules\Feed\Domain\Entity;
 
-use App\Modules\Comment\Domain\Entity\Comment;
+use App\Modules\Comment\Domain\Entity\CommentThread;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\Media\Domain\Entity\PostMediaBinding;
 use App\Modules\Feed\Domain\Enum\VisibilityEnum;
@@ -41,11 +41,10 @@ class Post
     #[ORM\Column(enumType: VisibilityEnum::class)]
     private ?VisibilityEnum $visibility = VisibilityEnum::PUBLIC;
 
-    /**
-     * @var Collection<int, Comment>
-     */
-    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'post', orphanRemoval: true)]
-    private Collection $comments;
+
+    #[ORM\OneToOne(targetEntity: CommentThread::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\JoinColumn(name: 'comment_thread_id', referencedColumnName: 'id', nullable: false)]
+    private ?CommentThread $commentThread  = null;
 
     /**
      * @var Collection<int, User>
@@ -73,7 +72,7 @@ class Post
 
     public function __construct()
     {
-        $this->comments = new ArrayCollection();
+        $this->commentThread = new CommentThread();
         $this->likeBy = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->bindedMedia = new ArrayCollection();
@@ -162,37 +161,11 @@ class Post
         return $this;
     }
 
-    /**
-     * @return Collection<int, Comment>
-     */
-    public function getComments(): Collection
+    public function getCommentThread(): CommentThread
     {
-        return $this->comments;
+        return $this->commentThread;
     }
 
-    public function addComment(Comment $comment): static
-    {
-        if (!$this->comments->contains($comment)) {
-            $this->comments->add($comment);
-            $comment->setPost($this);
-            $this->commentCount = $this->comments->count();
-        }
-
-        return $this;
-    }
-
-    public function removeComment(Comment $comment): static
-    {
-        if ($this->comments->removeElement($comment)) {
-            // set the owning side to null (unless already changed)
-            if ($comment->getPost() === $this) {
-                $comment->setPost(null);
-            }
-            $this->commentCount = $this->comments->count();
-        }
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, User>

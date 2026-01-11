@@ -8,5 +8,6 @@ use Symfony\Component\Uid\Uuid;
 interface PostDirectoryInterface
 {
     public function getPost(Uuid $postId): ?Post;
-    
+    public function getPostByAuthor(Uuid $authorId): ?Post;
+    public function getPostByCommentThreadId(Uuid $threadId): ?Post;
 }

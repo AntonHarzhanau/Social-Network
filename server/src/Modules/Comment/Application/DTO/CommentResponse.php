@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Modules\Comment\Application\ReadModel;
+namespace App\Modules\Comment\Application\DTO;
 
 use App\Modules\User\Contracts\DTO\UserPreviewDTO;
 
-final readonly class CommentView
+final readonly class CommentResponse
 {
     public function __construct(
         public string $id,

@@ -2,8 +2,10 @@
 
 namespace App\Modules\Media\Domain\Entity;
 
+use App\Modules\Comment\Domain\Entity\CommentThread;
 use App\Modules\Media\Domain\Enum\FileTypeEnum;
 use App\Modules\User\Domain\Entity\User;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -21,6 +23,22 @@ class MediaAsset
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'owner_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?User $owner = null;
+
+    #[ORM\OneToOne(targetEntity: CommentThread::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\JoinColumn(name: 'comment_thread_id', referencedColumnName: 'id', nullable: false)]
+    private ?CommentThread $commentThread = null;
+
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\ManyToMany(targetEntity: User::class)]
+    #[ORM\JoinTable(name: 'media_likes')]
+    #[ORM\JoinColumn(name: 'media_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'user_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    private Collection $likeBy;
+
+    #[ORM\Column]
+    private ?int $likeCount = 0;
 
     #[ORM\Column(enumType: FileTypeEnum::class)]
     private ?FileTypeEnum $fileType = null;
@@ -51,6 +69,7 @@ class MediaAsset
 
     public function __construct()
     {
+        $this->commentThread = new CommentThread();
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -67,6 +86,23 @@ class MediaAsset
     public function setOwner(?User $owner): static
     {
         $this->owner = $owner;
+
+        return $this;
+    }
+
+    public function getCommentThread(): ?CommentThread
+    {
+        return $this->commentThread;
+    }
+
+    public function getLikeCount(): ?int
+    {
+        return $this->likeCount;
+    }
+
+    public function setLikeCount(int $likeCount): static
+    {
+        $this->likeCount = $likeCount;
 
         return $this;
     }
@@ -170,6 +206,30 @@ class MediaAsset
     public function setDurationSeconds(?float $durationSeconds): static
     {
         $this->durationSeconds = $durationSeconds;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getLikeBy(): Collection
+    {
+        return $this->likeBy;
+    }
+
+    public function addLikeBy(User $likeBy): static
+    {
+        if (!$this->likeBy->contains($likeBy)) {
+            $this->likeBy->add($likeBy);
+        }
+
+        return $this;
+    }
+
+    public function removeLikeBy(User $likeBy): static
+    {
+        $this->likeBy->removeElement($likeBy);
+
         return $this;
     }
 }

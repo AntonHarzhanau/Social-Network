@@ -34,9 +34,9 @@ class CommentRepository extends ServiceEntityRepository implements CommentReposi
         }
     }
 
-    public function findRootForPost(
-        Uuid $post,
-        Uuid $currentUser,
+    public function findByThreadId(
+        Uuid $threadId,
+        Uuid $currentUserId,
         int $page,
         int $limit
     ): array {
@@ -47,17 +47,17 @@ class CommentRepository extends ServiceEntityRepository implements CommentReposi
                 FROM App\Modules\Comment\Domain\Entity\Comment c2
                 WHERE c2.parent = c) AS replyCount'
             )
-            ->andWhere('IDENTITY(c.post) = :post')
+            ->andWhere('IDENTITY(c.thread) = :threadId')
             ->andWhere('c.parent IS NULL')
-            ->setParameter('post', $post)
+            ->setParameter('threadId', $threadId)
             ->orderBy('c.createdAt', 'DESC')
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit)
             ->addSelect(
-                'CASE WHEN :currentUser MEMBER OF c.likeBy 
+                'CASE WHEN :currentUserId MEMBER OF c.likeBy 
                 THEN true ELSE false END AS likedByCurrentUser'
             )
-            ->setParameter('currentUser', $currentUser);
+            ->setParameter('currentUserId', $currentUserId);
 
         $comments = $qb->getQuery()->getResult();
         return $comments;
