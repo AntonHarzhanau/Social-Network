@@ -26,7 +26,7 @@ final class GetAllPostsAction
             limit: $limit
         );
 
-        $posts = $this->postFactory->toPostListResponse($rows);
+        $posts = $this->postFactory->toPostListResponse($currentUserId, $rows);
         return $posts;
     }
 }

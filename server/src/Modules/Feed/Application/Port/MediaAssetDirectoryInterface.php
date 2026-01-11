@@ -8,5 +8,5 @@ interface MediaAssetDirectoryInterface
 {
     public function addMediaToPost(array $mediaIds, Uuid $postId): void;
 
-    public function getBindingsByPostIds(array $postIds): array;
+    public function getBindingsByPostIds(Uuid $currentUser, array $postIds): array;
 }

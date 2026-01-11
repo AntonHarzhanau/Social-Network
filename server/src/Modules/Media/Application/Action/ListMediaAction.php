@@ -19,10 +19,9 @@ final class ListMediaAction
         int $offset = 0
     ): array 
     {
-        $meidas = $this->mediaAssetRepository->findAll();
-        dd($meidas);
+        $medias = $this->mediaAssetRepository->findAll();
         $result = [];
-        foreach ($meidas as $media) {
+        foreach ($medias as $media) {
             $result[] = new MediaItemDTO(
                 id: (string) $media->getId(),
                 url: '', // URL generation logic can be added here
@@ -31,6 +30,8 @@ final class ListMediaAction
                 width: $media->getWidth(),
                 height: $media->getHeight(),
                 durationSeconds: $media->getDurationSeconds(),
+                commentThreadId: $media->getCommentThread()->getId()->toRfc4122(),
+                likeCount: $media->getLikeCount(),
             );
         }
         return $result;

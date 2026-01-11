@@ -23,9 +23,9 @@ class PostMediaApi implements PostMediaApiInterface
         $this->postMediaBindingRepository->removeMediaFromPost($mediaIds, $post);
     }
 
-    public function getMediasForPosts(array $postIds): array
+    public function getMediasForPosts(Uuid $currentUser, array $postIds): array
     {   
-        $postMedias = ($this->postMediaUrlAction)($postIds);
+        $postMedias = ($this->postMediaUrlAction)($currentUser, $postIds);
         return $postMedias;
     }
 }

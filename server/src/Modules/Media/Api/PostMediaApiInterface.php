@@ -10,5 +10,5 @@ interface PostMediaApiInterface
 
     public function removeMediaFromPost(array $mediaIds, Uuid $post): void;
 
-    public function getMediasForPosts(array $postIds): array;
+    public function getMediasForPosts(Uuid $currentUser, array $postIds): array;
 }

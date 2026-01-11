@@ -2,7 +2,9 @@
 
 namespace App\Modules\User\Application\Port;
 
+use Symfony\Component\Uid\Uuid;
+
 interface MediaServicePort
 {
-    public function getMediasByIds(array $ids): array;
+    public function getMediasByIds(?Uuid $currentUser, array $ids): array;
 }

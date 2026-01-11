@@ -11,10 +11,10 @@ final class GetMediaUrl
         private readonly MediaStorageInterface $mediaStorage,
     ) {}
 
-    public function __invoke(MediaAsset $media, bool $signed = false, int $ttlSecond = 3600)
+    public function __invoke(string $storageKey, bool $signed = false, int $ttlSecond = 3600)
     {
         return $signed
-            ? $this->mediaStorage->signedUrl($media->getStorageKey(), $ttlSecond)
-            : $this->mediaStorage->publicUrl($media->getStorageKey());
+            ? $this->mediaStorage->signedUrl($storageKey, $ttlSecond)
+            : $this->mediaStorage->publicUrl($storageKey);
     }
 }

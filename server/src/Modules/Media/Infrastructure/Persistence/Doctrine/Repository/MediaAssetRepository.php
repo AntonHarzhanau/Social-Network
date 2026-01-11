@@ -2,9 +2,11 @@
 
 namespace App\Modules\Media\Infrastructure\Persistence\Doctrine\Repository;
 
+use App\Modules\Media\Application\DTO\MediaItemRowDTO;
 use App\Modules\Media\Domain\Entity\MediaAsset;
 use App\Modules\Media\Domain\Repository\MediaAssetRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
@@ -62,11 +64,83 @@ class MediaAssetRepository extends ServiceEntityRepository implements MediaAsset
             ->getResult();
     }
 
-   public function findAll(): array
-   {
-       return $this->createQueryBuilder('m')
-           ->orderBy('m.createdAt', 'DESC')
-           ->getQuery()
-           ->getResult();
-   } 
+    public function findAll(): array
+    {
+        return $this->createQueryBuilder('m')
+            ->orderBy('m.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @param string[] $ids RFC4122
+     * @return MediaItemRowDTO[]
+     */
+    public function findMediaRowsByIds(Uuid $currentUserId, array $ids): array
+    {
+        if ($ids === []) return [];
+
+        $qb = $this->createQueryBuilder('m')
+            ->select(sprintf(
+                'NEW %s(
+                m.id,
+                m.storageKey,
+                m.fileType,
+                m.createdAt,
+                m.width,
+                m.height,
+                m.durationSeconds,
+                ct.id,
+                m.likeCount,
+                CASE WHEN COUNT(lb) > 0 THEN true ELSE false END
+            )',
+                MediaItemRowDTO::class
+            ))
+            ->innerJoin('m.commentThread', 'ct')
+            ->leftJoin('m.likeBy', 'lb', 'WITH', 'lb.id = :meId')
+            ->setParameter('meId', $currentUserId)
+            ->where('m.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->andWhere('m.deletedAt IS NULL')
+            ->groupBy('m.id, m.storageKey, m.fileType, m.createdAt, m.width, m.height, m.durationSeconds, ct.id, m.likeCount');
+
+        /** @var MediaItemRowDTO[] */
+        return $qb->getQuery()->getResult();
+    }
+
+
+    public function getMediaItemById(Uuid $mediaId, Uuid $currentUserId): ?MediaItemRowDTO
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->select(sprintf(
+                'NEW %s(
+                m.id,
+                m.storageKey,
+                m.fileType,
+                m.createdAt,
+                m.width,
+                m.height,
+                m.durationSeconds,
+                ct.id,
+                m.likeCount,
+                CASE WHEN COUNT(lb) > 0 THEN true ELSE false END
+            )',
+                MediaItemRowDTO::class
+            ))
+            ->innerJoin('m.commentThread', 'ct')
+            ->leftJoin('m.likeBy', 'lb', 'WITH', 'lb.id = :meId')
+            ->setParameter('meId', $currentUserId)
+            ->where('m.id = :id')
+            ->setParameter('id', $mediaId)
+            ->andWhere('m.deletedAt IS NULL')
+            ->groupBy('m.id, m.storageKey, m.fileType, m.createdAt, m.width, m.height, m.durationSeconds, ct.id, m.likeCount');
+
+        try {
+            /** @var MediaItemRowDTO|null $row */
+            $row = $qb->getQuery()->getOneOrNullResult();
+            return $row;
+        } catch (NonUniqueResultException) {
+            return null;
+        }
+    }
 }

@@ -15,15 +15,19 @@ export interface MediaResponse {
   width?: number | null;
   height?: number | null;
   durationSeconds?: number | null;
+  likeCount: number;
+  likedByCurrentUser: boolean;
+  commentThreadId: string;
 }
 
 export const UPLOADING_STATUS = {
-    UPLOADING: "uploading",
-    SUCCESS: "success",
-    ERROR: "error",
+  UPLOADING: "uploading",
+  SUCCESS: "success",
+  ERROR: "error",
 } as const;
 
-export type UPLOADING_STATUS = typeof UPLOADING_STATUS[keyof typeof UPLOADING_STATUS];
+export type UPLOADING_STATUS =
+  (typeof UPLOADING_STATUS)[keyof typeof UPLOADING_STATUS];
 
 export type MediaItem = {
   localId: string;
@@ -33,3 +37,9 @@ export type MediaItem = {
   previewUrl?: string;
   error?: string;
 };
+
+export type ToggleLikeMediaResponse = {
+    id: string;
+    likedByCurrentUser: boolean;
+    likeCount: number;
+}

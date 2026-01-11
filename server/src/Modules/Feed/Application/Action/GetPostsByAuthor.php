@@ -26,7 +26,7 @@ final class GetPostsByAuthor
             page: $page,
             limit: $limit
         );
-        $posts = $this->postFactory->toPostListResponse($rows);
+        $posts = $this->postFactory->toPostListResponse($currentUser->getId(), $rows);
         return $posts;
     }
 }

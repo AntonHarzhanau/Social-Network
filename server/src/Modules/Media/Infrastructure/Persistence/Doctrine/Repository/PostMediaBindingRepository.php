@@ -4,6 +4,7 @@ namespace App\Modules\Media\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Modules\Media\Api\PostMediaApiInterface;
 use App\Modules\Media\Domain\Entity\PostMediaBinding;
+use App\Modules\Media\Domain\Repository\PostMediaBindingRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\Persistence\ManagerRegistry;
@@ -12,7 +13,7 @@ use Symfony\Component\Uid\Uuid;
 /**
  * @extends ServiceEntityRepository<PostMediaBindings>
  */
-class PostMediaBindingRepository extends ServiceEntityRepository
+class PostMediaBindingRepository extends ServiceEntityRepository implements PostMediaBindingRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -48,16 +49,17 @@ class PostMediaBindingRepository extends ServiceEntityRepository
 
 
     /** @return list<PostMediaBinding> */
-    public function getMediasForPosts(array $postIds): array
+    public function findBindingRowsByPostIds(array $postIds): array
     {
-        $bindings = $this->createQueryBuilder('b')
-            ->select('b', 'm')
-            ->join('b.media', 'm')
+        if ($postIds === []) return [];
+
+        return $this->createQueryBuilder('b')
+            ->select('IDENTITY(b.post) AS postId, IDENTITY(b.media) AS mediaId')
             ->where('IDENTITY(b.post) IN (:postIds)')
             ->setParameter('postIds', $postIds)
+            ->orderBy('b.createdAt', 'ASC')
+            ->addOrderBy('b.id', 'ASC')
             ->getQuery()
-            ->getResult();
-
-        return $bindings;
+            ->getArrayResult();
     }
 }

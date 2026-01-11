@@ -16,7 +16,7 @@ final class UserMapper
     public function toPreview(User $user)
     {
         $avatarUrl = $user->getCurrentAvatar()
-            ? ($this->getUrl)($user->getCurrentAvatar()->getPreview())
+            ? ($this->getUrl)($user->getCurrentAvatar()->getPreview()->getStorageKey())
             : null;
         return new UserPreviewDTO(
             id: $user->getId(),
@@ -29,7 +29,7 @@ final class UserMapper
     public function toDetails(User $user)
     {
         $avatarUrl = $user->getCurrentAvatar()
-            ? ($this->getUrl)($user->getCurrentAvatar()->getPreview())
+            ? ($this->getUrl)($user->getCurrentAvatar()->getPreview()->getStorageKey())
             : null;
         return new UserDetailsDTO(
             id: (string) $user->getId(),

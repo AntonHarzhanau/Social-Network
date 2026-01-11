@@ -2,6 +2,7 @@
 
 namespace App\Modules\Media\Domain\Repository;
 
+use App\Modules\Media\Application\DTO\MediaItemRowDTO;
 use App\Modules\Media\Domain\Entity\MediaAsset;
 use Symfony\Component\Uid\Uuid;
 
@@ -21,4 +22,8 @@ interface MediaAssetRepositoryInterface
    
     /** @return list<MediaAsset> */
     public function findAll(): array;
+
+    public function findMediaRowsByIds(Uuid $currentUser, array $ids): array;
+
+     public function getMediaItemById(Uuid $mediaId, Uuid $currentUserId): ?MediaItemRowDTO;
 }

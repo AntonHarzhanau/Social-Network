@@ -3,6 +3,8 @@
 namespace App\Modules\Media\Infrastructure\Http\Controller;
 
 use App\Modules\Media\Application\Action\DeleteMediaAction;
+use App\Modules\Media\Application\Action\GetOneAction;
+use App\Modules\Media\Application\Action\LikeMediaAction;
 use App\Modules\Media\Application\Action\ListMediaAction;
 use App\Modules\Media\Application\Service\GetMediaUrl;
 use App\Modules\Media\Application\Action\UploadMediaAction;
@@ -16,6 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Constraints\Json;
 
 #[Route('/api/media')]
 final class MediaController extends AbstractController
@@ -44,7 +47,7 @@ final class MediaController extends AbstractController
             'fileType' => $media->getFileType()?->value,
             'mimeType' => $media->getMimeType(),
             'sizeByte' => $media->getSizeByte(),
-            'url' => ($this->getMediaUrl)($media),
+            'url' => ($this->getMediaUrl)($media->getStorageKey()),
             'createdAt' => $media->getCreatedAt()->format(\DateTime::ATOM),
             'width' => $media->getWidth(),
             'height' => $media->getHeight(),
@@ -64,8 +67,8 @@ final class MediaController extends AbstractController
     }
 
 
-    #[Route('/{id}', name: 'download_media', methods: ['GET'], format: 'json')]
-    public function download(string $id, #[CurrentUser] User $user, Request $request): Response
+    #[Route('/{id}', name: 'get_one', methods: ['GET'], format: 'json')]
+    public function getOne(string $id, #[CurrentUser] User $user, GetOneAction $getOneAction): JsonResponse
     {
         try {
             $uuid = Uuid::fromString($id);
@@ -73,14 +76,12 @@ final class MediaController extends AbstractController
             return $this->json(['error' => 'Not found'], JsonResponse::HTTP_NOT_FOUND);
         }
 
-        $media = $this->mediaAssetRepository->findById($uuid);
-        if (!$media || $media->getOwner()->getId() !== $user->getId()) {
+        $media = $getOneAction->execute($user->getId(), $uuid);
+        if (!$media) {
             return $this->json(['error' => 'Not found'], JsonResponse::HTTP_NOT_FOUND);
         }
 
-        $signed = (bool) $request->query->get('signed', false);
-        $url = ($this->getMediaUrl)($media, $signed);
-        return new RedirectResponse($url, Response::HTTP_FOUND);
+        return $this->json($media, JsonResponse::HTTP_OK);
     }
 
 
@@ -101,5 +102,14 @@ final class MediaController extends AbstractController
         ($this->deleteMedia)($media);
 
         return $this->json(null, JsonResponse::HTTP_NO_CONTENT);
+    }
+
+    #[Route('/{id}/like', name: 'like_media', methods: ['POST'], format: 'json')]
+    public function like(string $id, #[CurrentUser] User $user, LikeMediaAction $action): JsonResponse
+    {
+        $response = $action->execute(Uuid::fromString($id), $user->getId());
+        return $this->json([
+            $response,
+        ], JsonResponse::HTTP_OK);
     }
 }

@@ -21,9 +21,14 @@ final class GetMediaItemsAction
         foreach ($medias as $media) {
             $mediaItems[$media->getId()->toRfc4122()] = new MediaItemDTO(
                 id: $media->getId()->toRfc4122(),
-                url: ($this->getMediaUrl)($media),
+                url: ($this->getMediaUrl)($media->getStorageKey()),
                 type: $media->getFileType()->value,
                 createdAt: $media->getCreatedAt(),
+                width: $media->getWidth(),
+                height: $media->getHeight(),
+                durationSeconds: $media->getDurationSeconds(),
+                commentThreadId: $media->getCommentThread()->getId()->toRfc4122(),
+                likeCount: $media->getLikeCount(),
             );
         }
 

@@ -16,8 +16,8 @@ class MediaDirectoryAdapter implements MediaAssetDirectoryInterface
         $this->postMediaApi->addMediaToPost($mediaIds, $postId);
     }
 
-    public function getBindingsByPostIds(array $postIds): array
+    public function getBindingsByPostIds(Uuid $currentUser, array $postIds): array
     {
-        return $this->postMediaApi->getMediasForPosts($postIds);
+        return $this->postMediaApi->getMediasForPosts($currentUser, $postIds);
     }
 }

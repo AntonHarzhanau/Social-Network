@@ -13,7 +13,7 @@ const CommentList = ({ threadId }: CommentListProps) => {
     isError,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage
+    isFetchingNextPage,
   } = useComments(threadId);
   const sentinelRef = useInfiniteScrollSentinel({
     enabled: !isLoading && !isError,
@@ -24,11 +24,17 @@ const CommentList = ({ threadId }: CommentListProps) => {
 
   return (
     <div className="flex flex-col relative">
-        {comments.map((comment) => (
+      {comments.length === 0 ? (
+        <div className="text-zinc-400">
+          Оставьте первый комментарий к этой фотографии
+        </div>
+      ) : (
+        comments.map((comment) => (
           <CommentItem key={comment.id} threadId={threadId} comment={comment} />
-        ))}
-      <div ref={sentinelRef}/>
-      
+        ))
+      )}
+
+      <div ref={sentinelRef} />
     </div>
   );
 };

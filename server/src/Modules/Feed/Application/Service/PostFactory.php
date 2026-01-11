@@ -6,6 +6,7 @@ use App\Modules\Feed\Application\DTO\PostFeedItem;
 use App\Modules\Feed\Application\DTO\PostFeedRowDTO;
 use App\Modules\Feed\Application\Port\MediaAssetDirectoryInterface;
 use App\Modules\Feed\Application\Port\UserDirectoryInterface;
+use Symfony\Component\Uid\Uuid;
 
 class PostFactory
 {
@@ -29,13 +30,13 @@ class PostFactory
         );
     }
 
-    public function toPostListResponse(array $dtos): array
+    public function toPostListResponse(Uuid $currentUser, array $dtos): array
     {
         $postIds = array_map(fn(PostFeedRowDTO $post) => $post->id, $dtos);
 
         $authorIds = array_values(array_unique(array_map(fn(PostFeedRowDTO $row) => $row->authorId, $dtos)));
 
-        $media = $this->mediaAssetDirectory->getBindingsByPostIds($postIds);
+        $media = $this->mediaAssetDirectory->getBindingsByPostIds($currentUser, $postIds);
 
         $authorsPreviews = $this->userDirectory->findPreviewsByIds($authorIds);
 

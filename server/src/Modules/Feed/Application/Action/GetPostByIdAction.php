@@ -21,7 +21,7 @@ final class GetPostByIdAction
             return null;
         }
       
-        $post = $this->postFactory->toPostListResponse($rows)[0];
+        $post = $this->postFactory->toPostListResponse($currentUser->getId(), $rows)[0];
         return $post;
     }
 }

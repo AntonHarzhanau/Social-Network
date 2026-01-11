@@ -26,7 +26,7 @@ final class GetUserPreviewsByIdsAction
         )));
 
         $urlsById = $previewIds
-            ? $this->media->getMediasByIds($previewIds)
+            ? $this->media->getMediasByIds(null, $previewIds)
             : [];
 
         $result = [];

@@ -12,5 +12,8 @@ final class MediaItemDTO
         public readonly ?int $width = null,
         public readonly ?int $height = null,
         public readonly ?float $durationSeconds = null,
+        public readonly string $commentThreadId,
+        public readonly int $likeCount,
+        public readonly ?bool $likedByCurrentUser = null,
     ) {}
 }

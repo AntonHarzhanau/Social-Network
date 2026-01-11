@@ -21,7 +21,7 @@ final class GetUserAvatarsAction
             return null;
         }
         $mediaIds = array_map(fn($avatar) => $avatar->getOriginal()->getId(), $avatars);
-        $avatars = $this->mediaService->getMediasByIds($mediaIds);
+        $avatars = $this->mediaService->getMediasByIds($currentUserId, $mediaIds);
         usort($avatars, fn($a, $b) => $b->createdAt <=> $a->createdAt);
         return $avatars;
     }

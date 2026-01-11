@@ -1,30 +1,41 @@
+import { useCreateCommentMutation } from "@/entities/comment/model/useCommentMutations";
+import CommentList from "@/entities/comment/ui/CommentList";
+import type { MediaResponse } from "@/entities/media/model/types";
 import type { UserPreview } from "@/entities/user/model/types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { formatPostDate } from "@/shared/lib/date";
+import { useState } from "react";
 
 interface MediaModalAsideProps {
-    author: UserPreview;
-    createdAtText?: string;
-    comments: Array<{ id: string; username: string; text: string }>;
-    comment: string;
-    setComment: (text: string) => void;
-    submitComment: () => void;
+  author: UserPreview;
+  createdAtText?: string;
+  media: MediaResponse;
 }
 
 const MediaModalAside = ({
-    author,
-    createdAtText,
-    comments,
-    comment,
-    setComment,
-    submitComment,
+  author,
+  createdAtText,
+  media,
 }: MediaModalAsideProps) => {
+  const [comment, setComment] = useState("");
+
+  const createComment = useCreateCommentMutation(media.commentThreadId);
+  const submitComment = () => {
+    if (comment.trim() === "") return;
+    createComment.mutate(comment);
+    setComment("");
+  };
   return (
-    <>
+    <div className="flex h-full min-h-0 flex-col">
       {/* Header: avatar + name + date */}
-      <div className="p-4 border-b border-white/10 flex items-center gap-3">
+      <div className="shrink-0 p-4 border-b border-white/10 flex items-center gap-3">
         <Avatar className="h-9 w-9">
           <AvatarImage
             src={author.avatarUrl ?? undefined}
@@ -38,31 +49,20 @@ const MediaModalAside = ({
         <div className="min-w-0 flex-1">
           <div className="font-medium truncate">{author.username}</div>
           {!!createdAtText && (
-            <div className="text-xs text-zinc-400">{createdAtText}</div>
+            <div className="text-xs text-zinc-400">{formatPostDate(createdAtText)}</div>
           )}
         </div>
       </div>
 
       {/* Comments area (scroll) */}
       <ScrollArea className="flex-1 min-h-0">
-        <div className="p-4 space-y-3 text-sm">
-          {comments.length === 0 ? (
-            <div className="text-zinc-400">
-              Оставьте первый комментарий к этой фотографии
-            </div>
-          ) : (
-            comments.map((c) => (
-              <div key={c.id} className="leading-snug">
-                <span className="font-medium text-zinc-100">{c.username}</span>{" "}
-                <span className="text-zinc-300">{c.text}</span>
-              </div>
-            ))
-          )}
+        <div className="p-4">
+          <CommentList threadId={media.commentThreadId} />
         </div>
       </ScrollArea>
 
       {/* Input + send */}
-      <div className="p-3 border-t border-white/10 flex items-center gap-2">
+      <div className="shrink-0 p-3 border-t border-white/10 flex items-center gap-2">
         <Input
           value={comment}
           onChange={(e) => setComment(e.target.value)}
@@ -72,11 +72,16 @@ const MediaModalAside = ({
             if (e.key === "Enter") submitComment();
           }}
         />
-        <Button type="button" size="sm" onClick={submitComment}>
+        <Button
+          type="button"
+          size="sm"
+          onClick={submitComment}
+          disabled={comment.trim() === ""}
+        >
           Send
         </Button>
       </div>
-    </>
+    </div>
   );
 };
 

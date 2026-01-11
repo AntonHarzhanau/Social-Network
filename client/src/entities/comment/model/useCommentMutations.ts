@@ -16,7 +16,7 @@ function invalidateComments(
   return qc.invalidateQueries({ queryKey: commentsKey(threadId) });
 }
 
-export function useCreateCommentMutation(threadId: string, postId: string) {
+export function useCreateCommentMutation(threadId: string, postId?: string) {
   const qc = useQueryClient();
   const syncPost = useSyncPostInCache();
 
@@ -24,7 +24,9 @@ export function useCreateCommentMutation(threadId: string, postId: string) {
     mutationFn: (content: string) => createComment(threadId, content),
     onSuccess: async () => {
       invalidateComments(qc, threadId);
-      await syncPost(postId);
+        if (postId) {
+            await syncPost(postId);
+        }
     },
   });
 }
