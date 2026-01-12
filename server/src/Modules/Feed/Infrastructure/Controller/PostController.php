@@ -2,11 +2,12 @@
 
 namespace App\Modules\Feed\Infrastructure\Controller;
 
+use App\Modules\Feed\Application\Action\Command\CreatePostCommand;
 use App\Modules\Feed\Application\Action\CreatePostAction;
 use App\Modules\Feed\Application\Action\DeletePostAction;
 use App\Modules\Feed\Application\Action\GetAllPostsAction;
 use App\Modules\Feed\Application\Action\GetPostByIdAction;
-use App\Modules\Feed\Application\Action\GetPostsByAuthor;
+use App\Modules\Feed\Application\Action\GetPostsByWallAction;
 use App\Modules\Feed\Application\Action\ToggleLikeAction;
 use App\Modules\Feed\Application\Action\UpdatePostAction;
 use App\Modules\Feed\Infrastructure\Http\Request\CreatePostRequest;
@@ -29,17 +30,21 @@ final class PostController extends AbstractController
     public function __construct() {}
 
 
-    #[Route('', name: 'create_post', methods: ['POST'], format: 'json')]
+    #[Route('/{wallId}', name: 'create_post', methods: ['POST'], format: 'json')]
     public function create(
+        string $wallId,
         #[MapRequestPayload] CreatePostRequest $dto,
         #[CurrentUser] User $user,
-        CreatePostAction $create
+        CreatePostAction $action
     ): JsonResponse {
-        $create(
-            $dto->content,
-            $dto->mediaIds ?? [],
-            $user->getId(),
-            $dto->visibility ?? VisibilityEnum::PUBLIC,
+        $action->execute(
+            new CreatePostCommand(
+                wallId: Uuid::fromString($wallId),
+                authorId: $user->getId(),
+                content: $dto->content,
+                mediaIds: $dto->mediaIds,
+                visibility: $dto->visibility,
+            )
         );
 
         return $this->json([
@@ -49,17 +54,18 @@ final class PostController extends AbstractController
 
 
     #[Route('', name: 'get_posts', methods: ['GET'], format: 'json')]
-    public function getAll(Request $request, #[CurrentUser] User $user, GetAllPostsAction $getAll): JsonResponse
+    public function getAll(Request $request, #[CurrentUser] User $user, GetAllPostsAction $action): JsonResponse
     {
         $page = max((int) $request->query->get('page', 1), 1);
         $limit = min(max((int) $request->query->get('limit', 20), 1), 50);
         $visibilities = [VisibilityEnum::PUBLIC];
 
-        $posts = $getAll(
+        $posts = $action->execute(
             page: $page,
             limit: $limit,
             visibilities: $visibilities,
             currentUserId: $user->getId(),
+            // wallIds: [Uuid::fromString($wallId)],
         );
         return $this->json($posts, JsonResponse::HTTP_OK);
     }
@@ -67,10 +73,10 @@ final class PostController extends AbstractController
 
 
     #[Route('/{id}', name: 'get_post_by_id', methods: ['GET'], format: 'json')]
-    public function getById(string $id, #[CurrentUser] User $currentUser, GetPostByIdAction $getById): JsonResponse
+    public function getById(string $id, #[CurrentUser] User $currentUser, GetPostByIdAction $action): JsonResponse
     {
-        $post = $getById(
-            postId: $id,
+        $post = $action->execute(
+            postId: Uuid::fromString($id),
             currentUser: $currentUser,
         );
         if ($post === null) {
@@ -80,19 +86,19 @@ final class PostController extends AbstractController
     }
 
 
-    #[Route('/author/{authorId}', name: 'get_posts_by_author', methods: ['GET'], format: 'json')]
-    public function getByAuthor(
+    #[Route('/wall/{wallId}', name: 'get_posts_by_wall', methods: ['GET'], format: 'json')]
+    public function getByWall(
         #[CurrentUser] User $user,
-        string $authorId,
+        string $wallId,
         Request $request,
-        GetPostsByAuthor $getByAuthor
+        GetPostsByWallAction $action
     ): JsonResponse {
         $page = max(1, (int) $request->query->get('page', 1));
         $limit = max(1, (int) $request->query->get('limit', 2));
 
-        $posts = $getByAuthor(
+        $posts = $action->execute(
             currentUser: $user,
-            authorId: Uuid::fromString($authorId),
+            wallId: Uuid::fromString($wallId),
             page: $page,
             limit: $limit,
         );
@@ -102,10 +108,10 @@ final class PostController extends AbstractController
 
 
     #[Route('/{postId}', name: 'delete_post', methods: ['DELETE'], format: 'json')]
-    public function delete(string $postId, #[CurrentUser] User $user, DeletePostAction $delete): JsonResponse
+    public function delete(string $postId, #[CurrentUser] User $user, DeletePostAction $action): JsonResponse
     {
         try {
-            $delete(Uuid::fromString($postId), $user);
+            $action->execute(Uuid::fromString($postId), $user);
         } catch (AccessDeniedException $e) {
             return $this->json(['error' => 'Forbidden', 'message' => $e->getMessage()], 403);
         } catch (NotFoundHttpException $e) {
@@ -122,10 +128,10 @@ final class PostController extends AbstractController
         string $postId,
         #[MapRequestPayload] UpdatePostRequest $dto,
         #[CurrentUser] User $user,
-        UpdatePostAction $update,
+        UpdatePostAction $action,
     ): JsonResponse {
         try {
-            $update(Uuid::fromString($postId), $dto, $user);
+            $action->execute(Uuid::fromString($postId), $dto, $user);
         } catch (AccessDeniedException $e) {
             return $this->json(['error' => 'Forbidden', 'message' => $e->getMessage()], 403);
         } catch (NotFoundHttpException $e) {
@@ -137,9 +143,9 @@ final class PostController extends AbstractController
 
 
     #[Route('/{postId}/like', name: 'like_post', methods: ['POST'], format: 'json')]
-    public function toggleLike(string $postId, #[CurrentUser] User $user, ToggleLikeAction $toggleLike): JsonResponse
+    public function toggleLike(string $postId, #[CurrentUser] User $user, ToggleLikeAction $action): JsonResponse
     {
-        $responseDTO = $toggleLike(Uuid::fromString($postId), $user);
+        $responseDTO = $action->execute(Uuid::fromString($postId), $user);
         return $this->json($responseDTO, JsonResponse::HTTP_OK);
     }
 }

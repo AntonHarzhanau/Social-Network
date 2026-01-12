@@ -2,36 +2,51 @@
 
 namespace App\Modules\Feed\Application\Action;
 
+use App\Modules\Feed\Application\Action\Command\CreatePostCommand;
 use App\Modules\Feed\Application\DTO\PostMutationResponse;
-use App\Modules\Feed\Application\Port\MediaAssetDirectoryInterface;
 use App\Modules\Feed\Application\Port\UserDirectoryInterface;
+use App\Modules\Feed\Application\Service\PostMediaBindingsService;
 use App\Modules\Feed\Domain\Entity\Post;
+use App\Modules\Feed\Domain\Entity\WallPost;
 use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
-use App\Modules\Feed\Domain\Enum\VisibilityEnum;
-use Symfony\Component\Uid\Uuid;
+use App\Modules\Feed\Domain\Repository\WallPostRepositoryInterface;
+use App\Modules\Feed\Domain\Repository\WallRepositoryInterface;
 
 final class CreatePostAction
 {
     public function __construct(
         private readonly PostRepositoryInterface $postRepository,
-        private readonly MediaAssetDirectoryInterface $mediaAssetDirectory,
         private readonly UserDirectoryInterface $userDirectory,
+        private readonly WallRepositoryInterface $wallRepository,
+        private readonly WallPostRepositoryInterface $wallPostRepository,
+        private readonly PostMediaBindingsService $postMediaBindingsService,
     ) {}
 
-    public function __invoke(?string $content, array $mediaIds, Uuid $authorId, VisibilityEnum $visibility): PostMutationResponse
+    public function execute(CreatePostCommand $command): PostMutationResponse
     {
-        $post = new Post();
-        $author = $this->userDirectory->getUser($authorId->toRfc4122());
-        $post->setAuthor($author);
-        $post->setContent($content);
-        if ($visibility !== null) {
-            $post->setVisibility($visibility);
+        $author = $this->userDirectory->getUser($command->authorId);
+        if ($author === null) {
+            throw new \RuntimeException('Author not found: ' . $command->authorId);
+        }
+        $wall = $this->wallRepository->getWallById($command->wallId);
+        if ($wall === null) {
+            throw new \RuntimeException('Wall not found: ' . $command->wallId);
         }
 
-        $this->postRepository->save($post);
+        $post = new Post();
+        $post->setAuthor($author);
+        $post->setContent($command->content);
+        if ($command->visibility !== null) {
+            $post->setVisibility($command->visibility);
+        }
+        $this->postRepository->save($post, false);
+        $this->postMediaBindingsService->addMediaToPost($command->mediaIds ?? [], $post);
 
-
-        $this->mediaAssetDirectory->addMediaToPost($mediaIds ?? [], $post->getId());
+        $wallPost = new WallPost(
+            wall: $wall,
+            post: $post,
+        );
+        $this->wallPostRepository->save($wallPost);
 
         return new PostMutationResponse($post->getId()->toRfc4122());
     }

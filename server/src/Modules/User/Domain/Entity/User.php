@@ -2,6 +2,7 @@
 
 namespace App\Modules\User\Domain\Entity;
 
+use App\Modules\Feed\Domain\Entity\Wall;
 use App\Modules\User\Infrastructure\Persistence\Doctrine\Repository\UserRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -80,9 +81,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'userId', cascade: ['persist', 'remove'])]
     private ?UserPrivacySettings $PrivacySettings = null;
 
+    #[ORM\OneToOne(targetEntity: Wall::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\JoinColumn(name: 'wall_id', referencedColumnName: 'id', nullable: false, unique: true, onDelete: 'CASCADE')]
+    private ?Wall $wall = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->wall = new Wall();
     }
 
     public function getId(): ?Uuid
@@ -335,6 +341,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setCurrentAvatar(?UserAvatar $currentAvatar): static
     {
         $this->currentAvatar = $currentAvatar;
+
+        return $this;
+    }
+
+    public function getWall(): Wall
+    {
+        return $this->wall;
+    }
+    public function setWall(Wall $wall): static
+    {
+        $this->wall = $wall;
 
         return $this;
     }

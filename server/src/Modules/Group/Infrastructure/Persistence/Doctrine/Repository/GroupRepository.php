@@ -47,4 +47,25 @@ class GroupRepository extends ServiceEntityRepository implements GroupRepository
     {
         return $this->find($id);
     }
+
+    /** @return array<string> wallIds */
+    public function findWallIdsByGroupIds(array $groupIds): array
+    {
+        return $this->createQueryBuilder('g')
+            ->select('IDENTITY(g.wall) AS wallId')
+            ->andWhere('g.id IN (:ids)')
+            ->setParameter('ids', $groupIds)
+            ->getQuery()
+            ->getSingleColumnResult();
+    }
+
+    public function findGroupsByWallIds(array $wallIds): array
+    {
+        return $this->createQueryBuilder('g')
+            ->andWhere('g.wall IN (:wallIds)')
+            ->andWhere('g.deletedAt IS NULL')
+            ->setParameter('wallIds', $wallIds)
+            ->getQuery()
+            ->getResult();
+    }
 }

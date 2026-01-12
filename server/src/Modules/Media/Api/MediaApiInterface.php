@@ -6,6 +6,8 @@ use Symfony\Component\Uid\Uuid;
 
 interface MediaApiInterface
 {
+    public function getMediaAssetsByIds( array $mediaIds): array;
+
     /** @return array<string, MediaItemDTO> */
     public function getMediasByIds(?Uuid $currentUser, array $ids): array;
 }

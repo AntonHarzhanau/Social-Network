@@ -13,4 +13,7 @@ interface UserApiInterface
 
     /** @return list<UserPreviewDTO> */
     public function findPreviewsByIds(array $ids): array;
+
+    /** @return list<UserPreviewDTO> */
+    public function findPreviewByWallIds(array $wallIds): array;
 }

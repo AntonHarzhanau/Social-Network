@@ -3,16 +3,16 @@ import type { Post } from "./types";
 import { postKeys } from "./queryKeys";
 import { postApi } from "../api/postApi";
 
-export function useInfinitePosts(params?: { authorId?: string | null; limit?: number }) {
+export function useInfinitePosts(params?: { wallId?: string | null; limit?: number }) {
   const limit = params?.limit ?? 10;
-  const authorId = params?.authorId ?? null;
+  const wallId = params?.wallId ?? null;
 
   const query = useInfiniteQuery<Post[]>({
-    queryKey: postKeys.list({ authorId, limit }),
+    queryKey: postKeys.list({ wallId, limit }),
     initialPageParam: 1,
     queryFn: ({ pageParam }) =>
       postApi.fetchPosts({
-        authorId,
+        wallId,
         page: pageParam as number,
         limit,
       }),

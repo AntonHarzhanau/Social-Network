@@ -14,7 +14,7 @@ final class DeletePostAction
         private readonly PostRepositoryInterface $postRepository,
     ) {}
 
-    public function __invoke(Uuid $postId, User $user): void
+    public function execute(Uuid $postId, User $user): void
     {
         $post = $this->postRepository->findOneById($postId);
         if (!$post) {

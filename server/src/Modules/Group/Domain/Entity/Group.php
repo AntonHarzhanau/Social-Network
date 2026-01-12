@@ -2,6 +2,7 @@
 
 namespace App\Modules\Group\Domain\Entity;
 
+use App\Modules\Feed\Domain\Entity\Wall;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\Group\Infrastructure\Persistence\Doctrine\Repository\GroupRepository;
 use Doctrine\DBAL\Types\Types;
@@ -41,7 +42,9 @@ class Group
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $coverUrl = null;
 
-
+    #[ORM\OneToOne(targetEntity: Wall::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\JoinColumn(name: 'wall_id', referencedColumnName: 'id', nullable: false, unique: true, onDelete: 'CASCADE')]
+    private ?Wall $wall = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -55,6 +58,7 @@ class Group
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->wall = new Wall();
     }
 
     public function getId(): ?Uuid
@@ -179,6 +183,17 @@ class Group
     {
         $this->coverUrl = $coverUrl;
 
+        return $this;
+    }
+
+    public function getWall(): Wall
+    {
+        return $this->wall;
+    }
+
+    public function setWall(Wall $wall): static
+    {
+        $this->wall = $wall;
         return $this;
     }
 }

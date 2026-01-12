@@ -3,7 +3,7 @@ export const postKeys = {
 
   lists: () => [...postKeys.all, "lists"] as const,
   
-  list: (params: { authorId: string | null; limit: number }) =>
+  list: (params: { wallId: string | null; limit: number }) =>
     [...postKeys.lists(), params] as const,
 
   detail: (postId: string) => [...postKeys.all, "detail", postId] as const,

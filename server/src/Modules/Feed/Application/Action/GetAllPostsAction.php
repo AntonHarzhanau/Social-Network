@@ -5,28 +5,28 @@ namespace App\Modules\Feed\Application\Action;
 use App\Modules\Feed\Application\Port\UserDirectoryInterface;
 use App\Modules\Feed\Application\Service\PostFactory;
 use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
+use App\Modules\Feed\Domain\Repository\WallPostRepositoryInterface;
 use Symfony\Component\Uid\Uuid;
 
 final class GetAllPostsAction
 {
     public function __construct(
-        private readonly PostRepositoryInterface $postRepository,
-        private readonly UserDirectoryInterface $userDirectory,
         private readonly PostFactory $postFactory,
+        private readonly WallPostRepositoryInterface $wallPostRepository,
     ) {}
 
-    public function __invoke(int $page, int $limit, array $visibilities, Uuid $currentUserId): array
+    public function execute(array $visibilities, Uuid $currentUserId, int $page, int $limit): array
     {
-        $user = $this->userDirectory->getUser($currentUserId->toRfc4122());
 
-        $rows = $this->postRepository->findPosts(
-            currentUser: $user,
-            visibilities: $visibilities,
+        $rows = $this->wallPostRepository->findMixedFeed(
+            currentUser: $currentUserId,
+            wallIds: [],
             page: $page,
-            limit: $limit
+            limit: $limit,
+            includePublicAlso: true
         );
 
-        $posts = $this->postFactory->toPostListResponse($currentUserId, $rows);
+        $posts = $this->postFactory->toPostListResponse($rows);
         return $posts;
     }
 }

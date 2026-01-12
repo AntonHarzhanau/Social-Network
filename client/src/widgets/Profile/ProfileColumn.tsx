@@ -1,19 +1,19 @@
 import CreatePostDIalog from "../../features/post/create/ui/CreatePostDIalog";
 import FeedsList from "../FeedsList";
 import MediaBox from "../MediaBox/MediaBox";
+import type {  UserProfile } from "@/entities/user/model/types";
 
 interface ProfileColumnProps {
-  userId?: string;
+  user?: UserProfile | null;
 }
 
-const ProfileColumn = ({ userId }: ProfileColumnProps) => {
+const ProfileColumn = ({ user }: ProfileColumnProps) => {
 
   return (
     <div className="flex flex-col gap-2">
-     {userId && <MediaBox id={userId} />}
-
+     {user?.id && <MediaBox id={user.id} />}
       <CreatePostDIalog className="mt-2" />
-      <FeedsList authorId={userId} />
+      <FeedsList wallId={user?.wallId} />
     </div>
   );
 };

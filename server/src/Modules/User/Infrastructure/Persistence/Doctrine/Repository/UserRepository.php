@@ -51,11 +51,11 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->orderBy('u.createdAt', 'DESC')
             ->addOrderBy('u.id', 'DESC');
 
-            if ($query !== null && $query !== '') {
-               $escaped = addcslashes($query, '%_\\');
-               $qb->andWhere('LOWER(u.username) LIKE :query')
-                    ->setParameter('query', '%' . mb_strtolower($escaped) . '%');
-            }
+        if ($query !== null && $query !== '') {
+            $escaped = addcslashes($query, '%_\\');
+            $qb->andWhere('LOWER(u.username) LIKE :query')
+                ->setParameter('query', '%' . mb_strtolower($escaped) . '%');
+        }
 
         if ($limit !== null && $page !== null) {
             $qb->setMaxResults($limit)
@@ -106,7 +106,12 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function findPreviewsByIds(array $ids): array
     {
         $qb = $this->createQueryBuilder('u')
-            ->select(sprintf('NEW %s(u.id, u.username, p.id, u.slug)', UserPreviewRowDTO::class))
+            ->select(
+                sprintf(
+                    'NEW %s(u.id, u.username, p.id, u.slug, IDENTITY(u.wall))',
+                    UserPreviewRowDTO::class
+                )
+            )
             ->leftJoin('u.currentAvatar', 'ua')
             ->leftJoin('ua.preview', 'p')
             ->andWhere('u.id IN (:ids)')
@@ -120,5 +125,35 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object
     {
         return parent::findOneBy($criteria, $orderBy);
+    }
+
+    /** @return array<string> wallIds */
+    public function findWallIdsByUserIds(array $userIds): array
+    {
+        return $this->createQueryBuilder('u')
+            ->select('IDENTITY(u.wall) AS wallId')
+            ->andWhere('u.id IN (:ids)')
+            ->andWhere('u.deletedAt IS NULL')
+            ->setParameter('ids', $userIds)
+            ->getQuery()
+            ->getSingleColumnResult();
+    }
+
+    public function findPreviewRowsByWallIds(array $wallIds): array
+    {
+        return $this->createQueryBuilder('u')
+            ->select(
+                sprintf(
+                    'NEW %s(u.id, u.username, p.id, u.slug, IDENTITY(u.wall))',
+                    UserPreviewRowDTO::class
+                )
+            )
+            ->leftJoin('u.currentAvatar', 'ua')
+            ->leftJoin('ua.preview', 'p')
+            ->andWhere('IDENTITY(u.wall) IN (:wallIds)')
+            ->andWhere('u.deletedAt IS NULL')
+            ->setParameter('wallIds', $wallIds)
+            ->getQuery()
+            ->getResult();
     }
 }

@@ -3,7 +3,7 @@ import FeedCard from "../entities/post/ui/FeedCard";
 import { useInfiniteScrollSentinel } from "@/shared/hooks/useInfiniteScrollSentinel";
 
 
-const FeedsList = ({ authorId = null }: { authorId?: string | null }) => {
+const FeedsList = ({ wallId = null }: { wallId?: string | null }) => {
   const {
     posts,
     isLoading,
@@ -11,7 +11,7 @@ const FeedsList = ({ authorId = null }: { authorId?: string | null }) => {
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useInfinitePosts({ limit: 10, authorId });
+  } = useInfinitePosts({ limit: 10, wallId });
 
   const sentinelRef = useInfiniteScrollSentinel({
     enabled: !isLoading && !isError,

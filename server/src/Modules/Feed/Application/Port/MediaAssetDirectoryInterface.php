@@ -2,11 +2,10 @@
 
 namespace App\Modules\Feed\Application\Port;
 
-use Symfony\Component\Uid\Uuid;
-
 interface MediaAssetDirectoryInterface
 {
-    public function addMediaToPost(array $mediaIds, Uuid $postId): void;
+    public function getMediaAssetsByIds(array $mediaIds): array;
 
-    public function getBindingsByPostIds(Uuid $currentUser, array $postIds): array;
+
+    public function getMediaItems(array $mediaIds): array;
 }

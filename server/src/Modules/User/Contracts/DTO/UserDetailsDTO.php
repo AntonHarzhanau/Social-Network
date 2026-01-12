@@ -18,5 +18,6 @@ final readonly class UserDetailsDTO
         public string $createdAt,
         public ?string $emailVerifiedAt,
         public ?string $lastLoginAt,
+        public string $wallId,
     ) {}
 }

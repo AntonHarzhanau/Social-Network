@@ -14,7 +14,7 @@ final class UpdatePostAction
         private readonly PostRepositoryInterface $postRepository,
     ) {}
 
-    public function __invoke(Uuid $postId, $dto, $user): PostMutationResponse
+    public function execute(Uuid $postId, $dto, $user): PostMutationResponse
     {
         $post = $this->postRepository->findOneById($postId);
 

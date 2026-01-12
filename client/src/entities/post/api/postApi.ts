@@ -8,13 +8,13 @@ import type {
 
 export const postApi = {
   async fetchPosts({
-    authorId = null,
+    wallId = null,
     page = 1,
     limit = 10,
   }: FetchPostsParams = {}) {
-    const authorIdParam = authorId ? `/author/${authorId}` : "";
+    const wallIdParam = wallId ? `/wall/${wallId}` : "";
     const response = await apiClient.get<Post[]>(
-      `/posts${authorIdParam}?page=${page}&limit=${limit}`,
+      `/posts${wallIdParam}?page=${page}&limit=${limit}`,
     );
     console.log("Fetched posts:", response.data);
     return response.data;

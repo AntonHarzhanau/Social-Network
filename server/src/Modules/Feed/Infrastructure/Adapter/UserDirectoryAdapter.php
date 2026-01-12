@@ -21,4 +21,13 @@ class UserDirectoryAdapter implements UserDirectoryInterface
     {
         return $this->userApi->findPreviewsByIds($ids);
     }
+
+    public function findPreviewsByWallIds(array $wallIds): array
+    {   $users = $this->userApi->findPreviewByWallIds($wallIds);
+        $result = [];
+        foreach ($users as $user) {
+            $result[$user->wallId] = $user;
+        }
+        return $result;
+    }
 }

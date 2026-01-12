@@ -23,6 +23,7 @@ final class UserMapper
             username: $user->getUsername(),
             avatarUrl: $avatarUrl,
             slug: $user->getSlug(),
+            wallId: (string) $user->getWall()->getId(),
         );
     }
 
@@ -45,6 +46,7 @@ final class UserMapper
             createdAt: $user->getCreatedAt()?->format(\DateTimeInterface::ATOM) ?? '',
             emailVerifiedAt: $user->getEmailVerifiedAt()?->format(\DateTimeInterface::ATOM),
             lastLoginAt: $user->getLastLoginAt()?->format(\DateTimeInterface::ATOM),
+            wallId: (string) $user->getWall()->getId(),
         );
     }
 }

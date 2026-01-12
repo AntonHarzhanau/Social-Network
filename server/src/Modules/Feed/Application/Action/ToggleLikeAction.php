@@ -13,7 +13,7 @@ final class ToggleLikeAction
         private readonly PostRepositoryInterface $postRepository,
     ) {}
 
-    public function __invoke(Uuid $postId, User $user): PostMutationResponse
+    public function execute(Uuid $postId, User $user): PostMutationResponse
     {
         $post = $this->postRepository->findOneById($postId);
         if ($post->getLikeBy()->contains($user)) {

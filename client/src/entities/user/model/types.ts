@@ -3,12 +3,22 @@ export interface UserPreview {
   username: string;
   avatarUrl?: string | null;
   slug?: string | null;
+  wallId?: string | null;
 }
 
 export interface UserProfile extends UserPreview {
-  coverUrl: string;
-  location: string;
-  bio: string;
-  maritalStatus: string;
+  id: string;
+  email: string;
+  username: string;
+  slug: string | null;
+  avatarUrl: string | null;
+  coverUrl: string | null;
+  location: string | null;
+  maritalStatus: string | null;
+  bio: string | null;
   dateOfBirth: string;
+  createdAt: string;
+  emailVerifiedAt: string | null;
+  lastLoginAt: string | null;
+  wallId: string | null;
 }

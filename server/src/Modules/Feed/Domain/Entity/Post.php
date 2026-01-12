@@ -4,7 +4,6 @@ namespace App\Modules\Feed\Domain\Entity;
 
 use App\Modules\Comment\Domain\Entity\CommentThread;
 use App\Modules\User\Domain\Entity\User;
-use App\Modules\Media\Domain\Entity\PostMediaBinding;
 use App\Modules\Feed\Domain\Enum\VisibilityEnum;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -28,9 +27,6 @@ class Post
 
     #[ORM\Column]
     private ?int $likeCount = 0;
-
-    #[ORM\Column]
-    private ?int $commentCount = 0;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -103,18 +99,6 @@ class Post
     public function setLikeCount(int $likeCount): static
     {
         $this->likeCount = $likeCount;
-
-        return $this;
-    }
-
-    public function getCommentCount(): ?int
-    {
-        return $this->commentCount;
-    }
-
-    public function setCommentCount(int $commentCount): static
-    {
-        $this->commentCount = $commentCount;
 
         return $this;
     }
@@ -202,6 +186,7 @@ class Post
 
         return $this;
     }
+
 
     /**
      * @return Collection<int, PostMediaBinding>

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Modules\Media\Domain\Entity;
+namespace App\Modules\Feed\Domain\Entity;
 
 use App\Modules\Feed\Domain\Entity\Post;
+use App\Modules\Media\Domain\Entity\MediaAsset;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;

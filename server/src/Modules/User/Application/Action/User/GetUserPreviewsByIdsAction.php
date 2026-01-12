@@ -20,7 +20,6 @@ final class GetUserPreviewsByIdsAction
     {
         /** @var UserPreviewRowDTO[] $rows */
         $rows = $this->users->findPreviewsByIds($ids);
-
         $previewIds = array_values(array_unique(array_filter(
             array_map(fn(DTOUserPreviewRowDTO $r) => $r->currentAvatar, $rows)
         )));
@@ -35,7 +34,8 @@ final class GetUserPreviewsByIdsAction
                 id: $row->id,
                 username: $row->username,
                 avatarUrl: $row->currentAvatar ? ($urlsById[$row->currentAvatar]->url ?? null) : null,
-                slug: $row->slug
+                slug: $row->slug,
+                wallId: $row->wallId,
             );
         }
 

@@ -4,6 +4,7 @@ namespace App\Modules\Media\Api;
 
 use App\Modules\Media\Application\Action\GetMediaItemsAction;
 use App\Modules\Media\Application\Action\GetMediaItemsWithLikeAction;
+use App\Modules\Media\Domain\Repository\MediaAssetRepositoryInterface;
 use Symfony\Component\Uid\Uuid;
 
 final class MediaApi implements MediaApiInterface
@@ -11,7 +12,15 @@ final class MediaApi implements MediaApiInterface
     public function __construct(
         private readonly GetMediaItemsAction $getMediaItems,
         private readonly GetMediaItemsWithLikeAction $getMediaItemsWithLikes,
+        private readonly MediaAssetRepositoryInterface $mediaAssetRepository,
     ) {}
+
+
+    public function getMediaAssetsByIds( array $mediaIds): array
+    {
+        $items = $this->mediaAssetRepository->findByIds($mediaIds);
+        return $items;
+    }
 
     /** @return array<string, MediaItemDTO> */
     public function getMediasByIds(?Uuid $currentUser, array $ids): array

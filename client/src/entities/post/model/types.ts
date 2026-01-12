@@ -21,6 +21,9 @@ export interface Post {
   author: UserPreview;
   commentThreadId: string;
   media: MediaResponse[] | null;
+  wallId: string;
+  publicationId: string;
+  actorId?: string | null;
 }
 
 export interface ToggleLikePostResponse {
@@ -38,7 +41,7 @@ export interface PostMutationResponse {
 }
 
 export interface FetchPostsParams {
-  authorId?: string | null;
+  wallId?: string | null;
   page?: number;
   limit?: number;
 }
