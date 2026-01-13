@@ -1,21 +1,21 @@
 import { Button } from "@/shared/components/ui/button";
-import { useUserProfile } from "@/entities/user/model/useUserProfile";
 import EditProfileForm from "@/entities/user/ui/EditProfileForm";
 import ProfileHeader from "@/shared/components/ProfileHeader";
 import UserProfileAvatar from "@/features/user/manage-avatar/ui/UserProfileAvatar";
 import { Link } from "react-router-dom";
 import { GraduationCap, Info, MapPin } from "lucide-react";
-import { sessionUser } from "@/entities/session/model/sessionStore";
+import { sessionStore } from "@/entities/session/model/sessionStore";
+import type { UserProfile } from "@/entities/user/model/types";
 
 interface UserProfileHeaderProps {
-  userId?: string;
+  user?: UserProfile;
+  loading: boolean;
 }
 
-const UserProfileHeader = ({ userId }: UserProfileHeaderProps) => {
-  const user =  sessionUser();
-  const { data: userProfile } = useUserProfile(userId);
+const UserProfileHeader = ({ user, loading }: UserProfileHeaderProps) => {
+  const currentUser = sessionStore((s) => s.user);
 
-  const isOwner = !!userId && user?.id === userId;
+  const isOwner = !!user?.id && user?.id === currentUser?.id;
 
   return (
     <>
@@ -29,30 +29,30 @@ const UserProfileHeader = ({ userId }: UserProfileHeaderProps) => {
         }
         avatar={
           <UserProfileAvatar
-            userId={userId}
-            avatarUrl={userProfile?.avatarUrl}
-            username={userProfile?.username}
+            userId={user?.id}
+            avatarUrl={user?.avatarUrl}
+            username={user?.username}
             isOwner={isOwner}
           />
         }
         title={
           <h1 className="text-2xl font-bold text-secondary-foreground">
-            {userProfile?.username || ""}
+            {user?.username || ""}
           </h1>
         }
         rightActions={
           isOwner ? (
-            <EditProfileForm profileData={userProfile} userId={userId} />
+            <EditProfileForm profileData={user} userId={user?.id} />
           ) : null
         }
         meta={
           <div className=" text-sm text-muted-foreground">
             <div className="flex flex-wrap gap-3">
               <Link to="/profile">
-                {userProfile?.location && (
+                {user?.location && (
                   <div className="flex gap-1 items-center hover:underline">
                     <MapPin className="text-foreground h-4 w-4" />
-                    <p className="text-foreground">{userProfile?.location}</p>
+                    <p className="text-foreground">{user?.location}</p>
                   </div>
                 )}
               </Link>

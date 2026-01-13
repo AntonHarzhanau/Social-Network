@@ -17,7 +17,7 @@ class CommentThread
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id = null;
 
-    #[ORM\OneToMany(mappedBy: 'thread', targetEntity: Comment::class, orphanRemoval: true, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'thread', targetEntity: Comment::class, orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $comments;
 
     #[ORM\Column]

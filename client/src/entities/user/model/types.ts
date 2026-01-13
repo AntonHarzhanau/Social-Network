@@ -18,7 +18,7 @@ export interface UserProfile extends UserPreview {
   bio: string | null;
   dateOfBirth: string;
   createdAt: string;
-  emailVerifiedAt: string | null;
+  emailVerifiedAt: string;
   lastLoginAt: string | null;
-  wallId: string | null;
+  wallId: string;
 }

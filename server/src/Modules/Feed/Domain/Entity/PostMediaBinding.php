@@ -17,12 +17,12 @@ class PostMediaBinding
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'bindedMedia')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'bindedMedia')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Post $post = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: MediaAsset::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?MediaAsset $media = null;
 
     #[ORM\Column]

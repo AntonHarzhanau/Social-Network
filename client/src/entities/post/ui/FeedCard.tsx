@@ -1,4 +1,3 @@
-
 import {
   Card,
   CardContent,
@@ -20,9 +19,9 @@ interface FeedCardProps {
 }
 
 const FeedCard = ({ post }: FeedCardProps) => {
-    const openViewer = useMediaViewerStore((s) => s.openViewer);
-    const [feedDetailsOpen, setFeedDetailsOpen] = useState(false);
-    
+  const openViewer = useMediaViewerStore((s) => s.openViewer);
+  const [feedDetailsOpen, setFeedDetailsOpen] = useState(false);
+
   const authorName = post.author.username;
   return (
     <>
@@ -32,6 +31,7 @@ const FeedCard = ({ post }: FeedCardProps) => {
           name={authorName}
           avatarUrl={post.author.avatarUrl}
           date={formatPostDate(post.createdAt)}
+          postId={post.id}
         />
 
         <CardContent className="w-full px-2">
@@ -65,7 +65,11 @@ const FeedCard = ({ post }: FeedCardProps) => {
           />
         </CardFooter>
       </Card>
-      <FeedDetails post={post} open={feedDetailsOpen} onOpenChange={setFeedDetailsOpen} />
+      <FeedDetails
+        post={post}
+        open={feedDetailsOpen}
+        onOpenChange={setFeedDetailsOpen}
+      />
     </>
   );
 };

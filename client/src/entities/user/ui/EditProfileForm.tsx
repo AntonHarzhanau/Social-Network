@@ -14,7 +14,7 @@ import {
 } from "../model/EditProfileSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { UserProfile } from "../model/types";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateUserProfile } from "../api/userApi";
 
@@ -24,22 +24,25 @@ interface EditProfileFormProps {
 }
 
 const EditProfileForm = ({ profileData, userId }: EditProfileFormProps) => {
-    const queryClient = useQueryClient();
-    const mutation = useMutation({
-        mutationFn: (data: EditProfileSchema) => updateUserProfile(data),
-        onSuccess: () => {
-            if (userId) {
-                queryClient.invalidateQueries({ queryKey: ["userProfile", userId] });
-            }
-        },
-    });
+  const [open, setOpen] = useState(false);
+
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: (data: EditProfileSchema) => updateUserProfile(data),
+    onSuccess: () => {
+      if (userId) {
+        queryClient.invalidateQueries({ queryKey: ["userProfile", userId] });
+      }
+      setOpen(false);
+    },
+  });
 
   const form = useForm<EditProfileSchema>({
     resolver: zodResolver(editProfileSchema),
     defaultValues: {
       username: "",
       bio: "",
-    //   slug: "",
+      //   slug: "",
       location: "",
       maritalStatus: "",
     },
@@ -51,7 +54,7 @@ const EditProfileForm = ({ profileData, userId }: EditProfileFormProps) => {
     form.reset({
       username: profileData.username ?? "",
       bio: profileData.bio ?? "",
-    //   slug: profileData.slug ?? "",
+      //   slug: profileData.slug ?? "",
       location: profileData.location ?? "",
       maritalStatus: profileData.maritalStatus ?? "",
     });
@@ -59,11 +62,22 @@ const EditProfileForm = ({ profileData, userId }: EditProfileFormProps) => {
 
   const handleSubmit = (data: EditProfileSchema) => {
     mutation.mutate(data);
-    console.log("Edited profile data:", data);
   };
 
   return (
-    <Dialog>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        if (!v && profileData) form.reset({
+          username: profileData.username ?? "",
+          bio: profileData.bio ?? "",
+          //   slug: profileData.slug ?? "",
+          location: profileData.location ?? "",
+          maritalStatus: profileData.maritalStatus ?? "",
+        });
+      }}
+    >
       <DialogTrigger asChild>
         <Button size="sm" className="">
           Edit profile
@@ -72,9 +86,9 @@ const EditProfileForm = ({ profileData, userId }: EditProfileFormProps) => {
       <DialogContent aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
-          <form 
-          id="edit-profile-form"
-          onSubmit={form.handleSubmit(handleSubmit)}
+          <form
+            id="edit-profile-form"
+            onSubmit={form.handleSubmit(handleSubmit)}
           >
             <FormInput
               name="username"
