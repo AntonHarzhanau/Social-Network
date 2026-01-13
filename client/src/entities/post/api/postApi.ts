@@ -16,13 +16,13 @@ export const postApi = {
     const response = await apiClient.get<Post[]>(
       `/posts${wallIdParam}?page=${page}&limit=${limit}`,
     );
-    console.log("Fetched posts:", response.data);
     return response.data;
   },
 
-  async createPost(payload: CreatePostPayload) {
+  async createPost(payload: CreatePostPayload, wallId: string) {
+    if (!wallId) throw new Error("Wall ID is required to create a post.");
     const response = await apiClient.post<PostMutationResponse>(
-      "/posts",
+      `/posts/${wallId}`,
       payload,
     );
 

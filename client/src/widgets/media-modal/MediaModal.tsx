@@ -6,28 +6,28 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import MediaCarousel from "@/entities/media/ui/MediaCarousel";
 import { cn } from "@/shared/lib/utils";
-import type { MediaResponse } from "@/entities/media/model/types";
+import type { MediaDetail, MediaPreview } from "@/entities/media/model/types";
 import MediaModalCloseButton from "./MediaModalCloseButton";
 import MediaModalControls from "./MediaModalControls";
 import MediaModalAside from "./MediaModalAside";
 
 import { fetchMedia, toggleLikeMedia } from "@/entities/media/api/mediaApi";
-import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
+import type { UserPreview } from "@/entities/user/model/types";
+import { mediaKeys } from "@/entities/media/model/queryKeys";
 
 export const MEDIA_QUERY_KEY = "media";
-
-export type MediaModalAuthor = {
-  id: string;
-  username: string;
-  avatarUrl?: string | null;
-};
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-
-  author: MediaModalAuthor;
-  medias: MediaResponse[];
+  author: UserPreview;
+  medias: MediaPreview[];
   initialIndex: number;
 };
 
@@ -42,34 +42,75 @@ export function MediaModal({
 
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
-  // чтобы при повторном открытии модалки индекс сбрасывался
   useEffect(() => {
     if (open) setCurrentIndex(initialIndex);
   }, [open, initialIndex]);
 
-  const mediaId = medias[currentIndex]?.id;
+  const preview = medias[currentIndex];
+  const mediaId = preview?.id;
 
-  const {
-    data: currentMedia,
-    isFetching: isMediaFetching,
-  } = useQuery<MediaResponse>({
-    queryKey: [MEDIA_QUERY_KEY, mediaId],
+  // Загрузка полного медиа по id
+  const { data: currentMedia, isFetching } = useQuery<MediaDetail>({
+    queryKey: mediaId ? mediaKeys.detail(mediaId) : ["media", "detail", "none"],
     queryFn: () => fetchMedia(mediaId!),
-    enabled: !!mediaId,
-    placeholderData: keepPreviousData, // чтобы не мигало при перелистывании
+    enabled: open && !!mediaId,
+    placeholderData: keepPreviousData,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
   });
 
+  // Предзагрузка соседних медиа
+  useEffect(() => {
+    if (!open) return;
+    const next = medias[currentIndex + 1]?.id;
+    const prev = medias[currentIndex - 1]?.id;
+
+    if (next)
+      queryClient.prefetchQuery({
+        queryKey: mediaKeys.detail(next),
+        queryFn: () => fetchMedia(next),
+      });
+    if (prev)
+      queryClient.prefetchQuery({
+        queryKey: mediaKeys.detail(prev),
+        queryFn: () => fetchMedia(prev),
+      });
+  }, [open, currentIndex, medias, queryClient]);
+
+  // Лайк/дизлайк медиа
   const toggleLike = useMutation({
     mutationFn: () => toggleLikeMedia(mediaId!),
-    onSuccess: async () => {
-      // рефетчим ТОЛЬКО текущее медиа
-      await queryClient.invalidateQueries({
-        queryKey: [MEDIA_QUERY_KEY, mediaId],
-        exact: true,
-      });
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: mediaKeys.detail(mediaId!) });
 
-      // при желании можно ещё инвалидировать посты, но ты просил только медиа
-      // await queryClient.invalidateQueries({ queryKey: ["posts"], exact: false });
+      const prev = queryClient.getQueryData<MediaDetail>(
+        mediaKeys.detail(mediaId!),
+      );
+
+      if (prev) {
+        queryClient.setQueryData<MediaDetail>(mediaKeys.detail(mediaId!), {
+          ...prev,
+          likedByCurrentUser: !prev.likedByCurrentUser,
+          likeCount: prev.likeCount + (prev.likedByCurrentUser ? -1 : 1),
+        });
+      }
+
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) {
+        queryClient.setQueryData(mediaKeys.detail(mediaId!), ctx.prev);
+      }
+    },
+    onSuccess: (res) => {
+      // res: { likeCount, likedByCurrentUser, ... }
+      queryClient.setQueryData<MediaDetail>(
+        mediaKeys.detail(mediaId!),
+        (old) => {
+          if (!old) return old as any;
+          return { ...old, ...res };
+        },
+      );
     },
   });
 
@@ -108,25 +149,30 @@ export function MediaModal({
               </div>
 
               <div className="h-12 shrink-0 border-t border-white/10 bg-zinc-950/40 flex items-center justify-between px-4">
-                <MediaModalControls
-                  media={mediaForRender}
-                  onToggleLike={() => {
-                    if (!mediaId) return;
-                    if (toggleLike.isPending) return;
-                    toggleLike.mutate();
-                  }}
-                />
-                {/* опционально: показывай индикатор, если идет refetch */}
-                {/* {isMediaFetching && <span className="text-xs text-zinc-400">Updating...</span>} */}
+                {currentMedia && (
+                  <MediaModalControls
+                    mediaDetail={currentMedia}
+                    onToggleLike={() => {
+                      if (!mediaId) return;
+                      if (toggleLike.isPending) return;
+                      toggleLike.mutate();
+                    }}
+                  />
+                )}
+                {isFetching && (
+                  <span className="text-xs text-zinc-400">Updating...</span>
+                )}
               </div>
             </section>
 
             <aside className="col-span-1 h-full min-w-0 min-h-0 flex flex-col border-l border-white/10 bg-zinc-950/35">
-              <MediaModalAside
-                author={author}
-                createdAtText={mediaForRender.createdAt}
-                media={mediaForRender}
-              />
+              {currentMedia && (
+                <MediaModalAside
+                  author={author}
+                  createdAtText={currentMedia?.createdAt}
+                  mediaDetail={currentMedia}
+                />
+              )}
             </aside>
           </div>
         </div>

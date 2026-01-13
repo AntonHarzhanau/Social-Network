@@ -1,4 +1,4 @@
-import type { MediaResponse } from "@/entities/media/model/types";
+import type { MediaPreview } from "@/entities/media/model/types";
 import type { UserPreview } from "@/entities/user/model/types";
 
 export const VISIBILITY_VALUES = {
@@ -23,7 +23,7 @@ export interface Post {
   commentCount: number;
   isLikedByCurrentUser: boolean;
   createdAt: string;
-  media: MediaResponse[] | null;
+  media: MediaPreview[] | null;
   kind: "original" | "repost"; 
   originalPostId: string | null;
   quote: string | null;

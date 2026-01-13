@@ -11,8 +11,6 @@ final class GetPostsByWallAction
 {
     public function __construct(
         private readonly PostRepositoryInterface $postRepository, 
-
- $wallPostRepository,
         private readonly PostFactory $postFactory,
     ) {}
 
@@ -22,7 +20,7 @@ final class GetPostsByWallAction
         int $page,
         int $limit
     ): array {
-       $posts = $this->postRepository->findWallPosts(
+       $posts = $this->postRepository->findByWallId(
             currentUser: $currentUser->getId(),
             wallId: $wallId,
             page: $page,

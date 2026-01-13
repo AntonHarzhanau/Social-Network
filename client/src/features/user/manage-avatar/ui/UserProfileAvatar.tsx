@@ -19,8 +19,8 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { fetchUserAvatars } from "@/entities/user/api/userApi";
-import type { MediaResponse } from "@/entities/media/model/types";
 import { useMediaViewerStore } from "@/features/media/viewer/useMediaViewerStore";
+import type { MediaPreview } from "@/entities/media/model/types";
 
 interface UserProfileAvatarProps {
   userId?: string;
@@ -37,7 +37,7 @@ const UserProfileAvatar = ({
 }: UserProfileAvatarProps) => {
   const [cropOpen, setCropOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-    const [avatars, setAvatars] = useState<MediaResponse[]>([]);
+    const [avatars, setAvatars] = useState<MediaPreview[]>([]);
     const openViewer = useMediaViewerStore((s) => s.openViewer);
   const { uploadNewAvatar, deleteAvatar } = useUserAvatar(userId);
 

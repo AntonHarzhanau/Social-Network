@@ -8,15 +8,21 @@ import VisibilitySelector from "./VisibilitySelector";
 import { usePostMediaUpload } from "@/features/post/create/model/usePostMediaUpload";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/shared/components/ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/shared/components/ui/field";
 import { VISIBILITY_VALUES } from "@/entities/post/model/types";
 import { useCreatePost } from "@/entities/post/model/usePostMutations";
 
 interface CreatePostFormProps {
+  wallId: string;
   onSuccess?: () => void;
 }
 
-export const CreatePostForm = ({ onSuccess }: CreatePostFormProps) => {
+export const CreatePostForm = ({ wallId, onSuccess }: CreatePostFormProps) => {
   const { mutateAsync: createPost } = useCreatePost();
   const form = useForm<CreatePostFormValues>({
     resolver: zodResolver(createPostSchema),
@@ -44,6 +50,11 @@ export const CreatePostForm = ({ onSuccess }: CreatePostFormProps) => {
   });
 
   const onSubmit = async (rawvalues: CreatePostFormValues) => {
+    if (!wallId) {
+        toast.error("Wall ID is missing. Cannot create post.");
+        return;
+    }
+    
     if (isUploadingAny) {
       toast("Wait until all files are uploaded");
       return;
@@ -52,7 +63,7 @@ export const CreatePostForm = ({ onSuccess }: CreatePostFormProps) => {
     const values = createPostSchema.parse(rawvalues);
 
     try {
-      await createPost(values);
+      await createPost({ payload: values, wallId });
       toast.success("Post created successfully", { closeButton: true });
       form.reset();
       resetMedia();
@@ -78,17 +89,17 @@ export const CreatePostForm = ({ onSuccess }: CreatePostFormProps) => {
           onRetry={handleRetry}
         />
         <Controller
-          name='content'
+          name="content"
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor="content">Content</FieldLabel>
-                <Textarea
-                  {...field}
-                  id="content"
-                  placeholder="What's on your mind?"
-                  aria-invalid={fieldState.invalid}
-                />
+              <Textarea
+                {...field}
+                id="content"
+                placeholder="What's on your mind?"
+                aria-invalid={fieldState.invalid}
+              />
               {fieldState.error && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -102,5 +113,3 @@ export const CreatePostForm = ({ onSuccess }: CreatePostFormProps) => {
     </form>
   );
 };
-
-

@@ -1,16 +1,30 @@
 import { useCallback } from "react";
-import { useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  type InfiniteData,
+} from "@tanstack/react-query";
 import type { CreatePostPayload, Post } from "./types";
 import { postKeys } from "./queryKeys";
 import { removePostFromInfinite } from "./postCache";
 import { fetchAndInsertCreatedPost, syncPostByIdInCache } from "./syncPost";
 import { postApi } from "../api/postApi";
 
+type CreatePostVars = {
+  wallId: string;
+  payload: CreatePostPayload;
+};
+
 export function useCreatePost() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: CreatePostPayload) => postApi.createPost(payload),
+    mutationFn: ({ payload, wallId }: CreatePostVars) =>{
+        if (!wallId) {
+            throw new Error("wallId is required");
+        }
+        return postApi.createPost(payload, wallId);
+    },
     onSuccess: async (res) => {
       await fetchAndInsertCreatedPost(qc, res.id);
     },
@@ -36,8 +50,5 @@ export function useDeletePost() {
 export function useSyncPostInCache() {
   const qc = useQueryClient();
 
-  return useCallback(
-    (postId: string) => syncPostByIdInCache(qc, postId),
-    [qc],
-  );
+  return useCallback((postId: string) => syncPostByIdInCache(qc, postId), [qc]);
 }

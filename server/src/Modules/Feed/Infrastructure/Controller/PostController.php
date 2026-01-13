@@ -37,7 +37,7 @@ final class PostController extends AbstractController
         #[CurrentUser] User $user,
         CreatePostAction $action
     ): JsonResponse {
-        $action->execute(
+        $response =$action->execute(
             new CreatePostCommand(
                 wallId: Uuid::fromString($wallId),
                 authorId: $user->getId(),
@@ -47,9 +47,7 @@ final class PostController extends AbstractController
             )
         );
 
-        return $this->json([
-            'message' => 'Post created successfully!',
-        ]);
+        return $this->json($response, JsonResponse::HTTP_CREATED);
     }
 
 
@@ -111,7 +109,7 @@ final class PostController extends AbstractController
     public function delete(string $postId, #[CurrentUser] User $user, DeletePostAction $action): JsonResponse
     {
         try {
-            $action->execute(Uuid::fromString($postId), $user);
+           $response = $action->execute(Uuid::fromString($postId), $user);
         } catch (AccessDeniedException $e) {
             return $this->json(['error' => 'Forbidden', 'message' => $e->getMessage()], 403);
         } catch (NotFoundHttpException $e) {

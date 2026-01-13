@@ -1,24 +1,23 @@
-import type { MediaResponse, ToggleLikeMediaResponse } from "@/entities/media/model/types";
+import type { MediaDetail, MediaPreview, ToggleLikeMediaResponse } from "@/entities/media/model/types";
 import { apiClient } from "@/shared/api/apiClient";
 
-export const fetchMedia = async (id: string): Promise<MediaResponse> => {
+export const fetchMedia = async (id: string): Promise<MediaDetail> => {
   const response = await apiClient.get(`/media/${id}`);
 
   return response.data;
 };
 
-export const fetchMedias = async (): Promise<MediaResponse[]> => {
-  const response = await apiClient.get<MediaResponse[]>(`/media`);
+export const fetchMedias = async (): Promise<MediaPreview[]> => {
+  const response = await apiClient.get<MediaPreview[]>(`/media`);
 
   return response.data;
 };
 
-export const uploadMedia = async (file: File): Promise<MediaResponse> => {
+export const uploadMedia = async (file: File): Promise<MediaPreview> => {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await apiClient.post<MediaResponse>("/media", formData);
-
+  const response = await apiClient.post<MediaPreview>("/media", formData);
   return response.data;
 };
 

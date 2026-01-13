@@ -3,14 +3,14 @@ import { Button } from "@/shared/components/ui/button";
 import { useEffect, useState } from "react";
 import { fetchUserAvatars } from "@/entities/user/api/userApi";
 import { sessionUser } from "@/entities/session/model/sessionStore";
-import type { MediaResponse } from "@/entities/media/model/types";
+import type { MediaPreview } from "@/entities/media/model/types";
 import { useMediaViewerStore } from "@/features/media/viewer/useMediaViewerStore";
 import MediaBoxImageItem from "./MediaBoxImageItem";
 
 const MediaBoxImageList = () => {
   const user = sessionUser();
   const openViewer = useMediaViewerStore((s) => s.openViewer);
-  const [avatars, setAvatars] = useState<MediaResponse[]>([]);
+  const [avatars, setAvatars] = useState<MediaPreview[]>([]);
   useEffect(() => {
     const loadAvatars = async () => {
       if (!user?.id) return;

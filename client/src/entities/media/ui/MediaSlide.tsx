@@ -1,5 +1,5 @@
 import { cn } from "@/shared/lib/utils";
-import type { MediaResponse } from "@/entities/media/model/types";
+import type { MediaPreview } from "@/entities/media/model/types";
 import { computeTargetSize } from "@/entities/media/ui/lib/size";
 import { isVideoMedia } from "./lib/isVideoMedia";
 import { useEffect, useRef } from "react";
@@ -7,7 +7,7 @@ import { useEffect, useRef } from "react";
 type Dims = { w: number; h: number } | null;
 
 type Props = {
-  media: MediaResponse;
+  media: MediaPreview;
   index: number;
   layout: "feed" | "modal";
   containerW: number;
@@ -15,7 +15,7 @@ type Props = {
   dims: Dims;
 
   isClickable: boolean;
-  onClick?: (item: MediaResponse, index: number) => void;
+  onClick?: (item: MediaPreview, index: number) => void;
 
   onImgNaturalLoad?: (id: string, w: number, h: number) => void;
 

@@ -8,6 +8,7 @@ export const useComments = (threadId: string, limit = 10) => {
   const query = useInfiniteQuery<CommentResponse[]>({
     queryKey: [COMMENT_QUERY_KEY, threadId],
     initialPageParam: 1,
+    enabled: !!threadId,
     queryFn: async ({ pageParam }) =>
       fetchComments(threadId, pageParam as number, limit),
 

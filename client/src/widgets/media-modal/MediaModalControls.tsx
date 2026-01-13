@@ -1,17 +1,17 @@
-import type { MediaResponse } from "@/entities/media/model/types";
+import type { MediaDetail } from "@/entities/media/model/types";
 import { LikeButton } from "@/shared/components/LikeButton";
 import { Button } from "@/shared/components/ui/button";
 import { Share2 } from "lucide-react";
 
 interface MediaModalControlsProps {
-  media: MediaResponse;
+  mediaDetail: MediaDetail;
   onToggleLike: () => void;
 }
 
-const MediaModalControls = ({ media, onToggleLike }: MediaModalControlsProps) => {
+const MediaModalControls = ({ mediaDetail, onToggleLike }: MediaModalControlsProps) => {
   return (
     <div className="flex items-center gap-2">
-      <LikeButton count={media.likeCount} isActive={media.likedByCurrentUser} onClick={onToggleLike} />
+      <LikeButton count={mediaDetail.likeCount} isActive={mediaDetail.likedByCurrentUser} onClick={onToggleLike} />
       <Button
         type="button"
         variant="ghost"

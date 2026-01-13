@@ -1,9 +1,9 @@
 // entities/media/ui/MediaCarousel/lib/size.ts
-import type { MediaResponse } from "@/entities/media/model/types";
+import type { MediaPreview } from "@/entities/media/model/types";
 
 export const FALLBACK_RATIO = 4 / 5;
 
-export function getRatioFromMeta(m: MediaResponse, fallbackRatio: number) {
+export function getRatioFromMeta(m: MediaPreview, fallbackRatio: number) {
   const w = m.width ?? 0;
   const h = m.height ?? 0;
   if (w > 0 && h > 0) return w / h;

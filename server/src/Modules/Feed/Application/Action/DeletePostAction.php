@@ -2,6 +2,7 @@
 
 namespace App\Modules\Feed\Application\Action;
 
+use App\Modules\Feed\Application\DTO\PostMutationResponse;
 use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
 use App\Modules\User\Domain\Entity\User;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -14,7 +15,7 @@ final class DeletePostAction
         private readonly PostRepositoryInterface $postRepository,
     ) {}
 
-    public function execute(Uuid $postId, User $user): void
+    public function execute(Uuid $postId, User $user): PostMutationResponse
     {
         $post = $this->postRepository->findOneById($postId);
         if (!$post) {
@@ -23,8 +24,9 @@ final class DeletePostAction
         if ($post->getAuthor() !== $user) {
             throw new AccessDeniedException('You do not have permission to delete this post.');
         }
-        
+
         $this->postRepository->remove($post);
+
+        return new PostMutationResponse($postId);
     }
-    
 }

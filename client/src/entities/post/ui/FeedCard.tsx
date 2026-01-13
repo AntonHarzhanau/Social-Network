@@ -31,7 +31,7 @@ const FeedCard = ({ post }: FeedCardProps) => {
           userId={post.author.id}
           name={authorName}
           avatarUrl={post.author.avatarUrl}
-          date={formatPostDate(post.date)}
+          date={formatPostDate(post.createdAt)}
         />
 
         <CardContent className="w-full px-2">

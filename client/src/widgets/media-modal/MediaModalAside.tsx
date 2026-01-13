@@ -1,6 +1,6 @@
 import { useCreateCommentMutation } from "@/entities/comment/model/useCommentMutations";
 import CommentList from "@/entities/comment/ui/CommentList";
-import type { MediaResponse } from "@/entities/media/model/types";
+import type { MediaDetail } from "@/entities/media/model/types";
 import type { UserPreview } from "@/entities/user/model/types";
 import {
   Avatar,
@@ -16,17 +16,23 @@ import { useState } from "react";
 interface MediaModalAsideProps {
   author: UserPreview;
   createdAtText?: string;
-  media: MediaResponse;
+  mediaDetail: MediaDetail;
 }
 
 const MediaModalAside = ({
   author,
   createdAtText,
-  media,
+  mediaDetail,
 }: MediaModalAsideProps) => {
   const [comment, setComment] = useState("");
 
-  const createComment = useCreateCommentMutation(media.commentThreadId);
+  const createComment = useCreateCommentMutation(mediaDetail.commentThreadId);
+  const threadId = mediaDetail.commentThreadId;
+
+  if (!threadId) {
+    return <div className="p-4 text-sm text-zinc-400">Загрузка…</div>;
+  }
+
   const submitComment = () => {
     if (comment.trim() === "") return;
     createComment.mutate(comment);
@@ -49,7 +55,9 @@ const MediaModalAside = ({
         <div className="min-w-0 flex-1">
           <div className="font-medium truncate">{author.username}</div>
           {!!createdAtText && (
-            <div className="text-xs text-zinc-400">{formatPostDate(createdAtText)}</div>
+            <div className="text-xs text-zinc-400">
+              {formatPostDate(createdAtText)}
+            </div>
           )}
         </div>
       </div>
@@ -57,7 +65,7 @@ const MediaModalAside = ({
       {/* Comments area (scroll) */}
       <ScrollArea className="flex-1 min-h-0">
         <div className="p-4">
-          <CommentList threadId={media.commentThreadId} />
+          <CommentList threadId={threadId} />
         </div>
       </ScrollArea>
 

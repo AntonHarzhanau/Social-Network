@@ -8,7 +8,7 @@ import {
 } from "@/shared/components/ui/carousel";
 import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/shared/lib/utils";
-import type { MediaResponse } from "@/entities/media/model/types";
+import type { MediaPreview } from "@/entities/media/model/types";
 
 import { useElementSize } from "./hooks/useElementSize";
 import { useNaturalSizeMap } from "./hooks/useNaturalSizeMap";
@@ -18,14 +18,14 @@ import { MediaSlide } from "./MediaSlide";
 import { MediaCounterBadge } from "./MediaCounterBadge";
 
 interface MediaCarouselProps {
-  medias: MediaResponse[] | null;
+  medias: MediaPreview[] | null;
   className?: string;
 
   layout?: "feed" | "modal";
   initialIndex?: number;
 
   onIndexChange?: (index: number) => void;
-  onItemClick?: (item: MediaResponse, index: number) => void;
+  onItemClick?: (item: MediaPreview, index: number) => void;
 }
 
 type Dims = { w: number; h: number } | null;
@@ -51,7 +51,7 @@ export default function MediaCarousel({
   const canNavigate = safeMedias.length > 1;
 
   const getDims = useCallback(
-    (m: MediaResponse): Dims => {
+    (m: MediaPreview): Dims => {
       const mw = m.width ?? 0;
       const mh = m.height ?? 0;
       if (mw > 0 && mh > 0) return { w: mw, h: mh };

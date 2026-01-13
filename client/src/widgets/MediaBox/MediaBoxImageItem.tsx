@@ -1,7 +1,7 @@
-import type { MediaResponse } from "@/entities/media/model/types";
+import type { MediaPreview } from "@/entities/media/model/types";
 
 interface MediaBoxImageItemProps {
-  media: MediaResponse;
+  media: MediaPreview;
   onClick?: () => void;
 
 }

@@ -22,19 +22,6 @@ export interface MediaDetail extends MediaPreview {
   likedByCurrentUser: boolean;
 }
 
-export interface MediaResponse {
-  id: string;
-  fileType: FileType;
-  url: string;
-  createdAt: string;
-  width?: number | null;
-  height?: number | null;
-  durationSeconds?: number | null;
-  likeCount: number;
-  likedByCurrentUser: boolean;
-  commentThreadId: string;
-}
-
 export const UPLOADING_STATUS = {
   UPLOADING: "uploading",
   SUCCESS: "success",

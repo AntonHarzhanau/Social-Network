@@ -1,6 +1,6 @@
 import { apiClient } from "@/shared/api/apiClient";
 import type { UserPreview, UserProfile } from "@/entities/user/model/types";
-import type { MediaResponse } from "@/entities/media/model/types";
+import type { MediaPreview } from "@/entities/media/model/types";
 
 export const userApi = {
     
@@ -40,8 +40,8 @@ export const uploadAvatar = async (
 
 export const fetchUserAvatars = async (
   userId: string,
-): Promise<MediaResponse[]> => {
-  const response = await apiClient.get<MediaResponse[]>(
+): Promise<MediaPreview[]> => {
+  const response = await apiClient.get<MediaPreview[]>(
     `/users/${userId}/avatars`,
   );
   return response.data;

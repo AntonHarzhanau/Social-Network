@@ -14,25 +14,27 @@ import { CreatePostForm } from "@/features/post/create/ui/CreatePostForm";
 import { useState } from "react";
 
 interface CreatePostDIalogProps {
+  wallId: string;
   className?: string;
 }
 
-const CreatePostDIalog = ({ className }: CreatePostDIalogProps) => {
+const CreatePostDIalog = ({ wallId, className }: CreatePostDIalogProps) => {
   const [open, setOpen] = useState(false);
+  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className={cn("w-full justify-center", className)}>
-          <PlusCircleIcon />
-          New Post
-        </Button>
+          <Button className={cn("w-full justify-center", className)}>
+            <PlusCircleIcon />
+            New Post
+          </Button>
       </DialogTrigger>
       <DialogContent aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle className="mx-auto">New Post</DialogTitle>
         </DialogHeader>
 
-        <CreatePostForm onSuccess={() => setOpen(false)} />
+        <CreatePostForm wallId={wallId} onSuccess={() => setOpen(false)} />
 
         <DialogFooter>
           <DialogClose asChild>
@@ -40,7 +42,6 @@ const CreatePostDIalog = ({ className }: CreatePostDIalogProps) => {
               Cancel
             </Button>
           </DialogClose>
-          
         </DialogFooter>
       </DialogContent>
     </Dialog>

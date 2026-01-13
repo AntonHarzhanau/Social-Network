@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { MediaResponse } from "@/entities/media/model/types";
+import type { MediaPreview } from "@/entities/media/model/types";
 import { computeTargetSize, FALLBACK_RATIO, getRatioFromMeta } from "../lib/size";
 
 type Dims = { w: number; h: number } | null;
@@ -7,9 +7,9 @@ type Dims = { w: number; h: number } | null;
 export function useFeedHeight(params: {
   layout: "feed" | "modal";
   containerW: number;
-  medias: MediaResponse[];
+  medias: MediaPreview[];
   activeIndex: number;
-  getDims: (m: MediaResponse) => Dims;
+  getDims: (m: MediaPreview) => Dims;
 }) {
   const { layout, containerW, medias, activeIndex, getDims } = params;
 
