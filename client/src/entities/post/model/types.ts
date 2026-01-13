@@ -13,17 +13,20 @@ export type Visibility =
 
 export interface Post {
   id: string;
+  wallId: string;
+  wallOwnerType: "user" | "group";
+  wallOwner: UserPreview;
+  author: UserPreview;
   content: string;
+  commentThreadId: string;
   likeCount: number;
   commentCount: number;
   isLikedByCurrentUser: boolean;
-  date: string;
-  author: UserPreview;
-  commentThreadId: string;
+  createdAt: string;
   media: MediaResponse[] | null;
-  wallId: string;
-  publicationId: string;
-  actorId?: string | null;
+  kind: "original" | "repost"; 
+  originalPostId: string | null;
+  quote: string | null;
 }
 
 export interface ToggleLikePostResponse {

@@ -7,9 +7,7 @@ use App\Modules\Feed\Application\DTO\PostMutationResponse;
 use App\Modules\Feed\Application\Port\UserDirectoryInterface;
 use App\Modules\Feed\Application\Service\PostMediaBindingsService;
 use App\Modules\Feed\Domain\Entity\Post;
-use App\Modules\Feed\Domain\Entity\WallPost;
 use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
-use App\Modules\Feed\Domain\Repository\WallPostRepositoryInterface;
 use App\Modules\Feed\Domain\Repository\WallRepositoryInterface;
 
 final class CreatePostAction
@@ -18,19 +16,19 @@ final class CreatePostAction
         private readonly PostRepositoryInterface $postRepository,
         private readonly UserDirectoryInterface $userDirectory,
         private readonly WallRepositoryInterface $wallRepository,
-        private readonly WallPostRepositoryInterface $wallPostRepository,
         private readonly PostMediaBindingsService $postMediaBindingsService,
     ) {}
 
     public function execute(CreatePostCommand $command): PostMutationResponse
     {
+        
         $author = $this->userDirectory->getUser($command->authorId);
         if ($author === null) {
-            throw new \RuntimeException('Author not found: ' . $command->authorId);
+            throw new \RuntimeException('Author not found');
         }
         $wall = $this->wallRepository->getWallById($command->wallId);
         if ($wall === null) {
-            throw new \RuntimeException('Wall not found: ' . $command->wallId);
+            throw new \RuntimeException('Wall not found');
         }
 
         $post = new Post();
@@ -41,12 +39,9 @@ final class CreatePostAction
         }
         $this->postRepository->save($post, false);
         $this->postMediaBindingsService->addMediaToPost($command->mediaIds ?? [], $post);
+        $wall->addPost($post);
 
-        $wallPost = new WallPost(
-            wall: $wall,
-            post: $post,
-        );
-        $this->wallPostRepository->save($wallPost);
+        $this->wallRepository->save($wall, true);
 
         return new PostMutationResponse($post->getId()->toRfc4122());
     }

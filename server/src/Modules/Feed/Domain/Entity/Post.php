@@ -3,16 +3,20 @@
 namespace App\Modules\Feed\Domain\Entity;
 
 use App\Modules\Comment\Domain\Entity\CommentThread;
-use App\Modules\User\Domain\Entity\User;
+use App\Modules\Feed\Domain\Enum\PostKindEnum;
+use App\Modules\Feed\Domain\Enum\PostStatusEnum;
 use App\Modules\Feed\Domain\Enum\VisibilityEnum;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Modules\User\Domain\Entity\User;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
+#[ORM\Table(name: 'posts')]
+#[ORM\Index(columns: ['wall_id', 'created_at'], name: 'idx_posts_wall_created_at')]
+#[ORM\Index(columns: ['created_at'], name: 'idx_posts_created_at')]
+#[ORM\Index(columns: ['status', 'wall_id', 'created_at'], name: 'idx_posts_status_wall_created_at')]
 #[ORM\HasLifecycleCallbacks]
 class Post
 {
@@ -22,56 +26,57 @@ class Post
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id = null;
 
+    #[ORM\ManyToOne(targetEntity: Wall::class, inversedBy: 'posts')]
+    #[ORM\JoinColumn(name: 'wall_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    private ?Wall $wall = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'author_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    private ?User $author = null;
+
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $content = null;
 
-    #[ORM\Column]
-    private ?int $likeCount = 0;
+    #[ORM\Column(enumType: VisibilityEnum::class, length: 20)]
+    private VisibilityEnum $visibility = VisibilityEnum::PUBLIC;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    #[ORM\Column(enumType: PostStatusEnum::class, length: 20)]
+    private PostStatusEnum $status = PostStatusEnum::PUBLISHED;
 
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $updatedAt = null;
+    #[ORM\Column(enumType: PostKindEnum::class, length: 20)]
+    private PostKindEnum $kind = PostKindEnum::ORIGINAL;
 
-    #[ORM\Column(enumType: VisibilityEnum::class)]
-    private ?VisibilityEnum $visibility = VisibilityEnum::PUBLIC;
+    #[ORM\ManyToOne(targetEntity: self::class)]
+    #[ORM\JoinColumn(name: 'original_post_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?Post $originalPost = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $quote = null;
 
     #[ORM\OneToOne(targetEntity: CommentThread::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[ORM\JoinColumn(name: 'comment_thread_id', referencedColumnName: 'id', nullable: false)]
-    private ?CommentThread $commentThread  = null;
+    private ?CommentThread $commentThread = null;
 
-    /**
-     * @var Collection<int, User>
-     */
-    #[ORM\ManyToMany(targetEntity: User::class)]
-    #[ORM\JoinTable(name: 'post_likes')]
-    #[ORM\JoinColumn(name: 'post_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
-    #[ORM\InverseJoinColumn(name: 'user_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
-    private Collection $likeBy;
+    #[ORM\Column(options: ['default' => 0])]
+    private int $likeCount = 0;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $author = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $createdAt = null;
 
-    /**
-     * @var Collection<int, PostMediaBinding>
-     */
-    #[ORM\OneToMany(
-        targetEntity: PostMediaBinding::class,
-        cascade: ['persist'],
-        mappedBy: 'post',
-        orphanRemoval: true
-    )]
-    private Collection $bindedMedia;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
-    public function __construct()
+    #[ORM\PrePersist]
+    public function onPrePersist(): void
     {
-        $this->commentThread = new CommentThread();
-        $this->likeBy = new ArrayCollection();
-        $this->createdAt = new \DateTimeImmutable();
-        $this->bindedMedia = new ArrayCollection();
+        $this->commentThread ??= new CommentThread();
+        $this->createdAt ??= new \DateTimeImmutable();
+    }
+
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?Uuid
@@ -87,6 +92,54 @@ class Post
     public function setContent(?string $content): static
     {
         $this->content = $content;
+
+        return $this;
+    }
+
+    public function getVisibility(): ?VisibilityEnum
+    {
+        return $this->visibility;
+    }
+
+    public function setVisibility(VisibilityEnum $visibility): static
+    {
+        $this->visibility = $visibility;
+
+        return $this;
+    }
+
+    public function getStatus(): ?PostStatusEnum
+    {
+        return $this->status;
+    }
+
+    public function setStatus(PostStatusEnum $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getKind(): ?PostKindEnum
+    {
+        return $this->kind;
+    }
+
+    public function setKind(PostKindEnum $kind): static
+    {
+        $this->kind = $kind;
+
+        return $this;
+    }
+
+    public function getQuote(): ?string
+    {
+        return $this->quote;
+    }
+
+    public function setQuote(?string $quote): static
+    {
+        $this->quote = $quote;
 
         return $this;
     }
@@ -127,50 +180,14 @@ class Post
         return $this;
     }
 
-    #[ORM\PreUpdate]
-    public function setUpdatedAtValue(): void
+    public function getWall(): ?Wall
     {
-        $this->updatedAt = new \DateTimeImmutable();
+        return $this->wall;
     }
 
-    public function getVisibility(): ?VisibilityEnum
+    public function setWall(?Wall $wall): static
     {
-        return $this->visibility;
-    }
-
-    public function setVisibility(?VisibilityEnum $visibility): static
-    {
-        $this->visibility = $visibility;
-
-        return $this;
-    }
-
-    public function getCommentThread(): CommentThread
-    {
-        return $this->commentThread;
-    }
-
-
-    /**
-     * @return Collection<int, User>
-     */
-    public function getLikeBy(): Collection
-    {
-        return $this->likeBy;
-    }
-
-    public function addLikeBy(User $likeBy): static
-    {
-        if (!$this->likeBy->contains($likeBy)) {
-            $this->likeBy->add($likeBy);
-        }
-
-        return $this;
-    }
-
-    public function removeLikeBy(User $likeBy): static
-    {
-        $this->likeBy->removeElement($likeBy);
+        $this->wall = $wall;
 
         return $this;
     }
@@ -187,34 +204,28 @@ class Post
         return $this;
     }
 
-
-    /**
-     * @return Collection<int, PostMediaBinding>
-     */
-    public function getBindedMedia(): Collection
+    public function getOriginalPost(): ?self
     {
-        return $this->bindedMedia;
+        return $this->originalPost;
     }
 
-    public function addBindedMedia(PostMediaBinding $bindedMedia): static
+    public function setOriginalPost(?self $originalPost): static
     {
-        if (!$this->bindedMedia->contains($bindedMedia)) {
-            $this->bindedMedia->add($bindedMedia);
-            $bindedMedia->setPost($this);
-        }
+        $this->originalPost = $originalPost;
 
         return $this;
     }
 
-    public function removeBindedMedia(PostMediaBinding $bindedMedia): static
+    public function getCommentThread(): ?CommentThread
     {
-        if ($this->bindedMedia->removeElement($bindedMedia)) {
-            // set the owning side to null (unless already changed)
-            if ($bindedMedia->getPost() === $this) {
-                $bindedMedia->setPost(null);
-            }
-        }
+        return $this->commentThread;
+    }
+
+    public function setCommentThread(CommentThread $commentThread): static
+    {
+        $this->commentThread = $commentThread;
 
         return $this;
     }
+
 }

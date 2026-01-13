@@ -58,7 +58,7 @@ class Group
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
-        $this->wall = new Wall();
+        $this->wall = new Wall('group');
     }
 
     public function getId(): ?Uuid

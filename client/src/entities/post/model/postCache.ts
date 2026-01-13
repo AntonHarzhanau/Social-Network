@@ -48,31 +48,44 @@ function prependToFirstPage(
     return { pageParams: [1], pages: [[post]] };
   }
 
-  const first = old.pages[0] ?? [];
-  const already = first.some((p) => p.id === post.id) || old.pages.some((pg) => pg.some((p) => p.id === post.id));
+  const already = old.pages.some((page) =>
+    page.some((pagePost) => pagePost.id === post.id),
+  );
   if (already) return old;
 
+  const first = old.pages[0] ?? [];
   const nextFirst = [post, ...first].slice(0, limit);
 
-  return {
-    ...old,
-    pages: [nextFirst, ...old.pages.slice(1)],
-  };
+  return { ...old, pages: [nextFirst, ...old.pages.slice(1)] };
 }
 
-
 export function insertPostIntoCachedLists(qc: QueryClient, post: Post) {
-  const entries = qc.getQueriesData<InfiniteData<Post[]>>({ queryKey: postKeys.lists() });
+  const entries = qc.getQueriesData<InfiniteData<Post[]>>({
+    queryKey: postKeys.lists(),
+  });
 
   for (const [qk, data] of entries) {
-    // qk: ["posts","lists",{authorId,limit}]
-    const params = (qk as unknown as readonly any[])[2] as { authorId: string | null; limit: number } | undefined;
-    const authorId = params?.authorId ?? null;
-    const limit = params?.limit ?? 10;
+    const key = qk as readonly unknown[];
 
-    const matchesAuthor = authorId === null || authorId === post.author.id;
-    if (!matchesAuthor) continue;
+    // ["posts","lists","mixed",{limit}]
+    if (key[2] === "mixed") {
+      const limit = (key[3] as { limit: number } | undefined)?.limit ?? 10;
+      qc.setQueryData<InfiniteData<Post[]>>(qk, (old) =>
+        prependToFirstPage(old ?? data ?? undefined, post, limit),
+      );
+      continue;
+    }
 
-    qc.setQueryData<InfiniteData<Post[]>>(qk, (old) => prependToFirstPage(old ?? data ?? undefined, post, limit));
+    // ["posts","lists","wall", wallId, {limit}]
+    if (key[2] === "wall") {
+      const wallId = String(key[3]);
+      if (wallId !== post.wallId) continue;
+
+      const limit = (key[4] as { limit: number } | undefined)?.limit ?? 10;
+      qc.setQueryData<InfiniteData<Post[]>>(qk, (old) =>
+        prependToFirstPage(old ?? data ?? undefined, post, limit),
+      );
+      continue;
+    }
   }
 }

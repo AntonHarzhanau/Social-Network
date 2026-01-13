@@ -88,7 +88,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
-        $this->wall = new Wall();
+        $this->wall = new Wall('user');
     }
 
     public function getId(): ?Uuid

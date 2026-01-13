@@ -8,10 +8,13 @@ use Symfony\Component\Uid\Uuid;
 final class CreatePostCommand
 {
     public function __construct(
-        public readonly Uuid $wallId,
         public readonly Uuid $authorId,
-        public readonly ?string $content = null,
+        public readonly Uuid $wallId,
+        public readonly ?string $content,
+        public readonly VisibilityEnum $visibility,
+        /** @var Uuid[] */
         public readonly array $mediaIds = [],
-        public readonly ?VisibilityEnum $visibility = null,
+        public readonly ?Uuid $originalPostId = null,
+        public readonly ?string $quote = null,
     ) {}
 }

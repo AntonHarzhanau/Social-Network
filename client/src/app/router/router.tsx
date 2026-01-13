@@ -1,5 +1,5 @@
 import { ROUTES } from "@/shared/constants/routes";
-import { createBrowserRouter, redirect } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import RouteErrorPage from "@/app/router/RouteErrorPage";
 import ProtectedRoot from "@/app/router/ProtectedRoot";
 import { requireAuthLoader } from "@/app/router/requireAuthLoader";
@@ -24,7 +24,7 @@ export const router = createBrowserRouter([
     HydrateFallback: FullScreenLoader,
     errorElement: <RouteErrorPage />,
     children: [
-      { index: true, loader: () => redirect(ROUTES.FEEDS) },
+      { index: true, element: <Navigate to={ROUTES.FEEDS} replace /> }, 
       { path: ROUTES.FEEDS, lazy: () => import("@/pages/FeedsPage") },
       { path: ROUTES.PROFILE, lazy: () => import("@/pages/ProfilePage") },
       { path: ROUTES.CHAT, lazy: () => import("@/pages/ChatPage") },

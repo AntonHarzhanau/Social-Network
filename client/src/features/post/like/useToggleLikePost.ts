@@ -6,7 +6,7 @@ export function useToggleLikePost() {
 
   return useMutation({
     mutationFn: (postId: string) => {
-         return postApi.toggleLikePost(postId)
+      return postApi.toggleLikePost(postId);
     },
 
     onSuccess: async (res) => {

@@ -2,29 +2,31 @@
 
 namespace App\Modules\Feed\Application\DTO;
 
-use App\Modules\Feed\Domain\Enum\VisibilityEnum;
+use App\Modules\Group\Api\DTO\GroupPreviewDTO;
 use App\Modules\User\Contracts\DTO\UserPreviewDTO;
 
-final readonly class PostResponse
+final class PostResponse
 {
     public function __construct(
         public string $id,
-        public ?string $content,
+        public string $wallId,
+        public string $wallOwnerType,
+        public UserPreviewDTO | GroupPreviewDTO | null $wallOwner = null,
 
-        public PostContextDTO $context,
-
-        public UserPreviewDTO $author,
-
-        public \DateTimeImmutable $createdAt,
-        public ?\DateTimeImmutable $updatedAt,
-
-        public VisibilityEnum $visibility,
+        public ?UserPreviewDTO $author = null,
+        public string $content,
+        public string $commentThreadId,
 
         public int $likeCount,
         public int $commentCount,
-        public bool $likedByCurrentUser,
+        public bool $isLikedByCurrentUser,
 
-        /** @var array<MediaDTO> */
-        public array $medias,
+        public \DateTimeImmutable $createdAt,
+        public array $media = [],
+
+        public string $kind,
+        public ?string $originalPostId = null,
+        public ?string $quote = null,
+        // public ?UserPreviewDTO $actor = null,
     ) {}
 }

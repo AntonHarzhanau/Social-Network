@@ -3,14 +3,16 @@
 namespace App\Modules\Feed\Application\Action;
 
 use App\Modules\Feed\Application\Service\PostFactory;
-use App\Modules\Feed\Domain\Repository\WallPostRepositoryInterface;
+use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
 use App\Modules\User\Domain\Entity\User;
 use Symfony\Component\Uid\Uuid;
 
 final class GetPostsByWallAction
 {
     public function __construct(
-        private readonly WallPostRepositoryInterface $wallPostRepository,
+        private readonly PostRepositoryInterface $postRepository, 
+
+ $wallPostRepository,
         private readonly PostFactory $postFactory,
     ) {}
 
@@ -20,7 +22,7 @@ final class GetPostsByWallAction
         int $page,
         int $limit
     ): array {
-       $posts = $this->wallPostRepository->findWallFeed(
+       $posts = $this->postRepository->findWallPosts(
             currentUser: $currentUser->getId(),
             wallId: $wallId,
             page: $page,

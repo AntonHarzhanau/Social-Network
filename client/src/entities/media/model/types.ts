@@ -7,6 +7,21 @@ export type MediaAsset = {
 
 export type FileType = "image" | "video" | "audio" | "document" | "other";
 
+export interface MediaPreview {
+  id: string;
+  url: string;
+  type: FileType;
+  width?: number | null;
+  height?: number | null;
+  durationSeconds?: number | null;
+}
+export interface MediaDetail extends MediaPreview {
+  createdAt: string;
+  commentThreadId: string;
+  likeCount: number;
+  likedByCurrentUser: boolean;
+}
+
 export interface MediaResponse {
   id: string;
   fileType: FileType;
@@ -39,7 +54,7 @@ export type MediaItem = {
 };
 
 export type ToggleLikeMediaResponse = {
-    id: string;
-    likedByCurrentUser: boolean;
-    likeCount: number;
-}
+  id: string;
+  likedByCurrentUser: boolean;
+  likeCount: number;
+};
