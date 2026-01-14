@@ -3,13 +3,15 @@
 namespace App\Modules\User\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Modules\User\Domain\Entity\UserMediaBinding;
+use App\Modules\User\Domain\Repository\UserMediaBindingRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
 /**
- * @extends ServiceEntityRepository<UserMediaBindings>
+ * @extends ServiceEntityRepository<UserMediaBinding>
  */
-class UserMediaBindingRepository extends ServiceEntityRepository
+class UserMediaBindingRepository extends ServiceEntityRepository implements UserMediaBindingRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -34,4 +36,14 @@ class UserMediaBindingRepository extends ServiceEntityRepository
         }
     }
 
+    // Todo: optimize with DQL
+    public function findMediasByUserId(Uuid $userId): array
+    {
+        $bindings = $this->findBy(["owner" => $userId]);
+        $medias = [];
+        foreach ($bindings as $binding) {
+            $medias[] = $binding->getMedia();
+        }
+        return $medias;
+    }
 }

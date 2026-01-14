@@ -4,7 +4,9 @@ namespace App\Modules\User\Application\Action\User;
 
 use App\Modules\Media\Domain\Repository\MediaAssetRepositoryInterface;
 use App\Modules\User\Domain\Entity\UserAvatar;
+use App\Modules\User\Domain\Entity\UserMediaBinding;
 use App\Modules\User\Domain\Repository\UserAvatarRepositoryInterface;
+use App\Modules\User\Domain\Repository\UserMediaBindingRepositoryInterface;
 use App\Modules\User\Domain\Repository\UserRepositoryInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -14,6 +16,7 @@ final class UpdateUserAvatarAction
         private UserRepositoryInterface $users,
         private UserAvatarRepositoryInterface $userAvatars,
         private MediaAssetRepositoryInterface $mediaAssets,
+        private UserMediaBindingRepositoryInterface $userMediaBindings,
     ) {}
 
     public function execute(Uuid $userId, ?string $originalFileId, ?string $previewFileId): void
@@ -39,7 +42,13 @@ final class UpdateUserAvatarAction
             ->setUser($user)
             ->setOriginal($originaliFile)
             ->setPreview($previewFile);
-            
+
+        $userMediaBinding = (new UserMediaBinding())
+            ->setOwner($user)
+            ->setMedia($originaliFile);
+
+        $this->userMediaBindings->save($userMediaBinding);
+
         $user->setCurrentAvatar($userAvatar);
         $this->userAvatars->save($userAvatar);
     }

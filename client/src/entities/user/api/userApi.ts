@@ -47,6 +47,28 @@ export const fetchUserAvatars = async (
   return response.data;
 };
 
+export const fetchUserMedias = async (
+    userId: string,
+    type: 'image' | 'video',
+  ): Promise<MediaPreview[]> => {
+    const response = await apiClient.get<MediaPreview[]>(
+      `/users/${userId}/media`,
+      {
+        params: { type },
+      }
+    );
+    return response.data;
+  }
+
+  export const uploadUserMedia = async (
+    userId: string,
+    mediaIds: string[],
+  ): Promise<void> => {
+    await apiClient.post(`/users/${userId}/media`, {
+      mediaIds,
+    });
+  }
+
 export const updateUserProfile = async (
   profileData: Partial<UserProfile>,
 ): Promise<void> => {

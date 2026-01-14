@@ -2,10 +2,10 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { createPostSchema, type CreatePostFormValues } from "../model/schema";
-import DnDZone from "./DnDZone";
-import { PostMediaPreview } from "./PostMediaPreview";
+import DnDZone from "../../../media/upload-media/ui/DnDZone";
+import { PostMediaPreview } from "../../../media/upload-media/model/PostMediaPreview";
 import VisibilitySelector from "./VisibilitySelector";
-import { usePostMediaUpload } from "@/features/post/create/model/usePostMediaUpload";
+import { usePostMediaUpload } from "@/features/media/upload-media/model/usePostMediaUpload";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import {

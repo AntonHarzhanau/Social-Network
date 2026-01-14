@@ -7,4 +7,6 @@ use Symfony\Component\Uid\Uuid;
 interface MediaServicePort
 {
     public function getMediasByIds(?Uuid $currentUser, array $ids): array;
+
+    public function getMediaAssetsByIds(array $mediaIds): array;
 }

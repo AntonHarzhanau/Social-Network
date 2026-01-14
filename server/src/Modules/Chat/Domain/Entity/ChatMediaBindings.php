@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Modules\Media\Domain\Entity;
+namespace App\Modules\Chat\Domain\Entity;
 
 use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Entity\Message;
 use App\Modules\Media\Domain\Entity\MediaAsset;
-use App\Modules\Media\Infrastructure\Persistence\Doctrine\Repository\ChatMediaBindingsRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: ChatMediaBindingsRepository::class)]
+#[ORM\Entity]
 class ChatMediaBindings
 {
     #[ORM\Id]

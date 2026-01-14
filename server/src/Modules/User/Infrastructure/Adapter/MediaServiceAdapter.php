@@ -21,4 +21,9 @@ final class MediaServiceAdapter implements MediaServicePort
         }
         return $medias;
     }
+    
+     public function getMediaAssetsByIds(array $mediaIds): array
+     {
+        return $this->mediaApi->getMediaAssetsByIds($mediaIds);
+     }
 }

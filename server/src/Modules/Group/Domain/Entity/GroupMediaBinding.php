@@ -1,15 +1,13 @@
 <?php
 
-namespace App\Modules\Media\Domain\Entity;
+namespace App\Modules\Group\Domain\Entity;
 
-use App\Modules\Group\Domain\Entity\Group;
 use App\Modules\Media\Domain\Entity\MediaAsset;
-use App\Modules\Media\Infrastructure\Persistence\Doctrine\Repository\GroupMediaBindingRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: GroupMediaBindingRepository::class)]
+#[ORM\Entity]
 class GroupMediaBinding
 {
     #[ORM\Id]

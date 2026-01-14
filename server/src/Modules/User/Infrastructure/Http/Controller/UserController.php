@@ -2,14 +2,17 @@
 
 namespace App\Modules\User\Infrastructure\Http\Controller;
 
+use App\Modules\User\Application\Action\User\AttachMediaAction;
 use App\Modules\User\Application\Action\User\DeleteAccountAction;
 use App\Modules\User\Application\Action\User\GetUserAvatarsAction;
+use App\Modules\User\Application\Action\User\GetUserMediaFileAction;
 use App\Modules\User\Application\Action\User\GetUserProfileAction;
 use App\Modules\User\Application\Action\User\GetUsersAction;
 use App\Modules\User\Application\Action\User\UpdateProfileAction;
 use App\Modules\User\Application\Action\User\UpdateUserAvatarAction;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Domain\Exception\UserNotFoundException;
+use App\Modules\User\Infrastructure\Http\Request\AttachMediaRequest;
 use App\Modules\User\Infrastructure\Http\Request\UpdateAvatarRequest;
 use App\Modules\User\Infrastructure\Http\Request\UpdateProfileRequest;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -107,6 +110,36 @@ final class UserController extends AbstractController
         try {
             $avatars = $action->execute(Uuid::fromString($userId), $currentUser->getId());
             return $this->json($avatars, JsonResponse::HTTP_OK);
+        } catch (UserNotFoundException $e) {
+            return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_NOT_FOUND);
+        }
+    }
+
+    #[Route('/{userId}/media', methods: ['GET'])]
+    public function getUserMedia(
+        string $userId,
+        #[CurrentUser()] ?User $currentUser,
+        GetUserMediaFileAction $action,
+    ): JsonResponse {
+        try {
+            $media = $action->execute(Uuid::fromString($userId), $currentUser->getId());
+            return $this->json($media, JsonResponse::HTTP_OK);
+        } catch (UserNotFoundException $e) {
+            return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_NOT_FOUND);
+        }
+    }
+
+    #[Route('/{userId}/media', methods: ['POST'])]
+    public function AttachMedia(
+        string $userId,
+        #[CurrentUser()] ?User $currentUser,
+        AttachMediaAction $action,
+        #[MapRequestPayload] AttachMediaRequest $payload
+    ): JsonResponse {
+
+        try {
+            $response = $action->execute($currentUser->getId(), $payload->mediaIds);
+            return $this->json($response, JsonResponse::HTTP_OK);
         } catch (UserNotFoundException $e) {
             return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_NOT_FOUND);
         }
