@@ -2,6 +2,7 @@
 
 namespace App\Modules\User\Infrastructure\Persistence\Doctrine\Repository;
 
+use App\Modules\Media\Domain\Enum\FileTypeEnum;
 use App\Modules\User\Domain\Entity\UserMediaBinding;
 use App\Modules\User\Domain\Repository\UserMediaBindingRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;

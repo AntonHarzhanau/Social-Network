@@ -2,6 +2,7 @@
 
 namespace App\Modules\User\Infrastructure\Http\Controller;
 
+use App\Modules\Media\Domain\Enum\FileTypeEnum;
 use App\Modules\User\Application\Action\User\AttachMediaAction;
 use App\Modules\User\Application\Action\User\DeleteAccountAction;
 use App\Modules\User\Application\Action\User\GetUserAvatarsAction;
@@ -18,6 +19,7 @@ use App\Modules\User\Infrastructure\Http\Request\UpdateProfileRequest;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
@@ -119,8 +121,10 @@ final class UserController extends AbstractController
     public function getUserMedia(
         string $userId,
         #[CurrentUser()] ?User $currentUser,
+        #[MapQueryParameter()] ?FileTypeEnum $type,
         GetUserMediaFileAction $action,
     ): JsonResponse {
+        
         try {
             $media = $action->execute(Uuid::fromString($userId), $currentUser->getId());
             return $this->json($media, JsonResponse::HTTP_OK);
@@ -145,3 +149,4 @@ final class UserController extends AbstractController
         }
     }
 }
+

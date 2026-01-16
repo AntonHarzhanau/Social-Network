@@ -22,13 +22,12 @@ const FeedCard = ({ post }: FeedCardProps) => {
   const openViewer = useMediaViewerStore((s) => s.openViewer);
   const [feedDetailsOpen, setFeedDetailsOpen] = useState(false);
 
-  const authorName = post.author.username;
   return (
     <>
       <Card className="max-w-full bg-card">
         <FeedCardHeader
           userId={post.author.id}
-          name={authorName}
+          name={post.author.name}
           avatarUrl={post.author.avatarUrl}
           date={formatPostDate(post.createdAt)}
           postId={post.id}

@@ -31,8 +31,8 @@ const FriendsWidget = ({ userId }: FriendsWidgetProps) => {
           <div className="grid grid-cols-4 gap-2 mt-4">
             {friends.map((friend) => (
               <Link key={friend.id} to={`/profile/${friend.id}`} className="group flex flex-col items-center gap-1  no-underline">
-                  <UserAvatar imageUrl={friend.avatarUrl} name={friend.username} alt="Friend Avatar" className="h-10 w-10" />
-                <p className="text-xs font-light group-hover:underline">{friend.username.split(" ")[0]}</p>
+                  <UserAvatar imageUrl={friend.avatarUrl} name={friend.name} alt="Friend Avatar" className="h-10 w-10" />
+                <p className="text-xs font-light group-hover:underline">{friend.name.split(" ")[0]}</p>
               </Link>
             ))}
           </div>

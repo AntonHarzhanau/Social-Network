@@ -25,14 +25,14 @@ import type { MediaPreview } from "@/entities/media/model/types";
 interface UserProfileAvatarProps {
   userId?: string;
   avatarUrl?: string | null;
-  username?: string | null;
+  name?: string | null;
   isOwner?: boolean;
 }
 
 const UserProfileAvatar = ({
   userId,
   avatarUrl,
-  username,
+  name,
   isOwner,
 }: UserProfileAvatarProps) => {
   const [cropOpen, setCropOpen] = useState(false);
@@ -61,7 +61,7 @@ useEffect(() => {
         <DropdownMenuTrigger className="border-none focus:outline-none focus:ring-0 ">
           <UserAvatar
             imageUrl={avatarUrl || undefined}
-            name={username || ""}
+            name={name || ""}
             className="
               h-32 w-32 sm:h-36 sm:w-36
               rounded-full border-4 shadow-lg
@@ -78,7 +78,7 @@ useEffect(() => {
               openViewer({
                 author: {
                     id: userId,
-                    username: username || "",
+                    name: name || "",
                     avatarUrl: avatarUrl || undefined,
                 },
                 medias: avatars ?? [],

@@ -5,6 +5,7 @@ namespace App\Modules\Group\Domain\Entity;
 use App\Modules\Feed\Domain\Entity\Wall;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\Group\Infrastructure\Persistence\Doctrine\Repository\GroupRepository;
+use App\Modules\Media\Domain\Entity\MediaAsset;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -33,14 +34,16 @@ class Group
     #[ORM\JoinColumn(nullable: false)]
     private ?User $owner = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $avatarUrl = null;
+    #[ORM\OneToOne(targetEntity: MediaAsset::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\JoinColumn(name: 'current_avatar_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?MediaAsset $currentAvatar = null;
+
+    #[ORM\OneToOne(targetEntity: MediaAsset::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\JoinColumn(name: 'current_cover_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?MediaAsset $currentCover = null;
 
     #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
     private ?int $subscribersCount = 0;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $coverUrl = null;
 
     #[ORM\OneToOne(targetEntity: Wall::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[ORM\JoinColumn(name: 'wall_id', referencedColumnName: 'id', nullable: false, unique: true, onDelete: 'CASCADE')]
@@ -150,14 +153,14 @@ class Group
         return $this;
     }
 
-    public function getAvatarUrl(): ?string
+    public function getCurrentAvatar(): ?MediaAsset
     {
-        return $this->avatarUrl;
+        return $this->currentAvatar;
     }
 
-    public function setAvatarUrl(?string $avatarUrl): static
+    public function setCurrentAvatar(?MediaAsset $currentAvatar): static
     {
-        $this->avatarUrl = $avatarUrl;
+        $this->currentAvatar = $currentAvatar;
 
         return $this;
     }
@@ -174,14 +177,14 @@ class Group
         return $this;
     }
 
-    public function getCoverUrl(): ?string
+    public function getCurrentCover(): ?MediaAsset
     {
-        return $this->coverUrl;
+        return $this->currentCover;
     }
 
-    public function setCoverUrl(?string $coverUrl): static
+    public function setCurrentCover(?MediaAsset $currentCover): static
     {
-        $this->coverUrl = $coverUrl;
+        $this->currentCover = $currentCover;
 
         return $this;
     }

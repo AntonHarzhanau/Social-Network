@@ -45,12 +45,13 @@ class GroupController extends AbstractController
     #[Route('', name: 'get_groups', methods: ['GET'], format: 'json')]
     public function getAll(
         Request $request,
+        #[CurrentUser()] User $currentUser,
         GetAllGroupsAction $action,
     ): JsonResponse {
         $page = $request->query->getInt('page', 1);
         $limit = $request->query->getInt('limit', 10);
         $search = $request->query->getString('search', '');
-        $groups = $action->execute($page, $limit);
+        $groups = $action->execute($currentUser->getId(), $page, $limit);
         return $this->json($groups, JsonResponse::HTTP_OK);
     }
 
@@ -60,7 +61,7 @@ class GroupController extends AbstractController
         #[CurrentUser()] User $currentUser,
         GetOneGroupAction $action,
     ): JsonResponse {
-        $group = $action->execute(Uuid::fromString($groupId));
+        $group = $action->execute($currentUser->getId(), Uuid::fromString($groupId));
         return $this->json($group, JsonResponse::HTTP_OK);
     }
 

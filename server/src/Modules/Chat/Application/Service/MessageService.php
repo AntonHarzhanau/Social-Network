@@ -57,7 +57,7 @@ class MessageService
             'chatId' => (string) $chat->getId(),
             'sender' => [
                 'id' => (string) $sender->id,
-                'username' => $sender->username,
+                'name' => $sender->name,
                 'avatarUrl' => $sender->avatarUrl,
                 'slug' => $sender->slug,
             ],

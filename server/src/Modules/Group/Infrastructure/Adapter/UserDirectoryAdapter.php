@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Group\Infrastructure\Api\Adapter;
+namespace App\Modules\Group\Infrastructure\Adapter;
 
 use App\Modules\Group\Application\Port\UserDirectoryInterface;
 use App\Modules\User\Api\UserApiInterface;

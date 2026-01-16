@@ -6,17 +6,12 @@ interface ChatUiState {
 
   setActiveChat: (chatId: string) => void;
 
-  // cursor = id сообщения, на котором остановился пользователь
-  // cursor = null => "первое открытие / держимся низа"
   setCursor: (chatId: string, messageId: string | null) => void;
 
-  // удобно, чтобы не перетирать cursor, если пользователь уже успел проскроллить,
-  // а серверный lastRead пришёл позже
   setCursorIfEmpty: (chatId: string, messageId: string | null) => void;
 
   closeChat: (chatId: string) => void;
 
-  // при смене пользователя/логауте
   reset: () => void;
 }
 
@@ -37,7 +32,7 @@ export const useChatUiStore = create<ChatUiState>((set, get) => ({
 
   setCursorIfEmpty: (chatId, messageId) => {
     const current = get().cursorByChat[chatId];
-    // пусто = undefined (ещё не было) или null (первое открытие/низ)
+
     if (current == null) {
       set((s) => ({
         cursorByChat: { ...s.cursorByChat, [chatId]: messageId },
@@ -51,7 +46,7 @@ export const useChatUiStore = create<ChatUiState>((set, get) => ({
 
       return {
         activeChatId: s.activeChatId === chatId ? "" : s.activeChatId,
-        cursorByChat: rest, // убираем ключ полностью, а не храним null
+        cursorByChat: rest,
       };
     }),
 

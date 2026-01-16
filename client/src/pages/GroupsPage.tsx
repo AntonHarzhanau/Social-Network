@@ -20,8 +20,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGroups } from "@/entities/group/model/useGroups";
 
-
-
 const GroupsPage = () => {
   return (
     <MainSectionLayout
@@ -35,27 +33,40 @@ export default GroupsPage;
 export const Component = GroupsPage;
 
 const PageContent = () => {
-  const {
-    groups
-  } = useGroups();
+  const { groups } = useGroups();
 
   return (
     <div className="flex flex-col">
-      Groups Page
       <div className="mt-4 flex flex-col gap-2">
         {groups.map((group) => (
           <Link key={group.id} to={`/group/${group.id}`}>
-            <Item variant="outline">
-              <UserAvatar
-                name={group.name}
-                imageUrl={group.avatarUrl}
-                className="w-10 h-10"
-              />
-              <div className="flex flex-col">
-                <h3 className="text-sm font-semibold">{group.name}</h3>
-                <p className="text-xs text-muted-foreground">
-                  Subscribers: {group.subscribersCount}
-                </p>
+            <Item
+              variant="outline"
+              className="flex items-center justify-between gap-4"
+            >
+              <div className="flex items-center gap-3">
+                <UserAvatar
+                  name={group.name}
+                  imageUrl={group.currentAvatar?.url}
+                  className="w-10 h-10"
+                />
+                <div className="flex flex-col">
+                  <h3 className="text-sm font-semibold">{group.name}</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Subscribers: {group.subscribersCount}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                {group.isMember ? (
+                  <Button variant="outline" size="sm">
+                    Leave
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm">
+                    Join
+                  </Button>
+                )}
               </div>
             </Item>
           </Link>
@@ -124,7 +135,9 @@ const CreateGroupForm = () => {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button type="submit" form="create-group-form">Create</Button>
+            <Button type="submit" form="create-group-form">
+              Create
+            </Button>
           </DialogFooter>
         </DialogContent>
       </form>

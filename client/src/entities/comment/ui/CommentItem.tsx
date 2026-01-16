@@ -21,11 +21,11 @@ const CommentItem = ({ threadId, comment }: CommentItemProps) => {
       {/* Author Info */}
       <div className="flex gap-2">
         <UserAvatar
-          name={comment.author?.username}
+          name={comment.author?.name}
           imageUrl={comment.author?.avatarUrl}
           className="h-10 w-10"
         />
-        <p>{comment.author.username}</p>
+        <p>{comment.author?.name}</p>
       </div>
 
       {/* Comment Content */}

@@ -20,7 +20,7 @@ final class UserMapper
             : null;
         return new UserPreviewDTO(
             id: $user->getId(),
-            username: $user->getUsername(),
+            name: $user->getUsername(),
             avatarUrl: $avatarUrl,
             slug: $user->getSlug(),
             wallId: (string) $user->getWall()->getId(),

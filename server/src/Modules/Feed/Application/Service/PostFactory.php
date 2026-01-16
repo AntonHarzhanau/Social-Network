@@ -26,8 +26,8 @@ class PostFactory
             id: $row->id,
             wallId: $row->wallId,
             wallOwnerType: $row->wallOwnerType->value,
-            wallOwner: $wallOwner,
-            author: $author,
+            // wallOwner: $wallOwner,
+            author: $wallOwner,
             content: $row->content ?? '',
             commentThreadId: $row->commentThreadId,
             likeCount: $row->likeCount,
@@ -85,6 +85,7 @@ class PostFactory
             }
         }
 
+
         $groupOwnerByWallId = [];
         if ($wallIdsGroup !== []) {
             $groupOwners = $this->groupDirectory->findPreviewsByWallIds($wallIdsGroup);
@@ -107,7 +108,7 @@ class PostFactory
 
             $posts[] = $this->toPostResponse(
                 row: $row,
-                author: $author,
+                author: $wallOwner ?? null,
                 wallOwner: $wallOwner,
                 postMedia: $mediaByPostId,
             );

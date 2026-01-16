@@ -2,29 +2,23 @@
 
 namespace App\Modules\Group\Application\Action;
 
+use App\Modules\Group\Application\Service\GroupResponseFactory;
 use App\Modules\Group\Domain\Repository\GroupRepositoryInterface;
+use Symfony\Component\Uid\Uuid;
 
 final class GetAllGroupsAction
 {
     public function __construct(
         private readonly GroupRepositoryInterface $groupRepository,
+        private readonly GroupResponseFactory $groupResponseFactory,
     ) {}
 
-    public function execute(int $page, int $limit): array
+    public function execute(Uuid $currentUserId, int $page, int $limit): array
     {
-        $groups = $this->groupRepository->findAllGroups($page, $limit);
-        
-        $result = [];
-        foreach ($groups as $group) {
-            $result[] = [
-                'id' => $group->getId()->toRfc4122(),
-                'name' => $group->getName(), 
-                'slug' => $group->getSlug(),
-                'avatarUrl' => $group->getAvatarUrl(),
-                'subscribersCount' => $group->getSubscribersCount(),        
-            ];
-        }
+        $groups = $this->groupRepository->findAllGroups($currentUserId, $page, $limit);
 
-       return $result;
+        $response = $this->groupResponseFactory->toListResponse($groups);
+
+        return $response;
     }
 }

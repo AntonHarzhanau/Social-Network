@@ -33,7 +33,7 @@ final class GetUserPreviewsByWallIdsAction
         foreach ($rows as $row) {
             $result[] = new UserPreviewDTO(
                 id: $row->id,
-                username: $row->username,
+                name: $row->username,
                 avatarUrl: $row->currentAvatar ? ($urlsById[$row->currentAvatar]->url ?? null) : null,
                 slug: $row->slug,
                 wallId: $row->wallId,

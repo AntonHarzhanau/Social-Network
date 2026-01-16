@@ -1,9 +1,13 @@
+import type { MediaPreview } from "@/entities/media/model/types";
+
 export type Group = {
   id: string;
   name: string;
-  slug?: string | undefined | null;
-  avatarUrl?: string | undefined | null;
+  slug?: string | null;
+  isMember: boolean;
+  currentAvatar?: MediaPreview | null;
   subscribersCount: number;
+  wallId: string;
 };
 
 

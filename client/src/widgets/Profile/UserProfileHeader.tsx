@@ -31,13 +31,13 @@ const UserProfileHeader = ({ user, loading }: UserProfileHeaderProps) => {
           <UserProfileAvatar
             userId={user?.id}
             avatarUrl={user?.avatarUrl}
-            username={user?.username}
+            name={user?.name}
             isOwner={isOwner}
           />
         }
         title={
           <h1 className="text-2xl font-bold text-secondary-foreground">
-            {user?.username || ""}
+            {user?.name || ""}
           </h1>
         }
         rightActions={

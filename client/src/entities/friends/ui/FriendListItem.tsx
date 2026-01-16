@@ -46,7 +46,7 @@ const FriendListItem = ({ user, filter }: FriendListItemProps) => {
         >
           <UserAvatar
             imageUrl={user.avatarUrl}
-            name={user.username}
+            name={user.name}
             className=" rounded-full"
           />
         </Link>
@@ -56,11 +56,11 @@ const FriendListItem = ({ user, filter }: FriendListItemProps) => {
           to={`/profile/${user.id}`}
           className="text-md font-bold hover:underline"
         >
-          {user.username}
+          {user.name}
         </Link>
         <NewMessageDialog
           userId={user.id}
-          username={user.username}
+          username={user.name}
           avatarUrl={user.avatarUrl}
         />
       </div>

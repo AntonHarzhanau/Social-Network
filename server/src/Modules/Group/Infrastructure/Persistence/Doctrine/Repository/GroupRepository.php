@@ -2,9 +2,13 @@
 
 namespace App\Modules\Group\Infrastructure\Persistence\Doctrine\Repository;
 
+use App\Modules\Group\Application\DTO\GroupPreviewRawDTO;
+use App\Modules\Group\Application\DTO\GroupRawDTO;
 use App\Modules\Group\Domain\Entity\Group;
+use App\Modules\Group\Domain\Entity\GroupMember;
 use App\Modules\Group\Domain\Repository\GroupRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
@@ -37,15 +41,25 @@ class GroupRepository extends ServiceEntityRepository implements GroupRepository
     }
 
 
-    public function findAllGroups(int $page, $limit): array
+    public function findAllGroups(Uuid $currentUserId, int $page, $limit): array
     {
-        // TODO: add filtering
-        return parent::findBy([], ['createdAt' => 'ASC'], $limit, ($page - 1) * $limit);
+        $qb = $this->baseQB($currentUserId);
+       
+            $qb->andWhere('g.deletedAt IS NULL')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        $result = $qb->getQuery()->getResult();
+        return $result;
     }
 
-    public function findById(Uuid $id): ?Group
+    public function findById(Uuid $currentUserId, Uuid $groupId): ?GroupRawDTO
     {
-        return $this->find($id);
+        $qb = $this->baseQB($currentUserId);
+        $qb->andWhere('g.id = :groupId')
+            ->setParameter('groupId', $groupId)
+            ->andWhere('g.deletedAt IS NULL');
+        return $qb->getQuery()->getOneOrNullResult();
     }
 
     /** @return array<string> wallIds */
@@ -62,10 +76,44 @@ class GroupRepository extends ServiceEntityRepository implements GroupRepository
     public function findGroupsByWallIds(array $wallIds): array
     {
         return $this->createQueryBuilder('g')
+            ->select(sprintf(
+                'NEW %s(
+                g.id,
+                g.name,
+                IDENTITY(g.wall),
+                IDENTITY(g.currentAvatar)
+            )',
+                GroupPreviewRawDTO::class
+            ))
             ->andWhere('g.wall IN (:wallIds)')
             ->andWhere('g.deletedAt IS NULL')
             ->setParameter('wallIds', $wallIds)
             ->getQuery()
             ->getResult();
+    }
+
+    private function baseQB(Uuid $currentUserId): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('g')
+            ->leftJoin(
+                GroupMember::class,
+                'gm',
+                'WITH',
+                'gm.group = g.id AND gm.user = :currentUserId'
+            )
+            ->setParameter('currentUserId', $currentUserId)
+            ->select(sprintf(
+                'NEW %s(
+                g.id,
+                g.name,
+                g.description,
+                IDENTITY(g.wall),
+                (CASE WHEN gm.id IS NOT NULL THEN true ELSE false END),
+                g.subscribersCount,
+                IDENTITY(g.currentAvatar)
+            )',
+                GroupRawDTO::class
+            ));
+        return $qb;
     }
 }

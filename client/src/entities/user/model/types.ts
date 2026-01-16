@@ -1,6 +1,6 @@
 export interface UserPreview {
   id: string;
-  username: string;
+  name: string;
   avatarUrl?: string | null;
   slug?: string | null;
   wallId?: string | null;
@@ -9,7 +9,7 @@ export interface UserPreview {
 export interface UserProfile extends UserPreview {
   id: string;
   email: string;
-  username: string;
+  name: string;
   slug: string | null;
   avatarUrl: string | null;
   coverUrl: string | null;

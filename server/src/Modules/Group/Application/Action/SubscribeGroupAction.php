@@ -23,7 +23,7 @@ final class SubscribeGroupAction
         if ($user === null) {
             throw new \RuntimeException('User not found');
         }
-        $group = $this->groupRepository->findById($groupId);
+        $group = $this->groupRepository->findById($currentUserId, $groupId);
         if ($group === null) {
             throw new \RuntimeException('Group not found');
         }

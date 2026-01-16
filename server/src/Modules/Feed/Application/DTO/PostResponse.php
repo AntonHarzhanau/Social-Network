@@ -11,9 +11,9 @@ final class PostResponse
         public string $id,
         public string $wallId,
         public string $wallOwnerType,
-        public UserPreviewDTO | GroupPreviewDTO | null $wallOwner = null,
+        public UserPreviewDTO | GroupPreviewDTO | null $author = null,
 
-        public ?UserPreviewDTO $author = null,
+        // public ?UserPreviewDTO $author = null,
         public string $content,
         public string $commentThreadId,
 
