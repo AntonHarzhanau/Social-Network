@@ -2,13 +2,13 @@
 
 namespace App\Modules\Group\Api;
 
-use App\Modules\Group\Application\Action\GetGroupPreviewsAction;
+use App\Modules\Group\Application\Action\GetGroupPreviewsByWallsAction;
 use App\Modules\Group\Domain\Repository\GroupRepositoryInterface;
 
 final class GroupApi implements GroupApiInterface
 {
     public function __construct(
-       private readonly GetGroupPreviewsAction $getGroupPreviewsAction, 
+       private readonly GetGroupPreviewsByWallsAction $getGroupPreviewsAction, 
     ) {}
     
     /** @return GroupPreviewDTO[] */

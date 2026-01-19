@@ -15,7 +15,7 @@ final class GetAllGroupsAction
 
     public function execute(Uuid $currentUserId, int $page, int $limit): array
     {
-        $groups = $this->groupRepository->findAllGroups($currentUserId, $page, $limit);
+        $groups = $this->groupRepository->findAllGroupsWithSubscribers($currentUserId, $page, $limit);
 
         $response = $this->groupResponseFactory->toListResponse($groups);
 

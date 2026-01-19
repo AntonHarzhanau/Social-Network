@@ -2,10 +2,11 @@
 
 namespace App\Modules\Group\Application\Service;
 
-use App\Modules\Group\Application\DTO\GroupRawDTO;
-use App\Modules\Group\Application\DTO\GroupResponseDTO;
+use App\Modules\Group\Application\DTO\GroupDetailResponseDTO;
+use App\Modules\Group\Application\DTO\GroupDetailsRawDTO;
+use App\Modules\Group\Application\DTO\GroupPreviewRawDTO;
+use App\Modules\Group\Application\DTO\GroupPreviewResponseDTO;
 use App\Modules\Group\Application\Port\MediaDirectoryInterface;
-use App\Modules\Group\Infrastructure\Adapter\MediaDirectoryAdapter;
 
 final class GroupResponseFactory
 {
@@ -16,22 +17,21 @@ final class GroupResponseFactory
     public function toListResponse(array $groupRawDTOs): array
     {
         $mediaIds = array_map(
-            fn(GroupRawDTO $dto) => $dto->currentAvatarId,
-            array_filter($groupRawDTOs, fn(GroupRawDTO $dto) => $dto->currentAvatarId !== null)
+            fn(GroupPreviewRawDTO $dto) => $dto->avatarId,
+            array_filter($groupRawDTOs, fn(GroupPreviewRawDTO $dto) => $dto->avatarId !== null)
         );
         $mediaIds = array_values(array_unique($mediaIds));
         $medias = $this->mediaDirectory->getMediaItemsByIds($mediaIds);
 
         $result = [];
         foreach ($groupRawDTOs as $groupRawDTO) {
-            $currentAvatarId = $groupRawDTO->currentAvatarId;
-            $result[] = new GroupResponseDTO(
+            $avatarId = $groupRawDTO->avatarId;
+            $result[] = new GroupPreviewResponseDTO(
                 id: $groupRawDTO->id,
                 name: $groupRawDTO->name,
                 isMember: $groupRawDTO->isMember,
                 subscribersCount: $groupRawDTO->subscribersCount,
-                wallId: $groupRawDTO->wallId,
-                currentAvatar: $currentAvatarId ? $medias[$currentAvatarId] ?? null : null,
+                currentAvatar: $avatarId ? $medias[$avatarId] ?? null : null,
             );
         }
         return $result;

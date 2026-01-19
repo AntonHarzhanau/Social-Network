@@ -4,6 +4,7 @@ namespace App\Modules\Group\Infrastructure\Adapter;
 
 use App\Modules\Group\Application\Port\MediaDirectoryInterface;
 use App\Modules\Media\Api\MediaApiInterface;
+use Symfony\Component\Uid\Uuid;
 
 final class MediaDirectoryAdapter implements MediaDirectoryInterface
 {
@@ -12,5 +13,10 @@ final class MediaDirectoryAdapter implements MediaDirectoryInterface
     public function getMediaItemsByIds(array $ids): array
     {
         return $this->mediaApi->getMediasByIds(null, $ids);
+    }
+
+    public function getMediaById(Uuid $id)
+    {
+        return $this->mediaApi->getMediaAssetById($id);
     }
 }

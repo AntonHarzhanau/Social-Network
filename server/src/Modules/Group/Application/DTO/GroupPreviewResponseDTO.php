@@ -2,13 +2,15 @@
 
 namespace App\Modules\Group\Application\DTO;
 
-final readonly class GroupPreviewRawDTO 
+use App\Modules\Media\Api\DTO\MediaItemDTO;
+
+final readonly class GroupPreviewResponseDTO
 {
     public function __construct(
         public string $id,
         public string $name,
         public bool $isMember,
         public int $subscribersCount,
-        public ?string $avatarId,
+        public ?MediaItemDTO $currentAvatar,
     ) {}
 }

@@ -10,6 +10,7 @@ use App\Modules\Group\Domain\Repository\GroupRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use PHPUnit\Metadata\Group as MetadataGroup;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -40,8 +41,12 @@ class GroupRepository extends ServiceEntityRepository implements GroupRepository
         }
     }
 
+    public function findById(Uuid $groupId): ?Group
+    {
+        return $this->find($groupId);
+    }
 
-    public function findAllGroups(Uuid $currentUserId, int $page, $limit): array
+    public function findAllGroupsWithSubscribers(Uuid $currentUserId, int $page, $limit): array
     {
         $qb = $this->baseQB($currentUserId);
        
@@ -53,7 +58,7 @@ class GroupRepository extends ServiceEntityRepository implements GroupRepository
         return $result;
     }
 
-    public function findById(Uuid $currentUserId, Uuid $groupId): ?GroupRawDTO
+    public function findByIdWithSubscribers(Uuid $currentUserId, Uuid $groupId): ?GroupPreviewRawDTO
     {
         $qb = $this->baseQB($currentUserId);
         $qb->andWhere('g.id = :groupId')
@@ -106,13 +111,11 @@ class GroupRepository extends ServiceEntityRepository implements GroupRepository
                 'NEW %s(
                 g.id,
                 g.name,
-                g.description,
-                IDENTITY(g.wall),
                 (CASE WHEN gm.id IS NOT NULL THEN true ELSE false END),
                 g.subscribersCount,
                 IDENTITY(g.currentAvatar)
             )',
-                GroupRawDTO::class
+                GroupPreviewRawDTO::class
             ));
         return $qb;
     }

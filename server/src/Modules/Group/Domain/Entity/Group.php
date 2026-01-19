@@ -3,6 +3,7 @@
 namespace App\Modules\Group\Domain\Entity;
 
 use App\Modules\Feed\Domain\Entity\Wall;
+use App\Modules\Group\Domain\Enum\GroupVisibilityEnum;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\Group\Infrastructure\Persistence\Doctrine\Repository\GroupRepository;
 use App\Modules\Media\Domain\Entity\MediaAsset;
@@ -48,6 +49,9 @@ class Group
     #[ORM\OneToOne(targetEntity: Wall::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[ORM\JoinColumn(name: 'wall_id', referencedColumnName: 'id', nullable: false, unique: true, onDelete: 'CASCADE')]
     private ?Wall $wall = null;
+
+    #[ORM\Column(enumType: GroupVisibilityEnum::class, length: 10)]
+    private ?GroupVisibilityEnum $visibility = GroupVisibilityEnum::PUBLIC;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -197,6 +201,18 @@ class Group
     public function setWall(Wall $wall): static
     {
         $this->wall = $wall;
+        return $this;
+    }
+
+    public function getVisibility(): ?GroupVisibilityEnum
+    {
+        return $this->visibility;
+    }
+
+    public function setVisibility(GroupVisibilityEnum $visibility): static
+    {
+        $this->visibility = $visibility;
+
         return $this;
     }
 }

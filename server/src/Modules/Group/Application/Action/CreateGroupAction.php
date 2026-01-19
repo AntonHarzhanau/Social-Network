@@ -37,6 +37,8 @@ final class CreateGroupAction
             ->setUser($creator)
             ->setRole(GroupMemberRoleEnum::OWNER);
 
+
+        $group->setSubscribersCount(1);
         $this->groupMemberRepository->save($newMember, true);
     }
 }

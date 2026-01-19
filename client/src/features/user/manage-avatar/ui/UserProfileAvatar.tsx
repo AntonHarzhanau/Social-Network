@@ -37,11 +37,11 @@ const UserProfileAvatar = ({
 }: UserProfileAvatarProps) => {
   const [cropOpen, setCropOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-    const [avatars, setAvatars] = useState<MediaPreview[]>([]);
-    const openViewer = useMediaViewerStore((s) => s.openViewer);
+  const [avatars, setAvatars] = useState<MediaPreview[]>([]);
+  const openViewer = useMediaViewerStore((s) => s.openViewer);
   const { uploadNewAvatar, deleteAvatar } = useUserAvatar(userId);
 
-useEffect(() => {
+  useEffect(() => {
     const loadAvatars = async () => {
       if (!userId) return;
       try {
@@ -77,13 +77,13 @@ useEffect(() => {
               if (!userId) return;
               openViewer({
                 author: {
-                    id: userId,
-                    name: name || "",
-                    avatarUrl: avatarUrl || undefined,
+                  id: userId,
+                  name: name || "",
+                  avatarUrl: avatarUrl || undefined,
                 },
                 medias: avatars ?? [],
                 initialIndex: 0,
-              })
+              });
             }}
           >
             Open photo
@@ -123,7 +123,6 @@ useEffect(() => {
         }}
       />
 
- 
       {/* Подтверждение удаления */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>

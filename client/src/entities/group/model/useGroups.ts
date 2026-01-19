@@ -1,10 +1,10 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import type { Group } from "./types";
+import type { GroupPreview } from "./types";
 import { fetchGroups } from "../api/groupApi";
 
 export const GROUP_QUERY_KEY = "groups";
 export const useGroups = (limit = 10) => {
-  const query = useInfiniteQuery<Group[]>({
+  const query = useInfiniteQuery<GroupPreview[]>({
     queryKey: [GROUP_QUERY_KEY, limit],
     initialPageParam: 1,
     queryFn: ({ pageParam }) =>

@@ -12,4 +12,6 @@ interface GroupMemberRepositoryInterface
     public function delete(GroupMember $entity, bool $flush = true): void;
 
     public function findMembersByGroupId(Uuid $groupId): array;
+
+    public function findOneByCriteria(array $criteria): ?GroupMember;
 }

@@ -9,7 +9,7 @@ use App\Modules\Group\Domain\Repository\GroupMemberRepositoryInterface;
 use App\Modules\Group\Domain\Repository\GroupRepositoryInterface;
 use Symfony\Component\Uid\Uuid;
 
-final class SubscribeGroupAction
+final class LeaveGroupAction
 {
     public function __construct(
         private readonly GroupMemberRepositoryInterface $groupMemberRepository,
@@ -34,17 +34,12 @@ final class SubscribeGroupAction
             'user' => $currentUserId,
         ]);
         
-        if ($existingMember !== null) {
-            throw new \DomainException('User is already a member of this group.');
+        if ($existingMember === null) {
+            throw new \DomainException('User is not a member of this group.');
         }
-
-        $newMember = (new GroupMember())
-            ->setUser($user)
-            ->setGroup($group)
-            ->setRole(GroupMemberRoleEnum::MEMBER);
-        $this->groupMemberRepository->save($newMember);
-
-        $group->setSubscribersCount($group->getSubscribersCount() + 1);
+        $this->groupMemberRepository->delete($existingMember);
+        
+        $group->setSubscribersCount($group->getSubscribersCount() - 1);
         $this->groupRepository->save($group);
     }
 }

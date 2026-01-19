@@ -1,8 +1,8 @@
 import { useGroup } from "@/entities/group/model/useGroup";
+import GroupProfileAvatar from "@/features/group/manage-avatar/ui/GroupProfileAvatar";
+import { GroupMembershipActions } from "@/features/group/membership-actions/ui/GroupMembershipActions";
 import CreatePostDIalog from "@/features/post/create/ui/CreatePostDIalog";
 import ProfileHeader from "@/shared/components/ProfileHeader";
-import { Button } from "@/shared/components/ui/button";
-import { UserAvatar } from "@/shared/components/UserAvatar";
 import FeedsList from "@/widgets/FeedsList";
 import { useParams } from "react-router-dom";
 
@@ -19,13 +19,11 @@ const GroupPage = () => {
           </h1>
         }
         avatar={
-          <UserAvatar
-            imageUrl={group?.currentAvatar?.url}
+          <GroupProfileAvatar
+            groupId={group?.id}
+            avatarUrl={group?.currentAvatar?.url}
             name={group?.name}
-            className="
-              h-32 w-32 sm:h-36 sm:w-36
-              rounded-full border-4 shadow-lg
-            "
+            isOwner={group?.role === "owner"}
           />
         }
         meta={
@@ -39,21 +37,31 @@ const GroupPage = () => {
         }
         rightActions={
           <div className="flex items-center gap-3">
-            {group?.isMember ? (
-              <Button variant="outline" size="sm">
-                Leave
-              </Button>
-            ) : (
-              <Button variant="outline" size="sm">
-                Join
-              </Button>
-            )}
+            <GroupMembershipActions
+              isMember={!!group?.isMember}
+              groupVisibility={
+                (group?.groupVisibility ?? "public") as "public" | "private"
+              }
+              role={(group?.role ?? null) as any}
+              onJoin={() => {
+                /* join mutation */
+              }}
+              onRequestJoin={() => {
+                /* request mutation */
+              }}
+              onLeave={() => {
+                /* leave mutation */
+              }}
+              onOpenSettings={() => {
+                /* open settings modal */
+              }}
+              loading={false}
+            />
           </div>
         }
       />
-      {group?.isMember && (
-        <CreatePostDIalog wallId={group?.wallId} />
-      )}
+
+      {group?.isMember && <CreatePostDIalog wallId={group?.wallId} />}
       <FeedsList wallId={group?.wallId} />
     </div>
   );

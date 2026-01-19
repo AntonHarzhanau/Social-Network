@@ -15,7 +15,11 @@ final class MediaApi implements MediaApiInterface
         private readonly MediaAssetRepositoryInterface $mediaAssetRepository,
     ) {}
 
-
+    public function getMediaAssetById(Uuid $mediaId)
+    {
+        return $this->mediaAssetRepository->findById($mediaId);
+    }
+    
     public function getMediaAssetsByIds( array $mediaIds): array
     {
         $items = $this->mediaAssetRepository->findByIds($mediaIds);

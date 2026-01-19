@@ -8,16 +8,16 @@ use App\Modules\Group\Application\Port\MediaDirectoryInterface;
 use App\Modules\Group\Domain\Repository\GroupRepositoryInterface;
 use Symfony\Component\Uid\Uuid;
 
-final class GetGroupPreviewsAction
+final class GetGroupPreviewsByWallsAction
 {
     public function __construct(
         private readonly GroupRepositoryInterface $groupRepository,
         private readonly MediaDirectoryInterface $mediaDirectory,
     ) {}
 
-    public function execute(array $ids): array
+    public function execute(array $wallIds): array
     {
-        $groups = $this->groupRepository->findGroupsByWallIds($ids);
+        $groups = $this->groupRepository->findGroupsByWallIds($wallIds);
         $mediaIds = array_map(
             fn(GroupPreviewRawDTO $group) => $group->avatarId,
             array_filter($groups, fn(GroupPreviewRawDTO $group) => $group->avatarId !== null)

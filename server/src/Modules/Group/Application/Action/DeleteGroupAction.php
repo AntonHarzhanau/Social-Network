@@ -16,6 +16,10 @@ final class DeleteGroupAction
     public function execute(Uuid $currentUserId, Uuid $groupId): void
     {
         $user = $this->userApi->findById($currentUserId);
+        if ($user === null) {
+            throw new \RuntimeException('User not found');
+        }
+
         $group = $this->groupRepository->findById($groupId);
 
         if ($group === null) {

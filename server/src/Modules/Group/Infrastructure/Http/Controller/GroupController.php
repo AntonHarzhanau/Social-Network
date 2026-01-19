@@ -5,9 +5,12 @@ namespace App\Modules\Group\Infrastructure\Http\Controller;
 use App\Modules\Group\Application\Action\CreateGroupAction;
 use App\Modules\Group\Application\Action\DeleteGroupAction;
 use App\Modules\Group\Application\Action\GetAllGroupsAction;
-use App\Modules\Group\Application\Action\GetOneGroupAction;
+use App\Modules\Group\Application\Action\GetGroupDetailsAction;
+use App\Modules\Group\Application\Action\LeaveGroupAction;
+use App\Modules\Group\Application\Action\SetGroupAvatarAction;
 use App\Modules\Group\Application\Action\SubscribeGroupAction;
 use App\Modules\Group\Infrastructure\Http\Request\CreateGroupRequest;
+use App\Modules\Group\Infrastructure\Http\Request\SetGroupAvatarRequest;
 use App\Modules\User\Domain\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,7 +23,9 @@ use Symfony\Component\Uid\Uuid;
 #[Route('/api/groups')]
 class GroupController extends AbstractController
 {
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
     #[Route('', name: 'add_group', methods: ['POST'], format: 'json')]
     public function addGroup(
@@ -43,7 +48,7 @@ class GroupController extends AbstractController
     }
 
     #[Route('', name: 'get_groups', methods: ['GET'], format: 'json')]
-    public function getAll(
+    public function getList(
         Request $request,
         #[CurrentUser()] User $currentUser,
         GetAllGroupsAction $action,
@@ -56,10 +61,10 @@ class GroupController extends AbstractController
     }
 
     #[Route('/{groupId}', name: 'get_group', methods: ['GET'], format: 'json')]
-    public function getOne(
+    public function getDetails(
         string $groupId,
         #[CurrentUser()] User $currentUser,
-        GetOneGroupAction $action,
+        GetGroupDetailsAction $action,
     ): JsonResponse {
         $group = $action->execute($currentUser->getId(), Uuid::fromString($groupId));
         return $this->json($group, JsonResponse::HTTP_OK);
@@ -84,7 +89,32 @@ class GroupController extends AbstractController
         } catch (\DomainException $e) {
             return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_CONFLICT);
         }
-        return $this->json([], JsonResponse::HTTP_CREATED);
+        return $this->json([], JsonResponse::HTTP_OK);
     }
-    
+
+    #[Route('/{groupId}/leave', name: 'leave_group', methods: ['POST'], format: 'json')]
+    public function leave(
+        string $groupId,
+        #[CurrentUser()] User $currentUser,
+        LeaveGroupAction $action,
+    ): JsonResponse {
+        try {
+            $action->execute($currentUser->getId(), Uuid::fromString($groupId));
+        } catch (\DomainException $e) {
+            return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_CONFLICT);
+        }
+        return $this->json([], JsonResponse::HTTP_OK);
+    }
+
+    #[Route('/{groupId}/avatar', name: 'set_group_avatar', methods: ['POST'], format: 'json')]
+    public function setAvatar(
+        string $groupId,
+        #[CurrentUser()] User $currentUser,
+        #[MapRequestPayload()] SetGroupAvatarRequest $request,
+        SetGroupAvatarAction $action,
+    ): JsonResponse {
+        $response = $action->execute(Uuid::fromString($groupId), $request->avatarId ? Uuid::fromString($request->avatarId) : null, $currentUser->getId());
+        return $this->json($response, JsonResponse::HTTP_OK);
+    }
+
 }

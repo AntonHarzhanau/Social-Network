@@ -3,15 +3,17 @@ import type { MediaPreview } from "@/entities/media/model/types";
 export type Group = {
   id: string;
   name: string;
-  slug?: string | null;
+  groupVisibility: "public" | "private";
   isMember: boolean;
-  currentAvatar?: MediaPreview | null;
+  role?: string | null;
+  description?: string | null;
   subscribersCount: number;
   wallId: string;
+  currentAvatar?: MediaPreview | null;
+  cover?: MediaPreview | null;
 };
 
-
-// export type GroupDetails = Group & {
-//   description?: string | undefined | null;
-//   isSubscribedByCurrentUser: boolean;
-// };
+export type GroupPreview = Pick<
+  Group,
+  "id" | "name" | "isMember" | "subscribersCount" | "currentAvatar"
+>;

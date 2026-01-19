@@ -10,6 +10,12 @@ final readonly class CreateGroupRequest
         #[Assert\NotBlank]
         #[Assert\Length(min: 2, max: 100)]
         public string $name,
+
+        #[Assert\Length(max: 500)]
+        public ?string $description = null,
+
+        #[Assert\Choice(choices: ['public', 'private'])]
+        public string $visibility = 'public',
     ) {
     }
 }

@@ -49,4 +49,9 @@ class GroupMemberRepository extends ServiceEntityRepository implements GroupMemb
             ->getQuery()
             ->getResult();
     }
+
+    public function findOneByCriteria(array $criteria): ?GroupMember
+    {
+        return $this->findOneBy($criteria);
+    }
 }
