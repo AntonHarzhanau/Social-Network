@@ -15,7 +15,6 @@ final class GetUsersAction
         private SocialGraphApiInterface $socialGraphApi,
     ) {}
 
-    /** @return list<UserPreviewDTO> */
     public function execute(User $currentUser, ?int $page = null, ?int $limit = null, ?string $query = null): array
     {
         $exceptUserIds = array_merge(

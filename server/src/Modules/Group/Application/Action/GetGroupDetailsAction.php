@@ -41,7 +41,7 @@ final class GetGroupDetailsAction
             'group' => $groupId,
             'user' => $currentUserId,
         ]);
-
+// dd($member);
         $wallId = null;
         $description = null;
 
@@ -56,6 +56,7 @@ final class GetGroupDetailsAction
             groupVisibility: $group->getVisibility()->value,
             isMember: $member !== null,
             role: $member?->getRole()?->value ?? null,
+            status: $member?->getStatus()?->value ?? null,
             description: $description,
             subscribersCount: $group->getSubscribersCount(),
             wallId: $wallId,

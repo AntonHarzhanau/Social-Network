@@ -1,14 +1,28 @@
 import { apiClient } from "@/shared/api/apiClient";
-import type { Group, GroupPreview } from "../model/types";
+import type {
+  FetchGroupMembersResponse,
+  Group,
+  GroupPreview,
+  GroupRequestStatus,
+} from "../model/types";
 
 export const fetchGroups = async ({
   page = 1,
   limit = 10,
+  groupName = "",
+  forMe = false,
+}: {
+  page?: number;
+  limit?: number;
+  groupName?: string;
+  forMe?: boolean;
 }): Promise<GroupPreview[]> => {
   const response = await apiClient.get<GroupPreview[]>("/groups", {
     params: {
       page,
       limit,
+      groupName,
+      forMe,
     },
   });
   return response.data;
@@ -40,6 +54,45 @@ export const leaveGroup = async (groupId: string): Promise<void> => {
 };
 
 export const joinGroup = async (groupId: string): Promise<void> => {
-  const response = await apiClient.post(`/groups/${groupId}/join`);
+  const response = await apiClient.post(`/groups/${groupId}/subscribe`);
+  return response.data;
+};
+
+export const fetchGroupMembers = async (
+  groupId: string,
+  page = 1,
+  limit = 8,
+  status?: GroupRequestStatus,
+): Promise<FetchGroupMembersResponse> => {
+  const response = await apiClient.get<FetchGroupMembersResponse>(
+    `/groups/${groupId}/members`,
+    {
+      params: {
+        page,
+        limit,
+        status,
+      },
+    },
+  );
+  return response.data;
+};
+
+export const changeGroupMemberRole = async (
+  memberId: string,
+  newRole: string,
+): Promise<void> => {
+  const response = await apiClient.put(`/groups/members/${memberId}/role`, {
+    newRole,
+  });
+  return response.data;
+};
+
+export const changeGroupMemberStatus = async (
+  memberId: string,
+  newStatus: string,
+): Promise<void> => {
+  const response = await apiClient.put(`/groups/members/${memberId}/status`, {
+    newStatus,
+  });
   return response.data;
 };

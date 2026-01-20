@@ -2,15 +2,20 @@
 
 namespace App\Modules\Group\Infrastructure\Http\Controller;
 
+use App\Modules\Group\Application\Action\ChangeMemberRoleAction;
+use App\Modules\Group\Application\Action\ChangeMemberStatusAction;
 use App\Modules\Group\Application\Action\CreateGroupAction;
 use App\Modules\Group\Application\Action\DeleteGroupAction;
-use App\Modules\Group\Application\Action\GetAllGroupsAction;
 use App\Modules\Group\Application\Action\GetGroupDetailsAction;
+use App\Modules\Group\Application\Action\GetGroupListAction;
+use App\Modules\Group\Application\Action\GetMembersList;
 use App\Modules\Group\Application\Action\LeaveGroupAction;
 use App\Modules\Group\Application\Action\SetGroupAvatarAction;
 use App\Modules\Group\Application\Action\SubscribeGroupAction;
 use App\Modules\Group\Infrastructure\Http\Request\CreateGroupRequest;
 use App\Modules\Group\Infrastructure\Http\Request\SetGroupAvatarRequest;
+use App\Modules\Group\Infrastructure\Http\Request\UpdateMemberRoleRequest;
+use App\Modules\Group\Infrastructure\Http\Request\UpdateMemberStatusRequest;
 use App\Modules\User\Domain\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -33,7 +38,8 @@ class GroupController extends AbstractController
         #[MapRequestPayload()] CreateGroupRequest $request,
         CreateGroupAction $action,
     ): JsonResponse {
-        $action->execute($currentUser->getId(), $request->name);
+        //  dd($request);
+        $action->execute($currentUser->getId(), $request->name, $request->visibility);
         return $this->json([], JsonResponse::HTTP_CREATED);
     }
 
@@ -51,12 +57,13 @@ class GroupController extends AbstractController
     public function getList(
         Request $request,
         #[CurrentUser()] User $currentUser,
-        GetAllGroupsAction $action,
+        GetGroupListAction $action,
     ): JsonResponse {
-        $page = $request->query->getInt('page', 1);
-        $limit = $request->query->getInt('limit', 10);
-        $search = $request->query->getString('search', '');
-        $groups = $action->execute($currentUser->getId(), $page, $limit);
+        $page = max((int) $request->query->get('page', 1), 1);
+        $limit = min(max((int) $request->query->get('limit', 20), 1), 50);
+        $search = $request->query->getString('groupName', '');
+        $forMe = $request->query->getBoolean('forMe', false);
+        $groups = $action->execute($currentUser->getId(), $page, $limit, $search, $forMe);
         return $this->json($groups, JsonResponse::HTTP_OK);
     }
 
@@ -117,4 +124,58 @@ class GroupController extends AbstractController
         return $this->json($response, JsonResponse::HTTP_OK);
     }
 
+    #[Route('/members/{memberId}/status', name: 'change_member_status', methods: ['PUT'], format: 'json')]
+    public function changeMemberStatus(
+        string $memberId,
+        #[MapRequestPayload()] UpdateMemberStatusRequest $request,
+        #[CurrentUser()] User $currentUser,
+        ChangeMemberStatusAction $action,
+
+    ): JsonResponse {
+        $action->execute(
+            Uuid::fromString($memberId),
+            $request->newStatus,
+            $currentUser->getId()
+        );
+        return $this->json([], JsonResponse::HTTP_OK);
+    }
+
+    #[Route('/members/{memberId}/role', name: 'change_member_role', methods: ['PUT'], format: 'json')]
+    public function changeMemberRole(
+        string $memberId,
+        #[MapRequestPayload()] UpdateMemberRoleRequest $request,
+        #[CurrentUser()] User $currentUser,
+        ChangeMemberRoleAction $action,
+    ): JsonResponse {
+        $action->execute(
+            Uuid::fromString($memberId),
+            $request->newRole,
+            $currentUser->getId()
+        );
+        return $this->json([], JsonResponse::HTTP_OK);
+    }
+
+    #[Route('/{groupId}/members', name: 'get_group_members', methods: ['GET'], format: 'json')]
+    public function getMembersList(
+        string $groupId,
+        #[CurrentUser()] User $currentUser,
+        Request $request,
+        GetMembersList $action,
+    ): JsonResponse {
+        $page = max((int) $request->query->get('page', 1), 1);
+        $limit = min(max((int) $request->query->get('limit', 20), 1), 50);
+
+        $status = $request->query->getString('status', '');
+        $status = trim($status);
+        $status = $status === '' ? null : $status;
+
+        $members = $action->execute(
+            Uuid::fromString($groupId),
+            $status,
+            $currentUser->getId(),
+            $page,
+            $limit
+        );
+        return $this->json($members, JsonResponse::HTTP_OK);
+    }
 }

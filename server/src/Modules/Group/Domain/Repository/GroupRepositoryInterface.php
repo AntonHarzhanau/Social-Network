@@ -22,4 +22,9 @@ interface GroupRepositoryInterface
     public function findWallIdsByGroupIds(array $groupIds): array;
 
     public function findGroupsByWallIds(array $wallIds): array;
+
+    public function findAcceptedMemberGroups(Uuid $currentUserId, ?string $q = null, int $page = 1, int $limit = 10): array;
+    public function findGroupsExceptAcceptedMember(Uuid $currentUserId, ?string $q = null, int $page = 1, int $limit = 10): array;
+    public function findOwnedGroups(Uuid $currentUserId, ?string $q = null, int $page = 1, int $limit = 10): array;
+
 }

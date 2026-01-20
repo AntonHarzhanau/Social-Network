@@ -3,6 +3,7 @@
 namespace App\Modules\Group\Domain\Entity;
 
 use App\Modules\Group\Domain\Enum\GroupMemberRoleEnum;
+use App\Modules\Group\Domain\Enum\GroupMemberStatusEnum;
 use App\Modules\Group\Infrastructure\Persistence\Doctrine\Repository\GroupMemberRepository;
 use App\Modules\User\Domain\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
@@ -33,6 +34,9 @@ class GroupMember
 
     #[ORM\Column(length: 255, enumType: GroupMemberRoleEnum::class)]
     private ?GroupMemberRoleEnum $role = null;
+
+    #[ORM\Column(length: 255, enumType: GroupMemberStatusEnum::class)]
+    private ?GroupMemberStatusEnum $status = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $joinedAt = null;
@@ -91,6 +95,18 @@ class GroupMember
     public function setJoinedAt(\DateTimeImmutable $joinedAt): static
     {
         $this->joinedAt = $joinedAt;
+
+        return $this;
+    }
+
+    public function getStatus(): ?GroupMemberStatusEnum
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?GroupMemberStatusEnum $status): static
+    {
+        $this->status = $status;
 
         return $this;
     }

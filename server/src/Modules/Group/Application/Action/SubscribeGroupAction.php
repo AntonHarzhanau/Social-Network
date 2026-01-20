@@ -5,6 +5,8 @@ namespace App\Modules\Group\Application\Action;
 use App\Modules\Group\Application\Port\UserDirectoryInterface;
 use App\Modules\Group\Domain\Entity\GroupMember;
 use App\Modules\Group\Domain\Enum\GroupMemberRoleEnum;
+use App\Modules\Group\Domain\Enum\GroupMemberStatusEnum;
+use App\Modules\Group\Domain\Enum\GroupVisibilityEnum;
 use App\Modules\Group\Domain\Repository\GroupMemberRepositoryInterface;
 use App\Modules\Group\Domain\Repository\GroupRepositoryInterface;
 use Symfony\Component\Uid\Uuid;
@@ -42,6 +44,13 @@ final class SubscribeGroupAction
             ->setUser($user)
             ->setGroup($group)
             ->setRole(GroupMemberRoleEnum::MEMBER);
+
+        if($group->getVisibility() === GroupVisibilityEnum::PUBLIC) {
+            $newMember->setStatus(GroupMemberStatusEnum::ACCEPTED);
+        } else {
+            $newMember->setStatus(GroupMemberStatusEnum::PENDING);
+        }
+
         $this->groupMemberRepository->save($newMember);
 
         $group->setSubscribersCount($group->getSubscribersCount() + 1);

@@ -126,7 +126,7 @@ final class UserController extends AbstractController
     ): JsonResponse {
         
         try {
-            $media = $action->execute(Uuid::fromString($userId), $currentUser->getId());
+            $media = $action->execute(Uuid::fromString($userId));
             return $this->json($media, JsonResponse::HTTP_OK);
         } catch (UserNotFoundException $e) {
             return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_NOT_FOUND);

@@ -30,7 +30,6 @@ const FriendsList = ({ userId }: FriendsListProps) => {
     refetch,
   } = usePeopleListInfinite(filter, userId, 10, debouncedSearch);
 
-
   const sentinelRef = useInfiniteScrollSentinel({
     enabled: !isLoading && !isError,
     hasNextPage,
@@ -44,23 +43,33 @@ const FriendsList = ({ userId }: FriendsListProps) => {
         <Button variant="outline">
           <div className="flex gap-2">
             <h3>All</h3>
-            <p className="text-sm text-muted-foreground">{/* можно total с сервера */}</p>
+            <p className="text-sm text-muted-foreground">
+              {/* можно total с сервера */}
+            </p>
           </div>
         </Button>
 
         <Button variant="outline">
           <div className="flex gap-2">
             <h3>Online</h3>
-            <p className="text-sm text-muted-foreground">{/* online count */}</p>
+            <p className="text-sm text-muted-foreground">
+              {/* online count */}
+            </p>
           </div>
         </Button>
 
         <Button className="ml-auto">Find Friends</Button>
       </div>
 
-      <SearchInput value={search} onChange={setSearch}/>
+      <SearchInput
+        placeholder="Search friends..."
+        value={search}
+        onChange={setSearch}
+      />
 
-      {isLoading && <div className="p-4 text-sm text-muted-foreground">Loading...</div>}
+      {isLoading && (
+        <div className="p-4 text-sm text-muted-foreground">Loading...</div>
+      )}
 
       {isError && (
         <div className="p-4 text-sm">
@@ -72,11 +81,12 @@ const FriendsList = ({ userId }: FriendsListProps) => {
         </div>
       )}
 
-      {!isLoading && !isError && users.map((user) => (
-        <FriendListItem key={user.id} user={user} filter={filter} />
-      ))}
+      {!isLoading &&
+        !isError &&
+        users.map((user) => (
+          <FriendListItem key={user.id} user={user} filter={filter} />
+        ))}
 
-    
       <div ref={sentinelRef} className="h-10" />
 
       {isFetchingNextPage && (
@@ -85,6 +95,5 @@ const FriendsList = ({ userId }: FriendsListProps) => {
     </Card>
   );
 };
-
 
 export default FriendsList;

@@ -8,6 +8,7 @@ use Symfony\Component\Uid\Uuid;
 interface UserDirectoryInterface
 {
     public function findById(Uuid $id): ?User;
-    /** @return list<User> */
+    
+    /** @return list<UserPreviewDTO> */
     public function findPreviewsByIds(array $ids): array;
 }

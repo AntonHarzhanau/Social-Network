@@ -12,6 +12,7 @@ final readonly class GroupDetailResponseDTO
         public string $groupVisibility,
         public bool $isMember,
         public ?string $role,
+        public ?string $status,
         public ?string $description,
         public int $subscribersCount,
         public ?string $wallId,
