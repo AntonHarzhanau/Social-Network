@@ -26,7 +26,7 @@ final class GetPostsByWallAction
             page: $page,
             limit: $limit,
         );
-        $posts = $this->postFactory->toPostListResponse($posts);
+        $posts = $this->postFactory->toPostListResponse($currentUser->getId(), $posts);
         return $posts;
     }
 }

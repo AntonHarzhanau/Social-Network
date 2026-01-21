@@ -11,22 +11,33 @@ export const VISIBILITY_VALUES = {
 export type Visibility =
   (typeof VISIBILITY_VALUES)[keyof typeof VISIBILITY_VALUES];
 
+export type WallOwner = {
+  id: string;
+  type: "user" | "group";
+  name: string;
+  avatarUrl: string | null;
+  wallId: string;
+};
+
 export interface Post {
   id: string;
   wallId: string;
-  wallOwnerType: "user" | "group";
-  wallOwner: UserPreview;
+  wallOwner: WallOwner;
+
   author: UserPreview;
   content: string;
   commentThreadId: string;
+
   likeCount: number;
   commentCount: number;
   isLikedByCurrentUser: boolean;
+
   createdAt: string;
   media: MediaPreview[] | null;
-  kind: "original" | "repost"; 
-  originalPostId: string | null;
-  quote: string | null;
+
+  kind: "original" | "repost";
+  //   originalPostId: string | null;
+  canDelete: boolean;
 }
 
 export interface ToggleLikePostResponse {

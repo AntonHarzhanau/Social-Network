@@ -8,14 +8,14 @@ const GroupsAside = ({
   setMyGroupsOnly: (value: boolean) => void;
 }) => {
   return (
-    <>
+    <aside>
       <Card className="mb-4">
         <CardContent>
           <CreateGroupForm />
         </CardContent>
       </Card>
       <GroupFilter setMyGroupsOnly={setMyGroupsOnly} />
-    </>
+    </aside>
   );
 };
 

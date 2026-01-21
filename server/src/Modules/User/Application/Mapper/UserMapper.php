@@ -35,7 +35,7 @@ final class UserMapper
         return new UserDetailsDTO(
             id: (string) $user->getId(),
             email: (string) $user->getEmail(),
-            username: (string) $user->getUsername(),
+            name: (string) $user->getUsername(),
             slug: $user->getSlug(),
             avatarUrl: $avatarUrl,
             coverUrl: $user->getCoverUrl(),

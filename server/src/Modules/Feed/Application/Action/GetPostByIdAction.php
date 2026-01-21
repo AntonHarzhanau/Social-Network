@@ -23,7 +23,7 @@ final class GetPostByIdAction
             return null;
         }
         // dd(123, $postEntity);
-        $post = $this->postFactory->toPostListResponse([$postEntity], $currentUser)[0] ?? null;
+        $post = $this->postFactory->toPostListResponse($currentUser->getId(), [$postEntity])[0] ?? null;
         return $post;
     }
 }

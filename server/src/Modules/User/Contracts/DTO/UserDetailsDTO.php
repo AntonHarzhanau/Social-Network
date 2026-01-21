@@ -7,7 +7,7 @@ final readonly class UserDetailsDTO
     public function __construct(
         public string $id,
         public string $email,
-        public string $username,
+        public string $name,
         public ?string $slug,
         public ?string $avatarUrl,
         public ?string $coverUrl,

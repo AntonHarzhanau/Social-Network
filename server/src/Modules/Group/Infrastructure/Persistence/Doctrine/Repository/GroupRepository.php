@@ -77,23 +77,16 @@ class GroupRepository extends ServiceEntityRepository implements GroupRepository
             ->getSingleColumnResult();
     }
 
-    public function findGroupsByWallIds(array $wallIds): array
+    public function findGroupsByWallIds(Uuid $currentUserId, array $wallIds): array
     {
-        return $this->createQueryBuilder('g')
-            ->select(sprintf(
-                'NEW %s(
-                g.id,
-                g.name,
-                IDENTITY(g.wall),
-                IDENTITY(g.currentAvatar)
-            )',
-                GroupPreviewRawDTO::class
-            ))
+        $qb = $this->baseQB($currentUserId)
             ->andWhere('g.wall IN (:wallIds)')
             ->andWhere('g.deletedAt IS NULL')
-            ->setParameter('wallIds', $wallIds)
-            ->getQuery()
-            ->getResult();
+            ->setParameter('wallIds', $wallIds);
+        $result = $qb->getQuery()->getResult();
+        return $result;
+
+
     }
 
     public function findAcceptedMemberGroups(Uuid $currentUserId, ?string $q = null, int $page = 1, int $limit = 10): array
@@ -103,7 +96,6 @@ class GroupRepository extends ServiceEntityRepository implements GroupRepository
             ->orderBy('g.createdAt', 'DESC')
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
-
         return $qb->getQuery()->getResult(); // GroupPreviewRawDTO[]
     }
 
@@ -135,7 +127,6 @@ class GroupRepository extends ServiceEntityRepository implements GroupRepository
     private function baseQB(Uuid $currentUserId, ?string $q = null): QueryBuilder
     {
         $qb = $this->createQueryBuilder('g')
-            // важный join: association-to-entity
             ->leftJoin(
                 GroupMember::class,
                 'gm',
@@ -155,7 +146,9 @@ class GroupRepository extends ServiceEntityRepository implements GroupRepository
             'NEW %s(
             g.id,
             g.name,
+            IDENTITY(g.wall),
             (CASE WHEN gm.id IS NOT NULL THEN true ELSE false END),
+            gm.role,
             g.subscribersCount,
             IDENTITY(g.currentAvatar)
         )',

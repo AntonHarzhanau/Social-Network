@@ -22,7 +22,7 @@ final class GetAllPostsAction
             page: $page,
             limit: $limit,
         );
-        $posts = $this->postFactory->toPostListResponse($rows);
+        $posts = $this->postFactory->toPostListResponse($currentUserId, $rows);
         return $posts;
     }
 }

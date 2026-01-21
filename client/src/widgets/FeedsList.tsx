@@ -1,8 +1,6 @@
 import { useInfinitePosts } from "@/entities/post/model/useInfinitePosts";
 import FeedCard from "../entities/post/ui/FeedCard";
 import { useInfiniteScrollSentinel } from "@/shared/hooks/useInfiniteScrollSentinel";
-
-
 const FeedsList = ({ wallId = null }: { wallId?: string | null }) => {
   const {
     posts,

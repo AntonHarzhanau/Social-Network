@@ -5,7 +5,6 @@ import {
   CardFooter,
 } from "@/shared/components/ui/card";
 import ExpandableDescription from "@/shared/components/ExpandableDescription";
-import { formatPostDate } from "@/shared/lib/date";
 import FeedCardHeader from "@/entities/post/ui/FeedCardHeader";
 import FeedCardActions from "./FeedCardActions";
 import MediaCarousel from "../../media/ui/MediaCarousel";
@@ -21,17 +20,11 @@ interface FeedCardProps {
 const FeedCard = ({ post }: FeedCardProps) => {
   const openViewer = useMediaViewerStore((s) => s.openViewer);
   const [feedDetailsOpen, setFeedDetailsOpen] = useState(false);
-
+  console.log(post);
   return (
     <>
       <Card className="max-w-full bg-card">
-        <FeedCardHeader
-          userId={post.author.id}
-          name={post.author.name}
-          avatarUrl={post.author.avatarUrl}
-          date={formatPostDate(post.createdAt)}
-          postId={post.id}
-        />
+        <FeedCardHeader post={post} />
 
         <CardContent className="w-full px-2">
           <MediaCarousel

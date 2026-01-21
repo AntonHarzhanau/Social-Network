@@ -14,7 +14,6 @@ interface UserProfileHeaderProps {
 
 const UserProfileHeader = ({ user, loading }: UserProfileHeaderProps) => {
   const currentUser = sessionStore((s) => s.user);
-
   const isOwner = !!user?.id && user?.id === currentUser?.id;
 
   return (

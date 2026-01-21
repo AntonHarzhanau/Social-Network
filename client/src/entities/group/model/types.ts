@@ -2,16 +2,16 @@ import type { MediaPreview } from "@/entities/media/model/types";
 import type { UserPreview } from "@/entities/user/model/types";
 
 export type GroupVisibility = "public" | "private";
-export type GroupRole = "owner" | "admin" | "member";
-export type GroupRequestStatus = "pending" | "accepted" | "banned";
+export type MemberRole = "owner" | "admin" | "member";
+export type MemberStatus = "pending" | "accepted" | "banned";
 
 export type Group = {
   id: string;
   name: string;
-  groupVisibility: "public" | "private";
+  groupVisibility: GroupVisibility;
   isMember: boolean;
-  role?: GroupRole | null;
-  status?: GroupRequestStatus | null;
+  role?: MemberRole | null;
+  status?: MemberStatus | null;
   description?: string | null;
   subscribersCount: number;
   wallId: string;
@@ -27,8 +27,8 @@ export type GroupPreview = Pick<
 export type GroupMember = {
   id: string;
   user: UserPreview;
-  role: GroupRole;
-  status?: GroupRequestStatus | null;
+  role: MemberRole;
+  status?: MemberStatus | null;
 };
 
 export type FetchGroupMembersResponse = {

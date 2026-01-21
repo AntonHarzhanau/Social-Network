@@ -15,9 +15,10 @@ final class GetGroupPreviewsByWallsAction
         private readonly MediaDirectoryInterface $mediaDirectory,
     ) {}
 
-    public function execute(array $wallIds): array
+    public function execute(Uuid $currentUserId, array $wallIds): array
     {
-        $groups = $this->groupRepository->findGroupsByWallIds($wallIds);
+        $groups = $this->groupRepository->findGroupsByWallIds($currentUserId, $wallIds);
+
         $mediaIds = array_map(
             fn(GroupPreviewRawDTO $group) => $group->avatarId,
             array_filter($groups, fn(GroupPreviewRawDTO $group) => $group->avatarId !== null)
@@ -31,10 +32,13 @@ final class GetGroupPreviewsByWallsAction
                 id: $group->id,
                 name: $group->name,
                 wallId: $group->wallId,
-                slug: null,
+                isMember: $group->isMember,
+                role: $group->role->value ?? null,
+                subscribersCount: $group->subscribersCount,
                 avatarUrl: $group->avatarId ? ($medias[$group->avatarId]->url ?? null) : null,
             );
         }
+    
         return $result;
     }
 }

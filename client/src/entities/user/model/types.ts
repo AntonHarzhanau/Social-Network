@@ -7,11 +7,7 @@ export interface UserPreview {
 }
 
 export interface UserProfile extends UserPreview {
-  id: string;
   email: string;
-  name: string;
-  slug: string | null;
-  avatarUrl: string | null;
   coverUrl: string | null;
   location: string | null;
   maritalStatus: string | null;
@@ -20,5 +16,4 @@ export interface UserProfile extends UserPreview {
   createdAt: string;
   emailVerifiedAt: string;
   lastLoginAt: string | null;
-  wallId: string;
 }

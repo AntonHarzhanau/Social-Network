@@ -20,6 +20,7 @@ const GroupsPageContent = ({ myGroupsOnly }: { myGroupsOnly: boolean }) => {
   return (
     <Card className="flex flex-col min-h-[90vh] px-2">
       <SearchInput
+        searchId="search-groups"
         placeholder="Search groups..."
         value={search}
         onChange={setSearch}

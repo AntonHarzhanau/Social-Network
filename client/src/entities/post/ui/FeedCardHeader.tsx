@@ -10,89 +10,78 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import { useDeletePost } from "../model/usePostMutations";
-import { sessionStore } from "@/entities/session/model/sessionStore";
+import type { Post } from "../model/types";
+import { formatPostDate } from "@/shared/lib/date";
 
 interface FeedCardHeaderProps {
-  userId: string;
-  name: string;
-  avatarUrl?: string | null;
-  date: string;
-  postId: string;
+  post: Post;
 }
 
-const FeedCardHeader = ({
-  userId,
-  name,
-  avatarUrl,
-  date,
-  postId,
-}: FeedCardHeaderProps) => {
+const FeedCardHeader = ({ post }: FeedCardHeaderProps) => {
   const { mutateAsync: deletePost } = useDeletePost();
-  const user = sessionStore((s) => s.user);
+
+  const isGroupPost = post.wallOwner.type === "group";
+
+  const ownerName = post.wallOwner?.name ?? "";
+  const isDeletedOwner = !isGroupPost && ownerName === "[deleted]";
+
+  const headerHref = isDeletedOwner
+    ? "/notfound"
+    : isGroupPost
+      ? `/groups/${post.wallOwner.id}`
+      : `/profile/${post.wallOwner.id}`;
+
+  const headerTitle = isDeletedOwner ? "Deleted User" : ownerName;
+
+  const headerAvatarUrl = isDeletedOwner
+    ? "/public/deletedUserImage.png"
+    : (post.wallOwner.avatarUrl ?? null);
+
   return (
     <CardHeader className="flex items-center gap-3">
-      {name !== "[deleted]" ? (
-        <>
-          <Link to={`/profile/${userId}`} className="">
-            <UserAvatar
-              imageUrl={avatarUrl}
-              name={name}
-              alt={name}
-              className="w-10 h-10"
-            />
-          </Link>
-          <div className="flex flex-col">
-            <Link
-              to={`/profile/${userId}`}
-              className="text-sm font-semibold hover:underline"
+      <Link to={headerHref}>
+        <UserAvatar
+          imageUrl={headerAvatarUrl}
+          name={headerTitle}
+          alt={headerTitle}
+          className="w-10 h-10"
+        />
+      </Link>
+
+      <div className="flex flex-col min-w-0">
+        <Link
+          to={headerHref}
+          className="text-sm font-semibold hover:underline truncate"
+        >
+          {headerTitle}
+        </Link>
+
+        <span className="text-xs text-muted-foreground">
+          {formatPostDate(post.createdAt)}
+        </span>
+      </div>
+
+      {post.canDelete && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="ml-auto p-2 hover:bg-accent-foreground/5"
             >
-              {name}
-            </Link>
-            <span className="text-xs text-muted-foreground">{date}</span>
-          </div>
-        </>
-      ) : (
-        <>
-          <Link to={`/notfound`} className="">
-            <UserAvatar
-              imageUrl={"/public/deletedUserImage.png"}
-              name={name}
-              alt={name}
-              className="w-10 h-10"
-            />
-          </Link>
-          <div className="flex flex-col">
-            <Link
-              to={`/notfound`}
-              className="text-sm font-semibold hover:underline"
-            >
-              {"Deleted User"}
-            </Link>
-            <span className="text-xs text-muted-foreground">{date}</span>
-          </div>
-        </>
-      )}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="ml-auto p-2 hover:bg-accent-foreground/5"
-          >
-            <MoreHorizontal />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          {user?.id === userId && (
+              <MoreHorizontal />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
             <DropdownMenuItem
-              onClick={async () => await deletePost(postId)}
+              onClick={async () => await deletePost(post.id)}
               className="text-destructive"
             >
               Delete
             </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </CardHeader>
   );
 };

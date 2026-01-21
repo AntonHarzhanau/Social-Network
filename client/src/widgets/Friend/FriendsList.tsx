@@ -62,6 +62,7 @@ const FriendsList = ({ userId }: FriendsListProps) => {
       </div>
 
       <SearchInput
+        searchId="search-friends"
         placeholder="Search friends..."
         value={search}
         onChange={setSearch}

@@ -4,7 +4,7 @@ namespace App\Modules\Feed\Infrastructure\Adapter;
 
 use App\Modules\Feed\Application\Port\GroupDirectoryInterface;
 use App\Modules\Group\Api\GroupApiInterface;
-use App\Modules\Media\Api\MediaApiInterface;
+use Symfony\Component\Uid\Uuid;
 
 
 class GroupDirectoryAdapter implements GroupDirectoryInterface
@@ -13,9 +13,9 @@ class GroupDirectoryAdapter implements GroupDirectoryInterface
         private readonly GroupApiInterface $groupApi,
     ) {}
    
-    public function findPreviewsByWallIds(array $wallIds): array
+    public function findPreviewsByWallIds(Uuid $currentUserId, array $wallIds): array
     {
-        $groups = $this->groupApi->getGroupsPreviewsByWallIds($wallIds);
+        $groups = $this->groupApi->getGroupsPreviewsByWallIds($currentUserId, $wallIds);
         foreach ($groups as $group) {
             $groups[$group->wallId] = $group;
         }

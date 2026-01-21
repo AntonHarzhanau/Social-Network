@@ -3,7 +3,7 @@ import type {
   FetchGroupMembersResponse,
   Group,
   GroupPreview,
-  GroupRequestStatus,
+  MemberStatus,
 } from "../model/types";
 
 export const fetchGroups = async ({
@@ -62,7 +62,7 @@ export const fetchGroupMembers = async (
   groupId: string,
   page = 1,
   limit = 8,
-  status?: GroupRequestStatus,
+  status?: MemberStatus,
 ): Promise<FetchGroupMembersResponse> => {
   const response = await apiClient.get<FetchGroupMembersResponse>(
     `/groups/${groupId}/members`,

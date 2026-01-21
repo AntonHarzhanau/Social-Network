@@ -4,6 +4,7 @@ namespace App\Modules\Group\Api;
 
 use App\Modules\Group\Application\Action\GetGroupPreviewsByWallsAction;
 use App\Modules\Group\Domain\Repository\GroupRepositoryInterface;
+use Symfony\Component\Uid\Uuid;
 
 final class GroupApi implements GroupApiInterface
 {
@@ -12,8 +13,8 @@ final class GroupApi implements GroupApiInterface
     ) {}
     
     /** @return GroupPreviewDTO[] */
-    public function getGroupsPreviewsByWallIds(array $wallIds): array
+    public function getGroupsPreviewsByWallIds(Uuid $currentUserId, array $wallIds): array
     {
-        return $this->getGroupPreviewsAction->execute($wallIds);
+        return $this->getGroupPreviewsAction->execute($currentUserId, $wallIds);
     }
 }

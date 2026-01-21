@@ -10,7 +10,9 @@ final readonly class GroupPreviewDTO
         public string $id,
         public string $name,
         public string $wallId,
-        public ?string $slug,
+        public bool $isMember,
+        public ?string $role,
+        public int $subscribersCount,
         public ?string $avatarUrl,
     ) {}
 }
