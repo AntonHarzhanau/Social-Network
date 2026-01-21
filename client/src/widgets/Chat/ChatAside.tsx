@@ -2,13 +2,13 @@ import { useChatUiStore } from "@/entities/chat/model/chatUiStore";
 import { useOpenChatsStore } from "@/entities/chat/model/openChatsStore";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
-import { UserAvatar } from "@/shared/components/UserAvatar";
+import { Avatar } from "@/shared/components/Avatar";
 import { cn } from "@/shared/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
-const ChatAside = ({urlChatId}: {urlChatId: string}) => {
+const ChatAside = ({ urlChatId }: { urlChatId: string }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -37,7 +37,7 @@ const ChatAside = ({urlChatId}: {urlChatId: string}) => {
               to={`/chats/${chat.id}`}
               className={cn("flex gap-2 items-center rounded-md w-full")}
             >
-              <UserAvatar
+              <Avatar
                 imageUrl={chat.avatarUrl}
                 name={chat.title}
                 className="w-7 h-7"

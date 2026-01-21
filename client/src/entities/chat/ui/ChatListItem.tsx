@@ -1,7 +1,7 @@
 import type { Chat } from "@/entities/chat/model/types";
 import DropDownButton from "@/shared/components/DropDownButton";
 import { Item, ItemMedia } from "@/shared/components/ui/item";
-import { UserAvatar } from "@/shared/components/UserAvatar";
+import { Avatar } from "@/shared/components/Avatar";
 import { useOpenChatsStore } from "@/entities/chat/model/openChatsStore";
 import { Link } from "react-router-dom";
 
@@ -25,7 +25,7 @@ const ChatListItem = ({ chat }: ChatListItemProps) => {
         className="flex items-center gap-2 min-w-0"
       >
         <ItemMedia variant="icon" className="w-10 h-10 rounded-full shrink-0">
-          <UserAvatar
+          <Avatar
             imageUrl={chat.avatarUrl}
             alt={chat.title}
             name={chat.title}

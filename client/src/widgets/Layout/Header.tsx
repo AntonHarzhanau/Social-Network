@@ -2,7 +2,7 @@ import { authActions } from "@/features/auth/model/authActions";
 import type { UserPreview } from "@/entities/user/model/types";
 import { ModeToggle } from "@/shared/components/ModeToggle";
 import { Button } from "@/shared/components/ui/button";
-import { UserAvatar } from "@/shared/components/UserAvatar";
+import { Avatar } from "@/shared/components/Avatar";
 import { Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -29,7 +29,7 @@ const Header = ({ user }: HeaderProps) => {
           </Button>
 
           <Button asChild variant="ghost" className="w-8 h-8 p-0 rounded-full">
-            <UserAvatar name={user?.name} imageUrl={user?.avatarUrl} />
+            <Avatar name={user?.name} imageUrl={user?.avatarUrl} />
           </Button>
         </div>
       </div>

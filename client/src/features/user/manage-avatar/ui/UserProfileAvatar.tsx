@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import { UserAvatar } from "@/shared/components/UserAvatar";
+import { Avatar } from "@/shared/components/Avatar";
 import { AvatarCropDialog } from "@/widgets/AvatarCropDialog";
 import {
   AlertDialog,
@@ -59,7 +59,7 @@ const UserProfileAvatar = ({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger className="border-none focus:outline-none focus:ring-0 ">
-          <UserAvatar
+          <Avatar
             imageUrl={avatarUrl || undefined}
             name={name || ""}
             className="

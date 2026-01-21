@@ -10,5 +10,6 @@ final readonly class UserPreviewRowDTO
         public readonly ?string $currentAvatar = null,
         public readonly ?string $slug = null,
         public readonly string $wallId,
+        public readonly ?string $lastLoginAt = null,
     ) {}
 }

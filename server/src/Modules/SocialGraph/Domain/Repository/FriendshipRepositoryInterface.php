@@ -2,6 +2,7 @@
 
 namespace App\Modules\SocialGraph\Domain\Repository;
 
+use App\Modules\SocialGraph\Domain\Enum\FriendCountMode;
 use App\Modules\SocialGraph\Domain\Enum\FriendshipStatusEnum;
 use App\Modules\SocialGraph\Domain\Entity\Friendship;
 use Symfony\Component\Uid\Uuid;
@@ -27,4 +28,6 @@ interface FriendshipRepositoryInterface
      * @return Friendship[]
      */
     public function findSentFriendRequests(Uuid $user, ?int $page = null, ?int $limit = null): array;
+
+    public function countUserFriends(Uuid $userId, FriendCountMode $mode = FriendCountMode::FRIENDS): int;
 }

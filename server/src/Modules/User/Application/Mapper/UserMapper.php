@@ -5,6 +5,7 @@ namespace App\Modules\User\Application\Mapper;
 use App\Modules\Media\Application\Service\GetMediaUrl;
 use App\Modules\User\Contracts\DTO\UserDetailsDTO;
 use App\Modules\User\Contracts\DTO\UserPreviewDTO;
+use App\Modules\User\Contracts\DTO\UserPreviewRowDTO;
 use App\Modules\User\Domain\Entity\User;
 
 final class UserMapper
@@ -13,17 +14,15 @@ final class UserMapper
         private GetMediaUrl $getUrl,
     ) {}
 
-    public function toPreview(User $user)
+    public function toPreview(UserPreviewRowDTO $user, string|null $avatarUrl = null): UserPreviewDTO
     {
-        $avatarUrl = $user->getCurrentAvatar()
-            ? ($this->getUrl)($user->getCurrentAvatar()->getPreview()->getStorageKey())
-            : null;
         return new UserPreviewDTO(
-            id: $user->getId(),
-            name: $user->getUsername(),
+            id: $user->id,
+            name: $user->username,
             avatarUrl: $avatarUrl,
-            slug: $user->getSlug(),
-            wallId: (string) $user->getWall()->getId(),
+            slug: $user->slug,
+            wallId: $user->wallId,
+            lastLoginAt: $user->lastLoginAt,
         );
     }
 

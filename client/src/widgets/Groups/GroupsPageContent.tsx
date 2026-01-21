@@ -3,7 +3,7 @@ import SearchInput from "@/shared/components/SearchInput";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { Item } from "@/shared/components/ui/item";
-import { UserAvatar } from "@/shared/components/UserAvatar";
+import { Avatar } from "@/shared/components/Avatar";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -33,7 +33,7 @@ const GroupsPageContent = ({ myGroupsOnly }: { myGroupsOnly: boolean }) => {
               className="flex items-center justify-between gap-4"
             >
               <div className="flex items-center gap-3">
-                <UserAvatar
+                <Avatar
                   name={group.name}
                   imageUrl={group.currentAvatar?.url}
                   className="w-10 h-10"

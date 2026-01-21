@@ -7,6 +7,7 @@ use App\Modules\User\Contracts\DTO\UserPreviewRowDTO;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Domain\Repository\UserRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -20,70 +21,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, User::class);
-    }
-
-    /**
-     * Used to upgrade (rehash) the user's password automatically over time.
-     */
-    public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
-    {
-        if (!$user instanceof User) {
-            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', $user::class));
-        }
-
-        $user->setPassword($newHashedPassword);
-        $this->getEntityManager()->persist($user);
-        $this->getEntityManager()->flush();
-    }
-
-    public function findById(string $id): ?User
-    {
-        return $this->findBy(['id' => $id, 'deletedAt' => null])[0] ?? null;
-    }
-
-    /** @return array<User> */
-    public function findAllExcept(array $excludedUsers, ?int $page = null, ?int $limit = null, ?string $query = null): array
-    {
-        $qb = $this->createQueryBuilder('u')
-            ->where('u.id NOT IN (:excludedUsers)')
-            ->andWhere('u.deletedAt IS NULL')
-            ->setParameter('excludedUsers', $excludedUsers)
-            ->orderBy('u.createdAt', 'DESC')
-            ->addOrderBy('u.id', 'DESC');
-
-        if ($query !== null && $query !== '') {
-            $escaped = addcslashes($query, '%_\\');
-            $qb->andWhere('LOWER(u.username) LIKE :query')
-                ->setParameter('query', '%' . mb_strtolower($escaped) . '%');
-        }
-
-        if ($limit !== null && $page !== null) {
-            $qb->setMaxResults($limit)
-                ->setFirstResult(($page - 1) * $limit);
-        }
-
-
-
-        return $qb->getQuery()->getResult();
-    }
-
-    public function findByEmail(string $email): ?User
-    {
-        $qb = $this->createQueryBuilder('u')
-            ->andWhere('u.email = :email')
-            ->setParameter('email', $email)
-            ->setMaxResults(1);
-
-        return $qb->getQuery()->getOneOrNullResult();
-    }
-
-    public function findByUsername(string $username): ?User
-    {
-        $qb = $this->createQueryBuilder('u')
-            ->andWhere('u.username = :username')
-            ->setParameter('username', $username)
-            ->setMaxResults(1);
-        return $qb->getQuery()->getOneOrNullResult();
     }
 
     public function save(User $user, bool $flush = true): void
@@ -102,23 +39,61 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         }
     }
 
+    /**
+     * Used to upgrade (rehash) the user's password automatically over time.
+     */
+    public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
+    {
+        if (!$user instanceof User) {
+            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', $user::class));
+        }
+
+        $user->setPassword($newHashedPassword);
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush();
+    }
+
+    public function findById(string $id): ?User
+    {
+        return $this->findOneBy(['id' => $id, 'deletedAt' => null]);
+    }
+
+    public function findAllExcept(array $excludedUsers, ?int $page = null, ?int $limit = null, ?string $query = null): array
+    {
+        $qb = $this->qbUserPreviewRows();
+
+        $this->applyExcludedUsers($qb, $excludedUsers);
+        $this->applyUsernameQuery($qb, $query);
+        $this->applyPagination($qb, $page, $limit);
+
+        $qb->orderBy('u.createdAt', 'DESC')
+            ->addOrderBy('u.id', 'DESC');
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findByEmail(string $email): ?User
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->andWhere('u.email = :email')
+            ->setParameter('email', $email)
+            ->setMaxResults(1);
+
+        return $qb->getQuery()->getOneOrNullResult();
+    }
+
     /** @return array<UserPreviewDTO> */
     public function findPreviewsByIds(array $ids): array
     {
-        $qb = $this->createQueryBuilder('u')
-            ->select(
-                sprintf(
-                    'NEW %s(u.id, u.username, p.id, u.slug, IDENTITY(u.wall))',
-                    UserPreviewRowDTO::class
-                )
-            )
-            ->leftJoin('u.currentAvatar', 'ua')
-            ->leftJoin('ua.preview', 'p')
+        if ($ids === []) {
+            return [];
+        }
+
+        $qb = $this->qbUserPreviewRows()
             ->andWhere('u.id IN (:ids)')
-            ->andWhere('u.deletedAt IS NULL')
             ->setParameter('ids', $ids);
-        $result = $qb->getQuery()->getResult();
-        return $result;
+
+        return $qb->getQuery()->getResult();
     }
 
     /** @return User|null */
@@ -139,21 +114,60 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getSingleColumnResult();
     }
 
-    public function findPreviewRowsByWallIds(array $wallIds): array
+    public function findPreviewByWallIds(array $wallIds): array
+    {
+        if ($wallIds === []) {
+            return [];
+        }
+
+        $qb = $this->qbUserPreviewRows()
+            ->andWhere('IDENTITY(u.wall) IN (:wallIds)')
+            ->setParameter('wallIds', $wallIds);
+
+        return $qb->getQuery()->getResult();
+    }
+
+    private function qbUserPreviewRows(): QueryBuilder
     {
         return $this->createQueryBuilder('u')
-            ->select(
-                sprintf(
-                    'NEW %s(u.id, u.username, p.id, u.slug, IDENTITY(u.wall))',
-                    UserPreviewRowDTO::class
-                )
-            )
+            ->select(sprintf(
+                'NEW %s(u.id, u.username, p.id, u.slug, IDENTITY(u.wall), u.lastLoginAt)',
+                UserPreviewRowDTO::class
+            ))
             ->leftJoin('u.currentAvatar', 'ua')
             ->leftJoin('ua.preview', 'p')
-            ->andWhere('IDENTITY(u.wall) IN (:wallIds)')
-            ->andWhere('u.deletedAt IS NULL')
-            ->setParameter('wallIds', $wallIds)
-            ->getQuery()
-            ->getResult();
+            ->andWhere('u.deletedAt IS NULL');
+    }
+
+    private function applyUsernameQuery(QueryBuilder $qb, ?string $query): void
+    {
+        if ($query === null || $query === '') {
+            return;
+        }
+
+        $escaped = addcslashes($query, '%_\\');
+
+        $qb->andWhere('LOWER(u.username) LIKE :query')
+            ->setParameter('query', '%' . mb_strtolower($escaped) . '%');
+    }
+
+    private function applyPagination(QueryBuilder $qb, ?int $page, ?int $limit): void
+    {
+        if ($page === null || $limit === null) {
+            return;
+        }
+
+        $qb->setMaxResults($limit)
+            ->setFirstResult(($page - 1) * $limit);
+    }
+
+    private function applyExcludedUsers(QueryBuilder $qb, array $excludedUsers): void
+    {
+        if ($excludedUsers === []) {
+            return;
+        }
+
+        $qb->andWhere('u.id NOT IN (:excludedUsers)')
+            ->setParameter('excludedUsers', $excludedUsers);
     }
 }

@@ -1,5 +1,5 @@
 import { Item, ItemMedia } from "@/shared/components/ui/item";
-import { UserAvatar } from "@/shared/components/UserAvatar";
+import { Avatar } from "@/shared/components/Avatar";
 import NewMessageDialog from "../../../widgets/NewMessageDialog";
 import { Link } from "react-router-dom";
 import type { UserPreview } from "@/entities/user/model/types";
@@ -44,7 +44,7 @@ const FriendListItem = ({ user, filter }: FriendListItemProps) => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <UserAvatar
+          <Avatar
             imageUrl={user.avatarUrl}
             name={user.name}
             className=" rounded-full"
@@ -66,7 +66,10 @@ const FriendListItem = ({ user, filter }: FriendListItemProps) => {
       </div>
       {filter === "received" && (
         <div className="ml-auto flex gap-2">
-          <Button disabled={isBusy} onClick={() => acceptMutation.mutate(user.id)}>
+          <Button
+            disabled={isBusy}
+            onClick={() => acceptMutation.mutate(user.id)}
+          >
             {acceptMutation.isPending ? "Accepting..." : "Accept"}
           </Button>
           <Button
@@ -93,7 +96,10 @@ const FriendListItem = ({ user, filter }: FriendListItemProps) => {
 
       {filter === "" && (
         <div className="ml-auto">
-          <Button disabled={isBusy} onClick={() => sendMutation.mutate(user.id)}>
+          <Button
+            disabled={isBusy}
+            onClick={() => sendMutation.mutate(user.id)}
+          >
             {sendMutation.isPending ? "Sending..." : "Add to Friends"}
           </Button>
         </div>

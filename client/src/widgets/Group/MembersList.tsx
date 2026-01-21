@@ -38,7 +38,7 @@ import {
   changeGroupMemberStatus,
   fetchGroupMembers,
 } from "@/entities/group/api/groupApi";
-import { UserAvatar } from "@/shared/components/UserAvatar";
+import { Avatar } from "@/shared/components/Avatar";
 import type {
   GroupMember,
   MemberRole,
@@ -194,7 +194,7 @@ function MemberRow({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <UserAvatar
+      <Avatar
         imageUrl={member.user.avatarUrl ?? undefined}
         name={member.user.name}
         className="w-12 h-12"
@@ -258,7 +258,7 @@ function RequestRow({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <UserAvatar
+      <Avatar
         imageUrl={member.user.avatarUrl ?? undefined}
         name={member.user.name}
         className="w-12 h-12"

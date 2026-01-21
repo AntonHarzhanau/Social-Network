@@ -17,9 +17,6 @@ interface UserRepositoryInterface
 
     public function findByEmail(string $email): ?User;
 
-    /**
-     * @param array<Uuid> $excludedUsers
-     * @return User[] */
     public function findAllExcept(array $excludedUsers, ?int $page = null, ?int $limit = null, ?string $query = null): array;
 
     /** @return UserPreviewDTO[] */
@@ -32,5 +29,5 @@ interface UserRepositoryInterface
     /** @return array<string> wallIds */
     public function findWallIdsByUserIds(array $userIds): array;
 
-    public function findPreviewRowsByWallIds(array $wallIds): array;
+    public function findPreviewByWallIds(array $wallIds): array;
 }

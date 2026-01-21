@@ -1,4 +1,4 @@
-import { UserAvatar } from "@/shared/components/UserAvatar";
+import { Avatar } from "@/shared/components/Avatar";
 import type { CommentResponse } from "../model/types";
 import { Item } from "@/shared/components/ui/item";
 import { formatPostDate } from "@/shared/lib/date";
@@ -6,21 +6,19 @@ import { Button } from "@/shared/components/ui/button";
 import { LikeButton } from "@/shared/components/LikeButton";
 import { useToggleLikeCommentMutation } from "../model/useCommentMutations";
 
-
 interface CommentItemProps {
   threadId: string;
   comment: CommentResponse;
 }
 
 const CommentItem = ({ threadId, comment }: CommentItemProps) => {
-    const likeMut = useToggleLikeCommentMutation(threadId);
-    
+  const likeMut = useToggleLikeCommentMutation(threadId);
 
   return (
     <Item variant="default" className="flex-col items-start">
       {/* Author Info */}
       <div className="flex gap-2">
-        <UserAvatar
+        <Avatar
           name={comment.author?.name}
           imageUrl={comment.author?.avatarUrl}
           className="h-10 w-10"

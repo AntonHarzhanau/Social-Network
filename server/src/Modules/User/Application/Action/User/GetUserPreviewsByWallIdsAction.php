@@ -3,9 +3,9 @@
 namespace App\Modules\User\Application\Action\User;
 
 use App\Modules\Media\Api\MediaApiInterface;
+use App\Modules\User\Application\Mapper\UserMapper;
 use App\Modules\User\Contracts\DTO\UserPreviewDTO;
-use App\Modules\User\Application\DTO\UserPreviewRowDTO;
-use App\Modules\User\Contracts\DTO\UserPreviewRowDTO as DTOUserPreviewRowDTO;
+use App\Modules\User\Contracts\DTO\UserPreviewRowDTO;
 use App\Modules\User\Domain\Repository\UserRepositoryInterface;
 
 final class GetUserPreviewsByWallIdsAction
@@ -13,16 +13,18 @@ final class GetUserPreviewsByWallIdsAction
     public function __construct(
         private readonly UserRepositoryInterface $users,
         private readonly MediaApiInterface $media,
-    ) {}
+        private readonly UserMapper $mapper,
+    ) {
+    }
 
     /** @return array<UserPreviewDTO> */
     public function execute(array $ids): array
     {
-    
+
         /** @var UserPreviewRowDTO[] $rows */
-        $rows = $this->users->findPreviewRowsByWallIds($ids);
+        $rows = $this->users->findPreviewByWallIds($ids);
         $previewIds = array_values(array_unique(array_filter(
-            array_map(fn(DTOUserPreviewRowDTO $r) => $r->currentAvatar, $rows)
+            array_map(fn(UserPreviewRowDTO $r) => $r->currentAvatar, $rows)
         )));
 
         $urlsById = $previewIds
@@ -31,12 +33,9 @@ final class GetUserPreviewsByWallIdsAction
 
         $result = [];
         foreach ($rows as $row) {
-            $result[] = new UserPreviewDTO(
-                id: $row->id,
-                name: $row->username,
-                avatarUrl: $row->currentAvatar ? ($urlsById[$row->currentAvatar]->url ?? null) : null,
-                slug: $row->slug,
-                wallId: $row->wallId,
+            $result[] = $this->mapper->toPreview(
+                $row,
+                $row->currentAvatar ? ($urlsById[$row->currentAvatar]->url ?? null) : null
             );
         }
 

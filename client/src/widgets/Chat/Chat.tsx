@@ -1,5 +1,5 @@
 import { Card, CardAction, CardContent } from "@/shared/components/ui/card";
-import { UserAvatar } from "@/shared/components/UserAvatar";
+import { Avatar } from "@/shared/components/Avatar";
 import MessageList from "@/entities/message/ui/MessageList/MessageList";
 import { useChatMessages } from "@/entities/chat/model/useChatMessages";
 import NewMessageForm from "@/entities/message/ui/NewMessageForm";
@@ -12,7 +12,7 @@ interface MessagesPageProps {
 
 const Chat = ({ chatId }: MessagesPageProps) => {
   const currentUserId = sessionUser()?.id;
-    const chat = useOpenChatsStore((s) =>
+  const chat = useOpenChatsStore((s) =>
     s.openChats.find((c) => c.id === chatId),
   );
   const { messages, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -25,7 +25,7 @@ const Chat = ({ chatId }: MessagesPageProps) => {
   return (
     <Card className="flex flex-col gap-2 py-4 px-2">
       <div className="flex items-center gap-3 p-2 border-b">
-        <UserAvatar
+        <Avatar
           imageUrl={chat?.avatarUrl}
           name={chat?.title ?? "Chat"}
           className="w-12 h-12"

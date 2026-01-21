@@ -6,6 +6,7 @@ use App\Modules\User\Application\Action\Auth\ConfirmAccountRecoveryAction;
 use App\Modules\User\Application\Action\Auth\RegisterUserAction;
 use App\Modules\User\Application\Action\Auth\RequestAccountRecoveryAction;
 use App\Modules\User\Application\Action\Auth\ResendEmailVerificationAction;
+use App\Modules\User\Application\Action\Auth\UpdateMyPresenceAction;
 use App\Modules\User\Application\Action\Auth\VerifyEmailAction;
 use App\Modules\User\Application\Action\User\GetMeAction;
 use App\Modules\User\Domain\Entity\User;
@@ -67,9 +68,6 @@ final class AuthController extends AbstractController
         } catch (\Throwable $th) {
             return $this->redirect($this->frontendBaseUrl . '?email-verify-status=invalid');
         }
-
-
-        return $this->json(['ok' => true]);
     }
 
     #[Route('/resend-email-verification', name: 'api_auth_resend_email_verification', methods: ['POST'])]
@@ -118,5 +116,14 @@ Check your email.'], JsonResponse::HTTP_ACCEPTED);
         } catch (\InvalidArgumentException $e) {
             return $this->redirect($this->frontendBaseUrl . '?restore-account-status=invalid');
         }
+    }
+
+    #[Route('/me/presence', name: 'api_auth_me_presence', methods: ['POST'])]
+    public function updateMyPresence(
+        #[CurrentUser] ?User $user,
+        UpdateMyPresenceAction $action,
+    ): JsonResponse {
+        $action->execute($user);
+        return $this->json(null, JsonResponse::HTTP_NO_CONTENT);
     }
 }

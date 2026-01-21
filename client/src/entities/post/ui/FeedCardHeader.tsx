@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { CardHeader } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
-import { UserAvatar } from "@/shared/components/UserAvatar";
+import { Avatar } from "@/shared/components/Avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,7 +40,7 @@ const FeedCardHeader = ({ post }: FeedCardHeaderProps) => {
   return (
     <CardHeader className="flex items-center gap-3">
       <Link to={headerHref}>
-        <UserAvatar
+        <Avatar
           imageUrl={headerAvatarUrl}
           name={headerTitle}
           alt={headerTitle}

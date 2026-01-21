@@ -84,8 +84,11 @@ class ChatDTOMapper
 
     private function getAvatarUrl(User $user): ?string
     {
+
         $avatarId = $user->getCurrentAvatar()?->getPreview()->getId() ?? null;
-        $url = $this->mediaApi->getMediasByIds(null, [$avatarId])[$avatarId->toRfc4122()]->url ?? null;
+        $media = $this->mediaApi->getMediasByIds(null, [$avatarId]);
+        
+        $url = $avatarId ? $media[$avatarId->toRfc4122()]->url : null;
  
         return $url;
     }

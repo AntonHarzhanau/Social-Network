@@ -4,6 +4,7 @@ export interface UserPreview {
   avatarUrl?: string | null;
   slug?: string | null;
   wallId?: string | null;
+  lastLoginAt?: string | null;
 }
 
 export interface UserProfile extends UserPreview {
@@ -14,6 +15,6 @@ export interface UserProfile extends UserPreview {
   bio: string | null;
   dateOfBirth: string;
   createdAt: string;
-  emailVerifiedAt: string;
-  lastLoginAt: string | null;
+  emailVerifiedAt: string | null;
+  lastLoginAt?: string | null;
 }

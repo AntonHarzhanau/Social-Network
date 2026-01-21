@@ -1,5 +1,5 @@
 import {
-  Avatar,
+  Avatar as UIAvatar,
   AvatarImage,
   AvatarFallback,
 } from "@/shared/components/ui/avatar";
@@ -15,24 +15,19 @@ interface AvatarProps {
   className?: string;
 }
 
-export const UserAvatar = ({
-  imageUrl,
-  name,
-  alt,
-  className,
-}: AvatarProps) => {
+export const Avatar = ({ imageUrl, name, alt, className }: AvatarProps) => {
   const initials = getInitials(name);
   const [status, setStatus] = useState<"idle" | "loading" | "loaded" | "error">(
     "loading",
   );
 
   return (
-    <div className={className}>
+    <div className={cn("relative", className)}>
       {status === "loading" && (
         <Skeleton className="w-full h-full rounded-full" />
       )}
 
-      <Avatar className={cn("w-full h-full")}>
+      <UIAvatar className="w-full h-full">
         <AvatarImage
           src={imageUrl || undefined}
           alt={alt}
@@ -40,7 +35,19 @@ export const UserAvatar = ({
           className="object-cover"
         />
         <AvatarFallback>{initials}</AvatarFallback>
-      </Avatar>
+      </UIAvatar>
+
+      {/* {isOnline && (
+        <span
+          className={cn(
+            "absolute bottom-0 right-0",
+            "h-3 w-3 rounded-full bg-green-500",
+            "ring-2 ring-background",
+          )}
+          aria-label="Online"
+          title="Online"
+        />
+      )} */}
     </div>
   );
 };

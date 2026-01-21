@@ -11,7 +11,7 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { UserAvatar } from "@/shared/components/UserAvatar";
+import { Avatar } from "@/shared/components/Avatar";
 import { MessageCircle } from "lucide-react";
 import { useState } from "react";
 
@@ -54,7 +54,7 @@ const NewMessageDialog = ({
           <DialogHeader>
             <DialogTitle>New message</DialogTitle>
             <div className="flex items-center gap-4 mt-4">
-              <UserAvatar
+              <Avatar
                 imageUrl={avatarUrl}
                 alt={username}
                 name={username}

@@ -2,6 +2,7 @@
 
 namespace App\Modules\SocialGraph\Infrastructure\Persistence\Doctrine\Repository;
 
+use App\Modules\SocialGraph\Domain\Enum\FriendCountMode;
 use App\Modules\SocialGraph\Domain\Enum\FriendshipStatusEnum;
 use App\Modules\SocialGraph\Domain\Entity\Friendship;
 use App\Modules\SocialGraph\Domain\Repository\FriendshipRepositoryInterface;
@@ -134,4 +135,40 @@ class FriendshipRepository extends ServiceEntityRepository implements Friendship
 
         return $qb->getQuery()->getResult();
     }
+
+public function countUserFriends(
+    Uuid $userId,
+    FriendCountMode $mode = FriendCountMode::FRIENDS
+): int {
+    $qb = $this->createQueryBuilder('f')
+        ->select('COUNT(f.id)')
+        ->setParameter('user', $userId);
+
+    switch ($mode) {
+        case FriendCountMode::FRIENDS:
+            $qb->where(
+                    $qb->expr()->orX(
+                        'IDENTITY(f.requester) = :user',
+                        'IDENTITY(f.addressee) = :user'
+                    )
+                )
+                ->andWhere('f.status = :status')
+                ->setParameter('status', FriendshipStatusEnum::ACCEPTED);
+            break;
+
+        case FriendCountMode::INCOMING_REQUESTS:
+            $qb->where('IDENTITY(f.addressee) = :user')
+               ->andWhere('f.status = :status')
+               ->setParameter('status', FriendshipStatusEnum::PENDING);
+            break;
+
+        case FriendCountMode::OUTGOING_REQUESTS:
+            $qb->where('IDENTITY(f.requester) = :user')
+               ->andWhere('f.status = :status')
+               ->setParameter('status', FriendshipStatusEnum::PENDING);
+            break;
+    }
+
+    return (int) $qb->getQuery()->getSingleScalarResult();
+}
 }

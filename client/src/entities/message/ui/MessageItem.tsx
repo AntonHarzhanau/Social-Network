@@ -1,5 +1,5 @@
 import { Button } from "@/shared/components/ui/button";
-import { UserAvatar } from "@/shared/components/UserAvatar";
+import { Avatar } from "@/shared/components/Avatar";
 import { cn } from "@/shared/lib/utils";
 import type { Message } from "@/entities/chat/model/types";
 import { useDeleteMessage } from "@/entities/message/model/useDeleteMessage";
@@ -14,11 +14,7 @@ const MessageItem = ({ chatId, message, currentUserId }: MessageItemProps) => {
   const del = useDeleteMessage();
 
   return (
-    <div
-      id={`msg-${message.id}`}
-      data-message-id={message.id}
-      className="mb-2"
-    >
+    <div id={`msg-${message.id}`} data-message-id={message.id} className="mb-2">
       <div
         className={cn(
           "flex items-center gap-2 mr-auto p-1",
@@ -27,7 +23,7 @@ const MessageItem = ({ chatId, message, currentUserId }: MessageItemProps) => {
             : "mr-auto",
         )}
       >
-        <UserAvatar
+        <Avatar
           imageUrl={message.sender.avatarUrl}
           name={message.sender.name}
           className="w-8 h-8 min-w-8"

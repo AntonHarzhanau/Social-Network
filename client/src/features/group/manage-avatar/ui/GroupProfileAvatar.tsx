@@ -16,7 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import { UserAvatar } from "@/shared/components/UserAvatar";
+import { Avatar } from "@/shared/components/Avatar";
 import { AvatarCropDialog } from "@/widgets/AvatarCropDialog";
 import { useState } from "react";
 
@@ -66,7 +66,7 @@ const GroupProfileAvatar = ({
             className="rounded-full"
             aria-label="Group avatar menu"
           >
-            <UserAvatar
+            <Avatar
               imageUrl={avatarUrl}
               name={name || ""}
               className="

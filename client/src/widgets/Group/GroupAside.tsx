@@ -1,7 +1,7 @@
 import { fetchGroupMembers } from "@/entities/group/api/groupApi";
 import type { GroupMember } from "@/entities/group/model/types";
 import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
-import { UserAvatar } from "@/shared/components/UserAvatar";
+import { Avatar } from "@/shared/components/Avatar";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -41,7 +41,7 @@ const GroupAside = ({ groupId }: GroupAsideProps) => {
               to={`/profile/${member.user.id}`}
               className="flex flex-col items-center"
             >
-              <UserAvatar
+              <Avatar
                 imageUrl={member.user.avatarUrl}
                 name={member.user.name}
                 className="w-18 h-18"

@@ -17,7 +17,6 @@ final class GetChatList
     {
         
         $chats = $this->chatRepository->findUserChatsWithLastMessage($userId, $page, $limit);
-
         $items = [];
         foreach ($chats as $chat) {
             $items[] = $this->chatDTOMapper->toChatResponseDTO($chat, $userId); 
