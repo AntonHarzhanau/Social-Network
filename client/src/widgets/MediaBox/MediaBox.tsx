@@ -7,15 +7,19 @@ import {
 } from "@/shared/components/ui/tabs";
 import MediaBoxVideoList from "./MediaBoxVideoList";
 import MediaBoxImageList from "./MediaBoxImageList";
+import { sessionUser } from "@/entities/session/model/sessionStore";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 
 interface MediaBoxProps {
   id: string;
   forGroup?: boolean;
 }
 
-const MediaBox = ( { id, forGroup = false }: MediaBoxProps) => {
-    void id;
-    void forGroup;
+const MediaBox = ({ id, forGroup = false }: MediaBoxProps) => {
+  const user = sessionUser();
+
+  void id;
+  void forGroup;
   const contentTabs = {
     tabs: [
       { value: "photos", label: "Photos" },
@@ -24,6 +28,7 @@ const MediaBox = ( { id, forGroup = false }: MediaBoxProps) => {
     defaultValue: "photos",
   };
 
+  if (!user) return <Skeleton className="min-h-96 w-full" />;
   return (
     <Card>
       <Tabs defaultValue={contentTabs.defaultValue}>
@@ -37,7 +42,7 @@ const MediaBox = ( { id, forGroup = false }: MediaBoxProps) => {
 
         {/* Photos */}
         <TabsContent value="photos">
-            <MediaBoxImageList />
+          <MediaBoxImageList user={user} />
         </TabsContent>
 
         {/* Videos */}

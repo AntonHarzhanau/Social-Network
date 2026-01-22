@@ -3,7 +3,7 @@ import type { UserPreview } from "@/entities/user/model/types";
 import { create } from "zustand";
 
 export type MediaViewerPayload = {
-  author?: UserPreview | null;
+  author: UserPreview;
   medias: MediaPreview[];
   initialIndex: number;
 };

@@ -1,42 +1,48 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/shared/components/ui/dialog";
-import { readFileAsDataURL, getCroppedBlob } from "@/shared/lib/image/crop";
 import { Slider } from "@/shared/components/ui/slider";
+import { getCroppedBlob, readFileAsDataURL } from "@/shared/lib/image/crop";
 
-type Props = {
+interface CoverCropDialogProps {
   open: boolean;
-  onOpenChange: (v: boolean) => void;
+  onOpenChange: (open: boolean) => void;
   onSaved: (data: {
     original: File;
     preview: File;
     previewUrl: string;
   }) => void;
-};
+}
 
-export function AvatarCropDialog({ open, onOpenChange, onSaved }: Props) {
+const COVER_ASPECT = 16 / 9;
+const PREVIEW_WIDTH = 1280;
+const PREVIEW_HEIGHT = Math.round(PREVIEW_WIDTH / COVER_ASPECT);
+const OUTPUT_WIDTH = 1920;
+const OUTPUT_HEIGHT = Math.round(OUTPUT_WIDTH / COVER_ASPECT);
+
+export function CoverCropDialog({
+  open,
+  onOpenChange,
+  onSaved,
+}: CoverCropDialogProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
-
   const [originalFile, setOriginalFile] = useState<File | null>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
-
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-
   const [croppedPixels, setCroppedPixels] = useState<{
     x: number;
     y: number;
     width: number;
     height: number;
   } | null>(null);
-
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -46,12 +52,19 @@ export function AvatarCropDialog({ open, onOpenChange, onSaved }: Props) {
     };
   }, [previewUrl]);
 
-  const canCrop = Boolean(imageSrc);
+  const resetState = () => {
+    setPreviewUrl(null);
+    setOriginalFile(null);
+    setImageSrc(null);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedPixels(null);
+  };
 
   const handlePick = () => inputRef.current?.click();
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) return;
 
@@ -61,7 +74,6 @@ export function AvatarCropDialog({ open, onOpenChange, onSaved }: Props) {
     setOriginalFile(file);
     const src = await readFileAsDataURL(file);
     setImageSrc(src);
-
     setCrop({ x: 0, y: 0 });
     setZoom(1);
     setCroppedPixels(null);
@@ -75,13 +87,13 @@ export function AvatarCropDialog({ open, onOpenChange, onSaved }: Props) {
     if (!imageSrc || !croppedPixels) return;
 
     let cancelled = false;
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       try {
         const blob = await getCroppedBlob(
           imageSrc,
           croppedPixels,
-          256,
-          256,
+          PREVIEW_WIDTH,
+          PREVIEW_HEIGHT,
           "image/jpeg",
           0.9,
         );
@@ -92,58 +104,60 @@ export function AvatarCropDialog({ open, onOpenChange, onSaved }: Props) {
           if (old) URL.revokeObjectURL(old);
           return url;
         });
-      } catch {}
+      } catch {
+        /* ignore preview errors */
+      }
     }, 120);
 
     return () => {
       cancelled = true;
-      clearTimeout(t);
+      clearTimeout(timer);
     };
   }, [imageSrc, croppedPixels, zoom, crop]);
 
   const handleCancel = () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(null);
-    setOriginalFile(null);
-    setImageSrc(null);
-    setCroppedPixels(null);
-    setZoom(1);
-    setCrop({ x: 0, y: 0 });
+    resetState();
     onOpenChange(false);
   };
 
   const handleSave = async () => {
     if (!originalFile || !imageSrc || !croppedPixels) return;
-
     setSaving(true);
     try {
       const previewBlob = await getCroppedBlob(
         imageSrc,
         croppedPixels,
-        512,
-        512,
+        OUTPUT_WIDTH,
+        OUTPUT_HEIGHT,
         "image/jpeg",
         0.92,
       );
-      const previewFile = new File([previewBlob], "avatar_preview.jpg", {
+      const previewFile = new File([previewBlob], "cover_preview.jpg", {
         type: "image/jpeg",
       });
-
       const url = URL.createObjectURL(previewBlob);
-
       onSaved({
         original: originalFile,
         preview: previewFile,
         previewUrl: url,
       });
+      resetState();
       onOpenChange(false);
     } finally {
       setSaving(false);
     }
   };
 
+  const canCrop = Boolean(imageSrc);
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) resetState();
+        onOpenChange(v);
+      }}
+    >
       <DialogContent
         className="
           w-screen h-dvh max-w-none rounded-none
@@ -154,9 +168,10 @@ export function AvatarCropDialog({ open, onOpenChange, onSaved }: Props) {
       >
         <div className="flex flex-col h-full min-h-0">
           <DialogHeader className="shrink-0">
-            <DialogTitle>Update avatar</DialogTitle>
+            <DialogTitle>Update cover</DialogTitle>
             <DialogDescription className="hidden sm:block">
-              Choose an image, move the square area, and save.
+              Choose a photo, adjust the crop for best fit, and save the new
+              cover.
             </DialogDescription>
           </DialogHeader>
 
@@ -182,7 +197,7 @@ export function AvatarCropDialog({ open, onOpenChange, onSaved }: Props) {
                   image={imageSrc!}
                   crop={crop}
                   zoom={zoom}
-                  aspect={1}
+                  aspect={COVER_ASPECT}
                   onCropChange={setCrop}
                   onZoomChange={setZoom}
                   onCropComplete={onCropComplete}
@@ -192,49 +207,34 @@ export function AvatarCropDialog({ open, onOpenChange, onSaved }: Props) {
               </div>
 
               <div className="lg:w-[360px] shrink-0 flex flex-col min-h-0 gap-3">
-                <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
-                  <div className="rounded-xl border p-3">
-                    <div className="text-sm font-medium mb-2">Preview</div>
-                    <div className="flex items-center justify-center">
-                      <div
-                        className="
-                          rounded-full overflow-hidden border
-                          h-[clamp(72px,18vw,180px)]
-                          w-[clamp(72px,18vw,180px)]
-                          lg:h-[220px] lg:w-[220px]
-                        "
-                      >
-                        {previewUrl ? (
-                          <img
-                            src={previewUrl}
-                            alt="preview"
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <div className="h-full w-full bg-muted" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl border p-3">
-                    <div className="text-sm font-medium mb-2">Zoom</div>
-                    <Slider
-                      value={[zoom]}
-                      min={1}
-                      max={3}
-                      step={0.05}
-                      onValueChange={(v) => setZoom(v[0] ?? 1)}
-                    />
+                <div className="rounded-xl border p-3">
+                  <div className="text-sm font-medium mb-2">Preview</div>
+                  <div className="rounded-lg border overflow-hidden aspect-video bg-muted">
+                    {previewUrl ? (
+                      <img
+                        src={previewUrl}
+                        alt="preview"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-muted" />
+                    )}
                   </div>
                 </div>
-                
+
+                <div className="rounded-xl border p-3">
+                  <div className="text-sm font-medium mb-2">Zoom</div>
+                  <Slider
+                    value={[zoom]}
+                    min={1}
+                    max={3}
+                    step={0.05}
+                    onValueChange={(value) => setZoom(value[0] ?? 1)}
+                  />
+                </div>
+
                 <div className="mt-auto flex items-center justify-end gap-2">
-                  <Button
-                    variant="secondary"
-                    onClick={handleCancel}
-                    disabled={saving}
-                  >
+                  <Button variant="secondary" onClick={handleCancel}>
                     Cancel
                   </Button>
                   <Button onClick={handleSave} disabled={saving}>

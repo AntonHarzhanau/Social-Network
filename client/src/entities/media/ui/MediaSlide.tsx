@@ -1,23 +1,17 @@
 import { cn } from "@/shared/lib/utils";
 import type { MediaPreview } from "@/entities/media/model/types";
-import { computeTargetSize } from "@/entities/media/ui/lib/size";
 import { isVideoMedia } from "./lib/isVideoMedia";
 import { useEffect, useRef } from "react";
-
-type Dims = { w: number; h: number } | null;
 
 type Props = {
   media: MediaPreview;
   index: number;
-  layout: "feed" | "modal";
-  containerW: number;
-  containerH: number;
-  dims: Dims;
+  mode: "feed" | "modal";
 
   isClickable: boolean;
   onClick?: (item: MediaPreview, index: number) => void;
 
-  onImgNaturalLoad?: (id: string, w: number, h: number) => void;
+  onNaturalLoad?: (id: string, w: number, h: number) => void;
 
   isActive?: boolean;
 };
@@ -25,58 +19,34 @@ type Props = {
 export function MediaSlide({
   media,
   index,
-  layout,
-  containerW,
-  containerH,
-  dims,
+  mode,
   isClickable,
   onClick,
-  onImgNaturalLoad,
+  onNaturalLoad,
   isActive = true,
 }: Props) {
   const video = isVideoMedia(media);
-
-  const target =
-    layout === "modal" && dims
-      ? computeTargetSize({
-          layout: "modal",
-          containerW,
-          containerH,
-          mediaW: dims.w,
-          mediaH: dims.h,
-        })
-      : null;
-
-  const handleClick = () => onClick?.(media, index);
-
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     if (!video) return;
     if (!videoRef.current) return;
     if (isActive) return;
-
     videoRef.current.pause();
-    //  сбрасывать на начало :
-    // videoRef.current.currentTime = 0;
   }, [isActive, video]);
 
-  const commonClass = cn(
-    "select-none object-contain",
-    layout === "feed"
-      ? "w-full h-full"
-      : "block max-w-full max-h-full",
-  );
+  const handleClick = () => onClick?.(media, index);
 
-  const commonStyle =
-    layout === "modal" && target
-      ? { width: `${target.width}px`, height: `${target.height}px` }
-      : undefined;
+  const mediaClass =
+    mode === "modal"
+      ? "block max-w-full max-h-full w-auto h-auto object-contain select-none"
+      : "block w-full h-full object-contain select-none";
 
   return (
     <div
       className={cn(
-        "w-full h-full overflow-hidden flex items-center justify-center",
+        "w-full h-full min-h-0 min-w-0 overflow-hidden",
+        "flex items-center justify-center",
         isClickable && "cursor-pointer",
       )}
       onClick={isClickable ? handleClick : undefined}
@@ -87,16 +57,14 @@ export function MediaSlide({
           src={media.url}
           preload="metadata"
           playsInline
-          controls={layout === "modal"}
-          muted={layout !== "modal"}
+          controls={mode === "modal"}
+          muted={mode !== "modal"}
+          className={mediaClass}
           onLoadedMetadata={(e) => {
             if ((media.width ?? 0) > 0 && (media.height ?? 0) > 0) return;
-
             const v = e.currentTarget;
-            onImgNaturalLoad?.(media.id, v.videoWidth, v.videoHeight);
+            onNaturalLoad?.(media.id, v.videoWidth, v.videoHeight);
           }}
-          style={commonStyle}
-          className={commonClass}
         />
       ) : (
         <img
@@ -104,14 +72,12 @@ export function MediaSlide({
           alt=""
           loading="lazy"
           draggable={false}
+          className={mediaClass}
           onLoad={(e) => {
             if ((media.width ?? 0) > 0 && (media.height ?? 0) > 0) return;
-
             const img = e.currentTarget;
-            onImgNaturalLoad?.(media.id, img.naturalWidth, img.naturalHeight);
+            onNaturalLoad?.(media.id, img.naturalWidth, img.naturalHeight);
           }}
-          style={commonStyle}
-          className={commonClass}
         />
       )}
     </div>

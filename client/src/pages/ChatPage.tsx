@@ -5,6 +5,7 @@ import { useOpenChatsStore } from "@/entities/chat/model/openChatsStore";
 import { useChatQuery } from "@/entities/chat/model/useChat";
 import ChatAside from "@/widgets/Chat/ChatAside";
 import { Spinner } from "@/shared/components/ui/spinner";
+import MainSectionLayout from "@/shared/components/MainSectionLayout";
 
 const ChatPage = () => {
   const { chatId: urlChatId = "" } = useParams<{ chatId: string }>();
@@ -30,13 +31,14 @@ const ChatPage = () => {
   }
 
   return (
-    <div className="flex gap-2 p-2">
-      <div className="flex flex-col flex-5 gap-2 min-w-0">
-        {urlChatId ? <Chat chatId={urlChatId} /> : <ChatList />}
-      </div>
-
-      <ChatAside urlChatId={urlChatId} />
-    </div>
+    <MainSectionLayout
+      pageContent={
+        <div className="flex flex-col flex-5 gap-2 min-w-0">
+          {urlChatId ? <Chat chatId={urlChatId} /> : <ChatList />}
+        </div>
+      }
+      asideContent={<ChatAside urlChatId={urlChatId} />}
+    />
   );
 };
 

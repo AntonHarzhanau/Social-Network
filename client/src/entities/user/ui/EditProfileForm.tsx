@@ -14,78 +14,92 @@ import {
 } from "../model/EditProfileSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { UserProfile } from "../model/types";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateUserProfile } from "../api/userApi";
 
 interface EditProfileFormProps {
   profileData?: UserProfile;
   userId?: string;
+  trigger?: ReactNode;
+  open?: boolean;
+  onOpenChange?: (v: boolean) => void;
+  withTrigger?: boolean;
 }
 
-const EditProfileForm = ({ profileData, userId }: EditProfileFormProps) => {
-  const [open, setOpen] = useState(false);
+const EditProfileForm = ({
+  profileData,
+  userId,
+  trigger,
+  open: openProp,
+  onOpenChange,
+  withTrigger = true,
+}: EditProfileFormProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  const isControlled = openProp !== undefined;
+  const open = isControlled ? openProp : internalOpen;
+  const setOpen = (v: boolean) => {
+    if (isControlled) onOpenChange?.(v);
+    else setInternalOpen(v);
+  };
 
   const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: (data: EditProfileSchema) => updateUserProfile(data),
     onSuccess: () => {
-      if (userId) {
+      if (userId)
         queryClient.invalidateQueries({ queryKey: ["userProfile", userId] });
-      }
       setOpen(false);
     },
   });
 
   const form = useForm<EditProfileSchema>({
     resolver: zodResolver(editProfileSchema),
-    defaultValues: {
-      username: "",
-      bio: "",
-      //   slug: "",
-      location: "",
-      maritalStatus: "",
-    },
+    defaultValues: { username: "", bio: "", location: "", maritalStatus: "" },
   });
 
   useEffect(() => {
     if (!profileData) return;
-
     form.reset({
-      username: profileData.username ?? "",
+      username: profileData.name ?? "",
       bio: profileData.bio ?? "",
-      //   slug: profileData.slug ?? "",
       location: profileData.location ?? "",
       maritalStatus: profileData.maritalStatus ?? "",
     });
   }, [profileData, form]);
 
-  const handleSubmit = (data: EditProfileSchema) => {
-    mutation.mutate(data);
-  };
+  const handleSubmit = (data: EditProfileSchema) => mutation.mutate(data);
 
   return (
     <Dialog
       open={open}
       onOpenChange={(v) => {
         setOpen(v);
-        if (!v && profileData) form.reset({
-          username: profileData.username ?? "",
-          bio: profileData.bio ?? "",
-          //   slug: profileData.slug ?? "",
-          location: profileData.location ?? "",
-          maritalStatus: profileData.maritalStatus ?? "",
-        });
+        if (!v && profileData) {
+          form.reset({
+            username: profileData.name ?? "",
+            bio: profileData.bio ?? "",
+            location: profileData.location ?? "",
+            maritalStatus: profileData.maritalStatus ?? "",
+          });
+        }
       }}
     >
-      <DialogTrigger asChild>
-        <Button size="sm" className="">
-          Edit profile
-        </Button>
-      </DialogTrigger>
+      {withTrigger && (
+        <DialogTrigger asChild>
+          {trigger ?? (
+            <Button variant="default" size="sm">
+              Edit profile
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
+
       <DialogContent aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
+
           <form
             id="edit-profile-form"
             onSubmit={form.handleSubmit(handleSubmit)}
@@ -105,14 +119,6 @@ const EditProfileForm = ({ profileData, userId }: EditProfileFormProps) => {
               placeholder="Bio"
               autoComplete="none"
             />
-            {/* <FormInput
-              name="slug"
-              control={form.control}
-              label="Slug"
-              type="text"
-              placeholder="Slug"
-              autoComplete="none"
-            /> */}
             <FormInput
               name="location"
               control={form.control}
@@ -129,6 +135,7 @@ const EditProfileForm = ({ profileData, userId }: EditProfileFormProps) => {
               placeholder="Marital Status"
               autoComplete="none"
             />
+
             <Button
               type="submit"
               form="edit-profile-form"

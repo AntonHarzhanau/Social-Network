@@ -8,10 +8,17 @@ interface MediaModalControlsProps {
   onToggleLike: () => void;
 }
 
-const MediaModalControls = ({ mediaDetail, onToggleLike }: MediaModalControlsProps) => {
+const MediaModalControls = ({
+  mediaDetail,
+  onToggleLike,
+}: MediaModalControlsProps) => {
   return (
     <div className="flex items-center gap-2">
-      <LikeButton count={mediaDetail.likeCount} isActive={mediaDetail.likedByCurrentUser} onClick={onToggleLike} />
+      <LikeButton
+        count={mediaDetail.likeCount}
+        isActive={mediaDetail.likedByCurrentUser}
+        onClick={onToggleLike}
+      />
       <Button
         type="button"
         variant="ghost"
@@ -20,7 +27,7 @@ const MediaModalControls = ({ mediaDetail, onToggleLike }: MediaModalControlsPro
         // onClick={onShare}
       >
         <Share2 className="h-4 w-4" />
-        Поделиться
+        Share
       </Button>
     </div>
   );

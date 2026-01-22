@@ -1,15 +1,17 @@
-import { PlusCircleIcon } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { useEffect, useState } from "react";
 import { fetchUserMedias } from "@/entities/user/api/userApi";
-import { sessionUser } from "@/entities/session/model/sessionStore";
 import type { MediaPreview } from "@/entities/media/model/types";
 import { useMediaViewerStore } from "@/features/media/viewer/useMediaViewerStore";
 import MediaBoxImageItem from "./MediaBoxImageItem";
 import UploadMediaDialog from "@/features/user/manage-avatar/ui/UploadMediaDialog";
+import type { UserPreview } from "@/entities/user/model/types";
 
-const MediaBoxImageList = () => {
-  const user = sessionUser();
+interface MediaBoxImageListProps {
+  user: UserPreview;
+}
+
+const MediaBoxImageList = ({ user }: MediaBoxImageListProps) => {
   const openViewer = useMediaViewerStore((s) => s.openViewer);
   const [medias, setMedias] = useState<MediaPreview[]>([]);
   useEffect(() => {

@@ -25,9 +25,7 @@ const CommentList = ({ threadId }: CommentListProps) => {
   return (
     <div className="flex flex-col relative">
       {comments.length === 0 ? (
-        <div className="text-zinc-400">
-          Оставьте первый комментарий к этой фотографии
-        </div>
+        <div className="text-zinc-400">Leave your first comment</div>
       ) : (
         comments.map((comment) => (
           <CommentItem key={comment.id} threadId={threadId} comment={comment} />

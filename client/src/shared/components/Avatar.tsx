@@ -44,16 +44,26 @@ export const Avatar = ({
     >
       <UIAvatar className={cn("h-full w-full overflow-hidden", rounding)}>
         {Boolean(imageUrl) && status === "loading" && (
-          <Skeleton className={cn("absolute inset-0", rounding)} />
+          <Skeleton
+            className={cn("absolute inset-0 h-full w-full", rounding)}
+          />
         )}
 
         <AvatarImage
           src={imageUrl || undefined}
           alt={alt}
           onLoadingStatusChange={setStatus}
-          className="object-cover"
+          className="h-full w-full object-cover"
         />
-        <AvatarFallback className={cn(rounding)}>{initials}</AvatarFallback>
+
+        <AvatarFallback
+          className={cn(
+            "h-full w-full flex items-center justify-center",
+            rounding,
+          )}
+        >
+          {initials}
+        </AvatarFallback>
       </UIAvatar>
 
       {isOnline && (
@@ -64,8 +74,6 @@ export const Avatar = ({
             indicatorRounding,
             "bg-green-500 ring-2 ring-background",
           )}
-          aria-label="Online"
-          title="Online"
         />
       )}
     </div>

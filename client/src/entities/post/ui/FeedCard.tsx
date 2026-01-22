@@ -7,11 +7,11 @@ import {
 import ExpandableDescription from "@/shared/components/ExpandableDescription";
 import FeedCardHeader from "@/entities/post/ui/FeedCardHeader";
 import FeedCardActions from "./FeedCardActions";
-import MediaCarousel from "../../media/ui/MediaCarousel";
 import type { Post } from "../model/types";
 import { useMediaViewerStore } from "@/features/media/viewer/useMediaViewerStore";
 import FeedDetails from "./FeedDetails";
 import { useState } from "react";
+import { FeedMediaCarousel } from "@/entities/media/ui/FeedMediaCarousel";
 
 interface FeedCardProps {
   post: Post;
@@ -20,15 +20,14 @@ interface FeedCardProps {
 const FeedCard = ({ post }: FeedCardProps) => {
   const openViewer = useMediaViewerStore((s) => s.openViewer);
   const [feedDetailsOpen, setFeedDetailsOpen] = useState(false);
-  console.log(post);
+
   return (
     <>
       <Card className="max-w-full bg-card">
         <FeedCardHeader post={post} />
 
         <CardContent className="w-full px-2">
-          <MediaCarousel
-            layout="feed"
+          <FeedMediaCarousel
             medias={post.media}
             onItemClick={(_, index) => {
               openViewer({

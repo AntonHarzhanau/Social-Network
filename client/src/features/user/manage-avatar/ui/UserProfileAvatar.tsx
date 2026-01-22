@@ -21,6 +21,7 @@ import {
 import { fetchUserAvatars } from "@/entities/user/api/userApi";
 import { useMediaViewerStore } from "@/features/media/viewer/useMediaViewerStore";
 import type { MediaPreview } from "@/entities/media/model/types";
+import { cn } from "@/shared/lib/utils";
 
 interface UserProfileAvatarProps {
   userId?: string;
@@ -28,6 +29,7 @@ interface UserProfileAvatarProps {
   name?: string | null;
   isOwner?: boolean;
   isOnline?: boolean;
+  className?: string;
 }
 
 const UserProfileAvatar = ({
@@ -36,6 +38,7 @@ const UserProfileAvatar = ({
   name,
   isOwner,
   isOnline,
+  className,
 }: UserProfileAvatarProps) => {
   const [cropOpen, setCropOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -60,19 +63,22 @@ const UserProfileAvatar = ({
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger className="border-none focus:outline-none focus:ring-0 ">
-          <Avatar
-            imageUrl={avatarUrl || undefined}
-            name={name || ""}
-            isOnline={isOnline || false}
-            className="
-              h-32 w-32 sm:h-36 sm:w-36
-              rounded-full border-4 shadow-lg
-              cursor-pointer
-            "
-          />
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className={cn(
+              "block h-full w-full border-none p-0 focus:outline-none focus:ring-0",
+              className,
+            )}
+          >
+            <Avatar
+              imageUrl={avatarUrl || undefined}
+              name={name || ""}
+              isOnline={isOnline || false}
+              className="h-full w-full rounded-full border-4 shadow-lg cursor-pointer"
+            />
+          </button>
         </DropdownMenuTrigger>
-
         <DropdownMenuContent>
           <DropdownMenuItem
             onSelect={(e) => {
@@ -127,7 +133,6 @@ const UserProfileAvatar = ({
         }}
       />
 
-      {/* Подтверждение удаления */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

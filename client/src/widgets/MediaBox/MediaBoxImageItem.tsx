@@ -7,7 +7,7 @@ interface MediaBoxImageItemProps {
 }
 const MediaBoxImageItem = ({ media, onClick }: MediaBoxImageItemProps) => {
   return (
-    <div key={media.id} className="aspect-square bg-amber-800" onClick={onClick}>
+    <div key={media.id} className="aspect-square" onClick={onClick}>
       <img
         src={media.url}
         alt=""

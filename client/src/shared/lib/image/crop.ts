@@ -22,15 +22,16 @@ function createImage(src: string): Promise<HTMLImageElement> {
 export async function getCroppedBlob(
   imageSrc: string,
   cropPixels: CroppedAreaPixels,
-  outputSizePx = 512,
+  outputWidth = 512,
+  outputHeight = outputWidth,
   mime: "image/jpeg" | "image/png" = "image/jpeg",
   quality = 0.9,
 ): Promise<Blob> {
   const image = await createImage(imageSrc);
 
   const canvas = document.createElement("canvas");
-  canvas.width = outputSizePx;
-  canvas.height = outputSizePx;
+  canvas.width = outputWidth;
+  canvas.height = outputHeight;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas context is not available");
 
@@ -42,8 +43,8 @@ export async function getCroppedBlob(
     cropPixels.height,
     0,
     0,
-    outputSizePx,
-    outputSizePx,
+    outputWidth,
+    outputHeight,
   );
 
   const blob: Blob = await new Promise((resolve, reject) => {
