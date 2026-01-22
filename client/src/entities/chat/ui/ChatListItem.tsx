@@ -24,13 +24,13 @@ const ChatListItem = ({ chat }: ChatListItemProps) => {
         onClick={() => openChat(chat)}
         className="flex items-center gap-2 min-w-0"
       >
-        <ItemMedia variant="icon" className="w-10 h-10 rounded-full shrink-0">
-          <Avatar
-            imageUrl={chat.avatarUrl}
-            alt={chat.title}
-            name={chat.title}
-          />
-        </ItemMedia>
+        <Avatar
+          imageUrl={chat.avatarUrl}
+          alt={chat.title}
+          name={chat.title}
+          className="w-12 h-12"
+        />
+
         <div className="min-w-0 flex-1">
           <div className="flex justify-between">
             <h2 className="truncate">{chat.title}</h2>

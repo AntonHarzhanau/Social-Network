@@ -32,7 +32,7 @@ const UserProfileHeader = ({ user, loading }: UserProfileHeaderProps) => {
             avatarUrl={user?.avatarUrl}
             name={user?.name}
             isOwner={isOwner}
-            lastLoginAt={user?.lastLoginAt}
+            isOnline={user?.isOnline}
           />
         }
         title={

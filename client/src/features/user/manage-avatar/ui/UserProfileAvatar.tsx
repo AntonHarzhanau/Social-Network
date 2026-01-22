@@ -27,6 +27,7 @@ interface UserProfileAvatarProps {
   avatarUrl?: string | null;
   name?: string | null;
   isOwner?: boolean;
+  isOnline?: boolean;
 }
 
 const UserProfileAvatar = ({
@@ -34,6 +35,7 @@ const UserProfileAvatar = ({
   avatarUrl,
   name,
   isOwner,
+  isOnline,
 }: UserProfileAvatarProps) => {
   const [cropOpen, setCropOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -62,6 +64,7 @@ const UserProfileAvatar = ({
           <Avatar
             imageUrl={avatarUrl || undefined}
             name={name || ""}
+            isOnline={isOnline || false}
             className="
               h-32 w-32 sm:h-36 sm:w-36
               rounded-full border-4 shadow-lg
@@ -80,6 +83,7 @@ const UserProfileAvatar = ({
                   id: userId,
                   name: name || "",
                   avatarUrl: avatarUrl || undefined,
+                  isOnline: isOnline || false,
                 },
                 medias: avatars ?? [],
                 initialIndex: 0,

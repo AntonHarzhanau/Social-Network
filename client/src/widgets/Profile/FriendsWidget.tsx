@@ -40,6 +40,7 @@ const FriendsWidget = ({ userId }: FriendsWidgetProps) => {
                   imageUrl={friend.avatarUrl}
                   name={friend.name}
                   alt="Friend Avatar"
+                  isOnline={friend.isOnline}
                   className="h-10 w-10"
                 />
                 <p className="text-xs font-light group-hover:underline">

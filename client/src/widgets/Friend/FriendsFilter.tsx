@@ -27,13 +27,6 @@ const FriendsFilter = () => {
       >
         ReceiverRequests
       </Button>
-      <Button
-        onClick={() => setFilter("")}
-        variant="ghost"
-        className="w-full justify-start"
-      >
-        All Users
-      </Button>
     </Card>
   );
 };

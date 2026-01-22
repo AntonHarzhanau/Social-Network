@@ -5,6 +5,7 @@ export interface UserPreview {
   slug?: string | null;
   wallId?: string | null;
   lastLoginAt?: string | null;
+  isOnline: boolean;
 }
 
 export interface UserProfile extends UserPreview {
@@ -16,5 +17,4 @@ export interface UserProfile extends UserPreview {
   dateOfBirth: string;
   createdAt: string;
   emailVerifiedAt: string | null;
-  lastLoginAt?: string | null;
 }

@@ -17,7 +17,8 @@ final readonly class UserDetailsDTO
         public string $dateOfBirth, 
         public string $createdAt,
         public ?string $emailVerifiedAt,
-        public ?string $lastLoginAt,
         public string $wallId,
+        public ?string $lastLoginAt,
+        public readonly bool $isOnline,
     ) {}
 }

@@ -44,7 +44,8 @@ const GroupAside = ({ groupId }: GroupAsideProps) => {
               <Avatar
                 imageUrl={member.user.avatarUrl}
                 name={member.user.name}
-                className="w-18 h-18"
+                isOnline={member.user.isOnline}
+                className="w-14 h-14"
               />
               <p className="text-sm">{member.user.name.split(" ")[0]}</p>
             </Link>

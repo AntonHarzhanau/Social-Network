@@ -11,5 +11,6 @@ final readonly class UserPreviewDTO
         public readonly ?string $slug = null,
         public readonly string $wallId,
         public readonly ?string $lastLoginAt = null,
+        public readonly bool $isOnline,
     ) {}
 }

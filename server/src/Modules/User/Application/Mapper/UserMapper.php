@@ -10,19 +10,23 @@ use App\Modules\User\Domain\Entity\User;
 
 final class UserMapper
 {
+    private const ONLINE_THRESHOLD_SECONDS = 180;
     public function __construct(
         private GetMediaUrl $getUrl,
-    ) {}
+    ) {
+    }
 
     public function toPreview(UserPreviewRowDTO $user, string|null $avatarUrl = null): UserPreviewDTO
     {
+        
         return new UserPreviewDTO(
             id: $user->id,
             name: $user->username,
             avatarUrl: $avatarUrl,
             slug: $user->slug,
             wallId: $user->wallId,
-            lastLoginAt: $user->lastLoginAt,
+            lastLoginAt: $user->lastLoginAt?->format(\DateTimeInterface::ATOM),
+            isOnline: $this->isUserOnline($user->lastLoginAt),
         );
     }
 
@@ -44,8 +48,21 @@ final class UserMapper
             dateOfBirth: $user->getDateOfBirth()?->format('Y-m-d') ?? '',
             createdAt: $user->getCreatedAt()?->format(\DateTimeInterface::ATOM) ?? '',
             emailVerifiedAt: $user->getEmailVerifiedAt()?->format(\DateTimeInterface::ATOM),
-            lastLoginAt: $user->getLastLoginAt()?->format(\DateTimeInterface::ATOM),
             wallId: (string) $user->getWall()->getId(),
+            lastLoginAt: $user->getLastLoginAt()?->format(\DateTimeInterface::ATOM),
+            isOnline: $this->isUserOnline($user->getLastLoginAt())
         );
+    }
+
+    private function isUserOnline(?\DateTimeImmutable $lastLoginAt): bool
+    {
+        $now = new \DateTimeImmutable();
+
+        if (!$lastLoginAt instanceof \DateTimeInterface) {
+            return false;
+        }
+
+        $lastActiveAt = \DateTimeImmutable::createFromInterface($lastLoginAt);
+        return ($now->getTimestamp() - $lastActiveAt->getTimestamp()) <= self::ONLINE_THRESHOLD_SECONDS;
     }
 }

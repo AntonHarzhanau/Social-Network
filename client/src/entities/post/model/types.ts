@@ -17,6 +17,7 @@ export type WallOwner = {
   name: string;
   avatarUrl: string | null;
   wallId: string;
+  isOnline: boolean;
 };
 
 export interface Post {

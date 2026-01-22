@@ -12,6 +12,7 @@ import {
   useRemoveFriendMutation,
   useSendFriendRequestMutation,
 } from "@/entities/friends/model/useFriendMutation";
+import { sessionStore } from "@/entities/session/model/sessionStore";
 
 interface FriendListItemProps {
   user: UserPreview;
@@ -19,11 +20,13 @@ interface FriendListItemProps {
 }
 
 const FriendListItem = ({ user, filter }: FriendListItemProps) => {
-  const sendMutation = useSendFriendRequestMutation();
-  const cancelMutation = useCancelFriendRequestMutation();
-  const acceptMutation = useAcceptFriendRequestMutation();
-  const declineMutation = useDeclineFriendRequestMutation();
-  const removeMutation = useRemoveFriendMutation();
+  const currentUserId = sessionStore((s) => s.user?.id);
+
+  const sendMutation = useSendFriendRequestMutation(currentUserId);
+  const cancelMutation = useCancelFriendRequestMutation(currentUserId);
+  const acceptMutation = useAcceptFriendRequestMutation(currentUserId);
+  const declineMutation = useDeclineFriendRequestMutation(currentUserId);
+  const removeMutation = useRemoveFriendMutation(currentUserId);
 
   const isBusy =
     sendMutation.isPending ||
@@ -47,6 +50,7 @@ const FriendListItem = ({ user, filter }: FriendListItemProps) => {
           <Avatar
             imageUrl={user.avatarUrl}
             name={user.name}
+            isOnline={user.isOnline}
             className=" rounded-full"
           />
         </Link>

@@ -1,6 +1,6 @@
 import { apiClient } from "@/shared/api/apiClient";
-import type { FetchFriendsResponse } from "../model/types";
 import type { UserPreview } from "@/entities/user/model/types";
+import type { FriendsStats } from "../model/types";
 
 export const fetchFriends = async (
   userId: string | undefined,
@@ -53,4 +53,13 @@ export const cancelFriendRequest = async (userId: string): Promise<void> => {
 
 export const removeFriend = async (userId: string): Promise<void> => {
   await apiClient.delete(`/friends/${userId}`);
+};
+
+export const fetchFriendsStats = async (
+  userId: string,
+): Promise<FriendsStats> => {
+  const response = await apiClient.get<FriendsStats>(
+    `/friends/${userId}/stats`,
+  );
+  return response.data;
 };

@@ -1,4 +1,8 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   acceptFriendRequest,
   cancelFriendRequest,
@@ -6,48 +10,53 @@ import {
   removeFriend,
   sendFriendRequest,
 } from "@/entities/friends/api/friends";
-import { PEOPLE_KEY } from "./queryKeys";
+import { friendsQueryKeys } from "./queryKeys";
+import { userQueryKeys } from "@/entities/user/model/userQueryKeys";
 
-function invalidatePeople(qc: ReturnType<typeof useQueryClient>) {
-  return qc.invalidateQueries({ queryKey: PEOPLE_KEY });
+function invalidateFriends(qc: QueryClient, currentUserId?: string) {
+  qc.invalidateQueries({ queryKey: friendsQueryKeys.root });
+  qc.invalidateQueries({ queryKey: userQueryKeys.root });
+  if (currentUserId) {
+    qc.invalidateQueries({ queryKey: friendsQueryKeys.stats(currentUserId) });
+  }
 }
 
-export function useSendFriendRequestMutation() {
+export function useSendFriendRequestMutation(currentUserId?: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (userId: string) => sendFriendRequest(userId),
-    onSuccess: () => invalidatePeople(qc),
+    onSuccess: () => invalidateFriends(qc, currentUserId),
   });
 }
 
-export function useCancelFriendRequestMutation() {
+export function useCancelFriendRequestMutation(currentUserId?: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (userId: string) => cancelFriendRequest(userId),
-    onSuccess: () => invalidatePeople(qc),
+    onSuccess: () => invalidateFriends(qc, currentUserId),
   });
 }
 
-export function useAcceptFriendRequestMutation() {
+export function useAcceptFriendRequestMutation(currentUserId?: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (userId: string) => acceptFriendRequest(userId),
-    onSuccess: () => invalidatePeople(qc),
+    onSuccess: () => invalidateFriends(qc, currentUserId),
   });
 }
 
-export function useDeclineFriendRequestMutation() {
+export function useDeclineFriendRequestMutation(currentUserId?: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (userId: string) => declineFriendRequest(userId),
-    onSuccess: () => invalidatePeople(qc),
+    onSuccess: () => invalidateFriends(qc, currentUserId),
   });
 }
 
-export function useRemoveFriendMutation() {
+export function useRemoveFriendMutation(currentUserId?: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (userId: string) => removeFriend(userId),
-    onSuccess: () => invalidatePeople(qc),
+    onSuccess: () => invalidateFriends(qc, currentUserId),
   });
 }

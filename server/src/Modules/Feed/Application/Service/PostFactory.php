@@ -100,7 +100,7 @@ class PostFactory
                 $groupOwnerByWallId[$g->wallId] = $g;
             }
         }
-
+        
         // build responses
         $posts = [];
         foreach ($dtos as $row) {
@@ -113,6 +113,7 @@ class PostFactory
                     name: $userOwnerByWallId[$row->wallId]->name,
                     avatarUrl: $userOwnerByWallId[$row->wallId]->avatarUrl,
                     wallId: $row->wallId,
+                    isOnline: $userOwnerByWallId[$row->wallId]->isOnline,
                 )
                 : $wallOwner = new WallOwnerPreviewDTO(
                     id: $groupOwnerByWallId[$row->wallId]->id,
@@ -120,6 +121,7 @@ class PostFactory
                     name: $groupOwnerByWallId[$row->wallId]->name,
                     avatarUrl: $groupOwnerByWallId[$row->wallId]->avatarUrl,
                     wallId: $row->wallId,
+                    isOnline: false,
                 );
                 $canDelete = ($row->wallOwnerType === WallOwnerTypeEnum::USER)
                 ? $row->authorId === (string)$currentUserId 

@@ -3,16 +3,17 @@ import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import FriendListItem from "../../entities/friends/ui/FriendListItem";
 import { useFriendsFilterStore } from "../../entities/friends/model/useFriendsFilterStore";
-import { usePeopleListInfinite } from "@/entities/friends/model/usePeopleListInfinite";
 import { useInfiniteScrollSentinel } from "@/shared/hooks/useInfiniteScrollSentinel";
 import { useState } from "react";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
+import { useFriends } from "@/entities/friends/model/useFriends";
 
 interface FriendsListProps {
   userId: string | undefined;
+  onFindFriends?: () => void;
 }
 
-const FriendsList = ({ userId }: FriendsListProps) => {
+const FriendsList = ({ userId, onFindFriends }: FriendsListProps) => {
   const filter = useFriendsFilterStore((state) => state.filter);
 
   const [search, setSearch] = useState("");
@@ -28,7 +29,7 @@ const FriendsList = ({ userId }: FriendsListProps) => {
     isFetchingNextPage,
 
     refetch,
-  } = usePeopleListInfinite(filter, userId, 10, debouncedSearch);
+  } = useFriends(filter, userId, 10, debouncedSearch);
 
   const sentinelRef = useInfiniteScrollSentinel({
     enabled: !isLoading && !isError,
@@ -58,7 +59,9 @@ const FriendsList = ({ userId }: FriendsListProps) => {
           </div>
         </Button>
 
-        <Button className="ml-auto">Find Friends</Button>
+        <Button className="ml-auto" onClick={onFindFriends}>
+          Find Friends
+        </Button>
       </div>
 
       <SearchInput

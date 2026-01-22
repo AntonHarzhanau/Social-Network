@@ -10,5 +10,6 @@ final class WallOwnerPreviewDTO
         public ?string $avatarUrl = null,
         public string $wallId = '',
         public bool $isDeleted = false,
+        public bool $isOnline = false,
     ) {}
 }

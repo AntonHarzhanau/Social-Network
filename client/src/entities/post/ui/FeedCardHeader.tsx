@@ -44,6 +44,7 @@ const FeedCardHeader = ({ post }: FeedCardHeaderProps) => {
           imageUrl={headerAvatarUrl}
           name={headerTitle}
           alt={headerTitle}
+          isOnline={post.wallOwner.isOnline}
           className="w-10 h-10"
         />
       </Link>

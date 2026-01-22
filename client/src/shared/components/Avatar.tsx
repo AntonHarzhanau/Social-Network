@@ -13,41 +13,61 @@ interface AvatarProps {
   name?: string | null;
   alt?: string;
   className?: string;
+
+  isOnline?: boolean;
+  shape?: "circle" | "square";
 }
 
-export const Avatar = ({ imageUrl, name, alt, className }: AvatarProps) => {
+export const Avatar = ({
+  imageUrl,
+  name,
+  alt,
+  className,
+  isOnline = false,
+  shape = "circle",
+}: AvatarProps) => {
   const initials = getInitials(name);
   const [status, setStatus] = useState<"idle" | "loading" | "loaded" | "error">(
     "loading",
   );
 
-  return (
-    <div className={cn("relative", className)}>
-      {status === "loading" && (
-        <Skeleton className="w-full h-full rounded-full" />
-      )}
+  const isCircle = shape === "circle";
+  const rounding = isCircle ? "rounded-full" : "rounded-md";
+  const indicatorRounding = "rounded-full";
 
-      <UIAvatar className="w-full h-full">
+  return (
+    <div
+      className={cn(
+        "relative inline-flex shrink-0 overflow-visible",
+        className,
+      )}
+    >
+      <UIAvatar className={cn("h-full w-full overflow-hidden", rounding)}>
+        {Boolean(imageUrl) && status === "loading" && (
+          <Skeleton className={cn("absolute inset-0", rounding)} />
+        )}
+
         <AvatarImage
           src={imageUrl || undefined}
           alt={alt}
           onLoadingStatusChange={setStatus}
           className="object-cover"
         />
-        <AvatarFallback>{initials}</AvatarFallback>
+        <AvatarFallback className={cn(rounding)}>{initials}</AvatarFallback>
       </UIAvatar>
 
-      {/* {isOnline && (
+      {isOnline && (
         <span
           className={cn(
-            "absolute bottom-0 right-0",
-            "h-3 w-3 rounded-full bg-green-500",
-            "ring-2 ring-background",
+            "absolute bottom-[7%] right-[7%]",
+            "size-[clamp(8px,12%,18px)]",
+            indicatorRounding,
+            "bg-green-500 ring-2 ring-background",
           )}
           aria-label="Online"
           title="Online"
         />
-      )} */}
+      )}
     </div>
   );
 };
