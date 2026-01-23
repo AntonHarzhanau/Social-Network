@@ -19,13 +19,12 @@ final class GetListAction
         $response = [];
         foreach ($rows as $notification) {
             $response[] = [
-                'id' => $notification->getId()->toRfc4122(),
-                'type' => $notification->getType(),
-                'text' => $notification->getText(),
-                'target' => $notification->getTarget(),
-                'payload' => $notification->getPayload(),
-                'createdAt' => $notification->getCreatedAt()->format(DATE_ATOM),
-                'readAt' => $notification->getReadAt()?->format(DATE_ATOM),
+                'id' => $notification->id,
+                'type' => $notification->type->value,
+                'text' => $notification->text,
+                'target' => $notification->target,
+                'payload' => $notification->payload,
+                'createdAt' => $notification->createdAt->format(DATE_ATOM),
             ];
         }
         return $response;

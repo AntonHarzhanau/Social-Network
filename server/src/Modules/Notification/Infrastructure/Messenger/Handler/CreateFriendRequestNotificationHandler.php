@@ -65,7 +65,7 @@ final class CreateFriendRequestNotificationHandler
                     'target' => $notification->getTarget(),
                     'payload' => $notification->getPayload(),
                     'createdAt' => $notification->getCreatedAt()->format(DATE_ATOM),
-                    'readAt' => $notification->getReadAt()?->format(DATE_ATOM),
+                    
                 ],
                 'unreadCount' => $unreadCount,
             ],

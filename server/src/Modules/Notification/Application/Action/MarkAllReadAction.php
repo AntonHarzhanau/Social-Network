@@ -20,6 +20,6 @@ final readonly class MarkAllReadAction
             $this->notificationRepository->remove($notification, false);
             $count++;
         }
-        $this->notificationRepository->save($notification);
+        $this->notificationRepository->remove($notification, true);
     }
 }

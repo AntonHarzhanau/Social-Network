@@ -11,11 +11,12 @@ interface NotificationRepositoryInterface
 
     public function remove(Notification $notification, bool $flush = true): void;
 
+    public function findAllByRecipientId(Uuid $recipientId): array;
+
     public function countUnread(Uuid $recipientId): int;
 
     public function findByRecipientId(Uuid $recipientId, int $page = 1, int $limit = 20): array;
 
     public function findById(Uuid $notificationId): ?Notification;
 
-    public function findAllByRecipientId(Uuid $recipientId): array;
 }

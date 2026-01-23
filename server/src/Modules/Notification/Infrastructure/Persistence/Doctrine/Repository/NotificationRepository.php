@@ -2,6 +2,7 @@
 
 namespace App\Modules\Notification\Infrastructure\Persistence\Doctrine\Repository;
 
+use App\Modules\Notification\Application\DTO\NotificationRawDTO;
 use App\Modules\Notification\Domain\Entity\Notification;
 use App\Modules\Notification\Domain\Repository\NotificationRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -50,14 +51,16 @@ class NotificationRepository extends ServiceEntityRepository implements Notifica
 
     public function findByRecipientId(Uuid $recipientId, int $page = 1, int $limit = 20): array
     {
-        return $this->createQueryBuilder('n')
+        $qb = $this->createQueryBuilder('n')
+            ->join('n.recipient', 'r')
+            ->select(\sprintf('NEW %s(n.id, n.type, n.text, n.target, n.payload, n.createdAt)', NotificationRawDTO::class))
             ->where('IDENTITY(n.recipient) = :recipientId')
             ->setParameter('recipientId', $recipientId)
             ->orderBy('n.createdAt', 'DESC')
             ->setFirstResult(($page - 1) * $limit)
-            ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
+            ->setMaxResults($limit);
+
+        return $qb->getQuery()->getResult();
     }
     public function findById(Uuid $notificationId): ?Notification
     {
@@ -66,11 +69,10 @@ class NotificationRepository extends ServiceEntityRepository implements Notifica
 
     public function findAllByRecipientId(Uuid $recipientId): array
     {
-        return $this->createQueryBuilder('n')
+        $qb = $this->createQueryBuilder('n')
             ->where('IDENTITY(n.recipient) = :recipientId')
-            ->setParameter('recipientId', $recipientId)
-            ->orderBy('n.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
+            ->setParameter('recipientId', $recipientId);
+
+        return $qb->getQuery()->getResult();
     }
 }
