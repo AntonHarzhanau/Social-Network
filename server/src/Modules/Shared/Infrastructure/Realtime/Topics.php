@@ -6,11 +6,11 @@ final class Topics
 {
     public static function chat(string $chatId): string
     {
-        return sprintf('https://qynso.local/chats/%s', $chatId);
+        return \sprintf('https://social-network.local/chats/%s', $chatId);
     }
 
     public static function userNotifications(string $userId): string
     {
-        return sprintf('https://qynso.local/users/%s/notifications', $userId);
+        return \sprintf('https://social-network.local/users/%s/notifications', $userId);
     }
 }

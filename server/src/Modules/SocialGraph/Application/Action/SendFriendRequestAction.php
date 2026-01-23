@@ -2,6 +2,8 @@
 
 namespace App\Modules\SocialGraph\Application\Action;
 
+use App\Modules\Shared\Application\Port\EventBusInterface;
+use App\Modules\SocialGraph\Application\Event\FriendRequestSent;
 use App\Modules\SocialGraph\Domain\Enum\FriendshipStatusEnum;
 use App\Modules\SocialGraph\Application\Exception\CannotFriendYourselfException;
 use App\Modules\SocialGraph\Application\Exception\FriendshipAlreadyExistsException;
@@ -15,6 +17,7 @@ final class SendFriendRequestAction
     public function __construct(
         private FriendshipRepositoryInterface $friendships,
         private UserDirectoryInterface $users,
+        private EventBusInterface $events,
     ) {}
 
     public function execute(Uuid $requesterId, Uuid $addresseeId): void
@@ -40,5 +43,11 @@ final class SendFriendRequestAction
         $friendship->setStatus(FriendshipStatusEnum::PENDING);
 
         $this->friendships->save($friendship);
+
+        $this->events->dispatch(new FriendRequestSent(
+            $friendship->getId(),
+            $requesterId,
+            $addresseeId,
+        ));
     }
 }

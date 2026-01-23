@@ -27,6 +27,8 @@ export const authActions = {
       const me = (await authApi.me()).data;
       session.setUser(me);
 
+      await authApi.mercure();
+
       return me;
     } catch (error) {
       handleAuthRequired();
@@ -59,6 +61,7 @@ export const authActions = {
     try {
       const me = (await authApi.me()).data;
       session.setUser(me);
+      await authApi.mercure();
       return me;
     } catch (error: any) {
       const status = error?.response?.status;

@@ -9,7 +9,7 @@ services:
       MERCURE_PUBLISHER_JWT_KEY: "!ChangeThisMercureHubJWTSecretKey!"
       MERCURE_SUBSCRIBER_JWT_KEY: "!ChangeThisMercureHubJWTSecretKey!"
       MERCURE_EXTRA_DIRECTIVES: |
-        cors_origins http://127.0.0.1:8000 http://localhost:5173
+        cors_origins http://127.0.0.1:8000 http://127.0.0.1:5173 http://localhost:5173
     command: /usr/bin/caddy run --config /etc/caddy/dev.Caddyfile
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/healthz"]

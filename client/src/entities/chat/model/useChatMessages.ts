@@ -21,7 +21,6 @@ export const useChatMessages = (chatId: string) => {
 
   const handleMercureMessage = useCallback(
     (payload: ChatMercureEvent) => {
-
       if (payload.type === "message_created") {
         queryClient.setQueryData<MessagesInfinite>(
           ["messages", chatId],
@@ -40,7 +39,7 @@ export const useChatMessages = (chatId: string) => {
   );
 
   useMercure<ChatMercureEvent>({
-    topic: `https://qynso.local/chats/${chatId}`,
+    topic: `https://social-network.local/chats/${chatId}`,
     onMessage: handleMercureMessage,
     enable: !!chatId,
   });

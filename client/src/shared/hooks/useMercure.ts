@@ -1,5 +1,12 @@
 import { useEffect } from "react";
 
+const TOPIC_BASE = import.meta.env.VITE_TOPIC_BASE;
+
+export const topics = {
+  userNotifications: (userId: string) =>
+    `${TOPIC_BASE}/users/${userId}/notifications`,
+};
+
 const MERCURE_URL =
   import.meta.env.VITE_MERCURE_URL ||
   "http://localhost:3000/.well-known/mercure";
@@ -27,7 +34,9 @@ export const useMercure = <TPayload = unknown>({
     const url = new URL(MERCURE_URL);
     url.searchParams.append("topic", topic);
 
-    const eventSource = new EventSource(url.toString());
+    const eventSource = new EventSource(url.toString(), {
+      withCredentials: true,
+    });
 
     eventSource.onopen = () => {
       console.log("Mercure connected:", url.toString());
@@ -57,27 +66,3 @@ export const useMercure = <TPayload = unknown>({
     };
   }, [topic, enable, onMessage, parse, onError]);
 };
-
-// example usage:
-
-// interface NotificationPayload {
-//   id: string;
-//   type: string;
-//   text: string;
-// }
-
-// useMercure<NotificationPayload>({
-//   topic: "https://qynso.local/notifications/{userId}",
-//   onMessage: (notification) => {
-//     // Zustand /  toast
-//   },
-// });
-
-// Или если нужно самому парсить не-JSON:
-// useMercure<string>({
-//   topic: "https://qynso.local/raw",
-//   parse: (event) => event.data as string,
-//   onMessage: (data) => {
-//     console.log("raw data", data);
-//   },
-// });

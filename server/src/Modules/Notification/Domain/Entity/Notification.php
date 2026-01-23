@@ -2,6 +2,7 @@
 
 namespace App\Modules\Notification\Domain\Entity;
 
+use App\Modules\Notification\Domain\Enum\NotificationTypeEnum;
 use App\Modules\User\Domain\Entity\User;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;

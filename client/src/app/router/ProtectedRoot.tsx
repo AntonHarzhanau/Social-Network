@@ -7,11 +7,12 @@ import { ROUTES } from "@/shared/constants/routes";
 import Layout from "@/widgets/Layout/Layout";
 import { Navigate } from "react-router-dom";
 import AuthEventBridge from "./AuthEventBridge";
+import { NotificationsMercureBridge } from "@/entities/notification/model/NotificationMercureBridge";
 
 const ProtectedRoot = () => {
   const status = sessionStatus();
   const isAuth = isAuthenticated();
-  if (status === "loading" ) {
+  if (status === "loading") {
     return <FullScreenLoader />;
   }
   if (!isAuth) {
@@ -21,6 +22,7 @@ const ProtectedRoot = () => {
   return (
     <>
       <AuthEventBridge />
+      <NotificationsMercureBridge />
       <Layout />
     </>
   );
