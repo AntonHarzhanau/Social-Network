@@ -19,7 +19,6 @@ final readonly class MarkReadAction
         if ($notification === null) {
             throw new \InvalidArgumentException('Notification not found');
         }
-        $notification->markRead();
-        $this->notificationRepository->save($notification);
+        $this->notificationRepository->remove($notification);
     }
 }

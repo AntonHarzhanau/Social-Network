@@ -2,6 +2,8 @@
 
 namespace App\Modules\SocialGraph\Infrastructure\Http\Controller;
 
+use App\Modules\SocialGraph\Application\Action\GetMyFriendsStatsAction;
+use App\Modules\SocialGraph\Application\Action\GetPublicFriendsStatsAction;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\SocialGraph\Application\Action\ListFriendsAction;
 use App\Modules\SocialGraph\Application\Action\RemoveFriendAction;
@@ -18,7 +20,8 @@ final class FriendsController extends AbstractController
     public function __construct(
         private readonly ListFriendsAction $listFriends,
         private readonly RemoveFriendAction $removeFriend,
-    ) {}
+    ) {
+    }
 
     #[Route('/{userId}', name: 'friends_list', methods: ['GET'], format: 'json')]
     public function list(
@@ -48,5 +51,26 @@ final class FriendsController extends AbstractController
         }
 
         return $this->json(['message' => 'Friend removed'], JsonResponse::HTTP_OK);
+    }
+
+    #[Route('/{userId}/stats', name: 'friends_stats', methods: ['GET'], format: 'json')]
+    public function stats(
+        string $userId,
+        GetPublicFriendsStatsAction $action
+
+    ): JsonResponse {
+        $stats = $action->execute(Uuid::fromString($userId));
+
+        return $this->json($stats, JsonResponse::HTTP_OK);
+    }
+
+    #[Route('/me/stats', name: 'friends_stats', methods: ['GET'], format: 'json')]
+    public function myFriendsStats(
+        #[CurrentUser] User $currentUser,
+        GetMyFriendsStatsAction $action
+
+    ): JsonResponse {
+        $stats = $action->execute($currentUser->getId());
+        return $this->json($stats, JsonResponse::HTTP_OK);
     }
 }

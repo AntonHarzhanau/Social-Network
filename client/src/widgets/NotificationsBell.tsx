@@ -20,11 +20,11 @@ import {
   fetchUnreadCount,
 } from "@/entities/notification/api/notificationsApi";
 import { notificationsKeys } from "@/entities/notification/model/queryKeys";
-import {
-  useMarkAllNotificationsAsReadMutation,
-  useMarkNotificationAsReadMutation,
-} from "@/entities/notification/model/useNotificationMutations";
 import type { NotificationDTO } from "@/entities/notification/model/types";
+import {
+  useAckAllNotificationsMutation,
+  useAckNotificationMutation,
+} from "@/entities/notification/model/useNotificationMutations";
 
 const LIMIT = 10;
 
@@ -32,12 +32,12 @@ export function NotificationsBell({ enabled = true }: { enabled?: boolean }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
 
-  const markOneRead = useMarkNotificationAsReadMutation();
-  const markAllRead = useMarkAllNotificationsAsReadMutation();
+  const ackOne = useAckNotificationMutation();
+  const ackAll = useAckAllNotificationsMutation();
 
   // badge
   const unreadQuery = useQuery({
-    queryKey: notificationsKeys.unreadCount,
+    queryKey: notificationsKeys.unread,
     queryFn: fetchUnreadCount,
     enabled,
     initialData: { unreadCount: 0 },
@@ -45,7 +45,7 @@ export function NotificationsBell({ enabled = true }: { enabled?: boolean }) {
 
   // list
   const notificationsQuery = useInfiniteQuery<NotificationDTO[]>({
-    queryKey: notificationsKeys.all,
+    queryKey: notificationsKeys.list,
     enabled: enabled && open,
     initialPageParam: 1,
     queryFn: ({ pageParam }) => fetchNotifications(pageParam as number, LIMIT),
@@ -75,8 +75,8 @@ export function NotificationsBell({ enabled = true }: { enabled?: boolean }) {
       onOpenChange={(next) => {
         setOpen(next);
         if (next) {
-          qc.invalidateQueries({ queryKey: notificationsKeys.unreadCount });
-          qc.invalidateQueries({ queryKey: notificationsKeys.all });
+          qc.invalidateQueries({ queryKey: notificationsKeys.unread });
+          qc.invalidateQueries({ queryKey: notificationsKeys.list });
         }
       }}
     >
@@ -115,10 +115,10 @@ export function NotificationsBell({ enabled = true }: { enabled?: boolean }) {
           <Button
             variant="outline"
             size="sm"
-            disabled={unreadCount === 0 || markAllRead.isPending}
-            onClick={() => markAllRead.mutate()}
+            disabled={unreadCount === 0 || ackAll.isPending}
+            onClick={() => ackAll.mutate()}
           >
-            Mark all read
+            Clear all
           </Button>
         </div>
 
@@ -145,12 +145,8 @@ export function NotificationsBell({ enabled = true }: { enabled?: boolean }) {
                 key={n.id}
                 className="w-full text-left rounded-md px-3 py-2 hover:bg-accent transition"
                 onClick={() => {
-                  // mark-as-read (только если не прочитано)
-                  if (!n.readAt && !markOneRead.isPending) {
-                    markOneRead.mutate({ id: n.id });
-                  }
+                  ackOne.mutate({ id: n.id });
 
-                  // тут: навигация на target если нужно
                   setOpen(false);
                 }}
               >

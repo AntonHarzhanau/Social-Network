@@ -30,4 +30,5 @@ interface FriendshipRepositoryInterface
     public function findSentFriendRequests(Uuid $user, ?int $page = null, ?int $limit = null): array;
 
     public function countUserFriends(Uuid $userId, FriendCountMode $mode = FriendCountMode::FRIENDS): int;
+
 }

@@ -11,9 +11,8 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'notification')]
-#[ORM\Index(columns: ['recipient_id', 'read_at', 'created_at'], name: 'idx_notif_recipient_unread')]
 #[ORM\Index(columns: ['recipient_id', 'created_at'], name: 'idx_notif_recipient_created')]
-#[ORM\Index(columns: ['recipient_id', 'type', 'group_key', 'read_at'], name: 'idx_notif_grouping')]
+#[ORM\Index(columns: ['recipient_id', 'type', 'group_key'], name: 'idx_notif_grouping')]
 class Notification
 {
     #[ORM\Id]
@@ -65,10 +64,6 @@ class Notification
     #[ORM\Column(name: 'last_event_at', nullable: true)]
     private ?\DateTimeImmutable $lastEventAt = null;
 
-    // null => непрочитано
-    #[ORM\Column(name: 'read_at', nullable: true)]
-    private ?\DateTimeImmutable $readAt = null;
-
     public function __construct(
         User $recipient,
         NotificationTypeEnum $type,
@@ -94,16 +89,6 @@ class Notification
     // -------------------------
     // Domain methods
     // -------------------------
-
-    public function markRead(?\DateTimeImmutable $at = null): void
-    {
-        $this->readAt = $at ?? new \DateTimeImmutable();
-    }
-
-    public function markUnread(): void
-    {
-        $this->readAt = null;
-    }
 
     public function aggregate(
         string $newText,
@@ -178,13 +163,4 @@ class Notification
         return $this->lastEventAt;
     }
 
-    public function getReadAt(): ?\DateTimeImmutable
-    {
-        return $this->readAt;
-    }
-
-    public function isRead(): bool
-    {
-        return $this->readAt !== null;
-    }
 }

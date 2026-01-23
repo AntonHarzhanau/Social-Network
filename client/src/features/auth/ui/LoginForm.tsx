@@ -18,7 +18,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ROUTES } from "@/shared/constants/routes";
 import { toast } from "sonner";
 import type { AxiosError } from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EmailVerificationNotice from "@/features/auth/ui/EmailVerificationNotice";
 import { authActions } from "@/features/auth/model/authActions";
 
@@ -43,8 +43,23 @@ const LoginForm = ({
   });
 
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+
   const [emailVerification, setEmailVerification] = useState(false);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const status = searchParams.get("email-verify-status");
+    if (status !== "ok") return;
+
+    toast.success("Email successfully verified! You can now log in.", {
+      closeButton: true,
+    });
+
+    const next = new URLSearchParams(searchParams);
+    next.delete("email-verify-status");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const handleSubmit = async (data: LoginFormSchema) => {
     try {

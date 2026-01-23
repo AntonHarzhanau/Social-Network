@@ -1,4 +1,8 @@
-export type FriendsStats = {
+export type PublicFriendsStats = {
   total: number;
-  online: number;
+};
+
+export type MyFriendsStats = PublicFriendsStats & {
+  sentRequests: number;
+  receivedRequests: number;
 };

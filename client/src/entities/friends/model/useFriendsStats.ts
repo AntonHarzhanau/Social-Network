@@ -1,15 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
 import { friendsQueryKeys } from "./queryKeys";
-import { fetchFriendsStats } from "../api/friends";
+import { fetchMyFriendsStats, fetchPublicFriendsStats } from "../api/friends";
 
-export function useFriendsStats(userId?: string) {
+export const useMyFriendsStats = (enabled = true) => {
   return useQuery({
-    queryKey: userId
-      ? friendsQueryKeys.stats(userId)
-      : ["friends", "stats", "disabled"],
-
-    queryFn: () => fetchFriendsStats(userId as string),
-    enabled: Boolean(userId),
+    queryKey: friendsQueryKeys.stats.me(),
+    queryFn: fetchMyFriendsStats,
+    enabled,
     staleTime: 60 * 1000, // 1 minute
   });
-}
+};
+
+export const usePublicFriendsStats = (userId?: string) => {
+  return useQuery({
+    queryKey: userId
+      ? friendsQueryKeys.stats.user(userId)
+      : ["friends", "stats", "user", "disabled"],
+    queryFn: () => fetchPublicFriendsStats(userId as string),
+    enabled: Boolean(userId),
+    staleTime: 60_000,
+  });
+};

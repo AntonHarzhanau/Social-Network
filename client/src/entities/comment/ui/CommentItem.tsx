@@ -5,6 +5,7 @@ import { formatPostDate } from "@/shared/lib/date";
 import { Button } from "@/shared/components/ui/button";
 import { LikeButton } from "@/shared/components/LikeButton";
 import { useToggleLikeCommentMutation } from "../model/useCommentMutations";
+import ExpandableDescription from "@/shared/components/ExpandableDescription";
 
 interface CommentItemProps {
   threadId: string;
@@ -17,24 +18,30 @@ const CommentItem = ({ threadId, comment }: CommentItemProps) => {
   return (
     <Item variant="default" className="flex-col items-start">
       {/* Author Info */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
         <Avatar
           name={comment.author?.name}
           imageUrl={comment.author?.avatarUrl}
           className="h-10 w-10"
         />
-        <p>{comment.author?.name}</p>
+        <div>
+          <p>{comment.author?.name}</p>
+          <p className="text-xs text-muted-foreground">
+            {formatPostDate(comment.createdAt)}
+          </p>
+        </div>
       </div>
 
       {/* Comment Content */}
-      <p>{comment.content}</p>
+      <div className="font-normal whitespace-pre-wrap break-all wrap-anywhere min-w-0 max-w-full text-sm ">
+        <ExpandableDescription content={comment.content} limit={100} />
+      </div>
 
       {/* Actions*/}
       <div className="flex justify-between w-full items-center">
-        <div className="flex gap-4 items-center">
-          <p>{formatPostDate(comment.createdAt)}</p>
-          <Button variant="link">Reply ({comment.replyCount})</Button>
-        </div>
+        <Button className="p-0" variant="link">
+          <p className="text-sm font-normal">reply</p> ({comment.replyCount})
+        </Button>
         <LikeButton
           count={comment.likeCount}
           isActive={comment.likedByCurrentUser}

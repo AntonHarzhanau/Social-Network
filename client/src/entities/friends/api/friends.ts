@@ -1,6 +1,6 @@
 import { apiClient } from "@/shared/api/apiClient";
 import type { UserPreview } from "@/entities/user/model/types";
-import type { FriendsStats } from "../model/types";
+import type { MyFriendsStats, PublicFriendsStats } from "../model/types";
 
 export const fetchFriends = async (
   userId: string | undefined,
@@ -55,11 +55,16 @@ export const removeFriend = async (userId: string): Promise<void> => {
   await apiClient.delete(`/friends/${userId}`);
 };
 
-export const fetchFriendsStats = async (
+export const fetchPublicFriendsStats = async (
   userId: string,
-): Promise<FriendsStats> => {
-  const response = await apiClient.get<FriendsStats>(
+): Promise<PublicFriendsStats> => {
+  const response = await apiClient.get<PublicFriendsStats>(
     `/friends/${userId}/stats`,
   );
+  return response.data;
+};
+
+export const fetchMyFriendsStats = async (): Promise<MyFriendsStats> => {
+  const response = await apiClient.get<MyFriendsStats>(`/friends/me/stats`);
   return response.data;
 };

@@ -7,56 +7,32 @@ import {
   markAllNotificationsAsRead,
   markNotificationAsRead,
   type UnreadCountResponse,
-} from "@/entities/notification/api/notificationsApi";
+} from "../api/notificationsApi";
+import type { NotificationDTO } from "./types";
 import { notificationsKeys } from "./queryKeys";
-
-import { type NotificationDTO } from "./types";
 
 type Rollback = {
   prevList?: InfiniteData<NotificationDTO[]>;
   prevUnread?: UnreadCountResponse;
 };
 
-function markOneReadInInfinite(
+function removeOne(
   old: InfiniteData<NotificationDTO[]> | undefined,
   id: string,
 ) {
   if (!old) return old;
-
-  const now = new Date().toISOString();
   return {
     ...old,
-    pages: old.pages.map((page) =>
-      page.map((n) => (n.id === id ? { ...n, readAt: n.readAt ?? now } : n)),
-    ),
+    pages: old.pages.map((p) => p.filter((n) => n.id !== id)),
   };
 }
 
-function markAllReadInInfinite(
-  old: InfiniteData<NotificationDTO[]> | undefined,
-) {
+function removeAll(old: InfiniteData<NotificationDTO[]> | undefined) {
   if (!old) return old;
-
-  const now = new Date().toISOString();
-  return {
-    ...old,
-    pages: old.pages.map((page) =>
-      page.map((n) => (n.readAt ? n : { ...n, readAt: now })),
-    ),
-  };
+  return { ...old, pages: old.pages.map(() => []) };
 }
 
-function countUnreadInInfinite(
-  old: InfiniteData<NotificationDTO[]> | undefined,
-) {
-  if (!old) return 0;
-  return old.pages.reduce(
-    (acc, page) => acc + page.filter((n) => !n.readAt).length,
-    0,
-  );
-}
-
-export function useMarkNotificationAsReadMutation() {
+export function useAckNotificationMutation() {
   const qc = useQueryClient();
 
   return useMutation<void, Error, { id: string }, Rollback>({
@@ -64,56 +40,44 @@ export function useMarkNotificationAsReadMutation() {
 
     onMutate: async ({ id }) => {
       await Promise.all([
-        qc.cancelQueries({ queryKey: notificationsKeys.all }),
-        qc.cancelQueries({ queryKey: notificationsKeys.unreadCount }),
+        qc.cancelQueries({ queryKey: notificationsKeys.list }),
+        qc.cancelQueries({ queryKey: notificationsKeys.unread }),
       ]);
 
       const prevList = qc.getQueryData<InfiniteData<NotificationDTO[]>>(
-        notificationsKeys.all,
+        notificationsKeys.list,
       );
       const prevUnread = qc.getQueryData<UnreadCountResponse>(
-        notificationsKeys.unreadCount,
+        notificationsKeys.unread,
       );
 
       qc.setQueryData<InfiniteData<NotificationDTO[]>>(
-        notificationsKeys.all,
-        (old) => markOneReadInInfinite(old, id),
+        notificationsKeys.list,
+        (old) => removeOne(old, id),
       );
 
       if (prevUnread) {
-        qc.setQueryData<UnreadCountResponse>(notificationsKeys.unreadCount, {
+        qc.setQueryData<UnreadCountResponse>(notificationsKeys.unread, {
           unreadCount: Math.max(0, prevUnread.unreadCount - 1),
-        });
-      } else {
-        const nextList = qc.getQueryData<InfiniteData<NotificationDTO[]>>(
-          notificationsKeys.all,
-        );
-        qc.setQueryData<UnreadCountResponse>(notificationsKeys.unreadCount, {
-          unreadCount: countUnreadInInfinite(nextList),
         });
       }
 
       return { prevList, prevUnread };
     },
 
-    onError: (_err, _vars, ctx) => {
-      if (ctx?.prevList)
-        qc.setQueryData<InfiniteData<NotificationDTO[]>>(
-          notificationsKeys.all,
-          ctx.prevList,
-        );
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prevList) qc.setQueryData(notificationsKeys.list, ctx.prevList);
       if (ctx?.prevUnread)
-        qc.setQueryData(notificationsKeys.unreadCount, ctx.prevUnread);
+        qc.setQueryData(notificationsKeys.unread, ctx.prevUnread);
     },
 
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: notificationsKeys.unreadCount });
-      qc.invalidateQueries({ queryKey: notificationsKeys.all });
+      qc.invalidateQueries({ queryKey: notificationsKeys.unread });
     },
   });
 }
 
-export function useMarkAllNotificationsAsReadMutation() {
+export function useAckAllNotificationsMutation() {
   const qc = useQueryClient();
 
   return useMutation<void, Error, void, Rollback>({
@@ -121,38 +85,37 @@ export function useMarkAllNotificationsAsReadMutation() {
 
     onMutate: async () => {
       await Promise.all([
-        qc.cancelQueries({ queryKey: notificationsKeys.all }),
-        qc.cancelQueries({ queryKey: notificationsKeys.unreadCount }),
+        qc.cancelQueries({ queryKey: notificationsKeys.list }),
+        qc.cancelQueries({ queryKey: notificationsKeys.unread }),
       ]);
 
       const prevList = qc.getQueryData<InfiniteData<NotificationDTO[]>>(
-        notificationsKeys.all,
+        notificationsKeys.list,
       );
       const prevUnread = qc.getQueryData<UnreadCountResponse>(
-        notificationsKeys.unreadCount,
+        notificationsKeys.unread,
       );
 
       qc.setQueryData<InfiniteData<NotificationDTO[]>>(
-        notificationsKeys.all,
-        (old) => markAllReadInInfinite(old),
+        notificationsKeys.list,
+        (old) => removeAll(old),
       );
-
-      qc.setQueryData<UnreadCountResponse>(notificationsKeys.unreadCount, {
+      qc.setQueryData<UnreadCountResponse>(notificationsKeys.unread, {
         unreadCount: 0,
       });
 
       return { prevList, prevUnread };
     },
 
-    onError: (_err, _vars, ctx) => {
-      if (ctx?.prevList) qc.setQueryData(notificationsKeys.all, ctx.prevList);
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prevList) qc.setQueryData(notificationsKeys.list, ctx.prevList);
       if (ctx?.prevUnread)
-        qc.setQueryData(notificationsKeys.unreadCount, ctx.prevUnread);
+        qc.setQueryData(notificationsKeys.unread, ctx.prevUnread);
     },
 
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: notificationsKeys.unreadCount });
-      qc.invalidateQueries({ queryKey: notificationsKeys.all });
+      qc.invalidateQueries({ queryKey: notificationsKeys.unread });
+      qc.invalidateQueries({ queryKey: notificationsKeys.list });
     },
   });
 }

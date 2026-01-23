@@ -1,3 +1,4 @@
+import { useMyFriendsStats } from "@/entities/friends/model/useFriendsStats";
 import type { UserPreview } from "@/entities/user/model/types";
 import { Button } from "@/shared/components/ui/button";
 import { MAIN_MENU } from "@/shared/constants/menu";
@@ -11,6 +12,11 @@ interface MenuProps {
   className?: string;
 }
 const Menu = ({ user, className }: MenuProps) => {
+  const { data: stats } = useMyFriendsStats(!!user?.id);
+
+  const receivedCount = stats?.receivedRequests ?? 0;
+  const badgeText = receivedCount > 99 ? "99+" : String(receivedCount);
+
   return (
     <nav className={cn("sticky top-14 ", className)}>
       <Link
@@ -27,6 +33,8 @@ const Menu = ({ user, className }: MenuProps) => {
       </Link>
       {MAIN_MENU.map((item) => {
         const Icon = item.icon;
+        const isFriends = item.path === ROUTES.FRIENDS;
+
         return (
           <Link to={item.path} key={item.path} className="flex items-center">
             <Button
@@ -35,6 +43,19 @@ const Menu = ({ user, className }: MenuProps) => {
             >
               <Icon className="w-5 h-5" />
               <span className="font-normal">{item.name}</span>
+
+              {isFriends && receivedCount > 0 && (
+                <span
+                  className="
+                    min-w-5 h-5 px-1
+                    rounded-full
+                    text-[11px] leading-5 text-center
+                    bg-destructive text-destructive-foreground
+                  "
+                >
+                  {badgeText}
+                </span>
+              )}
             </Button>
           </Link>
         );

@@ -18,8 +18,8 @@ const MainSectionLayout = ({
   asideContent,
 }: MainSectionLayoutProps) => {
   return (
-    <div className="flex gap-2">
-      <div className="flex-1 min-w-0">
+    <div className="flex w-full gap-2">
+      <div className="flex-5 min-w-0">
         <div className="lg:hidden mb-2">
           <Sheet>
             <SheetTrigger asChild>
@@ -40,7 +40,7 @@ const MainSectionLayout = ({
         {pageContent}
       </div>
 
-      <aside className="hidden lg:block w-80 h-fit sticky top-14 p-2">
+      <aside className="hidden lg:block flex-3 h-fit sticky top-14 p-2">
         {asideContent}
       </aside>
     </div>

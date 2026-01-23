@@ -12,18 +12,14 @@ final readonly class MarkAllReadAction
     ) {
     }
 
-    public function execute(Uuid $currentUserId): int
+    public function execute(Uuid $currentUserId): void
     {
         $notifications = $this->notificationRepository->findAllByRecipientId($currentUserId);
         $count = 0;
         foreach ($notifications as $notification) {
-            if ($notification->isRead()) {
-                continue;
-            }
-            $notification->markRead();
+            $this->notificationRepository->remove($notification, false);
             $count++;
         }
         $this->notificationRepository->save($notification);
-        return $count;
     }
 }

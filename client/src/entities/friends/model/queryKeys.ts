@@ -9,6 +9,9 @@ export const friendsQueryKeys = {
     params: { query: string; limit: number },
   ) => [...friendsQueryKeys.root, "requests", type, params] as const,
 
-  stats: (userId: string) =>
-    [...friendsQueryKeys.root, "stats", userId] as const,
+  stats: {
+    me: () => [...friendsQueryKeys.root, "stats", "me"] as const,
+    user: (userId: string) =>
+      [...friendsQueryKeys.root, "stats", "user", userId] as const,
+  },
 };

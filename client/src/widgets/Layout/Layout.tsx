@@ -1,4 +1,3 @@
-
 import { Outlet } from "react-router";
 import Header from "./Header";
 import Menu from "./Menu";
@@ -15,7 +14,7 @@ const Layout = () => {
 
       <Header user={user} />
 
-      <div className="mx-auto w-full max-w-[1100px] flex-1 px-2 sm:px-4 md:px-6">
+      <div className="mx-auto w-full max-w-[1200px] flex-1 px-2 sm:px-4 md:px-6">
         <div className="flex gap-2">
           <aside className="hidden md:block md:w-56 lg:w-64 shrink-0">
             <Menu user={user} />

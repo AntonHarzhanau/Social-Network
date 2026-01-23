@@ -7,13 +7,15 @@ use Symfony\Component\Uid\Uuid;
 
 interface NotificationRepositoryInterface
 {
-   public function save(Notification $notification): void; 
+    public function save(Notification $notification, bool $flush = true): void;
 
-   public function countUnread(Uuid $recipientId): int;
+    public function remove(Notification $notification, bool $flush = true): void;
 
-   public function findByRecipientId(Uuid $recipientId, int $page = 1, int $limit = 20): array;
+    public function countUnread(Uuid $recipientId): int;
 
-   public function findById(Uuid $notificationId): ?Notification;
+    public function findByRecipientId(Uuid $recipientId, int $page = 1, int $limit = 20): array;
 
-   public function findAllByRecipientId(Uuid $recipientId): array;
+    public function findById(Uuid $notificationId): ?Notification;
+
+    public function findAllByRecipientId(Uuid $recipientId): array;
 }

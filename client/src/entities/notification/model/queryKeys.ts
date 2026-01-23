@@ -1,4 +1,4 @@
 export const notificationsKeys = {
-  all: ["notifications"] as const,
-  unreadCount: ["notifications", "unread-count"] as const,
+  list: ["notifications"] as const,
+  unread: ["notifications", "unread-count"] as const,
 };

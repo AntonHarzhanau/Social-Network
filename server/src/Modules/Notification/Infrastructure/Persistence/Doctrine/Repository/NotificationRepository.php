@@ -19,11 +19,22 @@ class NotificationRepository extends ServiceEntityRepository implements Notifica
         parent::__construct($registry, Notification::class);
     }
 
-    public function save(Notification $notification): void
+    public function save(Notification $notification, bool $flush = true): void
     {
         $em = $this->getEntityManager();
         $em->persist($notification);
-        $em->flush();
+        if ($flush) {
+            $em->flush();
+        }
+    }
+
+    public function remove(Notification $notification, bool $flush = true): void
+    {
+        $em = $this->getEntityManager();
+        $em->remove($notification);
+        if ($flush) {
+            $em->flush();
+        }
     }
 
     public function countUnread(Uuid $recipientId): int
@@ -32,7 +43,6 @@ class NotificationRepository extends ServiceEntityRepository implements Notifica
 
         $qb->select('COUNT(n.id)')
             ->where('IDENTITY(n.recipient) = :recipientId')
-            ->andWhere('n.readAt IS NULL')
             ->setParameter('recipientId', $recipientId);
 
         return (int) $qb->getQuery()->getSingleScalarResult();
