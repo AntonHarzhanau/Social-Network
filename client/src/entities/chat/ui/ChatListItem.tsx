@@ -1,9 +1,10 @@
 import type { Chat } from "@/entities/chat/model/types";
 import DropDownButton from "@/shared/components/DropDownButton";
-import { Item, ItemMedia } from "@/shared/components/ui/item";
+import { Item } from "@/shared/components/ui/item";
 import { Avatar } from "@/shared/components/Avatar";
 import { useOpenChatsStore } from "@/entities/chat/model/openChatsStore";
 import { Link } from "react-router-dom";
+import { Badge } from "@/shared/components/ui/badge";
 
 interface ChatListItemProps {
   chat: Chat;
@@ -34,7 +35,10 @@ const ChatListItem = ({ chat }: ChatListItemProps) => {
         <div className="min-w-0 flex-1">
           <div className="flex justify-between">
             <h2 className="truncate">{chat.title}</h2>
-            <DropDownButton />
+            <div className="flex flex-col">
+              <DropDownButton />
+              <Badge variant="outline">{chat.unreadMessageCount}</Badge>
+            </div>
           </div>
           <p className="text-sm text-muted-foreground truncate">
             {chat.lastMessage?.content}

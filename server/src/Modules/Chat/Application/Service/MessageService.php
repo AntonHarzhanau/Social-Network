@@ -26,7 +26,7 @@ class MessageService
     {
         $user = $this->userDirectory->findById($senderId);
         $chat = $this->chatRepository->findById($chatId);
-
+        
         $chatParticipant = $this->chatParticipantRepository->findOneBy([
             'chat' => $chatId,
             'user' => $senderId,
@@ -49,7 +49,6 @@ class MessageService
         $this->messageRepository->save($message);
         $this->chatRepository->save($chat);
 
-        // $sender = $message->getSender();
         $sender = $this->userDirectory->getPreviewsByIds([$senderId])[$senderId->toRfc4122()];
 
         $payload = [

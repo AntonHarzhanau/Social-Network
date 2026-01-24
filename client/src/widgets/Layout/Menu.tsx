@@ -1,10 +1,13 @@
+import { getUnreadChatCount } from "@/entities/chat/api/chat";
 import { useMyFriendsStats } from "@/entities/friends/model/useFriendsStats";
 import type { UserPreview } from "@/entities/user/model/types";
+import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { MAIN_MENU } from "@/shared/constants/menu";
 import { ROUTES } from "@/shared/constants/routes";
 import { cn } from "@/shared/lib/utils";
 import { User } from "lucide-react";
+import { useEffect, useState } from "react";
 import { href, Link } from "react-router-dom";
 
 interface MenuProps {
@@ -14,8 +17,19 @@ interface MenuProps {
 const Menu = ({ user, className }: MenuProps) => {
   const { data: stats } = useMyFriendsStats(!!user?.id);
 
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
+
   const receivedCount = stats?.receivedRequests ?? 0;
   const badgeText = receivedCount > 99 ? "99+" : String(receivedCount);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchUnreadChatCount = async () => {
+      const response = await getUnreadChatCount();
+      setUnreadChatCount(response);
+    };
+    fetchUnreadChatCount();
+  }, []);
 
   return (
     <nav className={cn("sticky top-14 ", className)}>
@@ -33,28 +47,25 @@ const Menu = ({ user, className }: MenuProps) => {
       </Link>
       {MAIN_MENU.map((item) => {
         const Icon = item.icon;
-        const isFriends = item.path === ROUTES.FRIENDS;
 
         return (
           <Link to={item.path} key={item.path} className="flex items-center">
             <Button
               variant="ghost"
-              className="w-full justify-start py-2 hover:bg-accent-foreground/5"
+              className="w-full justify-start items-baseline py-2 hover:bg-accent-foreground/5"
             >
               <Icon className="w-5 h-5" />
               <span className="font-normal">{item.name}</span>
 
-              {isFriends && receivedCount > 0 && (
-                <span
-                  className="
-                    min-w-5 h-5 px-1
-                    rounded-full
-                    text-[11px] leading-5 text-center
-                    bg-destructive text-destructive-foreground
-                  "
-                >
+              {item.path === ROUTES.FRIENDS && receivedCount > 0 && (
+                <Badge variant="destructive" className="w-4 h-4">
                   {badgeText}
-                </span>
+                </Badge>
+              )}
+              {item.path === "/chats" && unreadChatCount > 0 && (
+                <Badge variant="destructive" className="w-4 h-4">
+                  {unreadChatCount}
+                </Badge>
               )}
             </Button>
           </Link>

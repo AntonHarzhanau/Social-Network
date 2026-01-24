@@ -4,9 +4,7 @@ namespace App\Modules\Chat\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Modules\Chat\Domain\Entity\Message;
 use App\Modules\Chat\Domain\Repository\MessageRepositoryInterface;
-use App\Modules\User\Domain\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\DBAL\Schema\Exception\NotImplemented;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
@@ -34,9 +32,41 @@ class MessageRepository extends ServiceEntityRepository implements MessageReposi
         $this->getEntityManager()->flush();
     }
 
-    public function getUnreadMessageCountForUserByChats(User $user, array $chatsIds): array
+    public function findOneBy(
+        array $criteria,
+        ?array $orderBy = null,
+        ?int $limit = null,
+        ?int $offset = null
+    ): ?Message {
+        return parent::findOneBy($criteria, $orderBy);
+    }
+  
+
+    public function getUnreadMessageCountForUserByChats(Uuid $userId, array $chatIds): array
     {
-        throw new NotImplemented();
+        if (empty($chatIds)) {
+            return [];
+        }
+
+        $qb = $this->createQueryBuilder('m')
+            ->select('IDENTITY(m.chat) AS chatId')
+            ->addSelect('COUNT(m.id) AS unreadCount')
+            ->innerJoin('m.chat', 'c')
+            ->innerJoin('c.chatParticipants', 'cp', 'WITH', 'IDENTITY(cp.user) = :userId')
+            ->andWhere('c.id IN (:chatIds)')
+            ->andWhere('IDENTITY(m.sender) <> :userId')
+            ->andWhere('m.createdAt > COALESCE(cp.lastReadAt, cp.joinedAt)')
+            ->setParameter('userId', $userId)
+            ->setParameter('chatIds', $chatIds)
+            ->groupBy('m.chat');
+
+        $rows = $qb->getQuery()->getArrayResult();
+
+        $result = [];
+        foreach ($rows as $row) {
+            $result[(string) $row['chatId']] = (int) $row['unreadCount'];
+        }
+        return $result;
     }
 
     public function findMessagesByChatBefore(
@@ -55,7 +85,20 @@ class MessageRepository extends ServiceEntityRepository implements MessageReposi
             $qb->andWhere('m.createdAt < :before')
                 ->setParameter('before', $before);
         }
-        
+
         return $qb->getQuery()->getResult();
+    }
+
+    public function countUnreaChatsForUser(Uuid $userId): int
+    {
+        $qb = $this->createQueryBuilder('m')
+        ->select('COUNT(DISTINCT c.id) AS unreadChatsCount')
+        ->innerJoin('m.chat', 'c')
+        ->innerJoin('c.chatParticipants', 'cp', 'WITH', 'IDENTITY(cp.user) = :userId')
+        ->andWhere('IDENTITY(m.sender) <> :userId')
+        ->andWhere('m.createdAt > COALESCE(cp.lastReadAt, cp.joinedAt)')
+        ->setParameter('userId', $userId);
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 }

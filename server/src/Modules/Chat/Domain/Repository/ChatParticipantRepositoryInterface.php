@@ -7,6 +7,7 @@ use App\Modules\Chat\Domain\Entity\ChatParticipant;
 
 interface ChatParticipantRepositoryInterface
 {
+    public function save(ChatParticipant $chatParticipant): void;
     public function findOneBy(array $criteria, array|null $orderBy = null): ?ChatParticipant;
     public function getAllUsersByChatId(Chat $chat): array;
     public function delete(ChatParticipant $chatParticipant): void;

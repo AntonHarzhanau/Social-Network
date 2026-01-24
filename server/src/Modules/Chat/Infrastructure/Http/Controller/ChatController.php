@@ -7,8 +7,11 @@ use App\Modules\Chat\Application\Action\Chat\CreateGroupChat;
 use App\Modules\Chat\Application\Action\Chat\GetChat;
 use App\Modules\Chat\Application\Action\Chat\GetChatList;
 use App\Modules\Chat\Application\Action\Chat\GetChatMessages;
+use App\Modules\Chat\Application\Action\Chat\GetUnreadChatCountAction;
+use App\Modules\Chat\Application\Action\Chat\MarkChatReadAction;
 use App\Modules\Chat\Application\Action\Chat\RemoveUserFromChat;
 use App\Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
+use App\Modules\Chat\Infrastructure\Http\Request\MarkChatReadRequest;
 use App\Modules\User\Domain\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,7 +24,9 @@ use Symfony\Component\Uid\Uuid;
 #[Route('/api/chats')]
 final class ChatController extends AbstractController
 {
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
     #[Route('', name: 'new_chat', methods: ['POST'], format: 'json')]
     public function createGroupChat(
@@ -56,8 +61,18 @@ final class ChatController extends AbstractController
         return $this->json(
             $dto,
             JsonResponse::HTTP_OK,
-            [],
-            ['groups' => 'chat:list']
+        );
+    }
+
+    #[Route('/unread-summary', name: 'get_unread_summary', methods: ['GET'], format: 'json')]
+    public function getUnreadChatsCount(
+        #[CurrentUser] User $currentUser,
+        GetUnreadChatCountAction $action,
+    ): JsonResponse {
+        $count = $action->execute($currentUser->getId());
+        return $this->json(
+            $count,
+            JsonResponse::HTTP_OK,
         );
     }
 
@@ -135,4 +150,23 @@ final class ChatController extends AbstractController
 
         return $this->json(['message' => 'User(s) removed from chat'], JsonResponse::HTTP_OK, [], ['groups' => 'message:list']);
     }
+
+    #[Route('/{chatId}/read', name: 'mark_chat_as_read', methods: ['PATCH'], format: 'json')]
+    public function markRead(
+        string $chatId,
+        #[CurrentUser] User $currentUser,
+        #[MapRequestPayload] MarkChatReadRequest $data,
+        MarkChatReadAction $action,
+    ): JsonResponse {
+
+        $action->execute(
+            Uuid::fromString($chatId),
+            $currentUser->getId(),
+            $data->lastReadMessageId ? Uuid::fromString($data->lastReadMessageId) : null
+        );
+
+        return $this->json(JsonResponse::HTTP_OK);
+    }
+
+
 }

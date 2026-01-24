@@ -30,11 +30,13 @@ class ChatRepository extends ServiceEntityRepository implements ChatRepositoryIn
 
             ->innerJoin('c.chatParticipants', 'cpCurrent', 'WITH', 'cpCurrent.user = :user')
             ->setParameter('user', $user)
-
+            ->leftJoin('cpCurrent.lastReadMessage', 'lrm')
             ->leftJoin('c.lastMessage', 'lm')
             ->leftJoin('lm.sender', 'lmSender')
 
             ->addSelect('PARTIAL c.{id, type, title, avatarUrl, createdAt, updatedAt}')
+            ->addSelect('PARTIAL cpCurrent.{id, lastReadAt, joinedAt}')
+            ->addSelect('PARTIAL lrm.{id}')
             ->addSelect('PARTIAL lm.{id, content, createdAt}')
             ->addSelect('PARTIAL lmSender.{id, username, avatarUrl}')
 
@@ -43,7 +45,7 @@ class ChatRepository extends ServiceEntityRepository implements ChatRepositoryIn
             ->setFirstResult($offset)
             ->setMaxResults($limit);
         $chats = $qb->getQuery()->getResult();
-        
+
         return $chats;
     }
 

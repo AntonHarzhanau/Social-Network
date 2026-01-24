@@ -16,6 +16,8 @@ export interface Chat {
   updatedAt: string;
   lastMessage?: Message;
   lastMessageAt?: string;
+  lastReadAt?: string | null;
+  lastReadMessageId?: string | null;
   unreadMessageCount: number | null;
 }
 
@@ -23,4 +25,3 @@ export interface CreateDirectChatParams {
   participantId: string;
   content?: string;
 }
-

@@ -2,14 +2,14 @@
 
 namespace App\Modules\Chat\Application\ReadModel\Chat;
 
-use App\Modules\Chat\Domain\Entity\Message;
+use App\Modules\User\Contracts\DTO\UserPreviewDTO;
 
-final class MessageDTO
+final class MessageResponseDTO
 {
     public function __construct(
         public readonly string $id,
         public readonly string $content,
-        public readonly object $sender,
+        public readonly array $sender,
         public readonly string $createdAt,
     ) {}
 }

@@ -29,6 +29,7 @@ final class MessageController extends AbstractController
         SendMessageToChatAction $sendMessage,
         NewMessageRequestMapper $mapper,
     ): JsonResponse {
+        
         $sendMessage(Uuid::fromString($chatId), $user->getId(), $mapper::map($data));
         return $this->json(['message' => 'Message sent successfully'], JsonResponse::HTTP_CREATED);
     }

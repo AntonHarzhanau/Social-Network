@@ -7,6 +7,7 @@ use App\Modules\Chat\Domain\Entity\ChatParticipant;
 use App\Modules\Chat\Domain\Repository\ChatParticipantRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends ServiceEntityRepository<ChatParticipant>
@@ -18,6 +19,15 @@ class ChatParticipantRepository extends ServiceEntityRepository implements ChatP
         parent::__construct($registry, ChatParticipant::class);
     }
 
+    public function save(ChatParticipant $chatParticipant, bool $flush = true): void
+    {
+        $em = $this->getEntityManager();
+        $em->persist($chatParticipant);
+        if ($flush) {
+            $em->flush();
+        }
+    }
+    
     public function findOneBy(array $criteria, array|null $orderBy = null): ?ChatParticipant
     {
         return parent::findOneBy($criteria);

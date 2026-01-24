@@ -3,7 +3,7 @@
 namespace App\Modules\Chat\Application\Action\Chat;
 
 use App\Modules\Chat\Application\Port\UserDirectoryInterface;
-use App\Modules\Chat\Application\ReadModel\Chat\MessageDTO;
+use App\Modules\Chat\Application\ReadModel\Chat\MessageResponseDTO;
 use App\Modules\Chat\Domain\Repository\ChatParticipantRepositoryInterface;
 use App\Modules\Chat\Domain\Repository\MessageRepositoryInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -48,10 +48,14 @@ final readonly class GetChatMessages
         $messages = [];
         foreach ($data as $message) {
             $sender = $sendersPreviews[$message->getSender()->getId()->toRfc4122()];
-            $messages[] = new MessageDTO(
+            $messages[] = new MessageResponseDTO(
                 id: (string) $message->getId(),
                 content: $message->getContent(),
-                sender: $sender,
+                sender: [
+                    'id' => $sender->id,
+                    'name' => $sender->name,
+                    'avatarUrl' => $sender->avatarUrl,
+                ],
                 createdAt: $message->getCreatedAt()->format(\DateTime::ATOM),
             );
         }
