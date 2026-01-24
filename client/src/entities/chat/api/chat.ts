@@ -21,9 +21,15 @@ export const fetchChatById = async (chatId: string): Promise<Chat> => {
   return response.data;
 };
 
+type FetchMessageMode = "before" | "after" | "around" | "";
+
 export const fetchMessages = async (
   chatId: string,
-  params: { before?: string; limit?: number } = {},
+  params: {
+    mode?: FetchMessageMode;
+    messageId?: string;
+    limit?: number;
+  } = {},
 ): Promise<Message[]> => {
   const response = await apiClient.get<Message[]>(`/chats/${chatId}/messages`, {
     params,

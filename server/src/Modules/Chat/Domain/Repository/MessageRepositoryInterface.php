@@ -20,12 +20,15 @@ interface MessageRepositoryInterface
         ?int $offset = null
     ): ?Message;
 
-    /** @return Message[] */
-    public function findMessagesByChatBefore(
-        Uuid $chatId,
-        int $limit,
-        ?\DateTimeImmutable $before = null
-    ): array;
+    public function findLatest(Uuid $chatId, int $limit): array;
 
-    public function countUnreaChatsForUser(Uuid $userId): int;
+    public function countUnreadChatsForUser(Uuid $userId): int;
+
+    public function findByCursor(
+        Uuid $chatId,
+        \DateTimeImmutable $cursorAt,
+        Uuid $cursorId,
+        int $limit,
+        string $mode, // 'before' | 'after'
+    ): array;
 }

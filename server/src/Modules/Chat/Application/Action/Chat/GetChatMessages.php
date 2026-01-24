@@ -6,38 +6,64 @@ use App\Modules\Chat\Application\Port\UserDirectoryInterface;
 use App\Modules\Chat\Application\ReadModel\Chat\MessageResponseDTO;
 use App\Modules\Chat\Domain\Repository\ChatParticipantRepositoryInterface;
 use App\Modules\Chat\Domain\Repository\MessageRepositoryInterface;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Uid\Uuid;
 
-final readonly class GetChatMessages
+final class GetChatMessages
 {
     public function __construct(
-        private readonly MessageRepositoryInterface $messageRepository,
-        private readonly ChatParticipantRepositoryInterface $chatParticipantRepository,
+        private readonly ChatParticipantRepositoryInterface $participants,
+        private readonly MessageRepositoryInterface $messages,
         private readonly UserDirectoryInterface $userDirectory,
     ) {}
 
-    public function __invoke(
+    public function execute(
         Uuid $chatId,
         Uuid $userId,
-        int $limit = 30,
-        ?\DateTimeImmutable $dateFrom = null
+        string $mode,     // latest|before|after|around
+        ?Uuid $messageId,
+        int $limit,
     ): array {
-        if ($this->chatParticipantRepository->findOneBy([
-            'chat' => $chatId,
-            'user' => $userId,
-        ]) === null) {
-            throw new AccessDeniedException('You are not a participant of this chat.');
+        $this->assertMember($chatId, $userId);
+
+        if ($mode === 'latest' || $messageId === null) {
+            $entities = $this->messages->findLatest($chatId, $limit);
+            return $this->messageResponseMapper($entities);
         }
 
-        $data = $this->messageRepository->findMessagesByChatBefore(
-            chatId: $chatId,
-            limit: $limit,
-            before: $dateFrom
-        );
+        $anchor = $this->messages->findOneBy(['chat' => $chatId, 'id' => $messageId]);
+        if ($anchor === null) {
+            return [];
+        }
 
+        $cursorAt = $anchor->getCreatedAt();
+        $cursorId = $anchor->getId();
+
+
+        if ($mode === 'before' || $mode === 'after') {
+            $entities = $this->messages->findByCursor($chatId, $cursorAt, $cursorId, $limit, $mode);
+            return $this->messageResponseMapper($entities);
+        }
+
+        $before = $this->messages->findByCursor($chatId, $cursorAt, $cursorId, $limit, 'before');
+        $after  = $this->messages->findByCursor($chatId, $cursorAt, $cursorId, $limit, 'after');
+
+        $entities = array_merge($before, [$anchor], $after);
+
+        return $this->messageResponseMapper($entities);
+    }
+
+    private function assertMember(Uuid $chatId, Uuid $userId): void
+    {
+        $cp = $this->participants->findOneBy(['chat' => $chatId, 'user' => $userId]);
+        if (!$cp) {
+            throw new \LogicException('Access denied');
+        }
+    }
+
+    private function messageResponseMapper(array $entities): array
+    {
         $sendersIds = [];
-        foreach ($data as $message) {
+        foreach ($entities as $message) {
             $id = $message->getSender()->getId();
             $sendersIds[] = $id;
         }
@@ -46,7 +72,7 @@ final readonly class GetChatMessages
         
 
         $messages = [];
-        foreach ($data as $message) {
+        foreach ($entities as $message) {
             $sender = $sendersPreviews[$message->getSender()->getId()->toRfc4122()];
             $messages[] = new MessageResponseDTO(
                 id: (string) $message->getId(),

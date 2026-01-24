@@ -77,19 +77,6 @@ final class ChatController extends AbstractController
     }
 
 
-    #[Route('/{chatId}', name: 'get_chat', methods: ['GET'], format: 'json')]
-    public function getOne(
-        #[CurrentUser] User $user,
-        string $chatId,
-        GetChat $getChat
-    ): JsonResponse {
-        $dto = $getChat(Uuid::fromString($chatId), $user->getId());
-        return $this->json(
-            $dto,
-            JsonResponse::HTTP_OK,
-        );
-    }
-
     #[Route('', name: 'update_chat', methods: ['PUT'], format: 'json')]
     public function update(): JsonResponse
     {
@@ -104,22 +91,6 @@ final class ChatController extends AbstractController
         return $this->json([
             'error' => 'Not implemented yet',
         ], JsonResponse::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-    #[Route('/{chatId}/messages', name: 'get_chat_messages', methods: ['GET'], format: 'json')]
-    public function getChatMessages(
-        string $chatId,
-        #[CurrentUser] User $currentUser,
-        Request $request,
-        GetChatMessages $getChatMessages
-    ): JsonResponse {
-        $limit = max(1, (int) $request->query->get('limit', 30));
-        $before = $request->query->get('before');
-        $beforeDt = $before ? new \DateTimeImmutable($before) : null;
-
-        $messages = $getChatMessages(Uuid::fromString($chatId), $currentUser->getId(), $limit, $beforeDt);
-        return $this->json($messages, JsonResponse::HTTP_OK);
     }
 
     #[Route('/{chatId}/add-members', name: 'add_user_to_chat', methods: ['POST'], format: 'json')]
@@ -168,5 +139,43 @@ final class ChatController extends AbstractController
         return $this->json(JsonResponse::HTTP_OK);
     }
 
+    #[Route('/{chatId}/messages', name: 'chat_messages', methods: ['GET'], format: 'json')]
+    public function messages(
+        string $chatId,
+        #[CurrentUser] User $currentUser,
+        Request $request,
+        GetChatMessages $action,
+    ): JsonResponse {
+        $mode = (string) $request->query->get('mode', '');
+        $messageId = $request->query->get('messageId');
+        $limit = max(1, (int) $request->query->get('limit', 10));
 
+        $mode = $mode === '' ? 'latest' : $mode;
+        if (!\in_array($mode, ['latest', 'before', 'after', 'around'], true)) {
+            return $this->json(['error' => 'mode must be before|after|around or omitted'], 400);
+        }
+
+        $messages = $action->execute(
+            Uuid::fromString($chatId),
+            $currentUser->getId(),
+            $mode,
+            $messageId !== null && $messageId !== '' ? Uuid::fromString((string) $messageId) : null,
+            $limit
+        );
+
+        return $this->json($messages, JsonResponse::HTTP_OK);
+    }
+
+    #[Route('/{chatId}', name: 'get_chat', methods: ['GET'], format: 'json')]
+    public function getOne(
+        #[CurrentUser] User $user,
+        string $chatId,
+        GetChat $getChat
+    ): JsonResponse {
+        $dto = $getChat(Uuid::fromString($chatId), $user->getId());
+        return $this->json(
+            $dto,
+            JsonResponse::HTTP_OK,
+        );
+    }
 }

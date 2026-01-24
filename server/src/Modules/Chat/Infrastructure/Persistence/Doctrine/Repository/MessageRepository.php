@@ -40,7 +40,7 @@ class MessageRepository extends ServiceEntityRepository implements MessageReposi
     ): ?Message {
         return parent::findOneBy($criteria, $orderBy);
     }
-  
+
 
     public function getUnreadMessageCountForUserByChats(Uuid $userId, array $chatIds): array
     {
@@ -69,36 +69,66 @@ class MessageRepository extends ServiceEntityRepository implements MessageReposi
         return $result;
     }
 
-    public function findMessagesByChatBefore(
-        Uuid $chatId,
-        int $limit,
-        ?\DateTimeImmutable $before = null
-    ): array {
+    public function countUnreadChatsForUser(Uuid $userId): int
+    {
         $qb = $this->createQueryBuilder('m')
+            ->select('COUNT(DISTINCT c.id) AS unreadChatsCount')
+            ->innerJoin('m.chat', 'c')
+            ->innerJoin('c.chatParticipants', 'cp', 'WITH', 'IDENTITY(cp.user) = :userId')
+            ->andWhere('IDENTITY(m.sender) <> :userId')
+            ->andWhere('m.createdAt > COALESCE(cp.lastReadAt, cp.joinedAt)')
+            ->setParameter('userId', $userId);
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    public function findLatest(Uuid $chatId, int $limit): array
+    {
+        $rows = $this->createQueryBuilder('m')
             ->andWhere('m.chat = :chatId')
             ->setParameter('chatId', $chatId)
             ->orderBy('m.createdAt', 'DESC')
             ->addOrderBy('m.id', 'DESC')
-            ->setMaxResults($limit);
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
 
-        if ($before !== null) {
-            $qb->andWhere('m.createdAt < :before')
-                ->setParameter('before', $before);
-        }
-
-        return $qb->getQuery()->getResult();
+        return array_reverse($rows);
     }
 
-    public function countUnreaChatsForUser(Uuid $userId): int
-    {
-        $qb = $this->createQueryBuilder('m')
-        ->select('COUNT(DISTINCT c.id) AS unreadChatsCount')
-        ->innerJoin('m.chat', 'c')
-        ->innerJoin('c.chatParticipants', 'cp', 'WITH', 'IDENTITY(cp.user) = :userId')
-        ->andWhere('IDENTITY(m.sender) <> :userId')
-        ->andWhere('m.createdAt > COALESCE(cp.lastReadAt, cp.joinedAt)')
-        ->setParameter('userId', $userId);
+    public function findByCursor(
+        Uuid $chatId,
+        \DateTimeImmutable $cursorAt,
+        Uuid $cursorId,
+        int $limit,
+        string $mode, // before|after
+    ): array {
+        if (!\in_array($mode, ['before', 'after'], true)) {
+            throw new \InvalidArgumentException('mode must be before|after');
+        }
 
-        return (int) $qb->getQuery()->getSingleScalarResult();
+        $qb = $this->createQueryBuilder('m')
+            ->andWhere('m.chat = :chatId')
+            ->setParameter('chatId', $chatId)
+            ->setMaxResults($limit);
+
+        if ($mode === 'before') {
+            $qb->andWhere('(m.createdAt < :t OR (m.createdAt = :t AND m.id < :id))')
+                ->setParameter('t', $cursorAt)
+                ->setParameter('id', $cursorId)
+                ->orderBy('m.createdAt', 'DESC')
+                ->addOrderBy('m.id', 'DESC');
+
+            $rows = $qb->getQuery()->getResult();
+            return array_reverse($rows);
+        }
+
+        $qb->andWhere('(m.createdAt > :t OR (m.createdAt = :t AND m.id > :id))')
+            ->setParameter('t', $cursorAt)
+            ->setParameter('id', $cursorId)
+            ->orderBy('m.createdAt', 'ASC')
+            ->addOrderBy('m.id', 'ASC');
+
+        return $qb->getQuery()->getResult();
     }
 }

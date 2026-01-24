@@ -20,7 +20,9 @@ const Menu = ({ user, className }: MenuProps) => {
   const [unreadChatCount, setUnreadChatCount] = useState(0);
 
   const receivedCount = stats?.receivedRequests ?? 0;
-  const badgeText = receivedCount > 99 ? "99+" : String(receivedCount);
+  const friendsBadgeText = receivedCount > 99 ? "99+" : String(receivedCount);
+  const messageBadgeText =
+    unreadChatCount > 99 ? "99+" : String(unreadChatCount);
 
   useEffect(() => {
     if (!user) return;
@@ -58,13 +60,13 @@ const Menu = ({ user, className }: MenuProps) => {
               <span className="font-normal">{item.name}</span>
 
               {item.path === ROUTES.FRIENDS && receivedCount > 0 && (
-                <Badge variant="destructive" className="w-4 h-4">
-                  {badgeText}
+                <Badge variant="default" className="w-4 h-4">
+                  {friendsBadgeText}
                 </Badge>
               )}
               {item.path === "/chats" && unreadChatCount > 0 && (
-                <Badge variant="destructive" className="w-4 h-4">
-                  {unreadChatCount}
+                <Badge variant="default" className="w-4 h-4">
+                  {messageBadgeText}
                 </Badge>
               )}
             </Button>

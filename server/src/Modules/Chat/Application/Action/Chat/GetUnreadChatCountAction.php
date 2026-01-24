@@ -14,6 +14,6 @@ final readonly class GetUnreadChatCountAction
 
     public function execute(Uuid $userId): int
     {
-        return $this->messageRepository->countUnreaChatsForUser($userId);
+        return $this->messageRepository->countUnreadChatsForUser($userId);
     }
 }
