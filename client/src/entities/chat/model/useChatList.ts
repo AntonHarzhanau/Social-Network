@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { ChatFilter } from "../api/chat";
 import type { Chat } from "./types";
-import { useInfiniteChats } from "./useInfiniteChats";
+import { useInfiniteChats } from "./hooks/useInfiniteChats";
 
 export function useChatList(filter: ChatFilter) {
   const query = useInfiniteChats(filter);

@@ -14,7 +14,7 @@ import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { useInfiniteScrollSentinel } from "@/shared/hooks/useInfiniteScrollSentinel";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { useState } from "react";
-import { useCreateChatMutation } from "@/entities/chat/model/useCreateChatMutation";
+import { useCreateChatMutation } from "@/entities/chat/model/hooks/useCreateChatMutation";
 import { Input } from "@/shared/components/ui/input";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 

@@ -84,6 +84,8 @@ final class ChatListAssembler
                 $r->lastReadAt ? $r->lastReadAt->format(DATE_ATOM) : null,
                 $lastMessage,
                 $unreadCounts[$r->chatId] ?? 0,
+                $r->lastReadMessageByOther,
+                $r->lastReadAtByOther ? $r->lastReadAtByOther->format(DATE_ATOM) : null,
             );
         }
 

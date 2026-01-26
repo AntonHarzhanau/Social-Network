@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { chatKeys } from "./queryKeys";
-import { fetchChatById } from "../api/chat";
+import { chatKeys } from "../queryKeys";
+import { fetchChatById } from "../../api/chat";
 
 export function useChat(chatId: string) {
   const query = useQuery({

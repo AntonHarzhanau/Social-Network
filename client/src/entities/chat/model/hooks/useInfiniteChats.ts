@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { CHAT_PAGE_SIZE, fetchChats, type ChatFilter } from "../api/chat";
-import { chatKeys } from "./queryKeys";
+import { CHAT_PAGE_SIZE, fetchChats, type ChatFilter } from "../../api/chat";
+import { chatKeys } from "../queryKeys";
 
 export function useInfiniteChats(filter: ChatFilter, limit = CHAT_PAGE_SIZE) {
   return useInfiniteQuery({

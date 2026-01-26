@@ -2,6 +2,7 @@
 
 namespace App\Modules\Chat\Application\DTO;
 
+use App\Modules\Chat\Domain\Entity\ChatParticipant;
 use App\Modules\Chat\Domain\Enum\ChatTypeEnum;
 
 final class ChatListItemRowDTO
@@ -24,5 +25,7 @@ final class ChatListItemRowDTO
         public readonly ?string $lastSenderId,
 
         public readonly ?string $directOtherUserId,
+        public readonly ?string $lastReadMessageByOther,
+        public readonly ?\DateTimeInterface $lastReadAtByOther,
     ) {}
 }

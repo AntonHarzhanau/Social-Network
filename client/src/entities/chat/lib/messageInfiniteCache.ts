@@ -1,6 +1,6 @@
 import type { InfiniteData, QueryClient } from "@tanstack/react-query";
 import type { Message } from "@/entities/chat/model/types";
-import { chatMessageKeys } from "@/entities/chat/model/messageQueryKeys";
+import { chatMessageKeys } from "@/entities/chat/model/hooks/messageQueryKeys";
 
 type MsgInf = InfiniteData<Message[], any>;
 

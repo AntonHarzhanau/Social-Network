@@ -21,6 +21,9 @@ final class ChatListItemDTO
 
         public readonly ?ChatMessagePreviewDTO $lastMessage,
         public readonly int $unreadMessageCount,
+
+        public readonly ?string $lastReadMessageByOther,
+        public readonly ?string $lastReadAtByOther,
     ) {
     }
 }

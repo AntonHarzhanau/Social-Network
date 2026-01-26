@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { useChat } from "@/entities/chat/model/useChat";
+import { useChat } from "@/entities/chat/model/hooks/useChat";
 import type { Chat } from "@/entities/chat/model/types";
-import { useChatMessages } from "@/entities/chat/model/useChatMessages";
+import { useChatMessages } from "@/entities/chat/model/hooks/useChatMessages";
 
 import { useChatRouting } from "@/features/chat/openedChats/lib/useChatRouting";
 import { useOpenedChatsStore } from "@/features/chat/openedChats/model/openedChatsStore";

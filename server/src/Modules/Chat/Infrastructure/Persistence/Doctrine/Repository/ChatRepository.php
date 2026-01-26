@@ -59,7 +59,9 @@ class ChatRepository extends ServiceEntityRepository implements ChatRepositoryIn
                 lm.createdAt,
                 IDENTITY(lm.sender),
 
-                IDENTITY(cpOther.user)
+                IDENTITY(cpOther.user),
+                IDENTITY(cpOther.lastReadMessage),
+                cpOther.lastReadAt
             )',
                 ChatListItemRowDTO::class
             ))

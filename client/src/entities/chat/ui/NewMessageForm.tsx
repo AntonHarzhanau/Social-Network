@@ -47,6 +47,7 @@ const NewMessageForm = ({
         onChange={(e) => setMessage(e.target.value)}
         placeholder="Type your message..."
         className="flex-1 shadow-sm"
+        autoComplete="off"
       />
       <Button
         type="submit"
