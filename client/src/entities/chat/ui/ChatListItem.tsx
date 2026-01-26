@@ -22,7 +22,7 @@ const ChatListItem = ({ chat }: ChatListItemProps) => {
     >
       <Link
         to={`/chats/${chat.id}`}
-        onClick={() => openChat(chat)}
+        onClick={() => openChat(chat.id)}
         className="flex items-center gap-2 min-w-0"
       >
         <Avatar
@@ -40,6 +40,7 @@ const ChatListItem = ({ chat }: ChatListItemProps) => {
               <Badge variant="outline">{chat.unreadMessageCount}</Badge>
             </div>
           </div>
+
           <p className="text-sm text-muted-foreground truncate">
             {chat.lastMessage?.content}
           </p>

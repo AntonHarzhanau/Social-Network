@@ -10,6 +10,7 @@ use App\Modules\Chat\Application\Action\Chat\GetChatMessages;
 use App\Modules\Chat\Application\Action\Chat\GetUnreadChatCountAction;
 use App\Modules\Chat\Application\Action\Chat\MarkChatReadAction;
 use App\Modules\Chat\Application\Action\Chat\RemoveUserFromChat;
+use App\Modules\Chat\Application\Action\Chat\UpdateChatInfo;
 use App\Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
 use App\Modules\Chat\Infrastructure\Http\Request\MarkChatReadRequest;
 use App\Modules\User\Domain\Entity\User;
@@ -77,12 +78,25 @@ final class ChatController extends AbstractController
     }
 
 
-    #[Route('', name: 'update_chat', methods: ['PUT'], format: 'json')]
-    public function update(): JsonResponse
+    #[Route('/{chatId}', name: 'update_chat', methods: ['PUT'], format: 'json')]
+    public function update(
+        string $chatId,
+        #[CurrentUser] User $currentUser,
+        Request $request,
+        UpdateChatInfo $updateChatInfo
+    ): JsonResponse
     {
+        $avatarId = $request->request->get('avatarId');
+        $chatName = $request->request->get('chatName');
+        $updateChatInfo->execute(
+            Uuid::fromString($chatId),
+            $currentUser->getId(),
+            $avatarId !== null ? Uuid::fromString($avatarId) : null,
+            $chatName
+        );
         return $this->json([
-            'error' => 'Not implemented yet',
-        ], JsonResponse::HTTP_NOT_IMPLEMENTED);
+            'message' => 'Chat updated successfully',
+        ], JsonResponse::HTTP_OK);
     }
 
     #[Route('', name: 'delete_chat', methods: ['DELETE'], format: 'json')]

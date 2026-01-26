@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\SocialGraph\Infrastructure\Listner;
+namespace App\Modules\SocialGraph\Infrastructure\Listener;
 
 use App\Modules\Notification\Application\Message\CreateFriendRequestNotification;
 use App\Modules\SocialGraph\Application\Event\FriendRequestSent;

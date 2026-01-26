@@ -26,6 +26,7 @@ type NotificationCreatedEvent = {
 };
 
 const FRIEND_REQUEST_TYPE = "FRIEND_REQUEST_CREATED";
+const FRIEND_REQUEST_ACCEPTED_TYPE = "FRIEND_REQUEST_ACCEPTED";
 
 export function NotificationsMercureBridge() {
   const userId = sessionStore((s) => s.user?.id);
@@ -35,6 +36,11 @@ export function NotificationsMercureBridge() {
 
   const openReceivedRequests = () => {
     setFilter("received");
+    navigate(ROUTES.FRIENDS);
+  };
+
+  const openAllFriends = () => {
+    setFilter("all");
     navigate(ROUTES.FRIENDS);
   };
 
@@ -63,6 +69,27 @@ export function NotificationsMercureBridge() {
         // toast с action, ведущим на страницу заявок
         toast(payload.notification.text, {
           action: { label: "Open", onClick: openReceivedRequests },
+        });
+
+        return;
+      }
+
+      if (payload.notification.type === FRIEND_REQUEST_ACCEPTED_TYPE) {
+        queryClient.setQueryData<MyFriendsStats>(
+          friendsQueryKeys.stats.me(),
+          (old) => {
+            const base = old ?? {
+              total: 0,
+              sentRequests: 0,
+              receivedRequests: 0,
+            };
+            return { ...base, total: base.total + 1 };
+          },
+        );
+
+        // toast с action, ведущим на страницу всех друзей
+        toast(payload.notification.text, {
+          action: { label: "Open", onClick: openAllFriends },
         });
 
         return;

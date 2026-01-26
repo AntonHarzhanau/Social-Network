@@ -2,7 +2,9 @@
 
 namespace App\Modules\Chat\Infrastructure\Persistence\Doctrine\Repository;
 
+use App\Modules\Chat\Application\DTO\ChatListItemRowDTO;
 use App\Modules\Chat\Domain\Entity\Chat;
+use App\Modules\Chat\Domain\Enum\ChatTypeEnum;
 use App\Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
@@ -20,33 +22,54 @@ class ChatRepository extends ServiceEntityRepository implements ChatRepositoryIn
     }
 
     public function findUserChatsWithLastMessage(
-        Uuid $user,
+        Uuid $userId,
         int $page = 1,
         int $limit = 10
     ): array {
         $offset = ($page - 1) * $limit;
 
         $qb = $this->createQueryBuilder('c')
-
             ->innerJoin('c.chatParticipants', 'cpCurrent', 'WITH', 'cpCurrent.user = :user')
-            ->setParameter('user', $user)
-            ->leftJoin('cpCurrent.lastReadMessage', 'lrm')
             ->leftJoin('c.lastMessage', 'lm')
-            ->leftJoin('lm.sender', 'lmSender')
+            ->leftJoin(
+                'c.chatParticipants',
+                'cpOther',
+                'WITH',
+                'c.type = :directType AND cpOther.user != :user'
+            )
+            ->setParameter('user', $userId)
+            ->setParameter('directType', ChatTypeEnum::DIRECT->value)
 
-            ->addSelect('PARTIAL c.{id, type, title, avatarUrl, createdAt, updatedAt}')
-            ->addSelect('PARTIAL cpCurrent.{id, lastReadAt, joinedAt}')
-            ->addSelect('PARTIAL lrm.{id}')
-            ->addSelect('PARTIAL lm.{id, content, createdAt}')
-            ->addSelect('PARTIAL lmSender.{id, username, avatarUrl}')
+            ->select(\sprintf(
+                'NEW %s(
+                c.id,
+                c.type,
+                c.title,
+                c.avatarUrl,
 
-            ->orderBy('lm.createdAt', 'DESC')
+                c.createdAt,
+                c.updatedAt,
+
+                IDENTITY(cpCurrent.lastReadMessage),
+                cpCurrent.lastReadAt,
+
+                lm.id,
+                lm.content,
+                lm.createdAt,
+                IDENTITY(lm.sender),
+
+                IDENTITY(cpOther.user)
+            )',
+                ChatListItemRowDTO::class
+            ))
+            ->addSelect('COALESCE(lm.createdAt, c.createdAt) AS HIDDEN sortDate')
+            ->orderBy('sortDate', 'DESC')
             ->addOrderBy('c.createdAt', 'DESC')
             ->setFirstResult($offset)
             ->setMaxResults($limit);
-        $chats = $qb->getQuery()->getResult();
-
-        return $chats;
+        $result = $qb->getQuery()->getResult();
+        
+        return $result;
     }
 
     public function save(Chat $chat): void

@@ -70,6 +70,5 @@ export const markMessagesAsRead = async (
 
 export const getUnreadChatCount = async (): Promise<number> => {
   const response = await apiClient.get(`/chats/unread-summary`);
-  console.log("response", response);
   return response.data;
 };

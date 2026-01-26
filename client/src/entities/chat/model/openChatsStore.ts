@@ -1,31 +1,28 @@
-import type { Chat } from "@/entities/chat/model/types";
 import { create } from "zustand";
 
 interface OpenChatsState {
-  openChats: Chat[];
-  openChat: (chat: Chat) => void;
+  openChatIds: string[];
+  openChat: (chatId: string) => void;
   closeChat: (chatId: string) => void;
-  setOpenChats: (chats: Chat[]) => void;
+  setOpenChats: (chatIds: string[]) => void;
   reset: () => void;
 }
 
-export const useOpenChatsStore = create<OpenChatsState>(
-    (set) => ({
-      openChats: [],
-      reset: () => set({ openChats: [] }),
-      openChat: (chat) =>
-        set((s) => {
-          if (s.openChats.some((c) => c.id === chat.id)) {
-            return s;
-          }
-          return { openChats: [...s.openChats, chat] };
-        }),
+export const useOpenChatsStore = create<OpenChatsState>((set) => ({
+  openChatIds: [],
 
-      closeChat: (chatId) =>
-        set((s) => ({
-          openChats: s.openChats.filter((c) => c.id !== chatId),
-        })),
+  reset: () => set({ openChatIds: [] }),
 
-      setOpenChats: (chats) => set({ openChats: chats }),
+  openChat: (chatId) =>
+    set((s) => {
+      if (s.openChatIds.includes(chatId)) return s;
+      return { openChatIds: [...s.openChatIds, chatId] };
     }),
-);
+
+  closeChat: (chatId) =>
+    set((s) => ({
+      openChatIds: s.openChatIds.filter((id) => id !== chatId),
+    })),
+
+  setOpenChats: (chatIds) => set({ openChatIds: chatIds }),
+}));

@@ -2,6 +2,7 @@
 
 namespace App\Modules\Chat\Application\Action\Chat;
 
+use App\Modules\Chat\Application\DTO\ReadMessageResponse;
 use App\Modules\Chat\Domain\Repository\ChatParticipantRepositoryInterface;
 use App\Modules\Chat\Domain\Repository\MessageRepositoryInterface;
 use App\Modules\Chat\Domain\Entity\Message;
@@ -20,9 +21,9 @@ final class MarkChatReadAction
         Uuid $chatId,
         Uuid $userId,
         ?Uuid $lastReadMessageId = null
-    ): void {
+    ): ReadMessageResponse|null {
         if ($lastReadMessageId === null) {
-            return;
+            return null;
         }
 
         $participant = $this->chatParticipantRepository->findOneBy([
@@ -46,12 +47,16 @@ final class MarkChatReadAction
 
         $lastReadMessage = $participant->getLastReadMessage();
 
-        // dd($participant, $message, $lastReadMessage);
         if ($lastReadMessage === null || $message->getCreatedAt() > $lastReadMessage->getCreatedAt()) {
             $participant->setLastReadMessage($message);
             $participant->setLastReadAt($message->getCreatedAt());
             $this->chatParticipantRepository->save($participant);
         }
 
+        return new ReadMessageResponse(
+            lastReadMessageId: $message->getId()->toRfc4122(),
+            lastReadAt: $participant->getLastReadAt()->format(DATE_ATOM),
+            chatId: $chatId->toRfc4122(),
+        );
     }
 }
