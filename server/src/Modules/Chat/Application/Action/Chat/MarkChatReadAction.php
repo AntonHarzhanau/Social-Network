@@ -3,9 +3,11 @@
 namespace App\Modules\Chat\Application\Action\Chat;
 
 use App\Modules\Chat\Application\DTO\ReadMessageResponse;
+use App\Modules\Chat\Domain\Event\ChatRead;
 use App\Modules\Chat\Domain\Repository\ChatParticipantRepositoryInterface;
 use App\Modules\Chat\Domain\Repository\MessageRepositoryInterface;
 use App\Modules\Chat\Domain\Entity\Message;
+use App\Modules\Shared\Application\Port\EventBusInterface;
 use Symfony\Component\Uid\Uuid;
 
 
@@ -14,6 +16,7 @@ final class MarkChatReadAction
     public function __construct(
         private readonly ChatParticipantRepositoryInterface $chatParticipantRepository,
         private readonly MessageRepositoryInterface $messageRepository,
+        private readonly EventBusInterface $eventBus,
     ) {
     }
 
@@ -51,6 +54,13 @@ final class MarkChatReadAction
             $participant->setLastReadMessage($message);
             $participant->setLastReadAt($message->getCreatedAt());
             $this->chatParticipantRepository->save($participant);
+
+            $this->eventBus->dispatch(new ChatRead(
+                chatId: $chatId->toRfc4122(),
+                readerId: $userId->toRfc4122(),
+                lastReadAt: $message->getCreatedAt(),
+                lastReadMessageId: $message->getId()->toRfc4122(),
+            ));
         }
 
         return new ReadMessageResponse(

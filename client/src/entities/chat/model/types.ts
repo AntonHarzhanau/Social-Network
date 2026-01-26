@@ -19,6 +19,8 @@ export interface Chat {
   lastReadAt?: string | null;
   lastReadMessageId?: string | null;
   unreadMessageCount: number;
+  lastReadMessageByOther?: string | null;
+  lastReadAtByOther?: string | null;
 }
 
 export interface CreateDirectChatParams {
@@ -29,4 +31,10 @@ export interface CreateDirectChatParams {
 export type ChatMercureEvent =
   | { type: "message_created"; message: Message }
   | { type: "message_updated"; messageId: string; message: Message }
-  | { type: "message_deleted"; messageId: string };
+  | { type: "message_deleted"; messageId: string }
+  | {
+      type: "chat_read";
+      userId: string;
+      lastReadAt: string;
+      lastReadMessageId: string | null;
+    };

@@ -57,8 +57,9 @@ function sortAscStable(arr: Message[]) {
 export function useChatMessages(params: {
   chat: Chat | undefined;
   pageSize: number;
+  currentUserId?: string;
 }) {
-  const { chat, pageSize } = params;
+  const { chat, pageSize, currentUserId } = params;
   const qc = useQueryClient();
 
   const queuedReadIdRef = useRef<string | null>(null);
@@ -135,7 +136,7 @@ export function useChatMessages(params: {
     queryKey: chatMessageKeys.byChat(chat?.id ?? "__disabled__"),
     initialPageParam: { kind: "initial" },
     staleTime: Infinity,
-    gcTime: 60 * 60 * 1000, // 1 час, либо больше
+    gcTime: 60 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchOnMount: false,
@@ -179,8 +180,13 @@ export function useChatMessages(params: {
     return sortAscStable(Array.from(byId.values()));
   }, [query.data?.pages]);
 
+  /**
+   * unreadSet: только сообщения НЕ текущего пользователя.
+   * Порог — lastReadAt (или дата сообщения lastReadMessageId, если lastReadAt = null).
+   */
   const unreadSet = useMemo(() => {
     if (!chat) return new Set<string>();
+    if (!currentUserId) return new Set<string>();
 
     let thresholdIso: string | null = chat.lastReadAt ?? null;
 
@@ -195,10 +201,14 @@ export function useChatMessages(params: {
     const s = new Set<string>();
 
     for (const m of messages) {
+      // КЛЮЧЕВОЕ: мои сообщения не считаем unread
+      if (m.sender.id === currentUserId) continue;
+
       if (new Date(m.createdAt).getTime() > t) s.add(m.id);
     }
+
     return s;
-  }, [chat, messages]);
+  }, [chat, messages, currentUserId]);
 
   return { query, messages, unreadSet, markReadUpTo };
 }

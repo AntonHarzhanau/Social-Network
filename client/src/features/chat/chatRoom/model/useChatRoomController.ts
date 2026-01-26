@@ -49,6 +49,7 @@ export function useChatRoomController(params: {
   const { query, messages, unreadSet, markReadUpTo } = useChatMessages({
     chat,
     pageSize: params.pageSize,
+    currentUserId,
   });
 
   const { messagesRef, unreadRef, queryRef } = useLatestMessageRefs({

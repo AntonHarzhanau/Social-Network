@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import type { ChatMercureEvent } from "@/entities/chat/model/types";
+import type { Chat, ChatMercureEvent } from "@/entities/chat/model/types";
 import { chatKeys } from "@/entities/chat/model/queryKeys";
 import { useMercure } from "@/shared/hooks/useMercure";
 import { topics } from "@/shared/constants/topics";
@@ -69,6 +69,24 @@ export function useChatMercure(params: {
           invalidateChatLists(qc);
           removeMessageFromCache(qc, params.chatId, evt.messageId);
           return;
+
+        case "chat_read": {
+          if (evt.userId === params.currentUserId) return;
+
+          qc.setQueryData<Chat>(chatKeys.byId(params.chatId), (prev) => {
+            if (!prev) return prev;
+            if (prev.type !== "direct") return prev;
+
+            return {
+              ...prev,
+              lastReadAtByOther: evt.lastReadAt,
+              lastReadMessageByOther: evt.lastReadMessageId,
+            };
+          });
+
+          invalidateChatLists(qc);
+          return;
+        }
 
         default:
           invalidateChatLists(qc);

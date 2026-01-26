@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "@/shared/lib/utils";
 import type { Message } from "@/entities/chat/model/types";
 import { Avatar } from "@/shared/components/Avatar";
-import { CheckCheck } from "lucide-react";
+import { Check, CheckCheck } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -15,18 +15,33 @@ import { deleteMessage } from "../api/chat";
 export function ChatMessageRow(props: {
   message: Message;
   isMine: boolean;
+
+  // unread относительно ТЕКУЩЕГО пользователя (т.е. "я не прочитал")
   isUnread: boolean;
+
+  // NEW: показывать ли read-receipt (обычно: direct + isMine)
+  showReadMark?: boolean;
+
+  // NEW: прочитал ли собеседник моё сообщение
   isReadByOther?: boolean;
+
   onEdit?: (messageId: string) => void;
 }) {
-  const { message, isMine, isUnread, isReadByOther, onEdit } = props;
+  const {
+    message,
+    isMine,
+    isUnread,
+    showReadMark = false,
+    isReadByOther = false,
+    onEdit,
+  } = props;
 
   const onDelete = async (messageId: string) => {
     await deleteMessage(messageId);
   };
 
   const d = new Date(message.createdAt);
-  const time = d.toISOString().slice(11, 16); // "15:48" (UTC)
+  const time = d.toISOString().slice(11, 16);
 
   const [open, setOpen] = React.useState(false);
 
@@ -35,6 +50,11 @@ export function ChatMessageRow(props: {
       className={cn(
         "w-full px-2 py-1 mb-2",
         "flex gap-2 justify-start rounded-md",
+
+        // фон темнее для непрочитанных входящих
+        !isMine && isUnread && "bg-muted ring-1 ring-border",
+
+        // поведение для моих сообщений (контекстное меню)
         isMine && "cursor-pointer",
         isMine && open && "bg-muted ring-1 ring-border",
         isMine && !open && "hover:bg-muted/50",
@@ -58,23 +78,21 @@ export function ChatMessageRow(props: {
 
       <div className="flex flex-col ml-auto">
         <div className="flex gap-1 items-center">
-          {isMine ? (
-            <CheckCheck
-              size={16}
-              strokeWidth={1}
-              className={cn(isReadByOther ? "text-blue-500" : "text-gray-400")}
-            />
+          {showReadMark ? (
+            isReadByOther ? (
+              <CheckCheck size={16} strokeWidth={1} className="text-blue-500" />
+            ) : (
+              <Check size={16} strokeWidth={1} className="text-gray-400" />
+            )
           ) : null}
 
-          {/* isUnread оставляю как есть — у тебя он используется для подсветки/логики,
-              но на UI для чужих сообщений обычно лучше выделять фон, а не чек.
-              Если хочешь — можно применить isUnread к фону строки. */}
           <p className="text-xs text-muted-foreground">{time}</p>
         </div>
       </div>
     </div>
   );
 
+  // меню — только для моих сообщений
   if (!isMine || !message.id) return Row;
 
   return (

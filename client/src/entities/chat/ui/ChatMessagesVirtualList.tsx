@@ -1,8 +1,34 @@
 import { CardContent } from "@/shared/components/ui/card";
-import type { Message } from "@/entities/chat/model/types";
+import type { Chat, Message } from "@/entities/chat/model/types";
 import type { VirtualItem } from "@tanstack/react-virtual";
 
 import { ChatMessageRow } from "./ChatMessageRow";
+
+function isReadByOtherCursor(
+  msg: Message,
+  cursorAt: string | null | undefined,
+  cursorId: string | null | undefined,
+) {
+  if (!cursorAt && !cursorId) return false;
+
+  // Основной критерий — по времени
+  if (cursorAt) {
+    const mt = new Date(msg.createdAt).getTime();
+    const ct = new Date(cursorAt).getTime();
+
+    if (mt < ct) return true;
+    if (mt > ct) return false;
+
+    // tie-break: одинаковая секунда/миллисекунда
+    if (cursorId) return msg.id <= cursorId;
+    return true;
+  }
+
+  // fallback только по id (работает корректно, если id монотонный по времени, как UUIDv7)
+  if (cursorId) return msg.id <= cursorId;
+
+  return false;
+}
 
 export function ChatMessagesVirtualList(props: {
   parentRef: React.RefObject<HTMLDivElement | null>;
@@ -15,6 +41,11 @@ export function ChatMessagesVirtualList(props: {
   messages: Message[];
   unreadSet: Set<string>;
   currentUserId?: string;
+
+  // NEW
+  chatType: Chat["type"];
+  lastReadAtByOther?: string | null;
+  lastReadMessageByOther?: string | null;
 }) {
   const {
     parentRef,
@@ -25,6 +56,9 @@ export function ChatMessagesVirtualList(props: {
     messages,
     unreadSet,
     currentUserId,
+    chatType,
+    lastReadAtByOther,
+    lastReadMessageByOther,
   } = props;
 
   return (
@@ -36,19 +70,24 @@ export function ChatMessagesVirtualList(props: {
           </div>
         )}
 
-        <div
-          style={{
-            height: totalSize,
-            width: "100%",
-            position: "relative",
-          }}
-        >
+        <div style={{ height: totalSize, width: "100%", position: "relative" }}>
           {virtualItems.map((v) => {
             const msg = messages[v.index];
             if (!msg) return null;
 
             const isMine = !!currentUserId && msg.sender.id === currentUserId;
             const isUnread = unreadSet.has(msg.id);
+
+            // read-receipts показываем только на МОИХ сообщениях в direct
+            const showReadMark = chatType === "direct" && isMine;
+
+            const readByOther =
+              showReadMark &&
+              isReadByOtherCursor(
+                msg,
+                lastReadAtByOther,
+                lastReadMessageByOther,
+              );
 
             return (
               <div
@@ -67,6 +106,8 @@ export function ChatMessagesVirtualList(props: {
                   message={msg}
                   isMine={isMine}
                   isUnread={isUnread}
+                  showReadMark={showReadMark}
+                  isReadByOther={!!readByOther}
                 />
               </div>
             );

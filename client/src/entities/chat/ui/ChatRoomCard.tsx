@@ -38,6 +38,9 @@ export default function ChatRoomCard(props: { chatId: string }) {
         messages={c.messages}
         unreadSet={c.unreadSet}
         currentUserId={c.currentUserId}
+        chatType={c.chat.type}
+        lastReadAtByOther={c.chat.lastReadAtByOther}
+        lastReadMessageByOther={c.chat.lastReadMessageByOther}
       />
 
       <ChatJumpControls
