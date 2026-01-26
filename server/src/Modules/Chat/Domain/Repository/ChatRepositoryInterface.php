@@ -10,7 +10,8 @@ interface ChatRepositoryInterface
     public function findUserChatsWithLastMessage(
         Uuid $user,
         int $page = 1,
-        int $limit = 10
+        int $limit = 10,
+        bool $unreadOnly = false
     ): array;
     
     public function findById(Uuid $chatId): ?Chat;

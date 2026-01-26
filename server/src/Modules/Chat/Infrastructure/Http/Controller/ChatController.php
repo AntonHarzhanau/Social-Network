@@ -56,8 +56,9 @@ final class ChatController extends AbstractController
 
         $page = max(1, (int) $request->query->get('page', 1));
         $limit = max(1, (int) $request->query->get('limit', 10));
+        $isUnreadOnly = $request->query->get('filter', 'all') === 'unread' ? true : false;
 
-        $dto = $getChatList($user->getId(), $page, $limit);
+        $dto = $getChatList($user->getId(), $page, $limit, $isUnreadOnly);
 
         return $this->json(
             $dto,
@@ -144,13 +145,13 @@ final class ChatController extends AbstractController
         MarkChatReadAction $action,
     ): JsonResponse {
 
-        $action->execute(
+        $response = $action->execute(
             Uuid::fromString($chatId),
             $currentUser->getId(),
             $data->lastReadMessageId ? Uuid::fromString($data->lastReadMessageId) : null
         );
 
-        return $this->json(JsonResponse::HTTP_OK);
+        return $this->json($response, JsonResponse::HTTP_OK);
     }
 
     #[Route('/{chatId}/messages', name: 'chat_messages', methods: ['GET'], format: 'json')]

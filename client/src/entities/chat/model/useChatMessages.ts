@@ -1,115 +1,204 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-
-import type { Message } from "@/entities/chat/model/types";
-import { fetchMessages } from "@/entities/chat/api/chat";
+import { useCallback, useMemo, useRef } from "react";
 import {
-  useInfiniteMessages,
-  MESSAGES_PAGE_SIZE,
-} from "@/entities/chat/model/useChat";
-import { messageKeys } from "@/entities/message/model/queryKeys";
+  useInfiniteQuery,
+  type InfiniteData,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 
-import {
-  addMessageToInfinite,
-  prependTailPage,
-  removeMessageFromInfinite,
-  type MessagesInfinite,
-} from "@/shared/lib/messagesCache";
+import type { Chat, Message } from "@/entities/chat/model/types";
+import { fetchMessages, markMessagesAsRead } from "@/entities/chat/api/chat";
+import { chatKeys } from "@/entities/chat/model/queryKeys";
+import { chatMessageKeys } from "@/entities/chat/model/messageQueryKeys";
 
-import { useMercure } from "@/shared/hooks/useMercure";
+export type PageParam =
+  | { kind: "initial" }
+  | { kind: "before"; messageId: string };
 
-type ChatMercureEvent =
-  | { type: "message_created"; message: Message & { chatId: string } }
-  | { type: "message_deleted"; messageId: string };
+export type MarkReadResponse = {
+  lastReadMessageId: string;
+  lastReadAt: string;
+  chatId: string;
+};
 
-function toMs(iso: string) {
-  return new Date(iso).getTime();
-}
+type MsgInf = InfiniteData<Message[], PageParam>;
+type MessagesKey = ReturnType<typeof chatMessageKeys.byChat>;
 
-function normalizeAsc(page: Message[]): Message[] {
-  if (page.length <= 1) return page;
-  const a = toMs(page[0].createdAt);
-  const b = toMs(page[page.length - 1].createdAt);
-  if (a > b) return [...page].reverse();
-  if (a < b) return page;
-  return [...page].sort((x, y) => {
-    const d = toMs(x.createdAt) - toMs(y.createdAt);
-    if (d !== 0) return d;
-    return x.id.localeCompare(y.id);
+function invalidateChatLists(qc: ReturnType<typeof useQueryClient>) {
+  qc.invalidateQueries({
+    predicate: (q) =>
+      Array.isArray(q.queryKey) &&
+      q.queryKey[0] === chatKeys.all[0] &&
+      q.queryKey[1] === "list",
   });
 }
 
-export const useChatMessages = (
-  chatId: string,
-  initialAnchorId: string | null,
-) => {
-  const queryClient = useQueryClient();
+function getOldestId(page: Message[]) {
+  if (!page.length) return undefined;
+  let best = page[0];
+  for (let i = 1; i < page.length; i++) {
+    const m = page[i];
+    if (new Date(m.createdAt).getTime() < new Date(best.createdAt).getTime()) {
+      best = m;
+    }
+  }
+  return best.id;
+}
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteMessages(chatId, initialAnchorId);
+function sortAscStable(arr: Message[]) {
+  return arr.slice().sort((a, b) => {
+    const ta = new Date(a.createdAt).getTime();
+    const tb = new Date(b.createdAt).getTime();
+    if (ta !== tb) return ta - tb;
+    return a.id.localeCompare(b.id);
+  });
+}
 
-  const tailEnsuredRef = useRef(false);
+export function useChatMessages(params: {
+  chat: Chat | undefined;
+  pageSize: number;
+}) {
+  const { chat, pageSize } = params;
+  const qc = useQueryClient();
 
-  useEffect(() => {
-    if (!initialAnchorId) return;
-    if (!data) return;
-    if (tailEnsuredRef.current) return;
+  const queuedReadIdRef = useRef<string | null>(null);
+  const lastSentReadIdRef = useRef<string | null>(null);
 
-    tailEnsuredRef.current = true;
+  const markReadMutation = useMutation({
+    mutationFn: (payload: { chatId: string; lastReadMessageId: string }) =>
+      markMessagesAsRead(
+        payload.chatId,
+        payload.lastReadMessageId,
+      ) as Promise<MarkReadResponse>,
 
-    fetchMessages(chatId, { limit: MESSAGES_PAGE_SIZE })
-      .then((tail) => {
-        queryClient.setQueryData<MessagesInfinite>(
-          messageKeys.list(chatId),
-          (old) => prependTailPage(old, normalizeAsc(tail)),
-        );
-      })
-      .catch(console.error);
-  }, [chatId, initialAnchorId, data, queryClient]);
+    onSuccess: (res) => {
+      qc.setQueryData<Chat>(chatKeys.byId(res.chatId), (prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          lastReadMessageId: res.lastReadMessageId,
+          lastReadAt: res.lastReadAt,
+          unreadMessageCount: 0,
+        };
+      });
 
-  const handleMercureMessage = useCallback(
-    (payload: ChatMercureEvent) => {
-      if (payload.type === "message_created") {
-        queryClient.setQueryData<MessagesInfinite>(
-          messageKeys.list(chatId),
-          (oldData) => addMessageToInfinite(oldData, payload.message),
-        );
+      invalidateChatLists(qc);
+      lastSentReadIdRef.current = res.lastReadMessageId;
+    },
+
+    onSettled: () => {
+      if (!chat?.id) return;
+      const nextId = queuedReadIdRef.current;
+      if (!nextId) return;
+
+      if (nextId === lastSentReadIdRef.current) {
+        queuedReadIdRef.current = null;
+        return;
       }
 
-      if (payload.type === "message_deleted") {
-        queryClient.setQueryData<MessagesInfinite>(
-          messageKeys.list(chatId),
-          (oldData) => removeMessageFromInfinite(oldData, payload.messageId),
-        );
+      queuedReadIdRef.current = null;
+      markReadMutation.mutate({ chatId: chat.id, lastReadMessageId: nextId });
+    },
+  });
+
+  const markReadUpTo = useCallback(
+    (messageId: string) => {
+      if (!chat?.id) return;
+      if (messageId === lastSentReadIdRef.current) return;
+
+      queuedReadIdRef.current = messageId;
+
+      if (!markReadMutation.isPending) {
+        const next = queuedReadIdRef.current;
+        if (!next) return;
+
+        if (next === lastSentReadIdRef.current) {
+          queuedReadIdRef.current = null;
+          return;
+        }
+
+        queuedReadIdRef.current = null;
+        markReadMutation.mutate({ chatId: chat.id, lastReadMessageId: next });
       }
     },
-    [chatId, queryClient],
+    [chat?.id, markReadMutation],
   );
 
-  useMercure<ChatMercureEvent>({
-    topic: `https://social-network.local/chats/${chatId}`,
-    onMessage: handleMercureMessage,
-    enable: !!chatId,
+  const query = useInfiniteQuery<
+    Message[],
+    Error,
+    MsgInf,
+    MessagesKey,
+    PageParam
+  >({
+    enabled: !!chat?.id,
+    queryKey: chatMessageKeys.byChat(chat?.id ?? "__disabled__"),
+    initialPageParam: { kind: "initial" },
+    staleTime: Infinity,
+    gcTime: 60 * 60 * 1000, // 1 час, либо больше
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+    placeholderData: (prev) => prev,
+
+    queryFn: async ({ pageParam }) => {
+      if (!chat) return [];
+
+      if (pageParam.kind === "initial") {
+        return fetchMessages(chat.id, { limit: pageSize });
+      }
+
+      return fetchMessages(chat.id, {
+        mode: "before",
+        messageId: pageParam.messageId,
+        limit: pageSize,
+      });
+    },
+
+    getPreviousPageParam: (firstPage) => {
+      if (!firstPage?.length) return undefined;
+      if (firstPage.length < pageSize) return undefined;
+
+      const oldestId = getOldestId(firstPage);
+      if (!oldestId) return undefined;
+
+      return { kind: "before", messageId: oldestId };
+    },
+
+    getNextPageParam: () => undefined,
   });
 
   const messages = useMemo(() => {
-    const pages = data?.pages ?? [];
-    const flat = [...pages].reverse().flat();
+    const pages = query.data?.pages ?? [];
+    const byId = new Map<string, Message>();
 
-    const seen = new Set<string>();
-    const out: Message[] = [];
-    for (const m of flat) {
-      if (seen.has(m.id)) continue;
-      seen.add(m.id);
-      out.push(m);
+    for (const p of pages) {
+      for (const m of p) byId.set(m.id, m);
     }
-    return out;
-  }, [data]);
 
-  return {
-    messages,
-    fetchNextPage,
-    hasNextPage: !!hasNextPage,
-    isFetchingNextPage,
-  };
-};
+    return sortAscStable(Array.from(byId.values()));
+  }, [query.data?.pages]);
+
+  const unreadSet = useMemo(() => {
+    if (!chat) return new Set<string>();
+
+    let thresholdIso: string | null = chat.lastReadAt ?? null;
+
+    if (!thresholdIso && chat.lastReadMessageId) {
+      const anchor = messages.find((m) => m.id === chat.lastReadMessageId);
+      thresholdIso = anchor?.createdAt ?? null;
+    }
+
+    if (!thresholdIso) return new Set<string>();
+
+    const t = new Date(thresholdIso).getTime();
+    const s = new Set<string>();
+
+    for (const m of messages) {
+      if (new Date(m.createdAt).getTime() > t) s.add(m.id);
+    }
+    return s;
+  }, [chat, messages]);
+
+  return { query, messages, unreadSet, markReadUpTo };
+}

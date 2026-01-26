@@ -1,11 +1,4 @@
-import { useEffect } from "react";
-
-const TOPIC_BASE = import.meta.env.VITE_TOPIC_BASE;
-
-export const topics = {
-  userNotifications: (userId: string) =>
-    `${TOPIC_BASE}/users/${userId}/notifications`,
-};
+import { useEffect, useRef } from "react";
 
 const MERCURE_URL =
   import.meta.env.VITE_MERCURE_URL ||
@@ -14,7 +7,7 @@ const MERCURE_URL =
 interface UseMercureOptions<TPayload = unknown> {
   topic: string;
   onMessage: (data: TPayload, event: MessageEvent) => void;
-  parse?: (data: MessageEvent) => TPayload;
+  parse?: (event: MessageEvent) => TPayload;
   onError?: (error: Event) => void;
   enable?: boolean;
 }
@@ -26,13 +19,21 @@ export const useMercure = <TPayload = unknown>({
   onError,
   enable = true,
 }: UseMercureOptions<TPayload>) => {
+  const onMessageRef = useRef(onMessage);
+  const parseRef = useRef(parse);
+  const onErrorRef = useRef(onError);
+
   useEffect(() => {
-    if (!enable || !topic || !onMessage) {
-      return;
-    }
+    onMessageRef.current = onMessage;
+    parseRef.current = parse;
+    onErrorRef.current = onError;
+  }, [onMessage, parse, onError]);
+
+  useEffect(() => {
+    if (!enable || !topic) return;
 
     const url = new URL(MERCURE_URL);
-    url.searchParams.append("topic", topic);
+    url.searchParams.set("topic", topic);
 
     const eventSource = new EventSource(url.toString(), {
       withCredentials: true,
@@ -44,25 +45,25 @@ export const useMercure = <TPayload = unknown>({
 
     eventSource.onmessage = (event) => {
       try {
-        console.log("Mercure message received:", event);
-        const data = parse
-          ? parse(event)
+        const parser = parseRef.current;
+        const data = parser
+          ? parser(event)
           : (JSON.parse(event.data) as TPayload);
 
-        onMessage(data, event);
-      } catch (error) {
-        console.error("Error parsing Mercure message:", error);
+        onMessageRef.current(data, event);
+      } catch (e) {
+        console.error("Mercure parse error:", e);
       }
     };
 
     eventSource.onerror = (err) => {
       console.error("Mercure error:", err);
-      onError?.(err);
+      onErrorRef.current?.(err);
     };
 
     return () => {
       eventSource.close();
       console.log("Mercure connection closed:", url.toString());
     };
-  }, [topic, enable, onMessage, parse, onError]);
+  }, [topic, enable]);
 };

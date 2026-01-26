@@ -1,5 +1,5 @@
-import { useChatUiStore } from "@/entities/chat/model/chatUiStore";
-import { useOpenChatsStore } from "@/entities/chat/model/openChatsStore";
+// import { useChatUiStore } from "@/entities/chat/model/chatUiStore";
+// import { useOpenChatsStore } from "@/entities/chat/model/openChatsStore";
 import { sessionStore } from "@/entities/session/model/sessionStore";
 import { authApi } from "@/features/auth/api/authApi";
 import type { LoginFormSchema } from "@/features/auth/model/loginFormSchema";
@@ -8,8 +8,8 @@ import { clearToken, getToken, setToken } from "@/shared/api/tokenStorage";
 import { queryClient } from "@/shared/lib/queryClient";
 
 const resetAppState = () => {
-  useOpenChatsStore.getState().reset();
-  useChatUiStore.getState().reset();
+  //   useOpenChatsStore.getState().reset();
+  //   useChatUiStore.getState().reset();
   queryClient.clear();
 };
 

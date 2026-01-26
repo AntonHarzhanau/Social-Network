@@ -24,7 +24,8 @@ class ChatRepository extends ServiceEntityRepository implements ChatRepositoryIn
     public function findUserChatsWithLastMessage(
         Uuid $userId,
         int $page = 1,
-        int $limit = 10
+        int $limit = 10,
+        bool $unreadOnly = false
     ): array {
         $offset = ($page - 1) * $limit;
 
@@ -67,8 +68,14 @@ class ChatRepository extends ServiceEntityRepository implements ChatRepositoryIn
             ->addOrderBy('c.createdAt', 'DESC')
             ->setFirstResult($offset)
             ->setMaxResults($limit);
+
+        if ($unreadOnly) {
+            $qb->andWhere('lm.id IS NOT NULL')
+                ->andWhere('(cpCurrent.lastReadAt IS NULL OR cpCurrent.lastReadAt < lm.createdAt)')
+                ->andWhere('lm.sender != :user');
+        }
         $result = $qb->getQuery()->getResult();
-        
+
         return $result;
     }
 

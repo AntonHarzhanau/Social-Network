@@ -19,9 +19,9 @@ final class GetChatList
     ) {
     }
 
-    public function __invoke(Uuid $currentUserId, int $page = 1, int $limit = 10): array
+    public function __invoke(Uuid $currentUserId, int $page = 1, int $limit = 10, bool $unreadOnly = false): array
     {
-        $chats = $this->chatRepository->findUserChatsWithLastMessage($currentUserId, $page, $limit);
+        $chats = $this->chatRepository->findUserChatsWithLastMessage($currentUserId, $page, $limit, $unreadOnly);
 
         return $this->chatListAssembler->assemble($currentUserId, $chats);
 

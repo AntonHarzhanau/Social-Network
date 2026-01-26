@@ -1,16 +1,19 @@
 import { apiClient } from "@/shared/api/apiClient";
 import type { Chat, CreateDirectChatParams, Message } from "../model/types";
 
-const CHAT_PAGE_SIZE = 20;
+export const CHAT_PAGE_SIZE = 10;
+export type ChatFilter = "all" | "unread";
 
 export const fetchChats = async (
   page: number = 1,
   limit: number = CHAT_PAGE_SIZE,
+  filter: ChatFilter = "all",
 ): Promise<Chat[]> => {
   const response = await apiClient.get<Chat[]>("/chats", {
     params: {
       page,
       limit,
+      filter,
     },
   });
   return response.data;
@@ -21,7 +24,7 @@ export const fetchChatById = async (chatId: string): Promise<Chat> => {
   return response.data;
 };
 
-type FetchMessageMode = "before" | "after" | "around" | "";
+type FetchMessageMode = "before" | "";
 
 export const fetchMessages = async (
   chatId: string,
@@ -61,14 +64,34 @@ export const createDirectChat = async (
   return response.data;
 };
 
+export type MarkReadMessageResponse = {
+  lastReadMessageId: string;
+  lastReadAt: string;
+  chatId: string;
+};
+
 export const markMessagesAsRead = async (
   chatId: string,
   lastReadMessageId?: string,
-): Promise<void> => {
-  await apiClient.post(`/chats/${chatId}/read`, { lastReadMessageId });
+): Promise<MarkReadMessageResponse> => {
+  console.log("markMessagesAsRead called with:", { chatId, lastReadMessageId });
+  const response = await apiClient.patch(`/chats/${chatId}/read`, {
+    lastReadMessageId,
+  });
+  return response.data;
 };
 
 export const getUnreadChatCount = async (): Promise<number> => {
   const response = await apiClient.get(`/chats/unread-summary`);
   return response.data;
+};
+
+export type CreateChatPayload = {
+  title: string;
+  participantIds: string[];
+};
+
+export const createChat = async (payload: CreateChatPayload): Promise<Chat> => {
+  const res = await apiClient.post<Chat>("/chats", payload);
+  return res.data;
 };

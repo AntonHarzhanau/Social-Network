@@ -25,3 +25,8 @@ export interface CreateDirectChatParams {
   participantId: string;
   content?: string;
 }
+
+export type ChatMercureEvent =
+  | { type: "message_created"; message: Message }
+  | { type: "message_updated"; messageId: string; message: Message }
+  | { type: "message_deleted"; messageId: string };

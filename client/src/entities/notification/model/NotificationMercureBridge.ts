@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { topics, useMercure } from "@/shared/hooks/useMercure";
+import { useMercure } from "@/shared/hooks/useMercure";
 import { sessionStore } from "@/entities/session/model/sessionStore";
 import { toast } from "sonner";
 import { friendsQueryKeys } from "@/entities/friends/model/queryKeys";
@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/shared/constants/routes";
 import { useFriendsFilterStore } from "@/entities/friends/model/useFriendsFilterStore";
 import type { MyFriendsStats } from "@/entities/friends/model/types";
+import { topics } from "@/shared/constants/topics";
 
 type NotificationDTO = {
   id: string;
