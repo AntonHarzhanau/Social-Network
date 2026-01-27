@@ -52,7 +52,7 @@ final class ChatRealtimeSubscriber implements EventSubscriberInterface
                 'messageId' => $event->messageId,
                 'message' => $event->message,
             ],
-            private: true
+            private: false
         );
     }
 

@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
-import { useChatList } from "../model/useChatList";
+import { useChatList } from "../model/hooks/useChatList";
 
 import ChatListItem from "./ChatListItem";
 import { useInfiniteScrollSentinel } from "@/shared/hooks/useInfiniteScrollSentinel";

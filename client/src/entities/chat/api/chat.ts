@@ -47,6 +47,14 @@ export const sendMessage = async (
   await apiClient.post(`/messages/${chatId}/chat`, { content });
 };
 
+export const editMessage = async (
+  messageId: string,
+  content: string,
+): Promise<void> => {
+  await apiClient.put(`/messages/${messageId}`, { content });
+  console.log("Message edited:", { messageId, content });
+};
+
 export const deleteMessage = async (messageId: string): Promise<void> => {
   await apiClient.delete(`/messages/${messageId}`);
 };

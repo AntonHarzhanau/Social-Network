@@ -1,62 +1,74 @@
-import { sendMessage } from "@/entities/chat/api/chat";
+import { editMessage, sendMessage } from "@/entities/chat/api/chat";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { useRef, useState } from "react";
+import { CircleCheck, CircleX } from "lucide-react";
+import { useRef } from "react";
+import { useMessageComposer } from "../model/messageComposerContext";
 
-const NewMessageForm = ({
-  chatId,
-  onBeforeSend,
-}: {
+interface NewMessageFormProps {
   chatId: string;
-  onBeforeSend?: () => void;
-}) => {
-  const [message, setMessage] = useState("");
-  const [sending, setSending] = useState(false);
+}
+
+const NewMessageForm = ({ chatId }: NewMessageFormProps) => {
+  const composer = useMessageComposer();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatId) return;
 
-    const text = message.trim();
-    if (!text || sending) return;
+    const text = composer.draft.trim();
+    if (!text) return;
 
-    onBeforeSend?.();
-
-    try {
-      setSending(true);
+    if (composer.mode === "edit") {
+      if (!composer.editingMessageId) return;
+      await editMessage(composer.editingMessageId, text);
+      composer.cancelEdit();
+    } else {
       await sendMessage(chatId, text);
-      setMessage("");
-
-      queueMicrotask(() => inputRef.current?.focus());
-    } finally {
-      setSending(false);
+      composer.setDraft("");
     }
   };
 
   return (
     <form
       id={`new-message-form-${chatId}`}
-      onSubmit={handleSendMessage}
+      onSubmit={handleMessage}
       className="flex w-full gap-2 items-center"
     >
       <Input
         ref={inputRef}
         name="message"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        value={composer.draft}
+        onChange={(e) => composer.setDraft(e.target.value)}
         placeholder="Type your message..."
         className="flex-1 shadow-sm"
         autoComplete="off"
       />
-      <Button
-        type="submit"
-        form={`new-message-form-${chatId}`}
-        disabled={sending || !message.trim()}
-        onMouseDown={(e) => e.preventDefault()}
-      >
-        Send
-      </Button>
+      {composer.mode === "edit" ? (
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            form={`new-message-form-${chatId}`}
+            disabled={!composer.draft.trim()}
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            <CircleCheck size={32} className="text-emerald-500" />
+          </button>
+          <button onClick={() => composer.cancelEdit()}>
+            <CircleX size={32} className="text-destructive" />
+          </button>
+        </div>
+      ) : (
+        <Button
+          type="submit"
+          form={`new-message-form-${chatId}`}
+          disabled={!composer.draft.trim()}
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          Send
+        </Button>
+      )}
     </form>
   );
 };

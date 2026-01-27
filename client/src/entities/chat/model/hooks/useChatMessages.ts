@@ -9,7 +9,7 @@ import {
 import type { Chat, Message } from "@/entities/chat/model/types";
 import { fetchMessages, markMessagesAsRead } from "@/entities/chat/api/chat";
 import { chatKeys } from "@/entities/chat/model/queryKeys";
-import { chatMessageKeys } from "@/entities/chat/model/hooks/messageQueryKeys";
+import { chatMessageKeys } from "@/entities/chat/model/messageQueryKeys";
 
 export type PageParam =
   | { kind: "initial" }

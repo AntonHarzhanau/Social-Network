@@ -15,14 +15,13 @@ final class DeleteMessageAction
 
     public function __invoke(Uuid $messageId, Uuid $userId): void
     {
-        $message = $this->messageRepository->findBy(['id' => $messageId, 'sender' => $userId]);
+        $message = $this->messageRepository->findOneBy(['id' => $messageId, 'sender' => $userId]);
 
         if (empty($message)) {
             throw new \RuntimeException('Message not found or you do not have permission to edit it.');
         }
 
-        $messageEntity = $message[0];
-        $this->messageService->deleteMessage($messageEntity);
+        $this->messageService->deleteMessage($message);
        
     }
 }

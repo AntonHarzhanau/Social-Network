@@ -42,7 +42,6 @@ export function ChatMessagesVirtualList(props: {
   unreadSet: Set<string>;
   currentUserId?: string;
 
-  // NEW
   chatType: Chat["type"];
   lastReadAtByOther?: string | null;
   lastReadMessageByOther?: string | null;
@@ -77,8 +76,6 @@ export function ChatMessagesVirtualList(props: {
 
             const isMine = !!currentUserId && msg.sender.id === currentUserId;
             const isUnread = unreadSet.has(msg.id);
-
-            // read-receipts показываем только на МОИХ сообщениях в direct
             const showReadMark = chatType === "direct" && isMine;
 
             const readByOther =

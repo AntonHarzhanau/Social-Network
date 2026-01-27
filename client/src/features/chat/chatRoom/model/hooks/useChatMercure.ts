@@ -35,6 +35,7 @@ export function useChatMercure(params: {
     topic: topics.chat(params.chatId),
     enable: params.enable,
     onMessage: (evt) => {
+      console.log("Mercure event received in chat:", evt);
       switch (evt.type) {
         case "message_created": {
           invalidateChatLists(qc);

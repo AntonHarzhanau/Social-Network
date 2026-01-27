@@ -38,7 +38,7 @@ class MessageRepository extends ServiceEntityRepository implements MessageReposi
         ?int $limit = null,
         ?int $offset = null
     ): ?Message {
-        return parent::findOneBy($criteria, $orderBy);
+        return parent::findBy($criteria, $orderBy, $limit, $offset)[0] ?? null;
     }
 
 

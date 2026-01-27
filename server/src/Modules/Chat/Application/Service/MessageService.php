@@ -81,13 +81,14 @@ class MessageService
 
         $lastMessage = $chat->getLastMessage();
         if ($message === $lastMessage) {
-            $newLastMessage = $this->messageRepository->findBy(
+            $newLastMessage = $this->messageRepository->findOneBy(
                 ['chat' => $chat->getId()],
                 ['createdAt' => 'DESC'],
                 1,
                 1
             );
-            $chat->setLastMessage($newLastMessage[0] ?? null);
+            $chat->setLastMessage($newLastMessage ?? null);
+            $this->chatRepository->save($chat);
         }
         $this->messageRepository->delete($message);
         

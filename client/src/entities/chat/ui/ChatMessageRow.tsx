@@ -11,21 +11,14 @@ import {
   DropdownMenuItem,
 } from "@/shared/components/ui/dropdown-menu";
 import { deleteMessage } from "../api/chat";
+import { useMessageComposer } from "../model/messageComposerContext";
 
 export function ChatMessageRow(props: {
   message: Message;
   isMine: boolean;
-
-  // unread относительно ТЕКУЩЕГО пользователя (т.е. "я не прочитал")
   isUnread: boolean;
-
-  // NEW: показывать ли read-receipt (обычно: direct + isMine)
   showReadMark?: boolean;
-
-  // NEW: прочитал ли собеседник моё сообщение
   isReadByOther?: boolean;
-
-  onEdit?: (messageId: string) => void;
 }) {
   const {
     message,
@@ -33,28 +26,29 @@ export function ChatMessageRow(props: {
     isUnread,
     showReadMark = false,
     isReadByOther = false,
-    onEdit,
   } = props;
 
-  const onDelete = async (messageId: string) => {
-    await deleteMessage(messageId);
-  };
+  const composer = useMessageComposer();
 
   const d = new Date(message.createdAt);
   const time = d.toISOString().slice(11, 16);
 
   const [open, setOpen] = React.useState(false);
 
-  const Row = (
+  const onDelete = async (messageId: string) => {
+    await deleteMessage(messageId);
+  };
+
+  const ChatMessageRow = (
     <div
       className={cn(
         "w-full px-2 py-1 mb-2",
         "flex gap-2 justify-start rounded-md",
 
-        // фон темнее для непрочитанных входящих
+        // background is darker for unread inboxes
         !isMine && isUnread && "bg-muted ring-1 ring-border",
 
-        // поведение для моих сообщений (контекстное меню)
+        // behavior for my messages (context menu)
         isMine && "cursor-pointer",
         isMine && open && "bg-muted ring-1 ring-border",
         isMine && !open && "hover:bg-muted/50",
@@ -92,8 +86,7 @@ export function ChatMessageRow(props: {
     </div>
   );
 
-  // меню — только для моих сообщений
-  if (!isMine || !message.id) return Row;
+  if (!isMine || !message.id) return ChatMessageRow;
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -103,12 +96,14 @@ export function ChatMessageRow(props: {
           className="w-full text-left focus-visible:outline-none"
           onClick={() => setOpen(true)}
         >
-          {Row}
+          {ChatMessageRow}
         </button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" side="bottom" className="w-40">
-        <DropdownMenuItem onSelect={() => onEdit?.(message.id)}>
+        <DropdownMenuItem
+          onSelect={() => composer.startEdit(message.id, message.content)}
+        >
           Edit
         </DropdownMenuItem>
         <DropdownMenuItem
