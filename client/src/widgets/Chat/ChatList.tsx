@@ -6,6 +6,7 @@ import { useInfiniteScrollSentinel } from "@/shared/hooks/useInfiniteScrollSenti
 import CreateChatDialog from "../../entities/chat/ui/CreateChatDialog";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { useChatFilterStore } from "@/features/chat/chatFilter/model/useChatFilterStore";
+import { ChatListItemSkeleton } from "@/entities/chat/ui/ChatListItemSkeleton";
 
 const ChatList = () => {
   const filter = useChatFilterStore((s) => s.filter);
@@ -35,6 +36,10 @@ const ChatList = () => {
       <CardContent className="flex-1 min-h-0">
         <ScrollArea className="h-full">
           {isError && <div>Error: {error.message}</div>}
+          {isLoading &&
+            Array.from({ length: 7 }).map((_, i) => (
+              <ChatListItemSkeleton key={i} />
+            ))}
           {chats.map((chat) => (
             <ChatListItem key={chat.id} chat={chat} />
           ))}

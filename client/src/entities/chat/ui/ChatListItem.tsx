@@ -7,6 +7,7 @@ import DropDownButton from "@/shared/components/DropDownButton";
 import { useChatRouting } from "@/features/chat/openedChats/lib/useChatRouting";
 import { useOpenedChatsStore } from "@/features/chat/openedChats/model/openedChatsStore";
 
+
 interface ChatListItemProps {
   chat: Chat;
 }
