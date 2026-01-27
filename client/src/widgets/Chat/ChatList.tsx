@@ -1,54 +1,48 @@
-// import { useEffect, useRef } from "react";
-// import ChatListItem from "@/entities/chat/ui/ChatListItem";
-// import { useInfiniteChats } from "@/entities/chat/model/useChat";
-// import { Card } from "@/shared/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
+import { useChatList } from "../../entities/chat/model/hooks/useChatList";
 
-// const ChatList = () => {
-//   const { data, fetchNextPage, hasNextPage, status } =
-//     useInfiniteChats();
+import ChatListItem from "../../entities/chat/ui/ChatListItem";
+import { useInfiniteScrollSentinel } from "@/shared/hooks/useInfiniteScrollSentinel";
+import CreateChatDialog from "../../entities/chat/ui/CreateChatDialog";
+import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { useChatFilterStore } from "@/features/chat/chatFilter/model/useChatFilterStore";
 
-//   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+const ChatList = () => {
+  const filter = useChatFilterStore((s) => s.filter);
+  const {
+    chats,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    error,
+  } = useChatList(filter ?? "all");
 
-//   useEffect(() => {
-//     if (!hasNextPage) return;
+  const sentinelRef = useInfiniteScrollSentinel({
+    enabled: !isLoading && !isError,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  });
 
-//     const target = loadMoreRef.current;
-//     if (!target) return;
+  return (
+    <Card className="h-[75vh] md:h-[80vh] lg:h-[90vh] flex flex-col">
+      <CardHeader className="shrink-0">
+        <CreateChatDialog />
+      </CardHeader>
 
-//     const observer = new IntersectionObserver(
-//       (entries) => {
-//         const [entry] = entries;
-//         if (entry.isIntersecting) {
-//           fetchNextPage();
-//         }
-//       },
-//       { threshold: 1 },
-//     );
-//     observer.observe(target);
+      <CardContent className="flex-1 min-h-0">
+        <ScrollArea className="h-full">
+          {isError && <div>Error: {error.message}</div>}
+          {chats.map((chat) => (
+            <ChatListItem key={chat.id} chat={chat} />
+          ))}
+          <div ref={sentinelRef} />
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  );
+};
 
-//     return () => {
-//       observer.disconnect();
-//     };
-//   }, [fetchNextPage, hasNextPage]);
-
-//   if (status === "pending") {
-//     return <div>Loading...</div>;
-//   }
-
-//   if (status === "error") {
-//     return <div>Failed to load chats.</div>;
-//   }
-
-//   const chats = data?.pages.flat() ?? [];
-
-//   return (
-//     <Card className="p-1 gap-0 h-full overflow-y-auto">
-//       {chats.map((chat) => (
-//         <ChatListItem key={chat.id} chat={chat} />
-//       ))}
-//       <div ref={loadMoreRef} />
-//     </Card>
-//   );
-// };
-
-// export default ChatList;
+export default ChatList;

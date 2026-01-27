@@ -2,17 +2,16 @@ import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 import MainSectionLayout from "@/shared/components/MainSectionLayout";
-import ChatList from "@/entities/chat/ui/ChatList";
-import ChatRoomCard from "@/entities/chat/ui/ChatRoomCard";
-import { OpenChatsSidebar } from "@/features/chat/openedChats/ui/OpenChatsSidebar";
+import ChatList from "@/widgets/Chat/ChatList";
+import ChatRoomCard from "@/widgets/Chat/ChatRoomCard";
 import { useOpenedChatsStore } from "@/features/chat/openedChats/model/openedChatsStore";
+import ChatWidgets from "@/widgets/Chat/ChatWidgets";
 
 const ChatPage = () => {
   const { chatId: urlChatId = "" } = useParams<{ chatId: string }>();
 
   const open = useOpenedChatsStore((s) => s.open);
 
-  // для прямого входа по URL
   useEffect(() => {
     if (urlChatId) open(urlChatId);
   }, [urlChatId, open]);
@@ -28,7 +27,7 @@ const ChatPage = () => {
           )}
         </div>
       }
-      asideContent={<OpenChatsSidebar currentChatId={urlChatId} />}
+      asideContent={<ChatWidgets currentChatId={urlChatId} />}
     />
   );
 };

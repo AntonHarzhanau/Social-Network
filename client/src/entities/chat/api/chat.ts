@@ -1,8 +1,12 @@
 import { apiClient } from "@/shared/api/apiClient";
-import type { Chat, CreateDirectChatParams, Message } from "../model/types";
+import type {
+  Chat,
+  ChatFilter,
+  CreateDirectChatParams,
+  Message,
+} from "../model/types";
 
 export const CHAT_PAGE_SIZE = 10;
-export type ChatFilter = "all" | "unread";
 
 export const fetchChats = async (
   page: number = 1,

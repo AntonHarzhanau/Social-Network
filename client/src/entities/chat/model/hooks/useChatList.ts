@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { ChatFilter } from "../../api/chat";
+import type { ChatFilter } from "../types";
 import type { Chat } from "../types";
 import { useInfiniteChats } from "./useInfiniteChats";
 

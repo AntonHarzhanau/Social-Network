@@ -1,12 +1,12 @@
 import { Card } from "@/shared/components/ui/card";
 import type { Chat } from "@/entities/chat/model/types";
 
-import { ChatRoomHeader } from "./ChatRoomHeader";
-import { ChatMessagesVirtualList } from "./ChatMessagesVirtualList";
-import { ChatJumpControls } from "./ChatJumpControls";
-import NewMessageForm from "./NewMessageForm";
+import { ChatRoomHeader } from "../../entities/chat/ui/ChatRoomHeader";
+import { ChatMessagesVirtualList } from "../../entities/chat/ui/ChatMessagesVirtualList";
+import { ChatJumpControls } from "../../entities/chat/ui/ChatJumpControls";
+import NewMessageForm from "../../entities/chat/ui/NewMessageForm";
 import { useChatRoomController } from "@/features/chat/chatRoom/model/useChatRoomController";
-import { MessageComposerProvider } from "../model/messageComposerContext";
+import { MessageComposerProvider } from "../../entities/chat/model/messageComposerContext";
 
 const PAGE_SIZE = 10;
 const READ_DEBOUNCE_MS = 500;

@@ -38,3 +38,5 @@ export type ChatMercureEvent =
       lastReadAt: string;
       lastReadMessageId: string | null;
     };
+
+export type ChatFilter = "all" | "unread";
