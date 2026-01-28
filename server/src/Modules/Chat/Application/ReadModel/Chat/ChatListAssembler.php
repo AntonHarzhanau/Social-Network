@@ -7,7 +7,6 @@ use App\Modules\Chat\Application\DTO\ChatListItemRowDTO;
 use App\Modules\Chat\Application\DTO\ChatMessagePreviewDTO;
 use App\Modules\Chat\Application\Port\UserDirectoryInterface;
 use App\Modules\Chat\Domain\Repository\MessageRepositoryInterface;
-use App\Modules\Media\Api\MediaApiInterface;
 use Symfony\Component\Uid\Uuid;
 
 final class ChatListAssembler
@@ -24,7 +23,6 @@ final class ChatListAssembler
         if (!$rows)
             return [];
 
-        // 1) Собираем нужные userIds
         $userIds = [];
 
         foreach ($rows as $r) {
@@ -35,7 +33,6 @@ final class ChatListAssembler
         }
 
         $userIds = array_values(array_unique($userIds));
-        // 2) Тянем превью пользователей (username + avatarUrl уже внутри)
         $userPreviews = $userIds ? $this->userDirectory->getPreviewsByIds($userIds) : [];
         $usersById = [];
         foreach ($userPreviews as $u) {
@@ -82,6 +79,7 @@ final class ChatListAssembler
                 $r->updatedAt ? $r->updatedAt->format(DATE_ATOM) : null,
                 $r->lastReadMessageId,
                 $r->lastReadAt ? $r->lastReadAt->format(DATE_ATOM) : null,
+                $r->currentUserRole->value,
                 $lastMessage,
                 $unreadCounts[$r->chatId] ?? 0,
                 $r->lastReadMessageByOther,

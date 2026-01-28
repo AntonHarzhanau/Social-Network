@@ -8,7 +8,8 @@ use App\Modules\Chat\Domain\Enum\ChatParticipantRoleEnum;
 use App\Modules\Chat\Domain\Enum\ChatTypeEnum;
 use App\Modules\Chat\Domain\Repository\ChatParticipantRepositoryInterface;
 use App\Modules\Chat\Domain\Repository\ChatRepositoryInterface;
-use Symfony\Component\Uid\Uuid;;
+use Symfony\Component\Uid\Uuid;
+;
 
 final class AddUserToChat
 {
@@ -16,7 +17,8 @@ final class AddUserToChat
         private readonly ChatParticipantRepositoryInterface $chatParticipantRepository,
         private readonly ChatRepositoryInterface $chatRepository,
         private readonly UserDirectoryInterface $userDirectory,
-    ) {}
+    ) {
+    }
 
     public function __invoke(array $newParticipantsIds, Uuid $chatId, Uuid $currentUserId): void
     {
@@ -40,15 +42,22 @@ final class AddUserToChat
 
         $newParticipants = $this->userDirectory->findManyByIds($newParticipantsIds);
 
-        $usersInChat = $this->chatParticipantRepository->getAllUsersByChatId($chat);
+        $usersInChat = $this->chatParticipantRepository->findAllUsersIdByChatId(chatId: $chatId, includeDeleted: true);
         $existingUserIds = [];
         foreach ($usersInChat as $userInChat) {
-            $existingUserIds[] = $userInChat->getUser()->getId();
+            $existingUserIds[] = $userInChat['userId'];
         }
 
         foreach ($newParticipants as $participant) {
-            if (in_array($participant->getId(), $existingUserIds, true)) {
-                continue; // Skip users already in the chat
+            if (\in_array((string) $participant->getId(), $existingUserIds, false)) {
+                $deletedParticipant = $this->chatParticipantRepository->findOneBy([
+                    'chat' => $chatId,
+                    'user' => $participant->getId(),
+                ]);
+                    $deletedParticipant->setDeletedAt(null);
+                    $this->chatParticipantRepository->save($deletedParticipant);
+
+                continue;
             }
 
             $chat->addChatParticipant(

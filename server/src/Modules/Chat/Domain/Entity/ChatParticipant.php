@@ -9,6 +9,7 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
+#[ORM\UniqueConstraint(name: 'uniq_chat_user', columns: ['chat_id', 'user_id'])]
 class ChatParticipant
 {
     #[ORM\Id]
@@ -36,6 +37,9 @@ class ChatParticipant
 
     #[ORM\Column]
     private ?\DateTimeImmutable $joinedAt = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $deletedAt = null;
 
     #[ORM\ManyToOne(targetEntity: Message::class)]
     #[ORM\JoinColumn(name: 'last_read_message_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
@@ -119,6 +123,18 @@ class ChatParticipant
     public function setJoinedAt(\DateTimeImmutable $joinedAt): static
     {
         $this->joinedAt = $joinedAt;
+
+        return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeImmutable $deletedAt): static
+    {
+        $this->deletedAt = $deletedAt;
 
         return $this;
     }

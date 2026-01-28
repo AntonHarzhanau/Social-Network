@@ -2,7 +2,6 @@
 
 namespace App\Modules\Chat\Infrastructure\Persistence\Doctrine\Repository;
 
-use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Entity\ChatParticipant;
 use App\Modules\Chat\Domain\Repository\ChatParticipantRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -27,24 +26,45 @@ class ChatParticipantRepository extends ServiceEntityRepository implements ChatP
             $em->flush();
         }
     }
-    
+
     public function findOneBy(array $criteria, array|null $orderBy = null): ?ChatParticipant
     {
         return parent::findOneBy($criteria);
     }
 
-    public function getAllUsersByChatId(Chat $chat): array
-    {
+    public function findAllUsersIdByChatId(
+        Uuid $chatId,
+        ?int $page = null,
+        ?int $limit = null,
+        ?bool $includeDeleted = false,
+        ?string $search = null
+    ): array {
         $qb = $this->createQueryBuilder('cp')
-            ->select('cp', 'u')
+            ->select('u.id AS userId', 'cp.role AS role')
             ->innerJoin('cp.user', 'u')
-            ->andWhere('cp.chat = :chat')
-            ->setParameter('chat', $chat);
+            ->andWhere('cp.chat = :chat');
 
-        return $qb->getQuery()->getResult();
+        if (!$includeDeleted) {
+            $qb->andWhere('cp.deletedAt IS NULL');
+        }
+
+        $q = $search !== null ? trim($search) : '';
+        if ($q !== '') {
+            $qb->andWhere('LOWER(u.username) LIKE :q')
+                ->setParameter('q', '%' . mb_strtolower($q) . '%');
+        }
+
+        $qb->setParameter('chat', $chatId);
+
+        if ($page !== null && $limit !== null) {
+            $qb->setFirstResult(($page - 1) * $limit)
+                ->setMaxResults($limit);
+        }
+
+        return $qb->getQuery()->getScalarResult();
     }
 
-    public function findUserChatsWithLastMessage(int $userId): array
+    public function findUserChatsWithLastMessage(Uuid $userId): array
     {
         $qb = $this->createQueryBuilder('cp')
             ->select('c', 'lm', 'lmSender', 'participants', 'participantUser')

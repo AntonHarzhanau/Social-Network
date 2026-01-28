@@ -4,6 +4,7 @@ namespace App\Modules\Chat\Application\Service;
 
 use App\Modules\Chat\Application\Port\UserDirectoryInterface;
 use App\Modules\Chat\Domain\Entity\Message;
+use App\Modules\Chat\Domain\Enum\ChatTypeEnum;
 use App\Modules\Chat\Domain\Event\MessageCreated;
 use App\Modules\Chat\Domain\Event\MessageDeleted;
 use App\Modules\Chat\Domain\Repository\ChatParticipantRepositoryInterface;
@@ -20,24 +21,40 @@ class MessageService
         private readonly ChatRepositoryInterface $chatRepository,
         private readonly ChatParticipantRepositoryInterface $chatParticipantRepository,
         private readonly EventBusInterface $eventBus,
-    ) {}
+    ) {
+    }
 
     public function createMessage(Uuid $chatId, Uuid $senderId, string $content): Message
     {
         $user = $this->userDirectory->findById($senderId);
         $chat = $this->chatRepository->findById($chatId);
-        
-        $chatParticipant = $this->chatParticipantRepository->findOneBy([
+
+        if (!$user)
+            throw new \InvalidArgumentException('User not found.');
+        if (!$chat)
+            throw new \InvalidArgumentException('Chat not found.');
+
+        $senderParticipant = $this->chatParticipantRepository->findOneBy([
             'chat' => $chatId,
             'user' => $senderId,
         ]);
 
-        if ($chat === null) {
-            throw new \InvalidArgumentException('Chat not found.');
+        if (!$senderParticipant) {
+            throw new \LogicException('User is not a participant of the chat.');
         }
 
-        if (!$chatParticipant) {
-            throw new \InvalidArgumentException('User is not a participant of the chat.');
+        if ($chat->getType() === ChatTypeEnum::GROUP && $senderParticipant->getDeletedAt() !== null) {
+            throw new \LogicException('User was removed from the group chat.');
+        }
+
+        if ($chat->getType() === ChatTypeEnum::DIRECT) {
+            $participants = $this->chatParticipantRepository->findBy(['chat' => $chatId]);
+            foreach ($participants as $p) {
+                if ($p->getDeletedAt() !== null) {
+                    $p->setDeletedAt(null);
+                    $this->chatParticipantRepository->save($p);
+                }
+            }
         }
 
         $message = new Message();
@@ -91,7 +108,7 @@ class MessageService
             $this->chatRepository->save($chat);
         }
         $this->messageRepository->delete($message);
-        
+
         $this->eventBus->dispatch(
             new MessageDeleted(
                 chatId: (string) $chat->getId(),

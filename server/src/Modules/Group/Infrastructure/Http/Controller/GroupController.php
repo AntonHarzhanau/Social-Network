@@ -140,7 +140,7 @@ class GroupController extends AbstractController
         return $this->json([], JsonResponse::HTTP_OK);
     }
 
-    #[Route('/members/{memberId}/role', name: 'change_member_role', methods: ['PUT'], format: 'json')]
+    #[Route('/members/{memberId}/role', methods: ['PUT'], format: 'json')]
     public function changeMemberRole(
         string $memberId,
         #[MapRequestPayload()] UpdateMemberRoleRequest $request,

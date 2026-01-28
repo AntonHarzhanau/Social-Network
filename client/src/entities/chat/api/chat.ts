@@ -2,6 +2,7 @@ import { apiClient } from "@/shared/api/apiClient";
 import type {
   Chat,
   ChatFilter,
+  ChatMember,
   CreateDirectChatParams,
   Message,
 } from "../model/types";
@@ -106,4 +107,43 @@ export type CreateChatPayload = {
 export const createChat = async (payload: CreateChatPayload): Promise<Chat> => {
   const res = await apiClient.post<Chat>("/chats", payload);
   return res.data;
+};
+
+export const removeMember = async (
+  chatId: string,
+  userId: string,
+): Promise<void> => {
+  await apiClient.post(`/chats/${chatId}/remove-members`, { userId });
+};
+
+export const fetchChatMembers = async (
+  chatId: string,
+  page: number,
+  limit: number,
+  search?: string,
+): Promise<ChatMember[]> => {
+  const res = await apiClient.get<ChatMember[]>(`/chats/${chatId}/members`, {
+    params: { page, limit, search: search?.trim() || undefined },
+  });
+  return res.data;
+};
+
+export const addMembers = async (
+  chatId: string,
+  userIds: string[],
+): Promise<void> => {
+  await apiClient.post(`/chats/${chatId}/add-members`, {
+    newParticipantIds: userIds,
+  });
+};
+
+export const changeMemberRole = async (
+  chatId: string,
+  userId: string,
+  newRole: "admin" | "member",
+): Promise<void> => {
+  await apiClient.post(`/chats/${chatId}/change-member-role`, {
+    userId,
+    newRole,
+  });
 };

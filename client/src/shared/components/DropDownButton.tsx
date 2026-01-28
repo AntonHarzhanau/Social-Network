@@ -1,11 +1,11 @@
+import { Ellipsis } from "lucide-react";
+import { cn } from "../lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@radix-ui/react-dropdown-menu";
-import { Ellipsis } from "lucide-react";
-import { cn } from "../lib/utils";
+} from "./ui/dropdown-menu";
 
 interface DropDownButtonProps {
   className?: string;

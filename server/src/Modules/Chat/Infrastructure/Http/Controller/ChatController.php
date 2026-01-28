@@ -3,9 +3,11 @@
 namespace App\Modules\Chat\Infrastructure\Http\Controller;
 
 use App\Modules\Chat\Application\Action\Chat\AddUserToChat;
+use App\Modules\Chat\Application\Action\Chat\ChangeMemberRole;
 use App\Modules\Chat\Application\Action\Chat\CreateGroupChat;
 use App\Modules\Chat\Application\Action\Chat\GetChat;
 use App\Modules\Chat\Application\Action\Chat\GetChatList;
+use App\Modules\Chat\Application\Action\Chat\GetChatMembers;
 use App\Modules\Chat\Application\Action\Chat\GetChatMessages;
 use App\Modules\Chat\Application\Action\Chat\GetUnreadChatCountAction;
 use App\Modules\Chat\Application\Action\Chat\MarkChatReadAction;
@@ -85,8 +87,7 @@ final class ChatController extends AbstractController
         #[CurrentUser] User $currentUser,
         Request $request,
         UpdateChatInfo $updateChatInfo
-    ): JsonResponse
-    {
+    ): JsonResponse {
         $avatarId = $request->request->get('avatarId');
         $chatName = $request->request->get('chatName');
         $updateChatInfo->execute(
@@ -106,6 +107,22 @@ final class ChatController extends AbstractController
         return $this->json([
             'error' => 'Not implemented yet',
         ], JsonResponse::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[Route('/{chatId}/members', name: 'get_chat_members', methods: ['GET'], format: 'json')]
+    public function getChatMembers(
+        string $chatId,
+        #[CurrentUser] User $currentUser,
+        GetChatMembers $action,
+        Request $request,
+    ): JsonResponse {
+        $page = max(1, (int) $request->query->get('page', 1));
+        $limit = max(1, (int) $request->query->get('limit', 10));
+        $search = $request->query->get('search', null);
+
+        $members = $action->execute(Uuid::fromString($chatId), $currentUser->getId(), $page, $limit, $search);
+
+        return $this->json($members, JsonResponse::HTTP_OK);
     }
 
     #[Route('/{chatId}/add-members', name: 'add_user_to_chat', methods: ['POST'], format: 'json')]
@@ -136,6 +153,27 @@ final class ChatController extends AbstractController
 
         return $this->json(['message' => 'User(s) removed from chat'], JsonResponse::HTTP_OK, [], ['groups' => 'message:list']);
     }
+
+
+    #[Route('/{chatId}/change-member-role', methods: ['POST'], format: 'json')]
+    public function changeMemberRole(
+        string $chatId,
+        #[CurrentUser] User $currentUser,
+        Request $request,
+        ChangeMemberRole $changeMemberRole
+    ): JsonResponse {
+        $data = json_decode($request->getContent(), true);
+
+        $changeMemberRole->execute(
+            Uuid::fromString($chatId),
+            Uuid::fromString($data['userId']),
+            $currentUser->getId(),
+            $data['newRole']
+        );
+
+        return $this->json(['message' => 'Member role changed successfully'], JsonResponse::HTTP_OK);
+    }
+
 
     #[Route('/{chatId}/read', name: 'mark_chat_as_read', methods: ['PATCH'], format: 'json')]
     public function markRead(

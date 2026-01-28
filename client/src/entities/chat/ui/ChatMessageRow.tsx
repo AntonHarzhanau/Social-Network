@@ -58,7 +58,7 @@ export function ChatMessageRow(props: {
         imageUrl={message.sender.avatarUrl}
         name={message.sender.name}
         isOnline={message.sender.isOnline}
-        className="h-11 w-11"
+        className="h-10 w-10"
       />
 
       <div className="flex flex-col min-w-0">

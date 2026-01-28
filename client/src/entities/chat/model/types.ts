@@ -16,13 +16,13 @@ export interface Chat {
   updatedAt: string;
   lastMessage?: Message;
   lastMessageAt?: string;
+  currentUserRole: ChatMemberRole;
   lastReadAt?: string | null;
   lastReadMessageId?: string | null;
   unreadMessageCount: number;
   lastReadMessageByOther?: string | null;
   lastReadAtByOther?: string | null;
 }
-
 export interface CreateDirectChatParams {
   participantId: string;
   content?: string;
@@ -40,3 +40,9 @@ export type ChatMercureEvent =
     };
 
 export type ChatFilter = "all" | "unread";
+
+export type ChatMemberRole = "admin" | "member" | "owner";
+
+export interface ChatMember extends UserPreview {
+  role: ChatMemberRole;
+}

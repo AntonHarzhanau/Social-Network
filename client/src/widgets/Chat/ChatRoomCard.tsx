@@ -7,6 +7,7 @@ import { ChatJumpControls } from "../../entities/chat/ui/ChatJumpControls";
 import NewMessageForm from "../../entities/chat/ui/NewMessageForm";
 import { useChatRoomController } from "@/features/chat/chatRoom/model/useChatRoomController";
 import { MessageComposerProvider } from "../../entities/chat/model/messageComposerContext";
+import { Separator } from "@/shared/components/ui/separator";
 
 const PAGE_SIZE = 10;
 const READ_DEBOUNCE_MS = 500;
@@ -24,12 +25,9 @@ export default function ChatRoomCard(props: { chatId: string }) {
 
   return (
     <MessageComposerProvider>
-      <Card className="relative h-[75vh] md:h-[80vh] lg:h-[90vh] flex flex-col">
-        <ChatRoomHeader
-          title={c.title}
-          avatarUrl={c.chat.avatarUrl}
-          onClose={c.closeView}
-        />
+      <Card className="relative h-[75vh] md:h-[80vh] lg:h-[90vh] flex flex-col gap-3 py-2">
+        <ChatRoomHeader chat={c.chat} onClose={c.closeView} />
+        <Separator />
 
         <ChatMessagesVirtualList
           parentRef={c.parentRef}

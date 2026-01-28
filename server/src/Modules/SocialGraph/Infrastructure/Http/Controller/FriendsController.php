@@ -31,7 +31,8 @@ final class FriendsController extends AbstractController
 
         $page = max((int) $request->query->get('page', 1), 1);
         $limit = min(max((int) $request->query->get('limit', 20), 1), 50);
-        $previews = $this->listFriends->execute(Uuid::fromString($userId), $page, $limit);
+        $search = $request->query->get('search', null);
+        $previews = $this->listFriends->execute(Uuid::fromString($userId), $page, $limit, $search);
 
 
         return $this->json($previews, JsonResponse::HTTP_OK);

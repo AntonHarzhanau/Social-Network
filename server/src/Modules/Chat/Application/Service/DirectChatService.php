@@ -8,6 +8,7 @@ use App\Modules\Chat\Domain\Entity\ChatParticipant;
 use App\Modules\Chat\Domain\Entity\DirectChat;
 use App\Modules\Chat\Domain\Enum\ChatParticipantRoleEnum;
 use App\Modules\Chat\Domain\Enum\ChatTypeEnum;
+use App\Modules\Chat\Domain\Repository\ChatParticipantRepositoryInterface;
 use App\Modules\Chat\Domain\Repository\DirectChatRepositoryInterface;
 use App\Modules\User\Domain\Entity\User;
 
@@ -15,7 +16,9 @@ class DirectChatService
 {
     public function __construct(
         private readonly DirectChatRepositoryInterface $directChatRepository,
-    ) {}
+        private readonly ChatParticipantRepositoryInterface $chatParticipantRepository,
+    ) {
+    }
 
     public function getOrCreateDirectChat(User $currentUser, User $otherUser): Chat
     {
@@ -27,8 +30,19 @@ class DirectChatService
 
         $existing = $this->directChatRepository->findByUsers($user1->getId(), $user2->getId());
 
+
         if ($existing) {
-            return $existing->getChat();
+            $chat = $existing->getChat();
+            $p = $this->chatParticipantRepository->findOneBy([
+                'chat' => $chat->getId(),
+                'user' => $currentUser->getId(),
+            ]);
+            if ($p && $p->getDeletedAt() !== null) {
+                $p->setDeletedAt(null);
+                $this->chatParticipantRepository->save($p);
+            }
+
+            return $chat;
         }
 
         $chat = $this->createDirectChat($currentUser, $otherUser);
@@ -39,7 +53,7 @@ class DirectChatService
             return $chat;
         } catch (DirectChatAlreadyExists) {
 
-            $existing = $this->directChatRepository->findByUsers($user1, $user2)->getChat();
+            $existing = $this->directChatRepository->findByUsers($user1->getId(), $user2->getId())->getChat();
 
             if (!$existing) {
                 throw new \RuntimeException('Direct chat was not found after UniqueConstraintViolationException.');

@@ -8,6 +8,7 @@ use App\Modules\Chat\Domain\Enum\ChatTypeEnum;
 use App\Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
@@ -21,64 +22,47 @@ class ChatRepository extends ServiceEntityRepository implements ChatRepositoryIn
         parent::__construct($registry, Chat::class);
     }
 
+    public function delete(Chat $chat): void
+    {
+        $em = $this->getEntityManager();
+        $em->remove($chat);
+        $em->flush();
+    }
+
     public function findUserChatsWithLastMessage(
         Uuid $userId,
         int $page = 1,
         int $limit = 10,
         bool $unreadOnly = false
     ): array {
+        $page = max(1, $page);
+        $limit = max(1, $limit);
         $offset = ($page - 1) * $limit;
 
-        $qb = $this->createQueryBuilder('c')
-            ->innerJoin('c.chatParticipants', 'cpCurrent', 'WITH', 'cpCurrent.user = :user')
-            ->leftJoin('c.lastMessage', 'lm')
-            ->leftJoin(
-                'c.chatParticipants',
-                'cpOther',
-                'WITH',
-                'c.type = :directType AND cpOther.user != :user'
-            )
-            ->setParameter('user', $userId)
-            ->setParameter('directType', ChatTypeEnum::DIRECT->value)
-
-            ->select(\sprintf(
-                'NEW %s(
-                c.id,
-                c.type,
-                c.title,
-                c.avatarUrl,
-
-                c.createdAt,
-                c.updatedAt,
-
-                IDENTITY(cpCurrent.lastReadMessage),
-                cpCurrent.lastReadAt,
-
-                lm.id,
-                lm.content,
-                lm.createdAt,
-                IDENTITY(lm.sender),
-
-                IDENTITY(cpOther.user),
-                IDENTITY(cpOther.lastReadMessage),
-                cpOther.lastReadAt
-            )',
-                ChatListItemRowDTO::class
-            ))
-            ->addSelect('COALESCE(lm.createdAt, c.createdAt) AS HIDDEN sortDate')
+        $qb = $this->qbUserChatsRow($userId)
             ->orderBy('sortDate', 'DESC')
             ->addOrderBy('c.createdAt', 'DESC')
             ->setFirstResult($offset)
             ->setMaxResults($limit);
 
         if ($unreadOnly) {
-            $qb->andWhere('lm.id IS NOT NULL')
-                ->andWhere('(cpCurrent.lastReadAt IS NULL OR cpCurrent.lastReadAt < lm.createdAt)')
-                ->andWhere('lm.sender != :user');
+            $this->applyUnreadOnlyFilter($qb, $userId);
         }
-        $result = $qb->getQuery()->getResult();
 
-        return $result;
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findUserChatRowById(
+        Uuid $userId,
+        Uuid $chatId
+    ): ?ChatListItemRowDTO {
+        $qb = $this->qbUserChatsRow($userId)
+            ->andWhere('c.id = :chatId')
+            ->setParameter('chatId', $chatId)
+            ->setMaxResults(1);
+
+        /** @var ChatListItemRowDTO|null */
+        return $qb->getQuery()->getOneOrNullResult();
     }
 
     public function save(Chat $chat): void
@@ -91,6 +75,61 @@ class ChatRepository extends ServiceEntityRepository implements ChatRepositoryIn
     public function findById(Uuid $chatId): ?Chat
     {
         return $this->find($chatId);
+    }
+
+    private function qbUserChatsRow(Uuid $userId): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->innerJoin(
+                'c.chatParticipants',
+                'cpCurrent',
+                'WITH',
+                'cpCurrent.user = :user AND cpCurrent.deletedAt IS NULL'
+            )
+            ->leftJoin('c.lastMessage', 'lm')
+            ->leftJoin(
+                'c.chatParticipants',
+                'cpOther',
+                'WITH',
+                'c.type = :directType AND cpOther.user != :user AND cpOther.deletedAt IS NULL'
+            )
+            ->setParameter('user', $userId)
+            ->setParameter('directType', ChatTypeEnum::DIRECT->value)
+            ->select(\sprintf(
+                'NEW %s(
+                    c.id,
+                    c.type,
+                    c.title,
+                    c.avatarUrl,
+                    c.createdAt,
+                    c.updatedAt,
+
+                    IDENTITY(cpCurrent.lastReadMessage),
+                    cpCurrent.lastReadAt,
+                    cpCurrent.role,
+
+                    lm.id,
+                    lm.content,
+                    lm.createdAt,
+                    IDENTITY(lm.sender),
+
+                    IDENTITY(cpOther.user),
+                    IDENTITY(cpOther.lastReadMessage),
+                    cpOther.lastReadAt
+                )',
+                ChatListItemRowDTO::class
+            ))
+            ->addSelect('COALESCE(lm.createdAt, c.createdAt) AS HIDDEN sortDate');
+
+        return $qb;
+    }
+
+    private function applyUnreadOnlyFilter(QueryBuilder $qb, Uuid $userId): void
+    {
+        $qb->andWhere('lm.id IS NOT NULL')
+            ->andWhere('(cpCurrent.lastReadAt IS NULL OR cpCurrent.lastReadAt < lm.createdAt)')
+            ->andWhere('IDENTITY(lm.sender) != :user')
+            ->setParameter('user', $userId);
     }
 
 }

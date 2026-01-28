@@ -52,6 +52,7 @@ final class FriendsRequestsController extends AbstractController
         $typeStr = $request->query->get('type');
         $page = max((int) $request->query->get('page', 1), 1);
         $limit = min(max((int) $request->query->get('limit', 20), 1), 50);
+        $search = $request->query->get('search', null);
 
         if (!$typeStr) {
             return $this->json(['error' => 'Type query parameter is required'], JsonResponse::HTTP_BAD_REQUEST);
@@ -62,7 +63,7 @@ final class FriendsRequestsController extends AbstractController
             return $this->json(['error' => 'Invalid type parameter'], JsonResponse::HTTP_BAD_REQUEST);
         }
 
-        $previews = $this->listFriendRequests->execute($currentUser->getId(), $type, $page, $limit);
+        $previews = $this->listFriendRequests->execute($currentUser->getId(), $type, $page, $limit, $search);
 
         return $this->json($previews, JsonResponse::HTTP_OK);
     }
@@ -90,7 +91,6 @@ final class FriendsRequestsController extends AbstractController
         try {
             $this->cancelFriendRequest->execute($currentUser->getId(), Uuid::fromString($addresseeId));
         } catch (\Throwable $e) {
-            // TODO: change to proper error handling
             return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
         return $this->json(['message' => 'Friend request canceled'], JsonResponse::HTTP_OK);

@@ -2,19 +2,23 @@
 
 namespace App\Modules\Chat\Application\Action\Chat;
 
-use App\Modules\Chat\Application\ReadModel\Chat\ChatDTOMapper;
+use App\Modules\Chat\Application\DTO\ChatListItemDTO;
+use App\Modules\Chat\Application\ReadModel\Chat\ChatListAssembler;
+use App\Modules\Chat\Domain\Enum\ChatTypeEnum;
 use App\Modules\Chat\Domain\Repository\ChatParticipantRepositoryInterface;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use App\Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Symfony\Component\Uid\Uuid;
 
 final class GetChat
 {
     public function __construct(
         private readonly ChatParticipantRepositoryInterface $chatParticipantRepository,
-        private readonly ChatDTOMapper $chatDTOMapper,
-    ) {}
+        private readonly ChatRepositoryInterface $chatRepository,
+        private readonly ChatListAssembler $chatListAssembler,
+    ) {
+    }
 
-    public function __invoke(Uuid $chatId, Uuid $userId): array
+    public function __invoke(Uuid $chatId, Uuid $userId): ?ChatListItemDTO
     {
         $chatParticipant = $this->chatParticipantRepository->findOneBy([
             'chat' => $chatId,
@@ -22,11 +26,15 @@ final class GetChat
         ]);
 
         if (!$chatParticipant) {
-            throw new AccessDeniedException('You are not a participant of this chat.');
+            throw new \LogicException('You are not a participant of this chat.');
         }
 
-        $chat = $chatParticipant->getChat();
+        if ($chatParticipant->getChat()->getType() === ChatTypeEnum::GROUP && $chatParticipant->getDeletedAt() !== null) {
+            throw new \LogicException('You are not a participant of this chat.');
+        }
 
-        return $this->chatDTOMapper->toChatResponseDTO($chat, $userId);
+        $chat = $this->chatRepository->findUserChatRowById($userId, $chatId);
+
+        return $this->chatListAssembler->assemble($userId, [$chat])[0];
     }
 }

@@ -61,7 +61,7 @@ export function ChatMessagesVirtualList(props: {
   } = props;
 
   return (
-    <CardContent className="flex-1 min-h-0 p-0 relative">
+    <CardContent className="flex-1 min-h-0 p-0 relative px-9">
       <div ref={parentRef} className="h-full overflow-auto">
         {isFetching && (
           <div className="py-2 text-center text-xs text-muted-foreground">

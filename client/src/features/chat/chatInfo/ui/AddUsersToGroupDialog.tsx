@@ -1,23 +1,22 @@
 import { useState } from "react";
+import { CirclePlus } from "lucide-react";
 
 import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
 
 import { sessionStore } from "@/entities/session/model/sessionStore";
 import { useFriends } from "@/entities/friends/model/useFriends";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { useInfiniteScrollSentinel } from "@/shared/hooks/useInfiniteScrollSentinel";
-import { useCreateChatMutation } from "@/entities/chat/model/hooks/useChatMutation";
+import { useAddMemberMutation } from "../../../../entities/chat/model/hooks/useChatMutation";
 
-import { SelectUsersDialog } from "./SelectUsersDialog";
+import { SelectUsersDialog } from "../../../../entities/chat/ui/SelectUsersDialog";
 
-const CreateChatDialog = () => {
+const AddUsersToGroupDialog = ({ chatId }: { chatId: string }) => {
   const user = sessionStore((s) => s.user);
 
+  const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebouncedValue(search, 500);
-
-  const [title, setTitle] = useState("New chat");
 
   const {
     data: friends,
@@ -36,41 +35,36 @@ const CreateChatDialog = () => {
     fetchNextPage,
   });
 
-  const createChat = useCreateChatMutation();
+  const addMembers = useAddMemberMutation();
 
   return (
     <SelectUsersDialog
-      trigger={<Button>Create New Chat</Button>}
-      title="Create chat"
+      open={open}
+      onOpenChange={setOpen}
+      trigger={
+        <Button className="flex items-center gap-2 mb-2 mt-2">
+          <CirclePlus className="h-4 w-4" />
+          <span>Add Member</span>
+        </Button>
+      }
+      title="Add Users to Group"
       users={friends ?? []}
-      isLoading={createChat.isPending}
+      isLoading={addMembers.isPending}
       isError={isError}
       error={error ?? null}
       search={search}
       setSearch={setSearch}
       sentinelRef={sentinelRef}
-      headerSlot={
-        <div className="flex gap-2">
-          <Input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Chat title..."
-          />
-        </div>
-      }
       submitText={(count) =>
-        createChat.isPending ? "Creating..." : `Create Chat (${count})`
+        addMembers.isPending ? "Adding..." : `Add (${count})`
       }
-      onSubmit={async (selectedIds) => {
-        await createChat.mutateAsync({
-          title: title.trim(),
-          participantIds: selectedIds,
-        });
-
-        setTitle("New chat");
-      }}
+      onSubmit={(selectedIds) =>
+        addMembers
+          .mutateAsync({ chatId, userIds: selectedIds })
+          .then(() => setOpen(false))
+      }
     />
   );
 };
 
-export default CreateChatDialog;
+export default AddUsersToGroupDialog;
