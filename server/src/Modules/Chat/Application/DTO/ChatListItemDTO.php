@@ -19,6 +19,7 @@ final class ChatListItemDTO
         public readonly ?string $lastReadMessageId,
         public readonly ?string $lastReadAt,
         public readonly string $currentUserRole,
+        public readonly bool $isMuted,
 
         public readonly ?ChatMessagePreviewDTO $lastMessage,
         public readonly int $unreadMessageCount,

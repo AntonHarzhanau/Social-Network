@@ -2,10 +2,7 @@
 
 namespace App\Modules\Chat\Application\Action\Chat;
 
-use App\Modules\Chat\Application\DTO\ChatListItemRowDTO;
-use App\Modules\Chat\Application\ReadModel\Chat\ChatDTOMapper;
 use App\Modules\Chat\Application\ReadModel\Chat\ChatListAssembler;
-use App\Modules\Chat\Domain\Entity\Chat;
 use App\Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use App\Modules\Chat\Domain\Repository\MessageRepositoryInterface;
 use Symfony\Component\Uid\Uuid;

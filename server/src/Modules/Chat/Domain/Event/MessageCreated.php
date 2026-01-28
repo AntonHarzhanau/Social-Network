@@ -7,5 +7,6 @@ final readonly class MessageCreated
     public function __construct(
         public string $chatId,
         public array $message,
+        public array $chat,
     ) {}
 }

@@ -14,7 +14,8 @@ interface ChatParticipantRepositoryInterface
         Uuid $chatId,
         ?int $page = null,
         ?int $limit = null,
-        ?bool $includeDeleted = false,
+        bool $includeDeleted = false,
+        ?bool $isMuted = null,
         ?string $search = null
     ): array;
 

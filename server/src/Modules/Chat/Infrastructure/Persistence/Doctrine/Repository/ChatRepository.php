@@ -107,6 +107,7 @@ class ChatRepository extends ServiceEntityRepository implements ChatRepositoryIn
                     IDENTITY(cpCurrent.lastReadMessage),
                     cpCurrent.lastReadAt,
                     cpCurrent.role,
+                    cpCurrent.isMuted,
 
                     lm.id,
                     lm.content,

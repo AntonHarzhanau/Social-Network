@@ -7,6 +7,7 @@ import {
   addMembers,
   changeMemberRole,
   createChat,
+  muteChatToggle,
   removeMember,
   type CreateChatPayload,
 } from "../../api/chat";
@@ -103,6 +104,19 @@ export function useChangeMemberRoleMutation() {
 
     onSettled: (_data, _err, vars) => {
       qc.invalidateQueries({ queryKey: chatKeys.members(vars.chatId) });
+      qc.invalidateQueries({ queryKey: chatKeys.all });
+    },
+  });
+}
+
+export function useMuteChatMutation() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (chatId: string) => {
+      await muteChatToggle(chatId);
+    },
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: chatKeys.all });
     },
   });

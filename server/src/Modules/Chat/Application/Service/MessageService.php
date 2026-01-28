@@ -81,10 +81,17 @@ class MessageService
             'createdAt' => $message->getCreatedAt()->format(\DateTime::ATOM),
         ];
 
+        $chatSnapshot = [
+            'type' => $chat->getType()->value,
+            'title' => $chat->getTitle(),
+            'avatarUrl' => $chat->getAvatarUrl()
+        ];
+
         $this->eventBus->dispatch(
             new MessageCreated(
                 chatId: (string) $chat->getId(),
-                message: $payload
+                message: $payload,
+                chat: $chatSnapshot,
             )
         );
 

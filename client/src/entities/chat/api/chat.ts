@@ -147,3 +147,7 @@ export const changeMemberRole = async (
     newRole,
   });
 };
+
+export const muteChatToggle = async (chatId: string): Promise<void> => {
+  await apiClient.post(`/chats/${chatId}/mute`);
+};

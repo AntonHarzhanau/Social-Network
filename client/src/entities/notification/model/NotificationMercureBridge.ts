@@ -26,6 +26,16 @@ type NotificationCreatedEvent = {
   unreadCount?: number;
 };
 
+type NotificationChangedEvent = {
+  type: "notification_changed";
+  kind?: string;
+  chatId?: string;
+  notificationId?: string;
+  unreadCount?: number;
+};
+
+type NotificationEvent = NotificationCreatedEvent | NotificationChangedEvent;
+
 const FRIEND_REQUEST_TYPE = "FRIEND_REQUEST_CREATED";
 const FRIEND_REQUEST_ACCEPTED_TYPE = "FRIEND_REQUEST_ACCEPTED";
 
@@ -46,15 +56,37 @@ export function NotificationsMercureBridge() {
   };
 
   const onMessage = useCallback(
-    (payload: NotificationCreatedEvent) => {
+    (payload: NotificationEvent) => {
       if (typeof payload.unreadCount === "number") {
         queryClient.setQueryData(["notifications", "unread-count"], {
           unreadCount: payload.unreadCount,
         });
       }
 
-      // ВАЖНО: если пришла заявка в друзья — обновляем friends stats (badge)
-      if (payload.notification.type === FRIEND_REQUEST_TYPE) {
+      if (payload.type === "notification_changed") {
+        queryClient.invalidateQueries({ queryKey: ["notifications"] });
+
+        // чаты/бейджи — как ты и хотел: пусть клиент сам перезапросит
+        // ПОДСТАВЬ свои реальные queryKeys для списков чатов и unread-summary:
+        queryClient.invalidateQueries({ queryKey: ["chats"] });
+        queryClient.invalidateQueries({
+          queryKey: ["chats", "unread-summary"],
+        });
+
+        // если у тебя есть отдельный запрос по chatId (опционально):
+        if (payload.chatId) {
+          queryClient.invalidateQueries({
+            queryKey: ["chats", "by-id", payload.chatId],
+          });
+        }
+
+        return;
+      }
+
+      // 2) Старый формат: "notification_created" — твоя текущая логика (friends toast)
+      const notif = payload.notification;
+
+      if (notif.type === FRIEND_REQUEST_TYPE) {
         queryClient.setQueryData<MyFriendsStats>(
           friendsQueryKeys.stats.me(),
           (old) => {
@@ -67,15 +99,14 @@ export function NotificationsMercureBridge() {
           },
         );
 
-        // toast с action, ведущим на страницу заявок
-        toast(payload.notification.text, {
+        toast(notif.text, {
           action: { label: "Open", onClick: openReceivedRequests },
         });
 
         return;
       }
 
-      if (payload.notification.type === FRIEND_REQUEST_ACCEPTED_TYPE) {
+      if (notif.type === FRIEND_REQUEST_ACCEPTED_TYPE) {
         queryClient.setQueryData<MyFriendsStats>(
           friendsQueryKeys.stats.me(),
           (old) => {
@@ -88,21 +119,19 @@ export function NotificationsMercureBridge() {
           },
         );
 
-        // toast с action, ведущим на страницу всех друзей
-        toast(payload.notification.text, {
+        toast(notif.text, {
           action: { label: "Open", onClick: openAllFriends },
         });
 
         return;
       }
 
-      // другие уведомления — обычный toast
-      toast(payload.notification.text);
+      toast(notif.text);
     },
-    [queryClient, userId, navigate, setFilter],
+    [queryClient, navigate, setFilter],
   );
 
-  useMercure<NotificationCreatedEvent>({
+  useMercure<NotificationEvent>({
     topic: userId ? topics.userNotifications(userId) : "",
     enable: !!userId,
     onMessage,

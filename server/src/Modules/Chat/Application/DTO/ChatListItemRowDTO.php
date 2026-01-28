@@ -19,6 +19,7 @@ final class ChatListItemRowDTO
         public readonly ?string $lastReadMessageId,
         public readonly ?\DateTimeInterface $lastReadAt,
         public readonly ChatParticipantRoleEnum $currentUserRole,
+        public readonly bool $isMuted,
 
         public readonly ?string $lastMessageId,
         public readonly ?string $lastMessageContent,

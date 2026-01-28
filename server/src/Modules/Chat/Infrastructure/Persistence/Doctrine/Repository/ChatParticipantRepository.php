@@ -36,16 +36,21 @@ class ChatParticipantRepository extends ServiceEntityRepository implements ChatP
         Uuid $chatId,
         ?int $page = null,
         ?int $limit = null,
-        ?bool $includeDeleted = false,
+        bool $includeDeleted = false,
+        ?bool $isMuted = null,
         ?string $search = null
     ): array {
         $qb = $this->createQueryBuilder('cp')
-            ->select('u.id AS userId', 'cp.role AS role')
+            ->select('u.id AS userId', 'cp.role AS role, cp.isMuted AS isMuted')
             ->innerJoin('cp.user', 'u')
             ->andWhere('cp.chat = :chat');
 
         if (!$includeDeleted) {
             $qb->andWhere('cp.deletedAt IS NULL');
+        }
+
+        if ($isMuted !== null) {
+            $qb->andWhere($isMuted ? 'cp.isMuted = true' : 'cp.isMuted = false');
         }
 
         $q = $search !== null ? trim($search) : '';

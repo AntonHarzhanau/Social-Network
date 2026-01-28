@@ -11,6 +11,7 @@ use App\Modules\Chat\Application\Action\Chat\GetChatMembers;
 use App\Modules\Chat\Application\Action\Chat\GetChatMessages;
 use App\Modules\Chat\Application\Action\Chat\GetUnreadChatCountAction;
 use App\Modules\Chat\Application\Action\Chat\MarkChatReadAction;
+use App\Modules\Chat\Application\Action\Chat\MuteChatAction;
 use App\Modules\Chat\Application\Action\Chat\RemoveUserFromChat;
 use App\Modules\Chat\Application\Action\Chat\UpdateChatInfo;
 use App\Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
@@ -174,6 +175,16 @@ final class ChatController extends AbstractController
         return $this->json(['message' => 'Member role changed successfully'], JsonResponse::HTTP_OK);
     }
 
+    #[Route('/{chatId}/mute', name: 'mute_chat', methods: ['POST'], format: 'json')]
+    public function muteChatToggle(
+        string $chatId,
+        #[CurrentUser] User $currentUser,
+        MuteChatAction $action,
+    ): JsonResponse {
+        $isMuted = $action->execute(Uuid::fromString($chatId), $currentUser->getId());
+
+        return $this->json(['isMuted' => $isMuted], JsonResponse::HTTP_OK);
+    }
 
     #[Route('/{chatId}/read', name: 'mark_chat_as_read', methods: ['PATCH'], format: 'json')]
     public function markRead(

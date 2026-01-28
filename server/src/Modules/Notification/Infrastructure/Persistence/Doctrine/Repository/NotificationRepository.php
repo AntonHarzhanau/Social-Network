@@ -4,6 +4,7 @@ namespace App\Modules\Notification\Infrastructure\Persistence\Doctrine\Repositor
 
 use App\Modules\Notification\Application\DTO\NotificationRawDTO;
 use App\Modules\Notification\Domain\Entity\Notification;
+use App\Modules\Notification\Domain\Enum\NotificationTypeEnum;
 use App\Modules\Notification\Domain\Repository\NotificationRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -74,5 +75,23 @@ class NotificationRepository extends ServiceEntityRepository implements Notifica
             ->setParameter('recipientId', $recipientId);
 
         return $qb->getQuery()->getResult();
+    }
+
+    public function findGroupedForRecipient(
+        Uuid $recipientId,
+        NotificationTypeEnum $type,
+        string $groupKey
+    ): ?Notification {
+        $qb = $this->createQueryBuilder('n')
+            ->where('IDENTITY(n.recipient) = :recipientId')
+            ->andWhere('n.type = :type')
+            ->andWhere('n.groupKey = :groupKey')
+            ->setParameter('recipientId', $recipientId)
+            ->setParameter('type', $type->value)
+            ->setParameter('groupKey', $groupKey)
+            ->setMaxResults(1);
+
+        /** @var Notification|null */
+        return $qb->getQuery()->getOneOrNullResult();
     }
 }

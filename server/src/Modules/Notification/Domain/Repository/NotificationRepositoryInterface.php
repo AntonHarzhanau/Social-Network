@@ -3,6 +3,7 @@
 namespace App\Modules\Notification\Domain\Repository;
 
 use App\Modules\Notification\Domain\Entity\Notification;
+use App\Modules\Notification\Domain\Enum\NotificationTypeEnum;
 use Symfony\Component\Uid\Uuid;
 
 interface NotificationRepositoryInterface
@@ -18,5 +19,11 @@ interface NotificationRepositoryInterface
     public function findByRecipientId(Uuid $recipientId, int $page = 1, int $limit = 20): array;
 
     public function findById(Uuid $notificationId): ?Notification;
+
+    public function findGroupedForRecipient(
+    Uuid $recipientId,
+    NotificationTypeEnum $type,
+    string $groupKey
+): ?Notification;
 
 }

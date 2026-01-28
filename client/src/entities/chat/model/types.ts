@@ -17,6 +17,7 @@ export interface Chat {
   lastMessage?: Message;
   lastMessageAt?: string;
   currentUserRole: ChatMemberRole;
+  isMuted: boolean;
   lastReadAt?: string | null;
   lastReadMessageId?: string | null;
   unreadMessageCount: number;

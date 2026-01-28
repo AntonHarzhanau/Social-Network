@@ -14,6 +14,7 @@ final class ChatListAssembler
     public function __construct(
         private readonly UserDirectoryInterface $userDirectory,
         private readonly MessageRepositoryInterface $messageRepository,
+        private readonly ChatDisplayResolver $displayResolver,
     ) {
     }
 
@@ -57,29 +58,20 @@ final class ChatListAssembler
                     $sender
                 );
             }
-            $displayAvatarUrl = null;
-            $title = null;
-            if ($r->type->value === 'direct') {
-                $displayAvatarUrl = $otherUser?->avatarUrl;
-                $title = $otherUser?->name;
-            } else if ($r->type->value === 'group') {
-                $displayAvatarUrl = $r->avatarUrl;
-                $title = $r->title;
-            } else {
-                $displayAvatarUrl = null;
-                $title = 'Personal Chat';
-            }
+
+            $display = $this->displayResolver->resolve($r, $otherUser);
 
             $out[] = new ChatListItemDTO(
                 $r->chatId,
                 $r->type->value,
-                $title,
-                $displayAvatarUrl,
+                $display->title,
+                $display->avatarUrl,
                 $r->createdAt->format(DATE_ATOM),
                 $r->updatedAt ? $r->updatedAt->format(DATE_ATOM) : null,
                 $r->lastReadMessageId,
                 $r->lastReadAt ? $r->lastReadAt->format(DATE_ATOM) : null,
                 $r->currentUserRole->value,
+                $r->isMuted,
                 $lastMessage,
                 $unreadCounts[$r->chatId] ?? 0,
                 $r->lastReadMessageByOther,

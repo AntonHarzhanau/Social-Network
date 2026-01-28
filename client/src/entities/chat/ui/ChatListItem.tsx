@@ -10,9 +10,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import { Ellipsis } from "lucide-react";
+import { Ellipsis, VolumeOff } from "lucide-react";
 import { sessionStore } from "@/entities/session/model/sessionStore";
-import { useRemoveMemberMutation } from "../model/hooks/useChatMutation";
+import {
+  useMuteChatMutation,
+  useRemoveMemberMutation,
+} from "../model/hooks/useChatMutation";
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
 import { useState } from "react";
 
@@ -24,6 +27,7 @@ const ChatListItem = ({ chat }: ChatListItemProps) => {
   const userId = sessionStore((s) => s.user?.id);
   const { openChat, putChatToByIdCache } = useChatRouting();
   const leaveChat = useRemoveMemberMutation();
+  const toggleMute = useMuteChatMutation();
   const open = useOpenedChatsStore((s) => s.open);
   const [confirmOpen, setConfirmOpen] = useState(false);
   return (
@@ -45,7 +49,14 @@ const ChatListItem = ({ chat }: ChatListItemProps) => {
 
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <div className="flex flex-col flex-1 w-0 overflow-hidden">
-            <h2 className="truncate">{chat.title}</h2>
+            <div className="flex gap-2 items-baseline">
+              <h2 className="truncate">{chat.title}</h2>
+              {chat.isMuted && (
+                <Badge variant="outline" className="p-0.5">
+                  <VolumeOff size={12} strokeWidth={2.25} />
+                </Badge>
+              )}
+            </div>
             <p className="text-sm text-muted-foreground truncate">
               {chat.lastMessage?.content}
             </p>
@@ -62,10 +73,16 @@ const ChatListItem = ({ chat }: ChatListItemProps) => {
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-card p-2 rounded-2xl">
                 <DropdownMenuItem
+                  className="text-accent-foreground focus:bg-accent-foreground/10"
+                  onSelect={() => toggleMute.mutate(chat.id)}
+                >
+                  {chat.isMuted ? "Unmute" : "Mute"}
+                </DropdownMenuItem>
+                <DropdownMenuItem
                   className="text-destructive focus:bg-destructive/10"
                   onSelect={() => setConfirmOpen(true)}
                 >
-                  Delete
+                  Leave
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

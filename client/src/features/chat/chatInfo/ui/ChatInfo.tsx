@@ -46,7 +46,7 @@ const ChatInfo = ({ children, chat }: { children: ReactNode; chat: Chat }) => {
             <h2 className="text-lg font-semibold">{chat.title}</h2>
           </div>
 
-          <Tabs defaultValue="members" className="w-[400px]">
+          <Tabs defaultValue="members" className="w-full">
             <TabsList>
               <TabsTrigger value="members">Members</TabsTrigger>
               <TabsTrigger value="photo">Photo</TabsTrigger>
