@@ -9,8 +9,14 @@ use Symfony\Component\Uid\Uuid;
 final class GroupApi implements GroupApiInterface
 {
     public function __construct(
-       private readonly GetGroupPreviewsByWallsAction $getGroupPreviewsAction, 
+       private readonly GetGroupPreviewsByWallsAction $getGroupPreviewsAction,
+       private readonly GroupRepositoryInterface $groupRepository,
     ) {}
+
+    public function findGroupWallIdsByUserId(Uuid $userId): array
+    {
+        return $this->groupRepository->findWallIdsByUserId($userId);
+    }
     
     /** @return GroupPreviewDTO[] */
     public function getGroupsPreviewsByWallIds(Uuid $currentUserId, array $wallIds): array

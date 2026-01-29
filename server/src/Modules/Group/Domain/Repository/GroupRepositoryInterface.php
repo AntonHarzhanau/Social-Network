@@ -14,12 +14,8 @@ interface GroupRepositoryInterface
 
     public function findById(Uuid $groupId): ?Group;
 
-    public function findAllGroupsWithSubscribers(Uuid $currentUserId, int $page, $limit): array;
-
-    // public function findGroupDitailsById(Uuid $currentUserId, Uuid $groupId): ?GroupDetailsRawDTO;
-
     /** @return array<string> wallIds */
-    public function findWallIdsByGroupIds(array $groupIds): array;
+    public function findWallIdsByUserId(Uuid $userId): array;
 
     public function findGroupsByWallIds(Uuid $currentUserId, array $wallIds): array;
 

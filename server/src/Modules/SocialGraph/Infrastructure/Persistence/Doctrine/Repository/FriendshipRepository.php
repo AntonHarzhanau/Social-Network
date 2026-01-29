@@ -46,6 +46,35 @@ final class FriendshipRepository extends ServiceEntityRepository implements Frie
     }
 
 
+    /**
+     * @return list<string> wall ids of accepted friends
+     */
+    public function findFriendsWallIds(
+        Uuid $userId,
+        ?int $page = null,
+        ?int $limit = null,
+        ?string $search = null
+    ): array {
+        $qb = $this->qbUserRelationsBase($userId);
+
+        $this->applyStatus($qb, FriendshipStatusEnum::ACCEPTED);
+        $this->applySearchByOtherUserName($qb, $search);
+        $this->applyPagination($qb, $page, $limit);
+
+        $qb->select(
+            'CASE
+            WHEN IDENTITY(f.requester) = :user THEN IDENTITY(addr.wall)
+            ELSE IDENTITY(req.wall)
+        END AS wallId'
+        );
+
+        $rows = $qb->getQuery()->getScalarResult();
+
+        return array_map(static fn(array $r) => (string) $r['wallId'], $rows);
+    }
+
+
+
     public function findFriendship(
         Uuid $userAId,
         Uuid $userBId,

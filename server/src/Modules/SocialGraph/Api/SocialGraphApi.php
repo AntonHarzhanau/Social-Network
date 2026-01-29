@@ -45,4 +45,9 @@ class SocialGraphApi implements SocialGraphApiInterface
             [FriendshipStatusEnum::ACCEPTED, FriendshipStatusEnum::PENDING],
         ) ? true : false;
     }
+
+    public function getFriendsWallIdsForUser(Uuid $currentUserId): array
+    {
+        return $this->friendshipRepository->findFriendsWallIds($currentUserId);
+    }
 }

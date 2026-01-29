@@ -45,37 +45,25 @@ class GroupRepository extends ServiceEntityRepository implements GroupRepository
         return $this->find($groupId);
     }
 
-    public function findAllGroupsWithSubscribers(Uuid $currentUserId, int $page, $limit): array
-    {
-        $qb = $this->baseQB($currentUserId);
-
-        $qb->andWhere('g.deletedAt IS NULL')
-            ->setFirstResult(($page - 1) * $limit)
-            ->setMaxResults($limit);
-
-        $result = $qb->getQuery()->getResult();
-        return $result;
-    }
-
-    public function findByIdWithSubscribers(Uuid $currentUserId, Uuid $groupId): ?GroupPreviewRawDTO
-    {
-        $qb = $this->baseQB($currentUserId);
-        $qb->andWhere('g.id = :groupId')
-            ->setParameter('groupId', $groupId)
-            ->andWhere('g.deletedAt IS NULL');
-        return $qb->getQuery()->getOneOrNullResult();
-    }
-
     /** @return array<string> wallIds */
-    public function findWallIdsByGroupIds(array $groupIds): array
+    public function findWallIdsByUserId(Uuid $userId): array
     {
-        return $this->createQueryBuilder('g')
-            ->select('IDENTITY(g.wall) AS wallId')
-            ->andWhere('g.id IN (:ids)')
-            ->setParameter('ids', $groupIds)
-            ->getQuery()
-            ->getSingleColumnResult();
+        $qb = $this->createQueryBuilder('g')
+            ->innerJoin(
+                GroupMember::class,
+                'gm',
+                'WITH',
+                'gm.group = g AND IDENTITY(gm.user) = :currentUserId'
+            )
+            ->select('DISTINCT IDENTITY(g.wall)')
+            ->andWhere('g.deletedAt IS NULL')
+            ->andWhere('gm.status = :accepted')
+            ->setParameter('currentUserId', $userId)
+            ->setParameter('accepted', GroupMemberStatusEnum::ACCEPTED);
+
+        return $qb->getQuery()->getSingleColumnResult();
     }
+
 
     public function findGroupsByWallIds(Uuid $currentUserId, array $wallIds): array
     {
@@ -110,13 +98,13 @@ class GroupRepository extends ServiceEntityRepository implements GroupRepository
     public function findOwnedGroups(Uuid $currentUserId, ?string $q = null, int $page = 1, int $limit = 10): array
     {
         $qb = $this->baseQB($currentUserId, $q)
-        ->andWhere('gm.id IS NOT NULL')
-        ->andWhere('IDENTITY(g.owner) = :currentUserId')
-        ->orderBy('g.createdAt', 'DESC')
-        ->setParameter('currentUserId', $currentUserId)
-        ->setFirstResult(($page - 1) * $limit)
-        ->setMaxResults($limit);
-        
+            ->andWhere('gm.id IS NOT NULL')
+            ->andWhere('IDENTITY(g.owner) = :currentUserId')
+            ->orderBy('g.createdAt', 'DESC')
+            ->setParameter('currentUserId', $currentUserId)
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
         return $qb->getQuery()->getResult();
     }
 

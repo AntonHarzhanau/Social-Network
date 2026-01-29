@@ -10,4 +10,6 @@ interface SocialGraphApiInterface
     public function isUserBlockedByUser(Uuid $userId, Uuid $potentialBlockerId): bool;
     public function getFriendsIdsForUser(Uuid $currentUserId): array;
     public function areUsersFriends(Uuid $userId, Uuid $potentialFriendId): bool;
+
+    public function getFriendsWallIdsForUser(Uuid $currentUserId): array;
 }

@@ -38,7 +38,7 @@ final class GetGroupPreviewsByWallsAction
                 avatarUrl: $group->avatarId ? ($medias[$group->avatarId]->url ?? null) : null,
             );
         }
-    
+        
         return $result;
     }
 }

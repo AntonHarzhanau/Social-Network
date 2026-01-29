@@ -30,4 +30,6 @@ interface FriendshipRepositoryInterface
 
     public function countUserFriends(Uuid $userId, FriendCountMode $mode = FriendCountMode::FRIENDS): int;
 
+    public function findFriendsWallIds(Uuid $userId): array;
+
 }

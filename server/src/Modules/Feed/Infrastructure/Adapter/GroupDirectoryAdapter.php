@@ -11,8 +11,14 @@ class GroupDirectoryAdapter implements GroupDirectoryInterface
 {
     public function __construct(
         private readonly GroupApiInterface $groupApi,
-    ) {}
-   
+    ) {
+    }
+
+    public function findGroupWallIdsByUserId(Uuid $userId): array
+    {
+        return $this->groupApi->findGroupWallIdsByUserId($userId);
+    }
+
     public function findPreviewsByWallIds(Uuid $currentUserId, array $wallIds): array
     {
         $groups = $this->groupApi->getGroupsPreviewsByWallIds($currentUserId, $wallIds);

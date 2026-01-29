@@ -100,7 +100,8 @@ class PostFactory
                 $groupOwnerByWallId[$g->wallId] = $g;
             }
         }
-        
+       
+
         // build responses
         $posts = [];
         foreach ($dtos as $row) {
@@ -123,10 +124,11 @@ class PostFactory
                     wallId: $row->wallId,
                     isOnline: false,
                 );
-                $canDelete = ($row->wallOwnerType === WallOwnerTypeEnum::USER)
-                ? $row->authorId === (string)$currentUserId 
-                : $groupOwnerByWallId[$row->wallId]->role === 'owner' 
-                    || $groupOwnerByWallId[$row->wallId]->role === 'admin';
+
+            $canDelete = ($row->wallOwnerType === WallOwnerTypeEnum::USER)
+                ? $row->authorId === (string) $currentUserId
+                : $groupOwnerByWallId[$row->wallId]->role === 'owner'
+                || $groupOwnerByWallId[$row->wallId]->role === 'admin';
 
             $posts[] = $this->toPostResponse(
                 row: $row,
