@@ -2,35 +2,37 @@ import { apiClient } from "@/shared/api/apiClient";
 import type {
   FetchGroupMembersResponse,
   Group,
+  GroupFilter,
   GroupPreview,
+  MemberRole,
   MemberStatus,
 } from "../model/types";
+
+export type FetchGroupsParams = {
+  page?: number;
+  limit?: number;
+  groupName?: string;
+  filter?: GroupFilter;
+};
 
 export const fetchGroups = async ({
   page = 1,
   limit = 10,
   groupName = "",
-  forMe = false,
-}: {
-  page?: number;
-  limit?: number;
-  groupName?: string;
-  forMe?: boolean;
-}): Promise<GroupPreview[]> => {
+  filter = "all",
+}: FetchGroupsParams): Promise<GroupPreview[]> => {
   const response = await apiClient.get<GroupPreview[]>("/groups", {
-    params: {
-      page,
-      limit,
-      groupName,
-      forMe,
-    },
+    params: { page, limit, groupName, filter },
   });
   return response.data;
 };
 
-export const createGroup = async (name: string): Promise<void> => {
-  const response = await apiClient.post("/groups", { name });
-  return response.data;
+export const createGroup = async (payload: {
+  name: string;
+  description?: string | null;
+  visibility: "public" | "private";
+}): Promise<void> => {
+  await apiClient.post("/groups", payload);
 };
 
 export const fetchGroupById = async (groupId: string): Promise<Group> => {
@@ -38,24 +40,37 @@ export const fetchGroupById = async (groupId: string): Promise<Group> => {
   return response.data;
 };
 
+export const updateGroupSettings = async (
+  groupId: string,
+  payload: Partial<Pick<Group, "name" | "description" | "visibility">>,
+): Promise<void> => {
+  await apiClient.put(`/groups/${groupId}`, payload);
+};
+
 export const setGroupAvatar = async (
   groupId: string,
   avatarId?: string | null,
 ): Promise<void> => {
-  const response = await apiClient.post(`/groups/${groupId}/avatar`, {
+  await apiClient.post<void>(`/groups/${groupId}/avatar`, {
     avatarId,
   });
-  return response.data;
+};
+
+export const setGroupCover = async (
+  groupId: string,
+  coverId?: string | null,
+): Promise<void> => {
+  await apiClient.post<void>(`/groups/${groupId}/cover`, {
+    coverId,
+  });
 };
 
 export const leaveGroup = async (groupId: string): Promise<void> => {
-  const response = await apiClient.post(`/groups/${groupId}/leave`);
-  return response.data;
+  await apiClient.post<void>(`/groups/${groupId}/leave`);
 };
 
 export const joinGroup = async (groupId: string): Promise<void> => {
-  const response = await apiClient.post(`/groups/${groupId}/subscribe`);
-  return response.data;
+  await apiClient.post<void>(`/groups/${groupId}/subscribe`);
 };
 
 export const fetchGroupMembers = async (
@@ -63,36 +78,36 @@ export const fetchGroupMembers = async (
   page = 1,
   limit = 8,
   status?: MemberStatus,
+  q?: string,
 ): Promise<FetchGroupMembersResponse> => {
   const response = await apiClient.get<FetchGroupMembersResponse>(
     `/groups/${groupId}/members`,
-    {
-      params: {
-        page,
-        limit,
-        status,
-      },
-    },
+    { params: { page, limit, status, name: q } },
   );
+  console.log("fetchGroupMembers response:", response.data);
   return response.data;
 };
 
-export const changeGroupMemberRole = async (
-  memberId: string,
-  newRole: string,
-): Promise<void> => {
-  const response = await apiClient.put(`/groups/members/${memberId}/role`, {
-    newRole,
+export const changeGroupMemberRole = async (payload: {
+  memberId: string;
+  newRole: MemberRole;
+}): Promise<void> => {
+  await apiClient.put(`/groups/members/${payload.memberId}/role`, {
+    newRole: payload.newRole,
   });
-  return response.data;
 };
 
-export const changeGroupMemberStatus = async (
-  memberId: string,
-  newStatus: string,
-): Promise<void> => {
-  const response = await apiClient.put(`/groups/members/${memberId}/status`, {
-    newStatus,
+export const changeGroupMemberStatus = async (payload: {
+  memberId: string;
+  newStatus: MemberStatus;
+}): Promise<void> => {
+  await apiClient.put(`/groups/members/${payload.memberId}/status`, {
+    newStatus: payload.newStatus,
   });
-  return response.data;
+};
+
+export const rejectGroupJoinRequest = async (
+  memberId: string,
+): Promise<void> => {
+  await apiClient.delete(`/groups/members/${memberId}`);
 };

@@ -4,7 +4,7 @@ import {
   type CreateGroupValues,
 } from "../model/CreateGroupSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { apiClient } from "@/shared/api/apiClient";
+
 import {
   Dialog,
   DialogClose,
@@ -17,8 +17,12 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { FormInput } from "@/shared/components/FormInput";
 import { FormSelect } from "@/shared/components/FormSelect";
+import { useState } from "react";
+import { useCreateGroupMutation } from "@/entities/group/model/useGroupMutations";
 
 const CreateGroupForm = () => {
+  const [open, setOpen] = useState(false);
+
   const form = useForm<CreateGroupValues>({
     resolver: zodResolver(CreateGroupSchema),
     defaultValues: {
@@ -27,17 +31,26 @@ const CreateGroupForm = () => {
     },
   });
 
+  const createMut = useCreateGroupMutation();
+
   const handleSubmit = async (data: CreateGroupValues) => {
-    console.log("Creating group with data:", data);
-    await apiClient.post("/groups", data);
+    await createMut.mutateAsync({
+      name: data.name,
+      visibility: data.visibility,
+      // description: null,
+    });
+
     form.reset();
+    setOpen(false);
   };
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <form id="create-group-form" onSubmit={form.handleSubmit(handleSubmit)}>
         <DialogTrigger asChild>
           <Button variant="outline">Create Community</Button>
         </DialogTrigger>
+
         <DialogContent
           className="sm:max-w-[425px]"
           aria-describedby={undefined}
@@ -69,12 +82,24 @@ const CreateGroupForm = () => {
               />
             </div>
           </div>
+
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button
+                variant="outline"
+                type="button"
+                disabled={createMut.isPending}
+              >
+                Cancel
+              </Button>
             </DialogClose>
-            <Button type="submit" form="create-group-form">
-              Create
+
+            <Button
+              type="submit"
+              form="create-group-form"
+              disabled={createMut.isPending}
+            >
+              {createMut.isPending ? "Creating..." : "Create"}
             </Button>
           </DialogFooter>
         </DialogContent>

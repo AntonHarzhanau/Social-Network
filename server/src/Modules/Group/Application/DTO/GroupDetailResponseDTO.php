@@ -9,14 +9,14 @@ final readonly class GroupDetailResponseDTO
     public function __construct(
         public string $id,
         public string $name,
-        public string $groupVisibility,
         public bool $isMember,
+        public int $subscribersCount,
+        public ?MediaItemDTO $currentAvatar,
+        public string $groupVisibility,
         public ?string $role,
         public ?string $status,
         public ?string $description,
-        public int $subscribersCount,
         public ?string $wallId,
-        public ?MediaItemDTO $currentAvatar,
         public ?MediaItemDTO $cover,
     ) {}
 }

@@ -74,7 +74,7 @@ final class MessageCreatedNotificationProducer implements EventSubscriberInterfa
             'messageId' => $event->message['id'] ?? '',
             'senderId' => $senderIdStr,
         ];
-
+        
         $this->bus->dispatch(new UpsertNotification(
             type: NotificationTypes::CHAT_MESSAGE,
             recipientsIds: $recipientIds,

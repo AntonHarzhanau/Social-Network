@@ -91,7 +91,7 @@ class ChatRepository extends ServiceEntityRepository implements ChatRepositoryIn
                 'c.chatParticipants',
                 'cpOther',
                 'WITH',
-                'c.type = :directType AND cpOther.user != :user AND cpOther.deletedAt IS NULL'
+                'c.type = :directType AND cpOther.user != :user'
             )
             ->setParameter('user', $userId)
             ->setParameter('directType', ChatTypeEnum::DIRECT->value)

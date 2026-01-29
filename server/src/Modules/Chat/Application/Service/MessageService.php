@@ -3,6 +3,7 @@
 namespace App\Modules\Chat\Application\Service;
 
 use App\Modules\Chat\Application\Port\UserDirectoryInterface;
+use App\Modules\Chat\Application\ReadModel\Chat\ChatDisplayResolver;
 use App\Modules\Chat\Domain\Entity\Message;
 use App\Modules\Chat\Domain\Enum\ChatTypeEnum;
 use App\Modules\Chat\Domain\Event\MessageCreated;
@@ -19,7 +20,7 @@ class MessageService
         private readonly MessageRepositoryInterface $messageRepository,
         private readonly UserDirectoryInterface $userDirectory,
         private readonly ChatRepositoryInterface $chatRepository,
-        private readonly ChatParticipantRepositoryInterface $chatParticipantRepository,
+        private readonly ChatParticipantRepositoryInterface $chatParticipantRepository, 
         private readonly EventBusInterface $eventBus,
     ) {
     }
@@ -83,8 +84,8 @@ class MessageService
 
         $chatSnapshot = [
             'type' => $chat->getType()->value,
-            'title' => $chat->getTitle(),
-            'avatarUrl' => $chat->getAvatarUrl()
+            'title' => $chat->getType() === ChatTypeEnum::DIRECT ? $sender->name : $chat->getTitle(),
+            'avatarUrl' => $chat->getType() === ChatTypeEnum::DIRECT ? $sender->avatarUrl : $chat->getAvatarUrl(),
         ];
 
         $this->eventBus->dispatch(

@@ -41,22 +41,6 @@ const FriendsList = ({ userId, onFindFriends }: FriendsListProps) => {
   return (
     <Card className="flex flex-col w-full gap-2 px-2">
       <div className="flex gap-2">
-        {/* <Button variant="outline">
-          <div className="flex gap-2">
-            <h3>All</h3>
-            <p className="text-sm text-muted-foreground">
-            </p>
-          </div>
-        </Button>
-
-        <Button variant="outline">
-          <div className="flex gap-2">
-            <h3>Online</h3>
-            <p className="text-sm text-muted-foreground">
-            </p>
-          </div>
-        </Button> */}
-
         <Button className="ml-auto" onClick={onFindFriends}>
           Find Friends
         </Button>

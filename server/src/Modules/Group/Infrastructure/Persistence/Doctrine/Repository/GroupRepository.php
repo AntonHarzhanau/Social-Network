@@ -85,8 +85,6 @@ class GroupRepository extends ServiceEntityRepository implements GroupRepository
             ->setParameter('wallIds', $wallIds);
         $result = $qb->getQuery()->getResult();
         return $result;
-
-
     }
 
     public function findAcceptedMemberGroups(Uuid $currentUserId, ?string $q = null, int $page = 1, int $limit = 10): array
@@ -96,30 +94,30 @@ class GroupRepository extends ServiceEntityRepository implements GroupRepository
             ->orderBy('g.createdAt', 'DESC')
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
-        return $qb->getQuery()->getResult(); // GroupPreviewRawDTO[]
+        return $qb->getQuery()->getResult();
     }
 
-    public function findGroupsExceptAcceptedMember(Uuid $currentUserId, ?string $q = null, int $page = 1, int $limit = 10): array
+    public function findAllGroups(Uuid $currentUserId, ?string $q = null, int $page = 1, int $limit = 10): array
     {
         $qb = $this->baseQB($currentUserId, $q)
-            ->andWhere('gm.id IS NULL')
             ->orderBy('g.createdAt', 'DESC')
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
 
-        return $qb->getQuery()->getResult(); // GroupPreviewRawDTO[]
+        return $qb->getQuery()->getResult();
     }
 
     public function findOwnedGroups(Uuid $currentUserId, ?string $q = null, int $page = 1, int $limit = 10): array
     {
         $qb = $this->baseQB($currentUserId, $q)
-            ->andWhere('IDENTITY(g.owner) = :currentUserId')
-            ->orderBy('g.createdAt', 'DESC')
-            ->setParameter('currentUserId', $currentUserId)
-            ->setFirstResult(($page - 1) * $limit)
-            ->setMaxResults($limit);
-
-        return $qb->getQuery()->getResult(); // GroupPreviewRawDTO[]
+        ->andWhere('gm.id IS NOT NULL')
+        ->andWhere('IDENTITY(g.owner) = :currentUserId')
+        ->orderBy('g.createdAt', 'DESC')
+        ->setParameter('currentUserId', $currentUserId)
+        ->setFirstResult(($page - 1) * $limit)
+        ->setMaxResults($limit);
+        
+        return $qb->getQuery()->getResult();
     }
 
 
@@ -131,24 +129,27 @@ class GroupRepository extends ServiceEntityRepository implements GroupRepository
                 GroupMember::class,
                 'gm',
                 'WITH',
-                'gm.group = g AND IDENTITY(gm.user) = :currentUserId AND gm.status = :accepted'
+                'gm.group = g AND IDENTITY(gm.user) = :currentUserId'
             )
             ->setParameter('currentUserId', $currentUserId)
-            ->setParameter('accepted', GroupMemberStatusEnum::ACCEPTED)
-            ->andWhere('g.deletedAt IS NULL');
+            ->andWhere('g.deletedAt IS NULL')
+            ->andWhere('(gm.id IS NULL OR gm.status != :banned)')
+            ->setParameter('banned', GroupMemberStatusEnum::BANNED);
+
 
         if ($q !== null && ($q = trim($q)) !== '') {
             $qb->andWhere('LOWER(g.name) LIKE :q')
                 ->setParameter('q', '%' . mb_strtolower($q) . '%');
         }
 
-        $qb->select(sprintf(
+        $qb->select(\sprintf(
             'NEW %s(
             g.id,
             g.name,
             IDENTITY(g.wall),
             (CASE WHEN gm.id IS NOT NULL THEN true ELSE false END),
             gm.role,
+            gm.status,
             g.subscribersCount,
             IDENTITY(g.currentAvatar)
         )',

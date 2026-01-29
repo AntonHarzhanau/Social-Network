@@ -12,7 +12,8 @@ final class GroupResponseFactory
 {
     public function __construct(
         private readonly MediaDirectoryInterface $mediaDirectory,
-    ) {}
+    ) {
+    }
 
     public function toListResponse(array $groupRawDTOs): array
     {
@@ -30,6 +31,8 @@ final class GroupResponseFactory
                 id: $groupRawDTO->id,
                 name: $groupRawDTO->name,
                 isMember: $groupRawDTO->isMember,
+                role: $groupRawDTO->role?->value,
+                status: $groupRawDTO->status?->value,
                 subscribersCount: $groupRawDTO->subscribersCount,
                 currentAvatar: $avatarId ? $medias[$avatarId] ?? null : null,
             );

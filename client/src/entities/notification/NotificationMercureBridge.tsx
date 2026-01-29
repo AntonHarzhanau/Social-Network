@@ -48,6 +48,7 @@ export function NotificationsMercureBridge() {
 
   const onMessage = useCallback(
     (ev: NotificationEvent) => {
+      console.log("Notification event received:", ev);
       qc.setQueryData(notificationsKeys.unread, {
         unreadCount: ev.unreadCount,
       });

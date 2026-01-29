@@ -135,7 +135,7 @@ function useMembersMutations(groupId: string) {
     }: {
       memberId: string;
       role: "admin" | "member";
-    }) => changeGroupMemberRole(memberId, role),
+    }) => changeGroupMemberRole({ memberId, newRole: role }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["groupMembers", groupId] });
     },
@@ -148,7 +148,7 @@ function useMembersMutations(groupId: string) {
     }: {
       memberId: string;
       status: MemberStatus;
-    }) => changeGroupMemberStatus(memberId, status),
+    }) => changeGroupMemberStatus({ memberId, newStatus: status }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["groupMembers", groupId] });
     },
@@ -157,7 +157,7 @@ function useMembersMutations(groupId: string) {
   // У вас "удаление" = banned
   const removeMut = useMutation({
     mutationFn: (memberId: string) =>
-      changeGroupMemberStatus(memberId, "banned"),
+      changeGroupMemberStatus({ memberId, newStatus: "banned" }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["groupMembers", groupId] });
     },

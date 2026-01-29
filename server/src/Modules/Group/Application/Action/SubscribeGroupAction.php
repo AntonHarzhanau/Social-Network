@@ -19,7 +19,7 @@ final class SubscribeGroupAction
         private readonly UserDirectoryInterface $userDirectory,
     ) {}
 
-    public function execute(Uuid $currentUserId, Uuid $groupId): void
+    public function execute(Uuid $currentUserId, Uuid $groupId): string
     {
         $user = $this->userDirectory->findById($currentUserId);
         if ($user === null) {
@@ -55,5 +55,7 @@ final class SubscribeGroupAction
 
         $group->setSubscribersCount($group->getSubscribersCount() + 1);
         $this->groupRepository->save($group);
+
+        return $newMember->getId()->toRfc4122();
     }
 }

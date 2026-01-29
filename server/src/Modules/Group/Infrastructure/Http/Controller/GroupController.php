@@ -6,6 +6,7 @@ use App\Modules\Group\Application\Action\ChangeMemberRoleAction;
 use App\Modules\Group\Application\Action\ChangeMemberStatusAction;
 use App\Modules\Group\Application\Action\CreateGroupAction;
 use App\Modules\Group\Application\Action\DeleteGroupAction;
+use App\Modules\Group\Application\Action\DeleteGroupMemberAction;
 use App\Modules\Group\Application\Action\GetGroupDetailsAction;
 use App\Modules\Group\Application\Action\GetGroupListAction;
 use App\Modules\Group\Application\Action\GetMembersList;
@@ -38,9 +39,8 @@ class GroupController extends AbstractController
         #[MapRequestPayload()] CreateGroupRequest $request,
         CreateGroupAction $action,
     ): JsonResponse {
-        //  dd($request);
-        $action->execute($currentUser->getId(), $request->name, $request->visibility);
-        return $this->json([], JsonResponse::HTTP_CREATED);
+        $id = $action->execute($currentUser->getId(), $request->name, $request->visibility);
+        return $this->json(['id' => $id], JsonResponse::HTTP_CREATED);
     }
 
     #[Route('/{groupId}', name: 'delete_group', methods: ['DELETE'], format: 'json')]
@@ -50,7 +50,7 @@ class GroupController extends AbstractController
         DeleteGroupAction $action,
     ): JsonResponse {
         $action->execute($currentUser->getId(), Uuid::fromString($groupId));
-        return $this->json([], JsonResponse::HTTP_CREATED);
+        return $this->json([], JsonResponse::HTTP_NO_CONTENT);
     }
 
     #[Route('', name: 'get_groups', methods: ['GET'], format: 'json')]
@@ -62,8 +62,8 @@ class GroupController extends AbstractController
         $page = max((int) $request->query->get('page', 1), 1);
         $limit = min(max((int) $request->query->get('limit', 20), 1), 50);
         $search = $request->query->getString('groupName', '');
-        $forMe = $request->query->getBoolean('forMe', false);
-        $groups = $action->execute($currentUser->getId(), $page, $limit, $search, $forMe);
+        $filter = $request->query->get('filter', '');
+        $groups = $action->execute($currentUser->getId(), $page, $limit, $search, $filter);
         return $this->json($groups, JsonResponse::HTTP_OK);
     }
 
@@ -82,7 +82,7 @@ class GroupController extends AbstractController
         string $groupId,
         #[CurrentUser()] User $currentUser,
     ): JsonResponse {
-        return $this->json(['error: Not implemented'], JsonResponse::HTTP_NOT_IMPLEMENTED);
+        return $this->json(['id' => null], JsonResponse::HTTP_NOT_IMPLEMENTED);
     }
 
     #[Route('/{groupId}/subscribe', name: 'subscribe_group', methods: ['POST'], format: 'json')]
@@ -164,8 +164,9 @@ class GroupController extends AbstractController
     ): JsonResponse {
         $page = max((int) $request->query->get('page', 1), 1);
         $limit = min(max((int) $request->query->get('limit', 20), 1), 50);
+        $name = $request->query->getString('name', '');
 
-        $status = $request->query->getString('status', '');
+        $status = $request->query->getString('status', 'accepted');
         $status = trim($status);
         $status = $status === '' ? null : $status;
 
@@ -174,8 +175,19 @@ class GroupController extends AbstractController
             $status,
             $currentUser->getId(),
             $page,
-            $limit
+            $limit,
+            $name,
         );
         return $this->json($members, JsonResponse::HTTP_OK);
+    }
+
+    #[Route('/members/{memberId}', name: 'delete_group_member', methods: ['DELETE'], format: 'json')]
+    public function deleteMember(
+        string $memberId,
+        #[CurrentUser()] User $currentUser,
+        DeleteGroupMemberAction $action,
+    ): JsonResponse {
+        $action->execute($currentUser->getId(), Uuid::fromString($memberId));
+        return $this->json([], JsonResponse::HTTP_OK);
     }
 }

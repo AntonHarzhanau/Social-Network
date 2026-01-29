@@ -44,7 +44,7 @@ export const useMercure = <TPayload = unknown>({
     };
 
     eventSource.onmessage = (event) => {
-      console.log("Mercure message received:", event);
+      //   console.log("Mercure message received:", event);
       try {
         const parser = parseRef.current;
         const data = parser

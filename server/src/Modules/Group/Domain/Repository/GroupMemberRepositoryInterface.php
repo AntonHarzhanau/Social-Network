@@ -18,10 +18,11 @@ interface GroupMemberRepositoryInterface
         ?GroupMemberStatusEnum $status = null, 
         ?GroupMemberRoleEnum $role = null, 
         int $page, 
-        int $limit
+        int $limit,
+        string $query = '',
     ): array;
 
     public function findOneByCriteria(array $criteria): ?GroupMember;
 
-    public function countGroupMembers(Uuid $groupId): int;
+    public function countGroupMembers(Uuid $groupId, ?GroupMemberStatusEnum $status = null): int;
 }

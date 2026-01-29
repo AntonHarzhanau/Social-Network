@@ -1,12 +1,13 @@
 import { create } from "zustand";
 
-interface FriendsFilterState {
-  filter: "all" | "sent" | "received";
-  setFilter: (filter: "all" | "sent" | "received") => void;
+export type FriendsFilter = "all" | "sent" | "received";
+
+export interface FriendsFilterState {
+  filter: FriendsFilter;
+  setFilter: (filter: FriendsFilter) => void;
 }
 
 export const useFriendsFilterStore = create<FriendsFilterState>((set) => ({
   filter: "all",
-
-  setFilter: (filter: "all" | "sent" | "received") => set({ filter }),
+  setFilter: (filter) => set({ filter }),
 }));

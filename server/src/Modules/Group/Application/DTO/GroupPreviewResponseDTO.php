@@ -10,6 +10,8 @@ final readonly class GroupPreviewResponseDTO
         public string $id,
         public string $name,
         public bool $isMember,
+        public ?string $role,
+        public ?string $status,
         public int $subscribersCount,
         public ?MediaItemDTO $currentAvatar,
     ) {}

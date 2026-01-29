@@ -20,7 +20,7 @@ final class CreateGroupAction
         private readonly GroupMemberRepositoryInterface $groupMemberRepository,
     ) {}
 
-    public function execute(Uuid $creatorId, string $groupName, string $visibility): void 
+    public function execute(Uuid $creatorId, string $groupName, string $visibility): string 
     {
         $creator = $this->userApi->findById($creatorId);
         if (!$creator) {
@@ -32,7 +32,7 @@ final class CreateGroupAction
             ->setOwner($creator)
             ->setVisibility(GroupVisibilityEnum::from($visibility))
             ->setCreatedAt(new \DateTimeImmutable());
-
+            
         $this->groupRepository->save($group, false);
 
         $newMember = (new GroupMember())
@@ -43,6 +43,8 @@ final class CreateGroupAction
 
 
         $group->setSubscribersCount(1);
+
         $this->groupMemberRepository->save($newMember, true);
+        return $group->getId()->toRfc4122();
     }
 }

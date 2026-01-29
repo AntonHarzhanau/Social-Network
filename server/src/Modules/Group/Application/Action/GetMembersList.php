@@ -27,7 +27,8 @@ final class GetMembersList
         ?string $status = null,
         Uuid $currentUserId,
         int $page,
-        int $limit
+        int $limit,
+        string $query = '',
     ): MembersListResponseDTO {
         $group = $this->groupRepository->findById($groupId);
         if ($group === null) {
@@ -41,7 +42,7 @@ final class GetMembersList
         $currentUserRole = $currentUserMember?->getRole();
         
         $hasAccess = $currentUserRole && $currentUserRole !== GroupMemberRoleEnum::MEMBER;
-        $enumStatus = null;
+        $enumStatus = GroupMemberStatusEnum::ACCEPTED;
         if ($status !== null && $hasAccess) {
             $enumStatus = GroupMemberStatusEnum::tryFrom($status);
             if ($enumStatus === null) {
@@ -49,8 +50,8 @@ final class GetMembersList
             }
         } 
 
-        $members = $this->groupMemberRepository->findGroupMembers($groupId, $enumStatus, null, $page, $limit);
-        $totalMembers = $this->groupMemberRepository->countGroupMembers($groupId);
+        $members = $this->groupMemberRepository->findGroupMembers($groupId, $enumStatus, null, $page, $limit, $query);
+        $totalMembers = $this->groupMemberRepository->countGroupMembers($groupId, $enumStatus);
 
         $userIds = array_map(fn(MemberRawDTO $member) => $member->userId, $members);
         $userPreviews = $this->userDirectory->findPreviewsByIds($userIds);

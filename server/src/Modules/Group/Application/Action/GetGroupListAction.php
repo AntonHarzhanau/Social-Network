@@ -5,6 +5,7 @@ namespace App\Modules\Group\Application\Action;
 use App\Modules\Group\Application\Service\GroupResponseFactory;
 use App\Modules\Group\Domain\Repository\GroupRepositoryInterface;
 use Symfony\Component\Uid\Uuid;
+use function PHPUnit\Framework\matches;
 
 final class GetGroupListAction
 {
@@ -13,13 +14,15 @@ final class GetGroupListAction
         private readonly GroupResponseFactory $groupResponseFactory,
     ) {}
 
-    public function execute(Uuid $currentUserId, int $page, int $limit, string $groupName, bool $forMe = false): array
+    public function execute(Uuid $currentUserId, int $page, int $limit, ?string $groupName = null,  $filter = ''): array
     {
-        // $groups = $this->groupRepository->findAllGroupsWithSubscribers($currentUserId, $page, $limit);
-        $groups = $forMe
-            ? $this->groupRepository->findAcceptedMemberGroups($currentUserId, $groupName, $page, $limit)
-            : $this->groupRepository->findGroupsExceptAcceptedMember($currentUserId, $groupName, $page, $limit);
-        // $groups = $this->groupRepository->findOwnedGroups($currentUserId, $groupName);
+        $groups = match($filter) {
+            'owned' => $this->groupRepository->findOwnedGroups($currentUserId, $groupName, $page, $limit),
+            'subscribed' => $this->groupRepository->findAcceptedMemberGroups($currentUserId, $groupName, $page, $limit),
+            "all" => $this->groupRepository->findAllGroups($currentUserId, $groupName, $page, $limit),
+            default => $this->groupRepository->findAllGroups($currentUserId, $groupName, $page, $limit),
+        };
+
 
         $response = $this->groupResponseFactory->toListResponse($groups);
 

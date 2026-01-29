@@ -8,14 +8,24 @@ import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-const GroupsPageContent = ({ myGroupsOnly }: { myGroupsOnly: boolean }) => {
+import {
+  useJoinGroupMutation,
+  useLeaveGroupMutation,
+} from "@/entities/group/model/useGroupMutations";
+import { useGroupFilterStore } from "@/features/group/filter-group/useGroupFilterStore";
+
+const GroupsPageContent = () => {
   const [search, setSearch] = useState("");
+  const filter = useGroupFilterStore((state) => state.filter);
   const debouncedSearch = useDebouncedValue(search, 500);
 
   const { groups } = useGroups({
-    forMe: myGroupsOnly,
+    filter,
     groupName: debouncedSearch,
   });
+
+  const joinMut = useJoinGroupMutation();
+  const leaveMut = useLeaveGroupMutation();
 
   return (
     <Card className="flex flex-col min-h-[90vh] px-2">
@@ -25,40 +35,97 @@ const GroupsPageContent = ({ myGroupsOnly }: { myGroupsOnly: boolean }) => {
         value={search}
         onChange={setSearch}
       />
-      <div className=" flex flex-col gap-2">
-        {groups.map((group) => (
-          <Link key={group.id} to={`/group/${group.id}`}>
-            <Item
-              variant="outline"
-              className="flex items-center justify-between gap-4"
-            >
-              <div className="flex items-center gap-3">
-                <Avatar
-                  name={group.name}
-                  imageUrl={group.currentAvatar?.url}
-                  className="w-10 h-10"
-                />
-                <div className="flex flex-col">
-                  <h3 className="text-sm font-semibold">{group.name}</h3>
-                  <p className="text-xs text-muted-foreground">
-                    Subscribers: {group.subscribersCount}
-                  </p>
+
+      <div className="flex flex-col gap-2">
+        {groups.map((group) => {
+          const isJoining = joinMut.isPending && joinMut.variables === group.id;
+          const isLeaving =
+            leaveMut.isPending && leaveMut.variables === group.id;
+
+          const stopNav = (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+          };
+
+          const rightSide = (() => {
+            if (group.role === "owner") {
+              return (
+                <span className="text-xs font-medium text-muted-foreground">
+                  Your Group
+                </span>
+              );
+            }
+
+            if (group.isMember) {
+              if (group.status === "pending") {
+                return (
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Request sent
+                  </span>
+                );
+              }
+
+              // accepted (или status отсутствует, если бек так отдаёт)
+              return (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Subscribed
+                  </span>
+                  {/* <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={isLeaving}
+                    onClick={(e) => {
+                      stopNav(e);
+                      leaveMut.mutate(group.id);
+                    }}
+                  >
+                    {isLeaving ? "Leaving..." : "Leave"}
+                  </Button> */}
                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                {group.isMember ? (
-                  <Button variant="outline" size="sm">
-                    Leave
-                  </Button>
-                ) : (
-                  <Button variant="outline" size="sm">
-                    Join
-                  </Button>
-                )}
-              </div>
-            </Item>
-          </Link>
-        ))}
+              );
+            }
+
+            return (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isJoining}
+                onClick={(e) => {
+                  stopNav(e);
+                  joinMut.mutate(group.id);
+                }}
+              >
+                {isJoining ? "Subscribing..." : "Subscribe"}
+              </Button>
+            );
+          })();
+
+          return (
+            <Link key={group.id} to={`/group/${group.id}`}>
+              <Item
+                variant="outline"
+                className="flex items-center justify-between gap-4"
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar
+                    name={group.name}
+                    imageUrl={group.currentAvatar?.url}
+                    className="w-10 h-10"
+                  />
+                  <div className="flex flex-col">
+                    <h3 className="text-sm font-semibold">{group.name}</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Subscribers: {group.subscribersCount}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">{rightSide}</div>
+              </Item>
+            </Link>
+          );
+        })}
       </div>
     </Card>
   );

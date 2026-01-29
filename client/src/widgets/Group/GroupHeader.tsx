@@ -12,6 +12,15 @@ const GroupHeader = ({ group }: GroupHeaderProps) => {
   if (!group) return null;
   return (
     <ProfileHeader
+      cover={
+        group?.cover ? (
+          <img
+            src={group?.cover.url}
+            alt="Profile cover"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : undefined
+      }
       title={
         <h1 className="text-2xl font-bold text-secondary-foreground">
           {group?.name}
@@ -44,7 +53,7 @@ const GroupHeader = ({ group }: GroupHeaderProps) => {
             <GroupMembershipActions
               isMember={!!group?.isMember}
               groupVisibility={
-                (group?.groupVisibility ?? "public") as "public" | "private"
+                (group?.visibility ?? "public") as "public" | "private"
               }
               role={(group?.role ?? null) as any}
               onJoin={async () => {

@@ -45,48 +45,63 @@ class GroupMemberRepository extends ServiceEntityRepository implements GroupMemb
     }
 
     public function findGroupMembers(
-        Uuid $groupId, 
-        ?GroupMemberStatusEnum $status = null, 
+        Uuid $groupId,
+        ?GroupMemberStatusEnum $status = null,
         ?GroupMemberRoleEnum $role = null,
         int $page = 1,
-        int $limit = 10
-    ): array
-    {
+        int $limit = 10,
+        string $query = '',
+    ): array {
         $qb = $this->createQueryBuilder('gm')
-        ->select(sprintf('NEW %s (gm.id, IDENTITY(gm.user), gm.role, gm.status)', MemberRawDTO::class))
-        ->andWhere('gm.group = :groupId')
-    
-        ->setParameter('groupId', $groupId)
-        ->orderBy('gm.joinedAt', 'ASC')
-        ->addOrderBy('gm.id', 'ASC');
+            ->innerJoin('gm.user', 'u') // ✅ для поиска
+            ->select(sprintf(
+                'NEW %s (gm.id, IDENTITY(gm.user), gm.role, gm.status)',
+                MemberRawDTO::class
+            ))
+            ->andWhere('gm.group = :groupId')
+            ->setParameter('groupId', $groupId)
+            ->orderBy('gm.joinedAt', 'ASC')
+            ->addOrderBy('gm.id', 'ASC');
 
         if ($status !== null) {
             $qb->andWhere('gm.status = :status')
                 ->setParameter('status', $status);
         }
+
         if ($role !== null) {
             $qb->andWhere('gm.role = :role')
                 ->setParameter('role', $role);
         }
 
+        $query = trim($query);
+        if ($query !== '') {
+            $qb->andWhere('LOWER(u.username) LIKE :q')
+                ->setParameter('q', '%' . mb_strtolower($query) . '%');
+        }
+
         $qb->setFirstResult(($page - 1) * $limit)
-           ->setMaxResults($limit);
-        
+            ->setMaxResults($limit);
+
         return $qb->getQuery()->getResult();
     }
-
     public function findOneByCriteria(array $criteria): ?GroupMember
     {
         return $this->findOneBy($criteria);
     }
 
-    public function countGroupMembers(Uuid $groupId): int
+    public function countGroupMembers(Uuid $groupId, ?GroupMemberStatusEnum $status = null): int
     {
-        return (int) $this->createQueryBuilder('gm')
+        $qb = $this->createQueryBuilder('gm')
             ->select('COUNT(gm.id)')
             ->where('gm.group = :groupId')
-            ->setParameter('groupId', $groupId)
-            ->getQuery()
-            ->getSingleScalarResult();
+            ->setParameter('groupId', $groupId);
+
+        if ($status !== null) {
+            $qb->andWhere('gm.status = :status')
+                ->setParameter('status', $status);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
+
 }
