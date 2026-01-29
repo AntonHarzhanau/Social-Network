@@ -54,7 +54,7 @@ class NotificationRepository extends ServiceEntityRepository implements Notifica
     {
         $qb = $this->createQueryBuilder('n')
             ->join('n.recipient', 'r')
-            ->select(\sprintf('NEW %s(n.id, n.type, n.text, n.target, n.payload, n.createdAt)', NotificationRawDTO::class))
+            ->select(\sprintf('NEW %s(n.id, n.type, n.text, n.payload, n.createdAt)', NotificationRawDTO::class))
             ->where('IDENTITY(n.recipient) = :recipientId')
             ->setParameter('recipientId', $recipientId)
             ->orderBy('n.createdAt', 'DESC')
@@ -94,4 +94,53 @@ class NotificationRepository extends ServiceEntityRepository implements Notifica
         /** @var Notification|null */
         return $qb->getQuery()->getOneOrNullResult();
     }
+
+    /** @return array<string, Notification> map[recipientId] = notification */
+    public function findGroupedForRecipients(
+        array $recipientIds,
+        NotificationTypeEnum $type,
+        string $groupKey,
+    ): array {
+        $qb = $this->createQueryBuilder('n')
+            ->join('n.recipient', 'r')
+            ->where('r.id IN (:recipientIds)')
+            ->andWhere('n.type = :type')
+            ->andWhere('n.groupKey = :groupKey')
+            ->setParameter('recipientIds', $recipientIds)
+            ->setParameter('type', $type)
+            ->setParameter('groupKey', $groupKey);
+
+        /** @var Notification[] $notifications */
+        $notifications = $qb->getQuery()->getResult();
+
+        $result = [];
+        foreach ($notifications as $notification) {
+            $rid = $notification->getRecipient()->getId()->toRfc4122();
+            $result[$rid] = $notification;
+        }
+
+        return $result;
+    }
+
+    /** @return array<string,int> map[recipientId] = unreadCount */
+    public function countUnreadByRecipients(array $recipientIds): array
+    {
+        $qb = $this->createQueryBuilder('n')
+            ->join('n.recipient', 'r')
+            ->select('r.id AS recipientId, COUNT(n.id) AS unreadCount')
+            ->where('r.id IN (:recipientIds)')
+            ->setParameter('recipientIds', $recipientIds)
+            ->groupBy('r.id');
+
+        $rows = $qb->getQuery()->getArrayResult();
+
+        $counts = [];
+        foreach ($rows as $row) {
+            $counts[(string) $row['recipientId']] = (int) $row['unreadCount'];
+        }
+
+        return $counts;
+    }
+
+
 }

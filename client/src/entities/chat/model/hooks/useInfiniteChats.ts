@@ -1,11 +1,11 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { CHAT_PAGE_SIZE, fetchChats} from "../../api/chat";
-import { chatKeys } from "../queryKeys";
+import { CHAT_PAGE_SIZE, fetchChats } from "../../api/chat";
+import { chatQueryKeys } from "../chatQueryKeys";
 import type { ChatFilter } from "../types";
 
 export function useInfiniteChats(filter: ChatFilter, limit = CHAT_PAGE_SIZE) {
   return useInfiniteQuery({
-    queryKey: chatKeys.list(filter, limit),
+    queryKey: chatQueryKeys.list(filter, limit),
     queryFn: ({ pageParam }) =>
       fetchChats((pageParam as number) ?? 1, limit, filter),
     initialPageParam: 1,

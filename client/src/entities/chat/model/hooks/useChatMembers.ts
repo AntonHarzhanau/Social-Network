@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { chatKeys } from "../queryKeys";
+import { chatQueryKeys } from "../chatQueryKeys";
 import { fetchChatMembers } from "../../api/chat";
 
 const MEMBERS_PAGE_SIZE = 10;
@@ -12,7 +12,7 @@ export function useChatMembers(params: {
   const { chatId, search, enabled = true } = params;
 
   const query = useInfiniteQuery({
-    queryKey: chatKeys.members(chatId, search),
+    queryKey: chatQueryKeys.members(chatId, search),
     enabled: enabled && !!chatId,
     queryFn: ({ pageParam }) =>
       fetchChatMembers(

@@ -17,7 +17,7 @@ export type PathParams = {
   [ROUTES.PROFILE]: {
     userId: string;
   };
-    [ROUTES.CHAT]: {
+  [ROUTES.CHAT]: {
     chatId?: string;
   };
 };

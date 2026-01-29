@@ -1,15 +1,13 @@
-// import { useChatUiStore } from "@/entities/chat/model/chatUiStore";
-// import { useOpenChatsStore } from "@/entities/chat/model/openChatsStore";
 import { sessionStore } from "@/entities/session/model/sessionStore";
 import { authApi } from "@/features/auth/api/authApi";
 import type { LoginFormSchema } from "@/features/auth/model/loginFormSchema";
 import type { RegisterApiPayload } from "@/features/auth/model/registerApiSchema";
+import { useOpenedChatsStore } from "@/features/chat/openedChats/model/openedChatsStore";
 import { clearToken, getToken, setToken } from "@/shared/api/tokenStorage";
 import { queryClient } from "@/shared/lib/queryClient";
 
 const resetAppState = () => {
-  //   useOpenChatsStore.getState().reset();
-  //   useChatUiStore.getState().reset();
+  useOpenedChatsStore.getState().clear();
   queryClient.clear();
 };
 
@@ -27,7 +25,7 @@ export const authActions = {
       const me = (await authApi.me()).data;
       session.setUser(me);
 
-      await authApi.mercure();
+      //   await authApi.mercure();
 
       return me;
     } catch (error) {
@@ -61,7 +59,7 @@ export const authActions = {
     try {
       const me = (await authApi.me()).data;
       session.setUser(me);
-      await authApi.mercure();
+      //   await authApi.mercure();
       return me;
     } catch (error: any) {
       const status = error?.response?.status;

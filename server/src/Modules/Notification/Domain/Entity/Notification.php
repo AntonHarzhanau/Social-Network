@@ -13,6 +13,7 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Table(name: 'notification')]
 #[ORM\Index(columns: ['recipient_id', 'created_at'], name: 'idx_notif_recipient_created')]
 #[ORM\Index(columns: ['recipient_id', 'type', 'group_key'], name: 'idx_notif_grouping')]
+#[ORM\UniqueConstraint(columns: ['recipient_id', 'type', 'group_key'], name: 'uniq_notif_group')]
 class Notification
 {
     #[ORM\Id]
@@ -25,33 +26,15 @@ class Notification
     #[ORM\JoinColumn(name: 'recipient_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?User $recipient = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: 'actor_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private ?User $actor = null;
-
     #[ORM\Column(length: 64, enumType: NotificationTypeEnum::class)]
     private NotificationTypeEnum $type;
 
     #[ORM\Column(type: Types::TEXT)]
     private string $text;
 
-    /**
-     *   { "kind": "chat", "chatId": "...", "messageId": "..." }
-     *   { "kind": "friend_requests" }
-     */
-    #[ORM\Column(type: Types::JSONB)]
-    private array $target = [];
-
-    /**
-     * Additional data for UI/logic (chatId, requestId, postId, etc.)
-     */
     #[ORM\Column(type: Types::JSONB)]
     private array $payload = [];
 
-    /**
-     * For aggregation (e.g., "chat:<chatId>").
-     * If null — notifications are not aggregated.
-     */
     #[ORM\Column(name: 'group_key', length: 120, nullable: true)]
     private ?string $groupKey = null;
 
@@ -68,17 +51,13 @@ class Notification
         User $recipient,
         NotificationTypeEnum $type,
         string $text,
-        array $target = [],
         array $payload = [],
-        ?User $actor = null,
         ?string $groupKey = null,
     ) {
         $this->recipient = $recipient;
         $this->type = $type;
         $this->text = $text;
-        $this->target = $target;
         $this->payload = $payload;
-        $this->actor = $actor;
         $this->groupKey = $groupKey;
 
         $now = new \DateTimeImmutable();
@@ -86,27 +65,17 @@ class Notification
         $this->lastEventAt = $now;
     }
 
-    // -------------------------
-    // Domain methods
-    // -------------------------
 
     public function aggregate(
         string $newText,
-        ?array $newTarget = null,
         array $mergePayload = [],
         ?\DateTimeImmutable $at = null,
     ): void {
         $this->groupCount++;
         $this->text = $newText;
-
-        if ($newTarget !== null) {
-            $this->target = $newTarget;
-        }
-
         $this->payload = array_replace($this->payload, $mergePayload);
         $this->lastEventAt = $at ?? new \DateTimeImmutable();
     }
-
 
     public function getId(): ?Uuid
     {
@@ -118,11 +87,6 @@ class Notification
         return $this->recipient;
     }
 
-    public function getActor(): ?User
-    {
-        return $this->actor;
-    }
-
     public function getType(): NotificationTypeEnum
     {
         return $this->type;
@@ -131,11 +95,6 @@ class Notification
     public function getText(): string
     {
         return $this->text;
-    }
-
-    public function getTarget(): array
-    {
-        return $this->target;
     }
 
     public function getPayload(): array
@@ -161,6 +120,11 @@ class Notification
     public function getLastEventAt(): ?\DateTimeImmutable
     {
         return $this->lastEventAt;
+    }
+
+    public function getSource(): ?array
+    {
+        return $this->payload['source'] ?? null;
     }
 
 }

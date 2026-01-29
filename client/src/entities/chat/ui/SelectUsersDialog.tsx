@@ -70,7 +70,6 @@ export function SelectUsersDialog(props: SelectUsersDialogProps) {
 
     await props.onSubmit(selectedIds);
 
-    // сброс после успеха
     setSelectedIds(props.initialSelectedIds ?? []);
     props.setSearch("");
     handleClose();

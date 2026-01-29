@@ -10,7 +10,6 @@ final readonly class NotificationRawDTO
         public string $id,
         public NotificationTypeEnum $type,
         public string $text,
-        public array  $target,
         public array  $payload,
         public \DateTimeImmutable $createdAt,
     ) {

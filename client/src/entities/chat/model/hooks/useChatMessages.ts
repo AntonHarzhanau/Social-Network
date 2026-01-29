@@ -8,7 +8,7 @@ import {
 
 import type { Chat, Message } from "@/entities/chat/model/types";
 import { fetchMessages, markMessagesAsRead } from "@/entities/chat/api/chat";
-import { chatKeys } from "@/entities/chat/model/queryKeys";
+import { chatQueryKeys } from "@/entities/chat/model/chatQueryKeys";
 import { chatMessageKeys } from "@/entities/chat/model/messageQueryKeys";
 
 export type PageParam =
@@ -28,7 +28,7 @@ function invalidateChatLists(qc: ReturnType<typeof useQueryClient>) {
   qc.invalidateQueries({
     predicate: (q) =>
       Array.isArray(q.queryKey) &&
-      q.queryKey[0] === chatKeys.all[0] &&
+      q.queryKey[0] === chatQueryKeys.all[0] &&
       q.queryKey[1] === "list",
   });
 }
@@ -73,7 +73,7 @@ export function useChatMessages(params: {
       ) as Promise<MarkReadResponse>,
 
     onSuccess: (res) => {
-      qc.setQueryData<Chat>(chatKeys.byId(res.chatId), (prev) => {
+      qc.setQueryData<Chat>(chatQueryKeys.byId(res.chatId), (prev) => {
         if (!prev) return prev;
         return {
           ...prev,
@@ -180,10 +180,6 @@ export function useChatMessages(params: {
     return sortAscStable(Array.from(byId.values()));
   }, [query.data?.pages]);
 
-  /**
-   * unreadSet: только сообщения НЕ текущего пользователя.
-   * Порог — lastReadAt (или дата сообщения lastReadMessageId, если lastReadAt = null).
-   */
   const unreadSet = useMemo(() => {
     if (!chat) return new Set<string>();
     if (!currentUserId) return new Set<string>();
@@ -201,7 +197,6 @@ export function useChatMessages(params: {
     const s = new Set<string>();
 
     for (const m of messages) {
-      // КЛЮЧЕВОЕ: мои сообщения не считаем unread
       if (m.sender.id === currentUserId) continue;
 
       if (new Date(m.createdAt).getTime() > t) s.add(m.id);

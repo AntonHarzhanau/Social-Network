@@ -9,10 +9,12 @@ interface ChatWidgetsProps {
 
 const ChatWidgets = ({ currentChatId }: ChatWidgetsProps) => {
   return (
-    <Card className="w-full hidden lg:flex flex-col gap-2 p-4">
+    <Card className="w-full flex-col gap-2 p-4">
       <ChatFilter />
       <Separator className="min-h-px bg-accent-foreground/10" />
-      <OpenChatsSidebar currentChatId={currentChatId} />
+      <div className="hidden lg:block">
+        <OpenChatsSidebar currentChatId={currentChatId} />
+      </div>
     </Card>
   );
 };

@@ -9,12 +9,12 @@ export function ChatRoomHeader(props: { chat: Chat; onClose: () => void }) {
   const { chat, onClose } = props;
 
   return (
-    <CardHeader className="shrink-0 flex items-center justify-between gap-2 px-1 py-0">
+    <CardHeader className="shrink-0 flex items-center justify-start gap-1 px-1 py-0">
+      <Button size="icon" variant="ghost" onClick={onClose}>
+        <X />
+      </Button>
       <ChatInfo chat={chat}>
-        <div className="flex items-center gap-1 min-w-0">
-          <Button size="icon" variant="ghost" onClick={onClose}>
-            <X />
-          </Button>
+        <div className="flex items-center gap-2 min-w-0">
           <Avatar
             imageUrl={chat.avatarUrl}
             name={chat.title}

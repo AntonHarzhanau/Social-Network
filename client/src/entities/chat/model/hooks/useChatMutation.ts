@@ -11,7 +11,7 @@ import {
   removeMember,
   type CreateChatPayload,
 } from "../../api/chat";
-import { chatKeys } from "../queryKeys";
+import { chatQueryKeys } from "../chatQueryKeys";
 import type { ChatMember } from "../types";
 
 export function useCreateChatMutation() {
@@ -20,7 +20,7 @@ export function useCreateChatMutation() {
   return useMutation({
     mutationFn: (payload: CreateChatPayload) => createChat(payload),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: chatKeys.all });
+      qc.invalidateQueries({ queryKey: chatQueryKeys.all });
     },
   });
 }
@@ -40,8 +40,8 @@ export function useRemoveMemberMutation() {
       await removeMember(chatId, userId);
     },
     onSuccess: (_data, vars) => {
-      qc.invalidateQueries({ queryKey: chatKeys.members(vars.chatId) });
-      qc.invalidateQueries({ queryKey: chatKeys.all });
+      qc.invalidateQueries({ queryKey: chatQueryKeys.members(vars.chatId) });
+      qc.invalidateQueries({ queryKey: chatQueryKeys.all });
     },
   });
 }
@@ -61,8 +61,8 @@ export function useAddMemberMutation() {
       await addMembers(chatId, userIds);
     },
     onSuccess: (_data, vars) => {
-      qc.invalidateQueries({ queryKey: chatKeys.members(vars.chatId) });
-      qc.invalidateQueries({ queryKey: chatKeys.all });
+      qc.invalidateQueries({ queryKey: chatQueryKeys.members(vars.chatId) });
+      qc.invalidateQueries({ queryKey: chatQueryKeys.all });
     },
   });
 }
@@ -80,7 +80,7 @@ export function useChangeMemberRoleMutation() {
     },
 
     onMutate: async ({ chatId, userId, newRole }) => {
-      const key = chatKeys.members(chatId);
+      const key = chatQueryKeys.members(chatId);
 
       await qc.cancelQueries({ queryKey: key });
       const prev = qc.getQueryData<InfiniteData<ChatMember[]>>(key);
@@ -103,8 +103,8 @@ export function useChangeMemberRoleMutation() {
     },
 
     onSettled: (_data, _err, vars) => {
-      qc.invalidateQueries({ queryKey: chatKeys.members(vars.chatId) });
-      qc.invalidateQueries({ queryKey: chatKeys.all });
+      qc.invalidateQueries({ queryKey: chatQueryKeys.members(vars.chatId) });
+      qc.invalidateQueries({ queryKey: chatQueryKeys.all });
     },
   });
 }
@@ -117,7 +117,7 @@ export function useMuteChatMutation() {
       await muteChatToggle(chatId);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: chatKeys.all });
+      qc.invalidateQueries({ queryKey: chatQueryKeys.all });
     },
   });
 }

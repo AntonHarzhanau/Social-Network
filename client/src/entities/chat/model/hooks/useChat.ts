@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { chatKeys } from "../queryKeys";
+import { chatQueryKeys } from "../chatQueryKeys";
 import { fetchChatById } from "../../api/chat";
 
 export function useChat(chatId: string) {
   const query = useQuery({
-    queryKey: chatKeys.byId(chatId),
+    queryKey: chatQueryKeys.byId(chatId),
     queryFn: () => fetchChatById(chatId),
     staleTime: 1000 * 60,
     gcTime: 1000 * 60 * 5,

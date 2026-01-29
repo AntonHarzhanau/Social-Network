@@ -11,7 +11,6 @@ function isReadByOtherCursor(
 ) {
   if (!cursorAt && !cursorId) return false;
 
-  // Основной критерий — по времени
   if (cursorAt) {
     const mt = new Date(msg.createdAt).getTime();
     const ct = new Date(cursorAt).getTime();
@@ -19,12 +18,10 @@ function isReadByOtherCursor(
     if (mt < ct) return true;
     if (mt > ct) return false;
 
-    // tie-break: одинаковая секунда/миллисекунда
     if (cursorId) return msg.id <= cursorId;
     return true;
   }
 
-  // fallback только по id (работает корректно, если id монотонный по времени, как UUIDv7)
   if (cursorId) return msg.id <= cursorId;
 
   return false;

@@ -12,7 +12,7 @@ export function ChatJumpControls(props: {
   return (
     <>
       {showNewBanner && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
+        <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-10">
           <Button variant="secondary" className="shadow" onClick={onJump}>
             {`New messages: ${newCount} • `}Jump to latest
           </Button>
@@ -20,7 +20,7 @@ export function ChatJumpControls(props: {
       )}
 
       {showJumpArrow && (
-        <div className="absolute bottom-4 right-4 z-10">
+        <div className="absolute bottom-1/7 right-1 z-10">
           <Button
             variant="secondary"
             size="icon"

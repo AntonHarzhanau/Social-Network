@@ -21,21 +21,31 @@ import {
 } from "@/entities/notification/api/notificationsApi";
 import { notificationsKeys } from "@/entities/notification/model/queryKeys";
 import type { NotificationDTO } from "@/entities/notification/model/types";
+import { normalizeNotification } from "@/entities/notification/model/types";
+
 import {
   useAckAllNotificationsMutation,
   useAckNotificationMutation,
 } from "@/entities/notification/model/useNotificationMutations";
 
+import { NotificationItem } from "@/entities/notification/ui/NotificationItem";
+import { getHandler } from "@/entities/notification/lib/handlers/registry";
+import { useFriendsFilterStore } from "@/entities/friends/model/useFriendsFilterStore";
+import { useLocation } from "react-router-dom";
+
 const LIMIT = 10;
 
 export function NotificationsBell({ enabled = true }: { enabled?: boolean }) {
   const qc = useQueryClient();
+  const location = useLocation();
+  const setFriendsFilter = useFriendsFilterStore((s) => s.setFilter);
+
   const [open, setOpen] = useState(false);
 
   const ackOne = useAckNotificationMutation();
   const ackAll = useAckAllNotificationsMutation();
 
-  // badge
+  // badge unread notifications
   const unreadQuery = useQuery({
     queryKey: notificationsKeys.unread,
     queryFn: fetchUnreadCount,
@@ -43,7 +53,7 @@ export function NotificationsBell({ enabled = true }: { enabled?: boolean }) {
     initialData: { unreadCount: 0 },
   });
 
-  // list
+  // list (raw DTO in cache -> mutations остаются совместимыми)
   const notificationsQuery = useInfiniteQuery<NotificationDTO[]>({
     queryKey: notificationsKeys.list,
     enabled: enabled && open,
@@ -54,7 +64,10 @@ export function NotificationsBell({ enabled = true }: { enabled?: boolean }) {
   });
 
   const items = useMemo(
-    () => notificationsQuery.data?.pages.flatMap((p) => p) ?? [],
+    () =>
+      (notificationsQuery.data?.pages.flatMap((p) => p) ?? []).map(
+        normalizeNotification,
+      ),
     [notificationsQuery.data],
   );
 
@@ -116,7 +129,15 @@ export function NotificationsBell({ enabled = true }: { enabled?: boolean }) {
             variant="outline"
             size="sm"
             disabled={unreadCount === 0 || ackAll.isPending}
-            onClick={() => ackAll.mutate()}
+            onClick={() => {
+              ackAll.mutate(undefined, {
+                onSettled: () => {
+                  qc.invalidateQueries({ queryKey: notificationsKeys.unread });
+                  qc.invalidateQueries({ queryKey: notificationsKeys.list });
+                },
+              });
+              setOpen(false);
+            }}
           >
             Clear all
           </Button>
@@ -140,32 +161,45 @@ export function NotificationsBell({ enabled = true }: { enabled?: boolean }) {
               </div>
             )}
 
-            {items.map((n) => (
-              <button
-                key={n.id}
-                className="w-full text-left rounded-md px-3 py-2 hover:bg-accent transition"
-                onClick={() => {
-                  ackOne.mutate({ id: n.id });
+            {items.map((n) => {
+              const handler = getHandler(n.type);
 
-                  setOpen(false);
-                }}
-              >
-                <div className="flex items-start gap-2">
-                  <span
-                    className={[
-                      "mt-2 h-2 w-2 rounded-full",
-                      n.readAt ? "bg-muted" : "bg-primary",
-                    ].join(" ")}
-                  />
-                  <div className="min-w-0">
-                    <div className="text-sm">{n.text}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(n.createdAt).toLocaleString()}
-                    </div>
-                  </div>
-                </div>
-              </button>
-            ))}
+              const ctx = {
+                qc,
+                location,
+                ackOne,
+                setFriendsFilter,
+              } as const;
+
+              const to = handler.getLink(n as any);
+
+              return (
+                <NotificationItem
+                  key={n.id}
+                  n={n}
+                  to={to}
+                  showTime
+                  onClick={() => {
+                    // side-effects (например выставить фильтр друзей)
+                    handler.onClick?.(n as any, ctx);
+
+                    // ack -> optimistic remove + decrement unread (в мутации)
+                    ackOne.mutate(
+                      { id: n.id },
+                      {
+                        onSettled: () => {
+                          qc.invalidateQueries({
+                            queryKey: notificationsKeys.unread,
+                          });
+                        },
+                      },
+                    );
+
+                    setOpen(false);
+                  }}
+                />
+              );
+            })}
 
             <div ref={sentinelRef} className="h-1" />
 

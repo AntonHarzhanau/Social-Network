@@ -7,7 +7,7 @@ import { ROUTES } from "@/shared/constants/routes";
 import Layout from "@/widgets/Layout/Layout";
 import { Navigate } from "react-router-dom";
 import AuthEventBridge from "./AuthEventBridge";
-import { NotificationsMercureBridge } from "@/entities/notification/model/NotificationMercureBridge";
+import { NotificationsMercureBridge } from "@/entities/notification/NotificationMercureBridge";
 
 const ProtectedRoot = () => {
   const status = sessionStatus();

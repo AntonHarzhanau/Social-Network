@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import type { Chat, ChatMercureEvent } from "@/entities/chat/model/types";
-import { chatKeys } from "@/entities/chat/model/queryKeys";
+import { chatQueryKeys } from "@/entities/chat/model/chatQueryKeys";
 import { useMercure } from "@/shared/hooks/useMercure";
 import { topics } from "@/shared/constants/topics";
 import {
@@ -13,7 +13,7 @@ function invalidateChatLists(qc: ReturnType<typeof useQueryClient>) {
   qc.invalidateQueries({
     predicate: (q) =>
       Array.isArray(q.queryKey) &&
-      q.queryKey[0] === chatKeys.all[0] &&
+      q.queryKey[0] === chatQueryKeys.all[0] &&
       q.queryKey[1] === "list",
   });
 }
@@ -74,7 +74,7 @@ export function useChatMercure(params: {
         case "chat_read": {
           if (evt.userId === params.currentUserId) return;
 
-          qc.setQueryData<Chat>(chatKeys.byId(params.chatId), (prev) => {
+          qc.setQueryData<Chat>(chatQueryKeys.byId(params.chatId), (prev) => {
             if (!prev) return prev;
             if (prev.type !== "direct") return prev;
 

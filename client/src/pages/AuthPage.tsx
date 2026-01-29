@@ -17,7 +17,7 @@ const AuthPage = () => {
 
   useEffect(() => {
     if (!restoreAccountStatus) return;
-    
+
     if (restoreAccountStatus === "ok") {
       toast.success("Account restored successfully", { closeButton: true });
     } else if (restoreAccountStatus === "invalid") {
@@ -54,7 +54,7 @@ const AuthPage = () => {
           <FieldDescription className="px-6 text-center">
             By clicking continue, you agree to our{" "}
             <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
-            <ModeToggle /> {/* TODO: for test */}
+            <ModeToggle />
           </FieldDescription>
         </div>
       </div>

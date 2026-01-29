@@ -21,9 +21,16 @@ interface NotificationRepositoryInterface
     public function findById(Uuid $notificationId): ?Notification;
 
     public function findGroupedForRecipient(
-    Uuid $recipientId,
-    NotificationTypeEnum $type,
-    string $groupKey
-): ?Notification;
+        Uuid $recipientId,
+        NotificationTypeEnum $type,
+        string $groupKey
+    ): ?Notification;
 
+    public function findGroupedForRecipients(
+        array $recipientIds,
+        NotificationTypeEnum $type,
+        string $groupKey,
+    ): array;
+
+    public function countUnreadByRecipients(array $recipientIds): array;
 }

@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useChatRouting } from "../lib/useChatRouting";
 import type { Chat } from "@/entities/chat/model/types";
-import { chatKeys } from "@/entities/chat/model/queryKeys";
+import { chatQueryKeys } from "@/entities/chat/model/chatQueryKeys";
 import { OpenChatRowSkeleton } from "./OpenChatRowSkeleton";
 import { Button } from "@/shared/components/ui/button";
 import { X } from "lucide-react";
@@ -20,9 +20,9 @@ export const OpenChatRow = ({
   const { goToChat, closeChatFromSidebar } = useChatRouting();
 
   const { data: chat } = useQuery<Chat | undefined>({
-    queryKey: chatKeys.byId(chatId),
-    queryFn: async () => qc.getQueryData<Chat>(chatKeys.byId(chatId)),
-    initialData: () => qc.getQueryData<Chat>(chatKeys.byId(chatId)),
+    queryKey: chatQueryKeys.byId(chatId),
+    queryFn: async () => qc.getQueryData<Chat>(chatQueryKeys.byId(chatId)),
+    initialData: () => qc.getQueryData<Chat>(chatQueryKeys.byId(chatId)),
     enabled: false,
     staleTime: Infinity,
   });

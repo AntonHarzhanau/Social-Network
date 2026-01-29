@@ -14,10 +14,7 @@ export async function fetchNotifications(
   limit = 10,
 ): Promise<NotificationDTO[]> {
   const response = await apiClient.get<NotificationDTO[]>("/notifications", {
-    params: {
-      page,
-      limit,
-    },
+    params: { page, limit },
   });
   return response.data;
 }

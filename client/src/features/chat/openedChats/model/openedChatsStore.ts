@@ -13,6 +13,7 @@ type OpenedChatsState = {
 
   open: (chatId: string) => void;
   close: (chatId: string) => void;
+  clear: () => void;
 
   setScroll: (
     chatId: string,
@@ -54,6 +55,10 @@ export const useOpenedChatsStore = create<OpenedChatsState>((set, get) => ({
       openedIds: s.openedIds.filter((id) => id !== chatId),
       byId: nextById,
     });
+  },
+
+  clear: () => {
+    set({ openedIds: [], byId: {} });
   },
 
   setScroll: (chatId, patch) => {

@@ -22,7 +22,6 @@ final class GetListAction
                 'id' => $notification->id,
                 'type' => $notification->type->value,
                 'text' => $notification->text,
-                'target' => $notification->target,
                 'payload' => $notification->payload,
                 'createdAt' => $notification->createdAt->format(DATE_ATOM),
             ];

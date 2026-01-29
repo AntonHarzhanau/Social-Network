@@ -5,6 +5,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Avatar } from "@/shared/components/Avatar";
 import { Link } from "react-router-dom";
 import { NotificationsBell } from "../NotificationsBell";
+import { LogOut } from "lucide-react";
 
 interface HeaderProps {
   user?: UserPreview | null;
@@ -43,12 +44,8 @@ const Header = ({ user }: HeaderProps) => {
 
           <ModeToggle />
 
-          <Button
-            variant="ghost"
-            onClick={logout}
-            className="hidden md:inline-flex"
-          >
-            Logout
+          <Button variant="ghost" onClick={logout} className="inline-flex">
+            <LogOut size={16} strokeWidth={2.25} />
           </Button>
 
           <Button
