@@ -42,7 +42,7 @@ class SocialGraphApi implements SocialGraphApiInterface
         return $this->friendshipRepository->findFriendship(
             $userId,
             $potentialFriendId,
-            [FriendshipStatusEnum::ACCEPTED, FriendshipStatusEnum::PENDING],
+            [FriendshipStatusEnum::ACCEPTED],
         ) ? true : false;
     }
 

@@ -19,7 +19,7 @@ class Education
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $userId = null;
+    private ?User $user = null;
 
     #[ORM\Column(length: 150)]
     private ?string $institutionName = null;
@@ -36,19 +36,24 @@ class Education
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $endAt = null;
 
+    public function __construct(User $user)
+    {
+        $this->user = $user;   
+    }
+
     public function getId(): ?Uuid
     {
         return $this->id;
     }
 
-    public function getUserId(): ?User
+    public function getUser(): ?User
     {
-        return $this->userId;
+        return $this->user;
     }
 
-    public function setUserId(?User $userId): static
+    public function setUser(?User $user): static
     {
-        $this->userId = $userId;
+        $this->user = $user;
 
         return $this;
     }

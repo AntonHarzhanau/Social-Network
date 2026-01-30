@@ -1,0 +1,69 @@
+<?php
+
+namespace App\Modules\User\Infrastructure\Http\Request;
+
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+
+final class CreateWorkExperienceRequest
+{
+    #[Assert\Type(type: 'string', message: 'Field "company" must be a string.')]
+    #[Assert\NotBlank(message: 'Field "company" cannot be empty.')]
+    #[Assert\Length(
+        max: 150,
+        maxMessage: 'Field "company" must be at most {{ limit }} characters.'
+    )]
+    public string $company;
+
+    #[Assert\Type(type: ['string', 'null'], message: 'Field "positionTitle" must be a string or null.')]
+    #[Assert\Length(
+        max: 150,
+        maxMessage: 'Field "positionTitle" must be at most {{ limit }} characters.'
+    )]
+    public ?string $positionTitle = null;
+
+    #[Assert\Type(type: 'string', message: 'Field "startAt" must be a string in format YYYY-MM-DD.')]
+    #[Assert\NotBlank(message: 'Field "startAt" cannot be empty.')]
+    #[Assert\Regex(
+        pattern: '/^\d{4}-\d{2}-\d{2}$/',
+        message: 'Field "startAt" must match format YYYY-MM-DD.'
+    )]
+    public string $startAt;
+
+    #[Assert\Type(type: ['string', 'null'], message: 'Field "endAt" must be a string in format YYYY-MM-DD or null.')]
+    #[Assert\Regex(
+        pattern: '/^\d{4}-\d{2}-\d{2}$/',
+        message: 'Field "endAt" must match format YYYY-MM-DD.'
+    )]
+    public ?string $endAt = null;
+
+    #[Assert\Callback]
+    public function validateDates(ExecutionContextInterface $context): void
+    {
+        $start = \DateTimeImmutable::createFromFormat('Y-m-d', $this->startAt);
+        if (!$start) {
+            $context->buildViolation('Field "startAt" is not a valid date.')
+                ->atPath('startAt')
+                ->addViolation();
+            return;
+        }
+
+        if ($this->endAt === null) {
+            return;
+        }
+
+        $end = \DateTimeImmutable::createFromFormat('Y-m-d', $this->endAt);
+        if (!$end) {
+            $context->buildViolation('Field "endAt" is not a valid date.')
+                ->atPath('endAt')
+                ->addViolation();
+            return;
+        }
+
+        if ($end < $start) {
+            $context->buildViolation('Field "endAt" must be greater than or equal to "startAt".')
+                ->atPath('endAt')
+                ->addViolation();
+        }
+    }
+}

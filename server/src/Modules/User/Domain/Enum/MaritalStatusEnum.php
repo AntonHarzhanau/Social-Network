@@ -8,4 +8,16 @@ enum MaritalStatusEnum: string
     case MARRIED = 'married';
     case DIVORCED = 'divorced';
     case WIDOWED = 'widowed';
+
+    public static function values(): array
+    {
+        return array_map(static fn(self $c) => $c->value, self::cases());
+    }
+
+    public static function valuesWithNull(): array
+    {
+        $v = self::values();
+        $v[] = null;
+        return $v;
+    }
 }

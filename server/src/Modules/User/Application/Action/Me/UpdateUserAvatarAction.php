@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\User\Application\Action\User;
+namespace App\Modules\User\Application\Action\Me;
 
 use App\Modules\Media\Domain\Repository\MediaAssetRepositoryInterface;
 use App\Modules\User\Domain\Entity\UserAvatar;

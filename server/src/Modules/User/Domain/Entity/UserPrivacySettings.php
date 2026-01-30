@@ -3,12 +3,12 @@
 namespace App\Modules\User\Domain\Entity;
 
 use App\Modules\User\Domain\Entity\User;
-use App\Modules\User\Infrastructure\Persistence\Doctrine\Repository\UserPrivacySettingsRepository;
+use App\Modules\User\Domain\Enum\ProfileVisibilityEnum;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: UserPrivacySettingsRepository::class)]
+#[ORM\Entity]
 class UserPrivacySettings
 {
     #[ORM\Id]
@@ -17,96 +17,101 @@ class UserPrivacySettings
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id = null;
 
-    #[ORM\OneToOne(inversedBy: 'PrivacySettings', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $userId = null;
+    #[ORM\OneToOne(inversedBy: 'privacySettings', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private User $user;
 
-    #[ORM\Column(length: 255)]
-    private ?string $postsVisibility = null;
+    #[ORM\Column(enumType: ProfileVisibilityEnum::class)]
+    private ProfileVisibilityEnum $postsVisibility = ProfileVisibilityEnum::PUBLIC;
 
-    #[ORM\Column(length: 255)]
-    private ?string $mediaVisibility = null;
+    #[ORM\Column(enumType: ProfileVisibilityEnum::class)]
+    private ProfileVisibilityEnum $mediaVisibility = ProfileVisibilityEnum::PUBLIC;
 
-    #[ORM\Column(length: 255)]
-    private ?string $friendsVisibility = null;
+    #[ORM\Column(enumType: ProfileVisibilityEnum::class)]
+    private ProfileVisibilityEnum $friendsVisibility = ProfileVisibilityEnum::PUBLIC;
 
-    #[ORM\Column(length: 255)]
-    private ?string $profileVisibility = null;
+    #[ORM\Column(enumType: ProfileVisibilityEnum::class)]
+    private ProfileVisibilityEnum $profileVisibility = ProfileVisibilityEnum::PUBLIC;
 
-    #[ORM\Column(length: 255)]
-    private ?string $groupsVisibility = null;
+    #[ORM\Column(enumType: ProfileVisibilityEnum::class)]
+    private ProfileVisibilityEnum $groupsVisibility = ProfileVisibilityEnum::PUBLIC;
+
+    public function __construct(User $user)
+    {
+        $this->user = $user;
+    }
 
     public function getId(): ?Uuid
     {
         return $this->id;
     }
 
-    public function getUserId(): ?User
+    public function getUser(): User
     {
-        return $this->userId;
+        return $this->user;
     }
 
-    public function setUserId(User $userId): static
+    public function setUser(User $user): static
     {
-        $this->userId = $userId;
+        $this->user = $user;
 
         return $this;
     }
 
-    public function getPostsVisibility(): ?string
+    public function getPostsVisibility(): ProfileVisibilityEnum
     {
         return $this->postsVisibility;
     }
 
-    public function setPostsVisibility(string $postsVisibility): static
+    public function setPostsVisibility(ProfileVisibilityEnum $postsVisibility): static
     {
         $this->postsVisibility = $postsVisibility;
 
         return $this;
     }
 
-    public function getMediaVisibility(): ?string
+    public function getMediaVisibility(): ProfileVisibilityEnum
     {
         return $this->mediaVisibility;
     }
 
-    public function setMediaVisibility(string $mediaVisibility): static
+    public function setMediaVisibility(ProfileVisibilityEnum $mediaVisibility): static
     {
         $this->mediaVisibility = $mediaVisibility;
 
         return $this;
     }
 
-    public function getFriendsVisibility(): ?string
+    public function getFriendsVisibility(): ProfileVisibilityEnum
     {
         return $this->friendsVisibility;
     }
 
-    public function setFriendsVisibility(string $friendsVisibility): static
+    public function setFriendsVisibility(ProfileVisibilityEnum $friendsVisibility): static
     {
         $this->friendsVisibility = $friendsVisibility;
 
         return $this;
     }
 
-    public function getProfileVisibility(): ?string
+    public function getProfileVisibility(): ProfileVisibilityEnum
     {
         return $this->profileVisibility;
     }
 
-    public function setProfileVisibility(string $profileVisibility): static
+    public function setProfileVisibility(ProfileVisibilityEnum $profileVisibility): static
     {
         $this->profileVisibility = $profileVisibility;
 
         return $this;
     }
 
-    public function getGroupsVisibility(): ?string
+    public function getGroupsVisibility(): ProfileVisibilityEnum
     {
         return $this->groupsVisibility;
     }
 
-    public function setGroupsVisibility(string $groupsVisibility): static
+    public function setGroupsVisibility(ProfileVisibilityEnum $groupsVisibility): static
     {
         $this->groupsVisibility = $groupsVisibility;
 

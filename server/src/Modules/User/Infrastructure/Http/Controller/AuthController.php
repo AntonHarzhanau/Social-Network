@@ -26,7 +26,8 @@ final class AuthController extends AbstractController
 {
     public function __construct(
         private readonly string $frontendBaseUrl = 'http://localhost:5173/auth'
-    ) {}
+    ) {
+    }
 
     #[Route('/register', methods: ['POST'])]
     public function register(
@@ -86,22 +87,15 @@ final class AuthController extends AbstractController
         return $this->json(['ok' => true]);
     }
 
-    #[Route('/me', methods: ['GET'])]
-    public function me(
-        #[CurrentUser] ?User $user,
-        GetMeAction $action,
-    ): JsonResponse {
-        return $this->json($action->execute($user->getId()));
-    }
-
     #[Route('/recovery/request', methods: ['POST'])]
     public function recoveryRequest(
         #[MapRequestPayload(validationFailedStatusCode: JsonResponse::HTTP_UNPROCESSABLE_ENTITY)] RecoveryAccountRequest $dto,
         RequestAccountRecoveryAction $action,
     ): JsonResponse {
         $action->execute($dto->email);
-        return $this->json(['message' => 'A recovery request has been sent to the specified address.
-Check your email.'], JsonResponse::HTTP_ACCEPTED);
+        return $this->json([
+            'message' => 'A recovery request has been sent to the specified address. Check your email.'
+        ], JsonResponse::HTTP_ACCEPTED);
     }
 
     #[Route('/recovery/confirm', name: 'api_auth_recovery_confirm', methods: ['GET'])]
@@ -116,14 +110,5 @@ Check your email.'], JsonResponse::HTTP_ACCEPTED);
         } catch (\InvalidArgumentException $e) {
             return $this->redirect($this->frontendBaseUrl . '?restore-account-status=invalid');
         }
-    }
-
-    #[Route('/me/presence', name: 'api_auth_me_presence', methods: ['POST'])]
-    public function updateMyPresence(
-        #[CurrentUser] ?User $user,
-        UpdateMyPresenceAction $action,
-    ): JsonResponse {
-        $action->execute($user);
-        return $this->json(null, JsonResponse::HTTP_NO_CONTENT);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\User\Application\Action\User;
+namespace App\Modules\User\Application\Action\Me;
 
 use App\Modules\User\Domain\Repository\UserRepositoryInterface;
 use Symfony\Component\Uid\Uuid;

@@ -3,6 +3,7 @@
 namespace App\Modules\User\Domain\Entity;
 
 use App\Modules\Feed\Domain\Entity\Wall;
+use App\Modules\User\Domain\Enum\MaritalStatusEnum;
 use App\Modules\User\Infrastructure\Persistence\Doctrine\Repository\UserRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -57,8 +58,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $location = null;
 
-    #[ORM\Column(length: 30, nullable: true)]
-    private ?string $maritalStatus = null;
+    #[ORM\Column(enumType: MaritalStatusEnum::class, nullable: true)]
+    private ?MaritalStatusEnum $maritalStatus = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
     private ?\DateTimeImmutable $dateOfBirth = null;
@@ -78,8 +79,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $emailVerifiedAt = null;
 
-    #[ORM\OneToOne(mappedBy: 'userId', cascade: ['persist', 'remove'])]
-    private ?UserPrivacySettings $PrivacySettings = null;
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private ?UserPrivacySettings $privacySettings = null;
 
     #[ORM\OneToOne(targetEntity: Wall::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[ORM\JoinColumn(name: 'wall_id', referencedColumnName: 'id', nullable: false, unique: true, onDelete: 'CASCADE')]
@@ -89,6 +90,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->wall = new Wall('user');
+        $this->privacySettings = new UserPrivacySettings($this);
     }
 
     public function getId(): ?Uuid
@@ -232,12 +234,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getMaritalStatus(): ?string
+    public function getMaritalStatus(): ?MaritalStatusEnum
     {
         return $this->maritalStatus;
     }
 
-    public function setMaritalStatus(string $maritalStatus): static
+    public function setMaritalStatus(?MaritalStatusEnum $maritalStatus): static
     {
         $this->maritalStatus = $maritalStatus;
 
@@ -318,17 +320,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getPrivacySettings(): ?UserPrivacySettings
     {
-        return $this->PrivacySettings;
+        return $this->privacySettings;
     }
 
-    public function setPrivacySettings(UserPrivacySettings $PrivacySettings): static
+    public function setPrivacySettings(UserPrivacySettings $privacySettings): static
     {
         // set the owning side of the relation if necessary
-        if ($PrivacySettings->getUserId() !== $this) {
-            $PrivacySettings->setUserId($this);
+        if ($privacySettings->getUser() !== $this) {
+            $privacySettings->setUser($this);
         }
 
-        $this->PrivacySettings = $PrivacySettings;
+        $this->privacySettings = $privacySettings;
 
         return $this;
     }

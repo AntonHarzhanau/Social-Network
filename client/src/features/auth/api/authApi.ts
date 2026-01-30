@@ -17,7 +17,7 @@ export const authApi = {
     return apiClient.post("/auth/logout");
   },
   me() {
-    const response = apiClient.get<UserPreview>("/auth/me");
+    const response = apiClient.get<UserPreview>("/me");
     return response;
   },
   mercure() {
