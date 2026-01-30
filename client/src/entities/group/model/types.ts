@@ -19,7 +19,7 @@ export type GroupPreview = {
 export type Group = GroupPreview & {
   visibility: GroupVisibility;
   description?: string | null;
-  wallId: string;
+  wallId?: string | null;
   cover?: MediaPreview | null;
 };
 

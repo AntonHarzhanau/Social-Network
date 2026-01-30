@@ -1,5 +1,13 @@
-import { setGroupAvatar } from "@/entities/group/api/groupApi";
-import { uploadMedia } from "@/entities/media/api/mediaApi";
+import { useState } from "react";
+import { cn } from "@/shared/lib/utils";
+import { Avatar } from "@/shared/components/Avatar";
+import { AvatarCropDialog } from "@/widgets/AvatarCropDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,21 +18,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu";
-import { Avatar } from "@/shared/components/Avatar";
-import { AvatarCropDialog } from "@/widgets/AvatarCropDialog";
-import { useState } from "react";
+
+import { useGroupAvatar } from "../model/useGroupAvatar";
 
 interface GroupProfileAvatarProps {
   groupId?: string | null;
   avatarUrl?: string | null;
   name?: string | null;
   isOwner: boolean;
+  className?: string; // ✅
 }
 
 const GroupProfileAvatar = ({
@@ -32,25 +34,13 @@ const GroupProfileAvatar = ({
   avatarUrl,
   name,
   isOwner,
+  className,
 }: GroupProfileAvatarProps) => {
   const [open, setOpen] = useState(false);
   const [cropOpen, setCropOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const uploadNewAvatar = async (data: { original: File; preview: File }) => {
-    if (!groupId) return;
-
-    const previewRes = await uploadMedia(data.preview);
-
-    await setGroupAvatar(groupId, previewRes.id);
-    return previewRes;
-  };
-
-  const deleteAvatar = async () => {
-    if (!groupId) return;
-
-    await setGroupAvatar(groupId, null);
-  };
+  const { uploadNewAvatar, deleteAvatar } = useGroupAvatar(groupId);
 
   const handleOpenChange = (next: boolean) => {
     if (!isOwner) return;
@@ -59,21 +49,21 @@ const GroupProfileAvatar = ({
 
   return (
     <>
-      <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+      <DropdownMenu open={open} onOpenChange={handleOpenChange} modal={false}>
         <DropdownMenuTrigger asChild disabled={!isOwner}>
           <button
             type="button"
-            className="rounded-full"
             aria-label="Group avatar menu"
+            className={cn(
+              "relative block rounded-full",
+              "h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 lg:h-32 lg:w-32",
+              className,
+            )}
           >
             <Avatar
               imageUrl={avatarUrl}
               name={name || ""}
-              className="
-                h-32 w-32 sm:h-36 sm:w-36
-                rounded-full border-4 shadow-lg
-                cursor-pointer
-              "
+              className="h-full w-full rounded-full border-4 shadow-lg cursor-pointer"
             />
           </button>
         </DropdownMenuTrigger>
@@ -81,7 +71,8 @@ const GroupProfileAvatar = ({
         {isOwner && (
           <DropdownMenuContent align="start" sideOffset={8}>
             <DropdownMenuItem
-              onSelect={() => {
+              onSelect={(e) => {
+                e.preventDefault();
                 setOpen(false);
                 setCropOpen(true);
               }}
@@ -91,7 +82,8 @@ const GroupProfileAvatar = ({
 
             <DropdownMenuItem
               className="text-destructive"
-              onSelect={() => {
+              onSelect={(e) => {
+                e.preventDefault();
                 setOpen(false);
                 setDeleteOpen(true);
               }}
@@ -106,7 +98,7 @@ const GroupProfileAvatar = ({
         open={cropOpen}
         onOpenChange={setCropOpen}
         onSaved={async ({ original, preview }) => {
-          await uploadNewAvatar({ original, preview });
+          await uploadNewAvatar(original, preview);
           setCropOpen(false);
         }}
       />

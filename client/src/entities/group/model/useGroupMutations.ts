@@ -1,7 +1,13 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  type InfiniteData,
+  type QueryClient,
+} from "@tanstack/react-query";
 
-import type { Group, MemberRole, MemberStatus } from "./types";
+import type { Group, GroupVisibility, MemberRole, MemberStatus } from "./types";
 import { groupKeys } from "./queryKeys";
+import type { MediaPreview } from "@/entities/media/model/types";
 
 import {
   changeGroupMemberRole,
@@ -14,24 +20,66 @@ import {
   updateGroupSettings,
 } from "../api/groupApi";
 
-function invalidateLists(qc: ReturnType<typeof useQueryClient>) {
-  return qc.invalidateQueries({ queryKey: groupKeys.lists() });
+function patchGroupDetail(
+  qc: QueryClient,
+  groupId: string,
+  patch: Partial<Group>,
+) {
+  qc.setQueryData<Group>(groupKeys.detail(groupId), (old) =>
+    old ? { ...old, ...patch } : old,
+  );
 }
 
-function invalidateGroup(
-  qc: ReturnType<typeof useQueryClient>,
+function patchGroupLists(
+  qc: QueryClient,
   groupId: string,
+  patch: Partial<
+    Pick<
+      Group,
+      | "id"
+      | "name"
+      | "isMember"
+      | "role"
+      | "status"
+      | "subscribersCount"
+      | "currentAvatar"
+    >
+  >,
 ) {
-  qc.invalidateQueries({ queryKey: groupKeys.detail(groupId) });
-  qc.invalidateQueries({ queryKey: groupKeys.members(groupId) });
+  qc.setQueriesData({ queryKey: groupKeys.lists() }, (old) => {
+    if (!old) return old;
+
+    if (Array.isArray(old)) {
+      return old.map((g: any) => (g?.id === groupId ? { ...g, ...patch } : g));
+    }
+
+    const inf = old as InfiniteData<any>;
+    if (inf?.pages && Array.isArray(inf.pages)) {
+      return {
+        ...inf,
+        pages: inf.pages.map((page: any[]) =>
+          page.map((g: any) => (g?.id === groupId ? { ...g, ...patch } : g)),
+        ),
+      };
+    }
+
+    return old;
+  });
 }
 
-function invalidateAllForGroup(
-  qc: ReturnType<typeof useQueryClient>,
-  groupId: string,
-) {
-  invalidateLists(qc);
-  invalidateGroup(qc, groupId);
+async function invalidateLists(qc: QueryClient) {
+  await qc.invalidateQueries({ queryKey: groupKeys.lists() });
+}
+
+async function invalidateGroup(qc: QueryClient, groupId: string) {
+  await Promise.all([
+    qc.invalidateQueries({ queryKey: groupKeys.detail(groupId) }),
+    qc.invalidateQueries({ queryKey: groupKeys.members(groupId) }),
+  ]);
+}
+
+async function invalidateAllForGroup(qc: QueryClient, groupId: string) {
+  await Promise.all([invalidateLists(qc), invalidateGroup(qc, groupId)]);
 }
 
 export function useCreateGroupMutation() {
@@ -49,9 +97,56 @@ export function useJoinGroupMutation() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: (groupId: string) => joinGroup(groupId),
-    onSuccess: async (_void, groupId) => {
-      await invalidateAllForGroup(qc, groupId);
+    mutationFn: (v: { groupId: string; visibility?: GroupVisibility }) =>
+      joinGroup(v.groupId),
+
+    onMutate: async (vars) => {
+      const { groupId } = vars;
+
+      await qc.cancelQueries({ queryKey: groupKeys.detail(groupId) });
+      const prev = qc.getQueryData<Group>(groupKeys.detail(groupId));
+
+      const visibility: GroupVisibility | undefined =
+        vars.visibility ?? prev?.visibility;
+
+      if (prev) {
+        if (visibility === "private") {
+          patchGroupDetail(qc, groupId, {
+            status: "pending",
+            isMember: false,
+            role: null,
+            wallId: null,
+          });
+          patchGroupLists(qc, groupId, {
+            status: "pending",
+            isMember: false,
+            role: null,
+          });
+        } else {
+          patchGroupDetail(qc, groupId, {
+            status: "accepted",
+            isMember: true,
+            role: "member",
+            subscribersCount: prev.subscribersCount + 1,
+          });
+          patchGroupLists(qc, groupId, {
+            status: "accepted",
+            isMember: true,
+            role: "member",
+            subscribersCount: prev.subscribersCount + 1,
+          });
+        }
+      }
+
+      return { prev };
+    },
+
+    onError: (_e, vars, ctx) => {
+      if (ctx?.prev) qc.setQueryData(groupKeys.detail(vars.groupId), ctx.prev);
+    },
+
+    onSettled: async (_d, _e, vars) => {
+      await invalidateAllForGroup(qc, vars.groupId);
     },
   });
 }
@@ -61,7 +156,41 @@ export function useLeaveGroupMutation() {
 
   return useMutation({
     mutationFn: (groupId: string) => leaveGroup(groupId),
-    onSuccess: async (_void, groupId) => {
+
+    onMutate: async (groupId) => {
+      await qc.cancelQueries({ queryKey: groupKeys.detail(groupId) });
+      const prev = qc.getQueryData<Group>(groupKeys.detail(groupId));
+
+      if (prev) {
+        const wasAcceptedMember = prev.isMember && prev.status === "accepted";
+        const nextCount = wasAcceptedMember
+          ? Math.max(0, prev.subscribersCount - 1)
+          : prev.subscribersCount;
+
+        patchGroupDetail(qc, groupId, {
+          status: null,
+          isMember: false,
+          role: null,
+          wallId: null,
+          subscribersCount: nextCount,
+        });
+
+        patchGroupLists(qc, groupId, {
+          status: null,
+          isMember: false,
+          role: null,
+          subscribersCount: nextCount,
+        });
+      }
+
+      return { prev };
+    },
+
+    onError: (_e, groupId, ctx) => {
+      if (ctx?.prev) qc.setQueryData(groupKeys.detail(groupId), ctx.prev);
+    },
+
+    onSettled: async (_d, _e, groupId) => {
       await invalidateAllForGroup(qc, groupId);
     },
   });
@@ -76,9 +205,13 @@ export function useChangeGroupMemberRoleMutation() {
       memberId: string;
       newRole: MemberRole;
     }) => changeGroupMemberRole({ memberId: v.memberId, newRole: v.newRole }),
+
     onSuccess: async (_void, vars) => {
-      await qc.invalidateQueries({ queryKey: groupKeys.members(vars.groupId) });
-      await qc.invalidateQueries({ queryKey: groupKeys.detail(vars.groupId) });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: groupKeys.members(vars.groupId) }),
+        qc.invalidateQueries({ queryKey: groupKeys.detail(vars.groupId) }),
+        invalidateLists(qc),
+      ]);
     },
   });
 }
@@ -93,10 +226,13 @@ export function useChangeGroupMemberStatusMutation() {
       newStatus: MemberStatus;
     }) =>
       changeGroupMemberStatus({ memberId: v.memberId, newStatus: v.newStatus }),
+
     onSuccess: async (_void, vars) => {
-      await qc.invalidateQueries({ queryKey: groupKeys.members(vars.groupId) });
-      await qc.invalidateQueries({ queryKey: groupKeys.detail(vars.groupId) });
-      await invalidateLists(qc);
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: groupKeys.members(vars.groupId) }),
+        qc.invalidateQueries({ queryKey: groupKeys.detail(vars.groupId) }),
+        invalidateLists(qc),
+      ]);
     },
   });
 }
@@ -105,11 +241,35 @@ export function useSetGroupAvatarMutation() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: (v: { groupId: string; avatarId?: string | null }) =>
-      setGroupAvatar(v.groupId, v.avatarId),
-    onSuccess: async (_void, vars) => {
-      await qc.invalidateQueries({ queryKey: groupKeys.detail(vars.groupId) });
-      await invalidateLists(qc);
+    mutationFn: (v: {
+      groupId: string;
+      avatarId?: string | null;
+      preview?: MediaPreview | null;
+    }) => setGroupAvatar(v.groupId, v.avatarId),
+
+    onMutate: async (vars) => {
+      await qc.cancelQueries({ queryKey: groupKeys.detail(vars.groupId) });
+      const prev = qc.getQueryData<Group>(groupKeys.detail(vars.groupId));
+
+      if (vars.preview !== undefined) {
+        patchGroupDetail(qc, vars.groupId, { currentAvatar: vars.preview });
+        patchGroupLists(qc, vars.groupId, {
+          currentAvatar: vars.preview ?? null,
+        });
+      }
+
+      return { prev };
+    },
+
+    onError: (_e, vars, ctx) => {
+      if (ctx?.prev) qc.setQueryData(groupKeys.detail(vars.groupId), ctx.prev);
+    },
+
+    onSettled: async (_d, _e, vars) => {
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: groupKeys.detail(vars.groupId) }),
+        invalidateLists(qc),
+      ]);
     },
   });
 }
@@ -120,7 +280,8 @@ export function useSetGroupCoverMutation() {
   return useMutation({
     mutationFn: (v: { groupId: string; coverId?: string | null }) =>
       setGroupCover(v.groupId, v.coverId),
-    onSuccess: async (_void, vars) => {
+
+    onSettled: async (_d, _e, vars) => {
       await qc.invalidateQueries({ queryKey: groupKeys.detail(vars.groupId) });
     },
   });
@@ -134,9 +295,29 @@ export function useUpdateGroupSettingsMutation() {
       groupId: string;
       patch: Partial<Pick<Group, "name" | "description" | "visibility">>;
     }) => updateGroupSettings(v.groupId, v.patch),
-    onSuccess: async (_void, vars) => {
-      await qc.invalidateQueries({ queryKey: groupKeys.detail(vars.groupId) });
-      await invalidateLists(qc);
+
+    onMutate: async (vars) => {
+      await qc.cancelQueries({ queryKey: groupKeys.detail(vars.groupId) });
+      const prev = qc.getQueryData<Group>(groupKeys.detail(vars.groupId));
+
+      patchGroupDetail(qc, vars.groupId, vars.patch);
+
+      if (vars.patch.name) {
+        patchGroupLists(qc, vars.groupId, { name: vars.patch.name } as any);
+      }
+
+      return { prev };
+    },
+
+    onError: (_e, vars, ctx) => {
+      if (ctx?.prev) qc.setQueryData(groupKeys.detail(vars.groupId), ctx.prev);
+    },
+
+    onSettled: async (_d, _e, vars) => {
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: groupKeys.detail(vars.groupId) }),
+        invalidateLists(qc),
+      ]);
     },
   });
 }
