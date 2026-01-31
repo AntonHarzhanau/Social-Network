@@ -8,6 +8,7 @@ use App\Modules\User\Application\Action\Me\Education\AddEducationAction;
 use App\Modules\User\Application\Action\Me\Education\DeleteEducationAction;
 use App\Modules\User\Application\Action\Me\Education\UpdateEducationAction;
 use App\Modules\User\Application\Action\Me\GetMeAction;
+use App\Modules\User\Application\Action\Me\GetPrivacySettings;
 use App\Modules\User\Application\Action\Me\PatchProfileSettingsAction;
 use App\Modules\User\Application\Action\Me\UpdateUserAvatarAction;
 use App\Modules\User\Application\Action\Me\WorkExperience\AddWorkExperienceAction;
@@ -59,6 +60,15 @@ final class MeController extends AbstractController
     ): JsonResponse {
         $action->execute($user, $dto);
         return $this->json(['ok' => true], Response::HTTP_OK);
+    }
+
+    #[Route('/profile/privacy', methods: ['GET'])]
+    public function getPrivacySettings(
+        #[CurrentUser] User $user,
+        GetPrivacySettings $action,
+    ): JsonResponse {
+        $dto = $action->execute($user);
+        return $this->json($dto, Response::HTTP_OK);
     }
 
     #[Route('/profile/education', methods: ['POST'], format: 'json')]

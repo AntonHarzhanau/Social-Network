@@ -2,26 +2,24 @@ import { Skeleton } from "@/shared/components/ui/skeleton";
 import CreatePostDIalog from "../../features/post/create/ui/CreatePostDIalog";
 import FeedsList from "../FeedsList";
 import MediaBox from "../MediaBox/MediaBox";
-import type { UserProfile } from "@/entities/user/model/types";
+import type { UserProfileResponse } from "@/entities/user/model/types";
 
 interface ProfileColumnProps {
-  user?: UserProfile;
+  user?: UserProfileResponse;
   loading: boolean;
 }
 
 const ProfileColumn = ({ user, loading }: ProfileColumnProps) => {
-  const wallId = user?.wallId;
+  const userId = user?.public.id;
+  const wallId = user?.privateSummary?.wallId;
 
+  console.log("ProfileColumn render", { user, loading });
   return (
     <div className="flex flex-col gap-2">
-      {user?.id ? (
-        <MediaBox id={user.id} />
-      ) : (
-        <Skeleton className="h-48 w-full" />
-      )}
-      {!loading && user?.wallId ? (
+      {userId ? <MediaBox id={userId} /> : <Skeleton className="h-48 w-full" />}
+      {!loading && wallId ? (
         <div className="flex flex-col gap-2">
-          <CreatePostDIalog wallId={user?.wallId} />
+          <CreatePostDIalog wallId={wallId} />
           <FeedsList wallId={wallId} />
         </div>
       ) : (

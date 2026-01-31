@@ -7,15 +7,29 @@ import { useParams } from "react-router-dom";
 
 const ProfilePage = () => {
   const { userId } = useParams<{ userId: string }>();
-  const { data: user, isLoading } = useUserProfile(userId);
+
+  const profileQuery = useUserProfile(userId);
 
   return (
     <div>
-      <UserProfileHeader user={user} loading={isLoading} />
+      <UserProfileHeader
+        user={profileQuery.data}
+        loading={profileQuery.isPending}
+      />
+
       <div className="flex gap-2 mt-4">
         <MainSectionLayout
-          pageContent={<ProfileColumn user={user} loading={isLoading} />}
-          asideContent={<FriendsWidget userId={userId} />}
+          pageContent={
+            <ProfileColumn
+              user={profileQuery.data}
+              loading={profileQuery.isPending}
+            />
+          }
+          asideContent={
+            <>
+              <FriendsWidget userId={profileQuery.data?.public.id} />
+            </>
+          }
         />
       </div>
     </div>

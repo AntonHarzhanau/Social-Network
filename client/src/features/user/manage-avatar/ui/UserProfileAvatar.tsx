@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useUserAvatar } from "../model/useUserAvatar";
 import {
   DropdownMenu,
@@ -18,10 +18,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
-import { fetchUserAvatars } from "@/entities/user/api/userApi";
 import { useMediaViewerStore } from "@/features/media/viewer/useMediaViewerStore";
-import type { MediaPreview } from "@/entities/media/model/types";
 import { cn } from "@/shared/lib/utils";
+import { useUserAvatars } from "@/entities/user/model/useUserQueries";
 
 interface UserProfileAvatarProps {
   userId?: string;
@@ -42,23 +41,15 @@ const UserProfileAvatar = ({
 }: UserProfileAvatarProps) => {
   const [cropOpen, setCropOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [avatars, setAvatars] = useState<MediaPreview[]>([]);
+
   const openViewer = useMediaViewerStore((s) => s.openViewer);
+
+  const avatarsQuery = useUserAvatars({
+    userId: userId ?? "",
+    enabled: !!userId,
+  });
+
   const { uploadNewAvatar, deleteAvatar } = useUserAvatar(userId);
-
-  useEffect(() => {
-    const loadAvatars = async () => {
-      if (!userId) return;
-      try {
-        const fetchedAvatars = await fetchUserAvatars(userId);
-        setAvatars(fetchedAvatars);
-      } catch (error) {
-        console.error("Error fetching user avatars:", error);
-      }
-    };
-
-    loadAvatars();
-  }, [userId, avatarUrl]);
 
   return (
     <>
@@ -79,11 +70,16 @@ const UserProfileAvatar = ({
             />
           </button>
         </DropdownMenuTrigger>
+
         <DropdownMenuContent>
           <DropdownMenuItem
-            onSelect={(e) => {
+            onSelect={async (e) => {
               e.preventDefault();
               if (!userId) return;
+
+              const data =
+                avatarsQuery.data ?? (await avatarsQuery.refetch()).data ?? [];
+
               openViewer({
                 author: {
                   id: userId,
@@ -91,7 +87,7 @@ const UserProfileAvatar = ({
                   avatarUrl: avatarUrl || undefined,
                   isOnline: isOnline || false,
                 },
-                medias: avatars ?? [],
+                medias: data,
                 initialIndex: 0,
               });
             }}

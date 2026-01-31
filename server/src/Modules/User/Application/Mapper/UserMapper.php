@@ -7,7 +7,9 @@ use App\Modules\User\Application\Service\PresenceService;
 use App\Modules\User\Contracts\DTO\UserDetailsDTO;
 use App\Modules\User\Contracts\DTO\UserPreviewDTO;
 use App\Modules\User\Contracts\DTO\UserPreviewRowDTO;
+use App\Modules\User\Contracts\DTO\UserPrivacySettingsDTO;
 use App\Modules\User\Domain\Entity\User;
+use App\Modules\User\Domain\Entity\UserPrivacySettings;
 
 final class UserMapper
 {
@@ -20,7 +22,7 @@ final class UserMapper
 
     public function toPreview(UserPreviewRowDTO $user, string|null $avatarUrl = null): UserPreviewDTO
     {
-        
+
         return new UserPreviewDTO(
             id: $user->id,
             name: $user->username,
@@ -32,7 +34,7 @@ final class UserMapper
         );
     }
 
-    public function toDetails(User $user)
+    public function toDetails(User $user): UserDetailsDTO
     {
         $avatarUrl = $user->getCurrentAvatar()
             ? ($this->getUrl)($user->getCurrentAvatar()->getPreview()->getStorageKey())
@@ -44,6 +46,7 @@ final class UserMapper
             slug: $user->getSlug(),
             avatarUrl: $avatarUrl,
             coverUrl: $user->getCoverUrl(),
+
             location: $user->getLocation(),
             maritalStatus: $user->getMaritalStatus()?->value ?? null,
             bio: $user->getBio(),
@@ -52,7 +55,15 @@ final class UserMapper
             emailVerifiedAt: $user->getEmailVerifiedAt()?->format(\DateTimeInterface::ATOM),
             wallId: (string) $user->getWall()->getId(),
             lastLoginAt: $user->getLastLoginAt()?->format(\DateTimeInterface::ATOM),
-            isOnline: $this->presenceService->isUserOnline($user->getLastLoginAt())
+            isOnline: $this->presenceService->isUserOnline($user->getLastLoginAt()),
+
+            privacySettings: new UserPrivacySettingsDTO(
+                postsVisibility: $user->getPrivacySettings()->getPostsVisibility()->value,
+                mediaVisibility: $user->getPrivacySettings()->getMediaVisibility()->value,
+                friendsVisibility: $user->getPrivacySettings()->getFriendsVisibility()->value,
+                profileVisibility: $user->getPrivacySettings()->getProfileVisibility()->value,
+                groupsVisibility: $user->getPrivacySettings()->getGroupsVisibility()->value,
+            ),
         );
     }
 

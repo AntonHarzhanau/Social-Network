@@ -11,7 +11,7 @@ import {
   sendFriendRequest,
 } from "@/entities/friends/api/friends";
 import { friendsQueryKeys } from "./queryKeys";
-import { userQueryKeys } from "@/entities/user/model/userQueryKeys";
+import { userKeys } from "@/entities/user/model/queryKeys";
 import type { MyFriendsStats } from "./types";
 
 type Ctx = { prevMyStats?: MyFriendsStats };
@@ -33,11 +33,11 @@ function patchMyStats(
 function invalidateFriends(qc: QueryClient, currentUserId?: string) {
   qc.invalidateQueries({ queryKey: friendsQueryKeys.root });
 
-  qc.invalidateQueries({ queryKey: userQueryKeys.root });
+  qc.invalidateQueries({ queryKey: userKeys.all });
 
   qc.invalidateQueries({ queryKey: friendsQueryKeys.stats.me() });
 
-//   qc.invalidateQueries({ queryKey: friendsQueryKeys.stats.user(currentUserId) });
+  //   qc.invalidateQueries({ queryKey: friendsQueryKeys.stats.user(currentUserId) });
 }
 
 export function useSendFriendRequestMutation(currentUserId?: string) {

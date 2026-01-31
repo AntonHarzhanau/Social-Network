@@ -2,6 +2,7 @@
 
 namespace App\Modules\User\Application\Action\User;
 
+use App\Modules\Media\Application\Service\GetMediaUrl;
 use App\Modules\User\Application\Port\SocialGraphPort;
 use App\Modules\User\Application\Service\PresenceService;
 use App\Modules\User\Application\Service\ProfileAccessPolicy;
@@ -27,12 +28,17 @@ final class GetUserProfileAction
         private ProfileAccessPolicy $policy,
         private SocialGraphPort $socialGraph,
         private PresenceService $presenceService,
+        private GetMediaUrl $getUrl,
     ) {
     }
 
     public function execute(Uuid $profileUserId, User $viewer): UserProfileResponseDTO
     {
         $owner = $this->users->findById($profileUserId);
+
+        $avatarUrl = $owner->getCurrentAvatar()
+            ? ($this->getUrl)($owner->getCurrentAvatar()->getPreview()->getStorageKey())
+            : null;
 
         $isBlocked = $this->socialGraph->isUserBlockedByUser($owner->getId(), $viewer->getId());
         $isFriend = $this->socialGraph->areUsersFriends($owner->getId(), $viewer->getId());
@@ -43,7 +49,7 @@ final class GetUserProfileAction
             id: (string) $owner->getId(),
             name: $owner->getUsername(),
             slug: $owner->getSlug(),
-            avatarUrl: $owner->getAvatarUrl(),
+            avatarUrl: $avatarUrl,
             coverUrl: $owner->getCoverUrl(),
             isOnline: $this->presenceService->isUserOnline($owner->getLastLoginAt()),
         );
@@ -55,6 +61,7 @@ final class GetUserProfileAction
 
             $summary = new UserPrivateProfileSummaryDTO(
                 location: $owner->getLocation(),
+                wallId: $owner->getWall()->getId()->toRfc4122(),
                 currentEducation: $edu ? $this->mapEducationPreview($edu) : null,
                 currentWorkExperience: $job ? $this->mapWorkPreview($job) : null,
             );

@@ -12,7 +12,7 @@ export const fetchFriends = async (
     params: {
       page,
       limit,
-      query,
+      search: query,
     },
   });
   return response.data;
@@ -29,7 +29,7 @@ export const fetchFriendsRequest = async (
       type,
       page,
       limit,
-      query,
+      search: query,
     },
   });
   return response.data;

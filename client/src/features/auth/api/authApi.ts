@@ -20,7 +20,5 @@ export const authApi = {
     const response = apiClient.get<UserPreview>("/me");
     return response;
   },
-  mercure() {
-    return apiClient.post("/auth/mercure", null, { withCredentials: true });
-  },
+
 };

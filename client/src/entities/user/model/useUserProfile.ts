@@ -1,14 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-import { fetchUserProfile } from "../api/userApi";
-import type { UserProfile } from "./types";
+import { useUserProfile as useUserProfileQuery } from "@/entities/user/model/useUserQueries";
 
-export const USER_PROFILE_QUERY_KEY = "userProfile";
-
-export const useUserProfile = (userId: string | undefined) => {
-  return useQuery<UserProfile>({
-    queryKey: [USER_PROFILE_QUERY_KEY, userId],
-    queryFn: () => fetchUserProfile(userId!),
-    enabled: !!userId,
-    placeholderData: (prev) => prev,
-  });
-};
+export const useUserProfile = (userId?: string) =>
+  useUserProfileQuery({ userId: userId ?? "", enabled: !!userId });

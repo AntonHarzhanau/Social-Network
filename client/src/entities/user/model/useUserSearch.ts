@@ -1,13 +1,13 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { UserPreview } from "./types";
 import { fetchUsers } from "../api/userApi";
-import { userQueryKeys } from "./userQueryKeys";
+import { userKeys } from "./queryKeys";
 
 export function useUserSearch(limit = 10, search?: string) {
   const q = (search ?? "").trim();
 
   return useInfiniteQuery<UserPreview[]>({
-    queryKey: userQueryKeys.list({ query: q, limit }),
+    queryKey: userKeys.list({ username: q, limit }),
     enabled: true,
     initialPageParam: 1,
 

@@ -52,7 +52,7 @@ final class GetUserProfileDetailsAction
 
         return new UserPrivateProfileDetailsDTO(
             dateOfBirth: $owner->getDateOfBirth()->format('Y-m-d'),
-            maritalStatus: $owner->getMaritalStatus()->value,
+            maritalStatus: $owner->getMaritalStatus()?->value ?? null,
             location: $owner->getLocation(),
             bio: $owner->getBio(),
             educations: $educations,
@@ -67,8 +67,8 @@ final class GetUserProfileDetailsAction
             institutionName: $e->getInstitutionName(),
             programName: $e->getProgramName(),
             degree: $e->getDegree(),
-            startAt: $e->getStartAt()->format('Y-m'),
-            endAt: $e->getEndAt()?->format('Y-m'),
+            startAt: $e->getStartAt()->format('Y-m-d'),
+            endAt: $e->getEndAt()?->format('Y-m-d'),
         );
     }
     private function mapWorkPreview(WorkExperience $w): WorkExperiencePreviewDTO
@@ -77,8 +77,8 @@ final class GetUserProfileDetailsAction
             id: (string) $w->getId(),
             company: $w->getCompany(),
             positionTitle: $w->getPositionTitle(),
-            startAt: $w->getStartAt()->format('Y-m'),
-            endAt: $w->getEndAt()?->format('Y-m')
+            startAt: $w->getStartAt()->format('Y-m-d'),
+            endAt: $w->getEndAt()?->format('Y-m-d')
         );
     }
 }

@@ -11,14 +11,18 @@ final readonly class UserDetailsDTO
         public ?string $slug,
         public ?string $avatarUrl,
         public ?string $coverUrl,
+
         public ?string $location,
         public ?string $maritalStatus,
         public ?string $bio,
         public string $dateOfBirth, 
+
         public string $createdAt,
         public ?string $emailVerifiedAt,
         public string $wallId,
         public ?string $lastLoginAt,
         public readonly bool $isOnline,
+
+        public UserPrivacySettingsDTO $privacySettings,
     ) {}
 }

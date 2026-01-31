@@ -22,7 +22,14 @@ interface FormSelectProps<TFieldValues extends FieldValues, V extends string> {
   options: Option<V>[];
   placeholder?: string;
   disabled?: boolean;
+
+  clearable?: boolean;
+  clearLabel?: string;
+
+  triggerClassName?: string;
 }
+
+const CLEAR_VALUE = "__clear__";
 
 export const FormSelect = <TFieldValues extends FieldValues, V extends string>({
   name,
@@ -31,6 +38,9 @@ export const FormSelect = <TFieldValues extends FieldValues, V extends string>({
   options,
   placeholder = "Select an option",
   disabled = false,
+  clearable = false,
+  clearLabel = "—",
+  triggerClassName,
 }: FormSelectProps<TFieldValues, V>) => {
   return (
     <Controller
@@ -41,19 +51,26 @@ export const FormSelect = <TFieldValues extends FieldValues, V extends string>({
           <FieldLabel htmlFor={name}>{label}</FieldLabel>
 
           <Select
-            value={field.value}
-            onValueChange={field.onChange}
+            value={field.value ?? ""}
+            onValueChange={(v) => {
+              if (v === CLEAR_VALUE) field.onChange("");
+              else field.onChange(v);
+            }}
             disabled={disabled}
           >
             <SelectTrigger
               id={name}
               aria-invalid={fieldState.invalid}
-              className="w-10"
+              className={triggerClassName ?? "w-full"}
             >
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
 
             <SelectContent>
+              {clearable && (
+                <SelectItem value={CLEAR_VALUE}>{clearLabel}</SelectItem>
+              )}
+
               {options.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -61,6 +78,7 @@ export const FormSelect = <TFieldValues extends FieldValues, V extends string>({
               ))}
             </SelectContent>
           </Select>
+
           {fieldState.error && <FieldError errors={[fieldState.error]} />}
         </Field>
       )}
