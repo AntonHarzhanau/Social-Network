@@ -1,4 +1,3 @@
-// entities/user/model/hooks/useUserQueries.ts
 import { useQuery } from "@tanstack/react-query";
 import {
   fetchUserProfile,

@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  uploadAvatar,
   patchMyProfileSettings,
   addEducation,
   updateEducation,
@@ -26,18 +25,6 @@ export function usePatchMyProfileSettingsMutation(params: {
   return useMutation({
     mutationFn: (payload: PatchProfileSettingsPayload) =>
       patchMyProfileSettings(payload),
-    onSuccess: () => invalidateUserProfile(qc, params.myUserId),
-  });
-}
-
-export function useUploadAvatarMutation(params: { myUserId: string }) {
-  const qc = useQueryClient();
-
-  return useMutation({
-    mutationFn: (vars: {
-      originalId?: string | null;
-      previewId?: string | null;
-    }) => uploadAvatar(vars.originalId, vars.previewId),
     onSuccess: () => invalidateUserProfile(qc, params.myUserId),
   });
 }

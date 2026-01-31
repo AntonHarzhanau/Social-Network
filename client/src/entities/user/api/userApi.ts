@@ -86,6 +86,12 @@ export const uploadAvatar = async (
   });
 };
 
+export const uploadCover = async (imageId?: string | null): Promise<void> => {
+  await apiClient.post("/me/cover", {
+    imageId: imageId ?? null,
+  });
+};
+
 export const attachMyMedia = async (mediaIds: string[]): Promise<unknown> => {
   const response = await apiClient.post("/me/media", { mediaIds });
   return response.data;

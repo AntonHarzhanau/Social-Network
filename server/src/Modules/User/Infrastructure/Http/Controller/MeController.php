@@ -10,6 +10,7 @@ use App\Modules\User\Application\Action\Me\Education\UpdateEducationAction;
 use App\Modules\User\Application\Action\Me\GetMeAction;
 use App\Modules\User\Application\Action\Me\GetPrivacySettings;
 use App\Modules\User\Application\Action\Me\PatchProfileSettingsAction;
+use App\Modules\User\Application\Action\Me\UpdateCoverAction;
 use App\Modules\User\Application\Action\Me\UpdateUserAvatarAction;
 use App\Modules\User\Application\Action\Me\WorkExperience\AddWorkExperienceAction;
 use App\Modules\User\Application\Action\Me\WorkExperience\DeleteWorkExperienceAction;
@@ -20,6 +21,7 @@ use App\Modules\User\Infrastructure\Http\Request\CreateEducationRequest;
 use App\Modules\User\Infrastructure\Http\Request\CreateWorkExperienceRequest;
 use App\Modules\User\Infrastructure\Http\Request\UpdateAvatarRequest;
 use App\Modules\User\Infrastructure\Http\Request\PatchProfileSettingsRequest;
+use App\Modules\User\Infrastructure\Http\Request\UpdateCoverRequest;
 use App\Modules\User\Infrastructure\Http\Request\UpdateEducationRequest;
 use App\Modules\User\Infrastructure\Http\Request\UpdateWorkExperienceRequest;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -141,6 +143,17 @@ final class MeController extends AbstractController
         UpdateUserAvatarAction $action,
     ): JsonResponse {
         $action->execute($user->getId(), $dto->originalFileId, $dto->previewFileId);
+
+        return $this->json(['ok' => true], Response::HTTP_OK);
+    }
+
+    #[Route('/cover', methods: ['POST'])]
+    public function updateCover(
+        #[CurrentUser] User $user,
+        #[MapRequestPayload(validationFailedStatusCode: 422)] UpdateCoverRequest $dto,
+        UpdateCoverAction $action,
+    ): JsonResponse {
+        $action->execute($user->getId(), $dto->imageId);
 
         return $this->json(['ok' => true], Response::HTTP_OK);
     }

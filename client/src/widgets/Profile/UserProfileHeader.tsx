@@ -25,6 +25,7 @@ import {
 
 import { useUserProfileDetails } from "@/entities/user/model/useUserProfileDetails";
 import { EditProfileDialog } from "./edit-profile-dialog/EditProfilleDialog";
+import { useUserCover } from "@/features/user/manage-avatar/model/useUserCover";
 
 interface UserProfileHeaderProps {
   user?: UserProfileResponse;
@@ -34,13 +35,17 @@ interface UserProfileHeaderProps {
 const UserProfileHeader = ({ user, loading }: UserProfileHeaderProps) => {
   const currentUser = sessionStore((s) => s.user);
 
+  const updateCoverMutation = useUserCover(currentUser?.id ?? "");
+
+  const deleteCoverMutation = useUserCover(currentUser?.id ?? "");
+
   const publicP = user?.public;
   const summary = user?.privateSummary;
 
   const isOwner = !!publicP?.id && publicP.id === currentUser?.id;
 
   const [coverCropOpen, setCoverCropOpen] = useState(false);
-  const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
+
   const [editOpen, setEditOpen] = useState(false);
   const [actionsOpen, setActionsOpen] = useState(false);
 
@@ -51,16 +56,6 @@ const UserProfileHeader = ({ user, loading }: UserProfileHeaderProps) => {
   );
 
   const openingDialogRef = useRef(false);
-
-  useEffect(() => {
-    return () => {
-      if (coverPreviewUrl) URL.revokeObjectURL(coverPreviewUrl);
-    };
-  }, [coverPreviewUrl]);
-
-  useEffect(() => {
-    setCoverPreviewUrl((prev) => (prev ? null : prev));
-  }, [publicP?.id]);
 
   useEffect(() => {
     if (editOpen) openingDialogRef.current = false;
@@ -74,7 +69,7 @@ const UserProfileHeader = ({ user, loading }: UserProfileHeaderProps) => {
     setEditOpen(true);
   };
 
-  const coverImageUrl = coverPreviewUrl ?? publicP?.coverUrl ?? null;
+  const coverImageUrl = publicP?.coverUrl ?? null;
 
   const educationLabel =
     summary?.currentEducation?.institutionName ??
@@ -280,7 +275,9 @@ const UserProfileHeader = ({ user, loading }: UserProfileHeaderProps) => {
       <CoverCropDialog
         open={coverCropOpen}
         onOpenChange={setCoverCropOpen}
-        onSaved={({ previewUrl }) => setCoverPreviewUrl(previewUrl)}
+        onSaved={({ preview }) => {
+          updateCoverMutation.uploadNewCover(preview);
+        }}
       />
 
       {isOwner && currentUser?.id ? (

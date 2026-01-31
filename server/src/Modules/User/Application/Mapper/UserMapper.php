@@ -9,11 +9,9 @@ use App\Modules\User\Contracts\DTO\UserPreviewDTO;
 use App\Modules\User\Contracts\DTO\UserPreviewRowDTO;
 use App\Modules\User\Contracts\DTO\UserPrivacySettingsDTO;
 use App\Modules\User\Domain\Entity\User;
-use App\Modules\User\Domain\Entity\UserPrivacySettings;
 
 final class UserMapper
 {
-    private const ONLINE_THRESHOLD_SECONDS = 180;
     public function __construct(
         private GetMediaUrl $getUrl,
         private PresenceService $presenceService,

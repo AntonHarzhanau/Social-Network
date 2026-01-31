@@ -1,33 +1,27 @@
 import { uploadMedia } from "@/entities/media/api/mediaApi";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { authActions } from "@/features/auth/model/authActions";
-import { uploadAvatar } from "@/entities/user/api/userApi";
+import { uploadCover } from "@/entities/user/api/userApi";
 import { userKeys } from "@/entities/user/model/queryKeys";
 
-export const useUserAvatar = (userId?: string) => {
+export const useUserCover = (userId?: string) => {
   const qc = useQueryClient();
 
   const syncAvatarCache = async () => {
     if (userId) {
       await qc.invalidateQueries({ queryKey: userKeys.profile(userId) });
       await qc.invalidateQueries({ queryKey: userKeys.profileDetails(userId) });
-      await qc.invalidateQueries({ queryKey: userKeys.avatars(userId) });
     }
-
-    // await qc.invalidateQueries({ queryKey: userKeys.all });
-    authActions.refreshMe();
   };
 
   const uploadMutation = useMutation({
-    mutationFn: async (vars: { original: File; preview: File }) => {
+    mutationFn: async (vars: { coverImage: File }) => {
       if (!userId) throw new Error("userId is required");
 
-      const originalRes = await uploadMedia(vars.original);
-      const previewRes = await uploadMedia(vars.preview);
+      const cover = await uploadMedia(vars.coverImage);
 
-      await uploadAvatar(originalRes.id, previewRes.id);
+      await uploadCover(cover.id);
 
-      return previewRes;
+      return cover;
     },
     onSuccess: async () => {
       await syncAvatarCache();
@@ -36,7 +30,7 @@ export const useUserAvatar = (userId?: string) => {
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      await uploadAvatar(null, null);
+      await uploadCover(null);
     },
     onSuccess: async () => {
       await syncAvatarCache();
@@ -44,9 +38,9 @@ export const useUserAvatar = (userId?: string) => {
   });
 
   return {
-    uploadNewAvatar: (original: File, preview: File) =>
-      uploadMutation.mutateAsync({ original, preview }),
-    deleteAvatar: () => deleteMutation.mutateAsync(),
+    uploadNewCover: (coverImage: File) =>
+      uploadMutation.mutateAsync({ coverImage }),
+    deleteCover: () => deleteMutation.mutateAsync(),
     isUploading: uploadMutation.isPending,
     isDeleting: deleteMutation.isPending,
   };

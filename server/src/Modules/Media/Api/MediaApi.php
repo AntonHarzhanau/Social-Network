@@ -4,6 +4,7 @@ namespace App\Modules\Media\Api;
 
 use App\Modules\Media\Application\Action\GetMediaItemsAction;
 use App\Modules\Media\Application\Action\GetMediaItemsWithLikeAction;
+use App\Modules\Media\Domain\Entity\MediaAsset;
 use App\Modules\Media\Domain\Repository\MediaAssetRepositoryInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -15,7 +16,7 @@ final class MediaApi implements MediaApiInterface
         private readonly MediaAssetRepositoryInterface $mediaAssetRepository,
     ) {}
 
-    public function getMediaAssetById(Uuid $mediaId)
+    public function getMediaAssetById(Uuid $mediaId): ?MediaAsset
     {
         return $this->mediaAssetRepository->findById($mediaId);
     }
