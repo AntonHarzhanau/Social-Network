@@ -139,7 +139,8 @@ class GroupRepository extends ServiceEntityRepository implements GroupRepository
             gm.role,
             gm.status,
             g.subscribersCount,
-            IDENTITY(g.currentAvatar)
+            IDENTITY(g.currentAvatar),
+            g.visibility
         )',
             GroupPreviewRawDTO::class
         ));

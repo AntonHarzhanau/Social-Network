@@ -105,6 +105,19 @@ export function useChatRoomController(params: {
     markReadUpTo,
   });
 
+  useEffect(() => {
+    if (!chat?.id) return;
+    if (!messages.length) return;
+    if (unreadSet.size === 0) return;
+
+    requestAnimationFrame(() => {
+      if (!aliveRef.current) return;
+      if (!v.recomputeTail()) return;
+
+      scheduleRead(v.getBottomVisibleUnreadId());
+    });
+  }, [chat?.id, messages.length, unreadSet.size, scheduleRead, v, aliveRef]);
+
   useSyncLatest({ chatId: chat?.id, pageSize: params.pageSize, qc, aliveRef });
 
   useInitialRestore({

@@ -7,12 +7,13 @@ interface GroupPageContentProps {
 }
 
 const GroupPageContent = ({ group }: GroupPageContentProps) => {
-  console.log("GroupPageContent render", group);
   return (
-    <>
-      {group?.isMember && <CreatePostDIalog wallId={group?.wallId} />}
+    <div className="flex flex-col gap-2">
+      {group?.isMember && group.wallId && (
+        <CreatePostDIalog wallId={group?.wallId} />
+      )}
       {group?.wallId && <FeedsList wallId={group?.wallId} />}
-    </>
+    </div>
   );
 };
 

@@ -6,7 +6,6 @@ import { Link } from "react-router-dom";
 import { GraduationCap, Info, MapPin, MoreHorizontal } from "lucide-react";
 import { sessionStore } from "@/entities/session/model/sessionStore";
 import type { UserProfileResponse } from "@/entities/user/model/types";
-import { CoverCropDialog } from "@/widgets/CoverCropDialog";
 
 import {
   DropdownMenu,
@@ -26,6 +25,7 @@ import {
 import { useUserProfileDetails } from "@/entities/user/model/useUserProfileDetails";
 import { EditProfileDialog } from "./edit-profile-dialog/EditProfilleDialog";
 import { useUserCover } from "@/features/user/manage-avatar/model/useUserCover";
+import { ImageCropDialog } from "../AvatarCrop/ImageCropDialog";
 
 interface UserProfileHeaderProps {
   user?: UserProfileResponse;
@@ -272,7 +272,8 @@ const UserProfileHeader = ({ user, loading }: UserProfileHeaderProps) => {
         </DialogContent>
       </Dialog>
 
-      <CoverCropDialog
+      <ImageCropDialog
+        variant="cover"
         open={coverCropOpen}
         onOpenChange={setCoverCropOpen}
         onSaved={({ preview }) => {

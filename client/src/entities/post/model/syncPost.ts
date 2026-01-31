@@ -5,11 +5,6 @@ import { replacePostInInfinite } from "./postCache";
 import { insertPostIntoCachedLists } from "./postCache";
 import { postApi } from "../api/postApi";
 
-/**
-* 1) fetch post by id
-* 2) put it in the detail cache
-* 3) replace it in all infinite lists where it already exists
-*/
 export async function syncPostByIdInCache(
   qc: QueryClient,
   postId: string,
@@ -31,11 +26,6 @@ export async function syncPostByIdInCache(
   return fresh;
 }
 
-/**
-* For create: the post is new – it's not in the lists, so:
-* 1) fetchPostById
-* 2) insert into the already cached lists (general + by author)
-*/
 export async function fetchAndInsertCreatedPost(
   qc: QueryClient,
   postId: string,

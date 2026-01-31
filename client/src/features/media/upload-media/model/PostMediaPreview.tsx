@@ -1,4 +1,3 @@
-
 import { UPLOADING_STATUS, type MediaItem } from "@/entities/media/model/types";
 import { AlertCircle, CheckCircle2, Loader2, X } from "lucide-react";
 
@@ -24,7 +23,7 @@ export function PostMediaPreview({
           key={item.localId}
           className="relative w-24 h-24 rounded-lg overflow-hidden border bg-background"
         >
-          {/* содержимое тайла */}
+          {/* content */}
           {item.status === UPLOADING_STATUS.SUCCESS && item.previewUrl ? (
             <img
               src={item.previewUrl}
@@ -58,7 +57,7 @@ export function PostMediaPreview({
             </div>
           )}
 
-          {/* нижняя полоска */}
+          {/* bottom bar */}
           <div className="absolute bottom-0 left-0 w-full flex items-center justify-between bg-black/60 text-[10px] text-white px-1 py-0.5">
             <span className="truncate" title={item.file.name}>
               {item.file.name}

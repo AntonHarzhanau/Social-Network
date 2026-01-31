@@ -16,7 +16,7 @@ export function MemberRow(props: {
 
   onRequestRoleChange: (p: PendingRoleChange) => void;
 }) {
-  const role = props.member.role; // уже строго типизирован
+  const role = props.member.role;
 
   return (
     <Item className="justify-between">

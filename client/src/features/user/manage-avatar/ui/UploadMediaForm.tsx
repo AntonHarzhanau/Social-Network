@@ -13,11 +13,15 @@ import {
 import { useAttachMyMediaMutation } from "@/entities/user/model/useUserMutations";
 
 interface UploadMediaFormProps {
+  userId: string;
   onSuccess?: () => void;
 }
 
-export const UploadMediaForm = ({ onSuccess }: UploadMediaFormProps) => {
-  const attachMutation = useAttachMyMediaMutation();
+export const UploadMediaForm = ({
+  userId,
+  onSuccess,
+}: UploadMediaFormProps) => {
+  const attachMutation = useAttachMyMediaMutation({ myUserId: userId });
 
   const form = useForm<UploadMediaPayload>({
     resolver: zodResolver(uploadMediaSchema),

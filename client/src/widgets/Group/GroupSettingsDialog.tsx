@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import type { Group } from "@/entities/group/model/types";
+import type { Group, GroupVisibility } from "@/entities/group/model/types";
 import { useUpdateGroupSettingsMutation } from "@/entities/group/model/useGroupMutations";
 
 import GroupProfileAvatar from "@/features/group/manage-avatar/ui/GroupProfileAvatar";
@@ -24,8 +24,6 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 
-type Visibility = "public" | "private";
-
 interface GroupSettingsDialogProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -46,18 +44,19 @@ export function GroupSettingsDialog({
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState<string>("");
-  const [visibility, setVisibility] = useState<Visibility>("public");
+  const [visibility, setVisibility] = useState<GroupVisibility>("public");
 
   useEffect(() => {
     if (!open || !group) return;
     setName(group.name ?? "");
     setDescription(group.description ?? "");
-    setVisibility((group.visibility ?? "public") as Visibility);
+    setVisibility((group.visibility ?? "public") as GroupVisibility);
   }, [open, group?.id]);
 
   const isBusy = updateMut.isPending;
   const isValid = name.trim().length >= 2;
-
+  console.log("GroupSettingsDialog render", group);
+  console.log("visibility:", visibility);
   const onCancel = () => {
     onOpenChange(false);
   };
@@ -79,7 +78,10 @@ export function GroupSettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[560px] p-0 overflow-hidden">
+      <DialogContent
+        aria-describedby="Group settings"
+        className="sm:max-w-[560px] p-0 overflow-hidden"
+      >
         <div className="p-6">
           <DialogHeader>
             <DialogTitle>Group settings</DialogTitle>
@@ -134,7 +136,7 @@ export function GroupSettingsDialog({
               <Label>Privacy</Label>
               <Select
                 value={visibility}
-                onValueChange={(v) => setVisibility(v as Visibility)}
+                onValueChange={(v) => setVisibility(v as GroupVisibility)}
                 disabled={!canEdit || isBusy}
               >
                 <SelectTrigger>

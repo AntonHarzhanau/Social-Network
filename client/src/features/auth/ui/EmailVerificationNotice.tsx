@@ -1,6 +1,6 @@
+import { apiClient } from "@/shared/api/apiClient";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import axios from "axios";
 
 interface EmailVerificationNoticeProps {
   email: string;
@@ -13,7 +13,9 @@ const EmailVerificationNotice = ({
 }: EmailVerificationNoticeProps) => {
   const sentEmailVerificationRequest = async (email: string) => {
     console.log("Resending email verification to:", email);
-    await axios.post("http://localhost:8000/api/auth/resend-email-verification", { email: email });
+    await apiClient.post("/auth/resend-email-verification", {
+      email: email,
+    });
   };
   return (
     <div className="absolute inset-0 flex flex-col justify-center items-center p-4 bg-background/50 z-20">

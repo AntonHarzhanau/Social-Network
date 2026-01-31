@@ -13,8 +13,10 @@ use App\Modules\Group\Application\Action\GetMembersList;
 use App\Modules\Group\Application\Action\LeaveGroupAction;
 use App\Modules\Group\Application\Action\SetGroupAvatarAction;
 use App\Modules\Group\Application\Action\SubscribeGroupAction;
+use App\Modules\Group\Application\Action\UpdateGroupAction;
 use App\Modules\Group\Infrastructure\Http\Request\CreateGroupRequest;
 use App\Modules\Group\Infrastructure\Http\Request\SetGroupAvatarRequest;
+use App\Modules\Group\Infrastructure\Http\Request\UpdateGroupRequest;
 use App\Modules\Group\Infrastructure\Http\Request\UpdateMemberRoleRequest;
 use App\Modules\Group\Infrastructure\Http\Request\UpdateMemberStatusRequest;
 use App\Modules\User\Domain\Entity\User;
@@ -81,8 +83,12 @@ class GroupController extends AbstractController
     public function update(
         string $groupId,
         #[CurrentUser()] User $currentUser,
+        #[MapRequestPayload()] UpdateGroupRequest $request,
+        UpdateGroupAction $action,
     ): JsonResponse {
-        return $this->json(['id' => null], JsonResponse::HTTP_NOT_IMPLEMENTED);
+
+        $id = $action->execute(Uuid::fromString($groupId), $currentUser->getId(), $request);
+        return $this->json(['id' => $id], JsonResponse::HTTP_OK);
     }
 
     #[Route('/{groupId}/subscribe', name: 'subscribe_group', methods: ['POST'], format: 'json')]

@@ -53,7 +53,9 @@ export function useUpdateEducationMutation(params: { myUserId: string }) {
   return useMutation({
     mutationFn: (vars: { educationId: string; input: EducationUpsertInput }) =>
       updateEducation(vars.educationId, vars.input),
-    onSuccess: () => invalidateUserProfile(qc, params.myUserId),
+    onSuccess: () => {
+      invalidateUserProfile(qc, params.myUserId);
+    },
   });
 }
 

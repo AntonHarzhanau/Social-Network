@@ -121,7 +121,6 @@ const FriendListItem = ({ user, filter }: FriendListItemProps) => {
         </div>
       )}
 
-      {/* Ошибки (опционально) */}
       {(sendMutation.isError ||
         cancelMutation.isError ||
         acceptMutation.isError ||

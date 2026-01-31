@@ -46,14 +46,12 @@ final class GetGroupDetailsAction
             $cover = $mediaMap[$id] ?? null;
         }
 
-        // 2) публичная часть — ВСЕГДА
         $description = $group->getDescription();
 
-        // 3) приватная часть — по правилам
         $isBanned = $member?->getStatus() === GroupMemberStatusEnum::BANNED;
 
         $isAcceptedMember = $member !== null
-            && $member->getStatus() === GroupMemberStatusEnum::ACCEPTED; // если нет ACCEPTED — замени на нужный “участник”
+            && $member->getStatus() === GroupMemberStatusEnum::ACCEPTED;
 
         $canSeeWall = !$isBanned && (
             $group->getVisibility() === GroupVisibilityEnum::PUBLIC
@@ -65,9 +63,8 @@ final class GetGroupDetailsAction
         return new GroupDetailResponseDTO(
             id: $group->getId(),
             name: $group->getName(),
-            groupVisibility: $group->getVisibility()->value,
+            visibility: $group->getVisibility()->value,
 
-            // isMember — обычно логичнее "принятый участник", а не "запись есть"
             isMember: $isAcceptedMember,
 
             role: $member?->getRole()?->value ?? null,

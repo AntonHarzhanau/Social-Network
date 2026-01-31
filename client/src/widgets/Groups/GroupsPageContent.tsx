@@ -13,6 +13,7 @@ import {
   useLeaveGroupMutation,
 } from "@/entities/group/model/useGroupMutations";
 import { useGroupFilterStore } from "@/features/group/filter-group/useGroupFilterStore";
+import CreateGroupForm from "@/features/group/create-group/ui/CreateGroupForm";
 
 const GroupsPageContent = () => {
   const [search, setSearch] = useState("");
@@ -29,6 +30,7 @@ const GroupsPageContent = () => {
 
   return (
     <Card className="flex flex-col min-h-[90vh] px-2">
+      <CreateGroupForm className="ml-auto" />
       <SearchInput
         searchId="search-groups"
         placeholder="Search groups..."
@@ -38,7 +40,8 @@ const GroupsPageContent = () => {
 
       <div className="flex flex-col gap-2">
         {groups.map((group) => {
-          const isJoining = joinMut.isPending && joinMut.variables === group.id;
+          const isJoining =
+            joinMut.isPending && joinMut.variables?.groupId === group.id;
           const isLeaving =
             leaveMut.isPending && leaveMut.variables === group.id;
 
@@ -65,13 +68,12 @@ const GroupsPageContent = () => {
                 );
               }
 
-              // accepted (или status отсутствует, если бек так отдаёт)
               return (
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-medium text-muted-foreground">
                     Subscribed
                   </span>
-                  {/* <Button
+                  <Button
                     variant="outline"
                     size="sm"
                     disabled={isLeaving}
@@ -81,7 +83,7 @@ const GroupsPageContent = () => {
                     }}
                   >
                     {isLeaving ? "Leaving..." : "Leave"}
-                  </Button> */}
+                  </Button>
                 </div>
               );
             }
@@ -93,7 +95,10 @@ const GroupsPageContent = () => {
                 disabled={isJoining}
                 onClick={(e) => {
                   stopNav(e);
-                  joinMut.mutate(group.id);
+                  joinMut.mutate({
+                    groupId: group.id,
+                    visibility: group.visibility,
+                  });
                 }}
               >
                 {isJoining ? "Subscribing..." : "Subscribe"}

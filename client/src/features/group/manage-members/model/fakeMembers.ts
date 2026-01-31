@@ -41,6 +41,6 @@ const fakeUsers: Array<
 export const FAKE_GROUP_MEMBERS: GroupMember[] = fakeUsers.map((u, i) => ({
   id: `gm-${String(i + 1).padStart(3, "0")}`,
   user: u as UserPreview,
-  role: roles[i === 0 ? 0 : i % roles.length], // первый owner, дальше циклом
+  role: roles[i === 0 ? 0 : i % roles.length],
   status: i === 0 ? "accepted" : statuses[i % statuses.length],
 }));

@@ -19,8 +19,13 @@ import { FormInput } from "@/shared/components/FormInput";
 import { FormSelect } from "@/shared/components/FormSelect";
 import { useState } from "react";
 import { useCreateGroupMutation } from "@/entities/group/model/useGroupMutations";
+import { cn } from "@/shared/lib/utils";
 
-const CreateGroupForm = () => {
+interface CreateGroupFormProps {
+  className?: string;
+}
+
+const CreateGroupForm = ({ className }: CreateGroupFormProps) => {
   const [open, setOpen] = useState(false);
 
   const form = useForm<CreateGroupValues>({
@@ -48,7 +53,9 @@ const CreateGroupForm = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <form id="create-group-form" onSubmit={form.handleSubmit(handleSubmit)}>
         <DialogTrigger asChild>
-          <Button variant="outline">Create Community</Button>
+          <Button variant="outline" className={cn("", className)}>
+            Create Community
+          </Button>
         </DialogTrigger>
 
         <DialogContent

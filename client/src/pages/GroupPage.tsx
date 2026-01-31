@@ -7,7 +7,7 @@ import { useParams } from "react-router-dom";
 
 const GroupPage = () => {
   const { groupId } = useParams<{ groupId: string }>();
-  const { data: group, isLoading, error } = useGroup(groupId!);
+  const { data: group, isLoading } = useGroup(groupId!);
 
   if (isLoading || !group) {
     return <div className="p-4 text-sm text-muted-foreground">Loading...</div>;
@@ -15,7 +15,7 @@ const GroupPage = () => {
 
   return (
     <div>
-      <GroupHeader group={group} />
+      <GroupHeader group={group} loading={isLoading} />
       <MainSectionLayout
         pageContent={<GroupPageContent group={group} />}
         asideContent={<GroupAside group={group} />}

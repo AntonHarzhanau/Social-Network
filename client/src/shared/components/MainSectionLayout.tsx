@@ -23,14 +23,18 @@ const MainSectionLayout = ({
         <div className="lg:hidden mb-2">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" className="w-full justify-start">
-                Open list
+              <Button variant="outline" className="w-full justify-start mt-1">
+                Open Widgets
               </Button>
             </SheetTrigger>
 
-            <SheetContent side="bottom" className="p-0">
+            <SheetContent
+              aria-describedby={undefined}
+              side="bottom"
+              className="p-0"
+            >
               <SheetHeader className="p-4 border-b">
-                <SheetTitle>List</SheetTitle>
+                <SheetTitle>Widgets</SheetTitle>
               </SheetHeader>
               <div className="p-2">{asideContent}</div>
             </SheetContent>

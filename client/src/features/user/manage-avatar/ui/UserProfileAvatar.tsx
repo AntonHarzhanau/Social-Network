@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import { Avatar } from "@/shared/components/Avatar";
-import { AvatarCropDialog } from "@/widgets/AvatarCropDialog";
+import { ImageCropDialog } from "@/widgets/AvatarCrop/ImageCropDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -120,7 +120,7 @@ const UserProfileAvatar = ({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <AvatarCropDialog
+      <ImageCropDialog
         open={cropOpen}
         onOpenChange={setCropOpen}
         onSaved={async ({ original, preview }) => {

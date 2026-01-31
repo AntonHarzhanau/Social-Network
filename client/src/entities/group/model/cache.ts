@@ -9,12 +9,10 @@ function patchArrayList(
 ) {
   if (!old) return old;
 
-  // list: GroupPreview[]
   if (Array.isArray(old)) {
     return old.map((g: any) => (g?.id === groupId ? { ...g, ...patch } : g));
   }
 
-  // infinite: InfiniteData<GroupPreview[]>
   const inf = old as InfiniteData<any>;
   if (inf?.pages && Array.isArray(inf.pages)) {
     return {

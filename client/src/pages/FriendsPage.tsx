@@ -30,7 +30,6 @@ const FriendsPage = () => {
         >
           Back to Friends
         </Button>
-        {/* сюда позже можно добавить фильтры поиска */}
       </Card>
     );
 

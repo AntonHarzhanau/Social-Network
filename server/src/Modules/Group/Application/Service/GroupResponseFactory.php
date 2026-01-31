@@ -2,8 +2,6 @@
 
 namespace App\Modules\Group\Application\Service;
 
-use App\Modules\Group\Application\DTO\GroupDetailResponseDTO;
-use App\Modules\Group\Application\DTO\GroupDetailsRawDTO;
 use App\Modules\Group\Application\DTO\GroupPreviewRawDTO;
 use App\Modules\Group\Application\DTO\GroupPreviewResponseDTO;
 use App\Modules\Group\Application\Port\MediaDirectoryInterface;
@@ -35,6 +33,7 @@ final class GroupResponseFactory
                 status: $groupRawDTO->status?->value,
                 subscribersCount: $groupRawDTO->subscribersCount,
                 currentAvatar: $avatarId ? $medias[$avatarId] ?? null : null,
+                visibility: $groupRawDTO->visibility->value,
             );
         }
         return $result;

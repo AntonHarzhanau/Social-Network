@@ -8,17 +8,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shared/components/ui/dialog";
-import { cn } from "@/shared/lib/utils";
+
 import { PlusCircleIcon } from "lucide-react";
 import { useState } from "react";
 import { UploadMediaForm } from "./UploadMediaForm";
 
 interface UploadMediaDialogProps {
   userId: string;
-  className?: string;
 }
 
-const UploadMediaDialog = ({ userId, className }: UploadMediaDialogProps) => {
+const UploadMediaDialog = ({ userId }: UploadMediaDialogProps) => {
   const [open, setOpen] = useState(false);
 
   return (

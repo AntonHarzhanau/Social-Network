@@ -19,7 +19,7 @@ const GroupHeader = ({ group, loading }: GroupHeaderProps) => {
   const joinMut = useJoinGroupMutation();
   const leaveMut = useLeaveGroupMutation();
   const [settingsOpen, setSettingsOpen] = useState(false);
-
+  console.log("GroupHeader render", group);
   if (!group && !loading) return null;
 
   const isOwner = !!group?.isMember && group?.role === "owner";

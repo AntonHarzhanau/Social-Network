@@ -14,5 +14,6 @@ final readonly class GroupPreviewResponseDTO
         public ?string $status,
         public int $subscribersCount,
         public ?MediaItemDTO $currentAvatar,
+        public string $visibility,
     ) {}
 }

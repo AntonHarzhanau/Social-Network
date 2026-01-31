@@ -184,26 +184,33 @@ export function useChatMessages(params: {
     if (!chat) return new Set<string>();
     if (!currentUserId) return new Set<string>();
 
-    let thresholdIso: string | null = chat.lastReadAt ?? null;
+    let thresholdMs: number | null = null;
 
-    if (!thresholdIso && chat.lastReadMessageId) {
+    if (chat.lastReadAt) {
+      const t = Date.parse(chat.lastReadAt);
+      if (Number.isFinite(t)) thresholdMs = t;
+    } else if (chat.lastReadMessageId) {
       const anchor = messages.find((m) => m.id === chat.lastReadMessageId);
-      thresholdIso = anchor?.createdAt ?? null;
+      const t = anchor ? Date.parse(anchor.createdAt) : NaN;
+      if (Number.isFinite(t)) thresholdMs = t;
     }
 
-    if (!thresholdIso) return new Set<string>();
-
-    const t = new Date(thresholdIso).getTime();
     const s = new Set<string>();
 
     for (const m of messages) {
       if (m.sender.id === currentUserId) continue;
 
-      if (new Date(m.createdAt).getTime() > t) s.add(m.id);
+      if (thresholdMs === null) {
+        s.add(m.id);
+        continue;
+      }
+
+      const mt = Date.parse(m.createdAt);
+      if (Number.isFinite(mt) && mt > thresholdMs) s.add(m.id);
     }
 
     return s;
-  }, [chat, messages, currentUserId]);
+  }, [chat?.lastReadAt, chat?.lastReadMessageId, messages, currentUserId]);
 
   return { query, messages, unreadSet, markReadUpTo };
 }

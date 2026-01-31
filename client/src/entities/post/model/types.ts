@@ -7,7 +7,6 @@ export const VISIBILITY_VALUES = {
   FRIENDS: "friends",
 } as const;
 
-// TypeScript-тип
 export type Visibility =
   (typeof VISIBILITY_VALUES)[keyof typeof VISIBILITY_VALUES];
 

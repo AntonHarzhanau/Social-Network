@@ -14,10 +14,10 @@ export type GroupPreview = {
   status?: MemberStatus | null;
   subscribersCount: number;
   currentAvatar?: MediaPreview | null;
+  visibility: GroupVisibility;
 };
 
 export type Group = GroupPreview & {
-  visibility: GroupVisibility;
   description?: string | null;
   wallId?: string | null;
   cover?: MediaPreview | null;

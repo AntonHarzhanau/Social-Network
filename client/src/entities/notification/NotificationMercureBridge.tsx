@@ -98,13 +98,13 @@ export function NotificationsMercureBridge() {
       toast.custom((t) => (
         <NotificationItem
           n={n}
-          to={null} // <- В toast НЕ Link
+          to={null}
           variant="toast"
           onClick={() => {
             handler.onClick?.(n as any, ctx);
             ackOne.mutate({ id: n.id });
 
-            if (to) navigate(to); // <- навигация программно
+            if (to) navigate(to);
             toast.dismiss(t);
           }}
         />

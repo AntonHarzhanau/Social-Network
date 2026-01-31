@@ -53,7 +53,6 @@ export function NotificationsBell({ enabled = true }: { enabled?: boolean }) {
     initialData: { unreadCount: 0 },
   });
 
-  // list (raw DTO in cache -> mutations остаются совместимыми)
   const notificationsQuery = useInfiniteQuery<NotificationDTO[]>({
     queryKey: notificationsKeys.list,
     enabled: enabled && open,
@@ -180,10 +179,8 @@ export function NotificationsBell({ enabled = true }: { enabled?: boolean }) {
                   to={to}
                   showTime
                   onClick={() => {
-                    // side-effects (например выставить фильтр друзей)
                     handler.onClick?.(n as any, ctx);
 
-                    // ack -> optimistic remove + decrement unread (в мутации)
                     ackOne.mutate(
                       { id: n.id },
                       {

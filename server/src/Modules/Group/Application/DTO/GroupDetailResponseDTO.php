@@ -12,7 +12,7 @@ final readonly class GroupDetailResponseDTO
         public bool $isMember,
         public int $subscribersCount,
         public ?MediaItemDTO $currentAvatar,
-        public string $groupVisibility,
+        public string $visibility,
         public ?string $role,
         public ?string $status,
         public ?string $description,

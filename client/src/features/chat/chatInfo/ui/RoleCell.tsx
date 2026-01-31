@@ -15,7 +15,6 @@ export function RoleCell(props: {
   canChange: boolean;
   onPick: (next: "admin" | "member") => void;
 }) {
-  // owner всегда текстом, и если нельзя менять — текстом
   if (props.role === "owner" || !props.canChange) {
     return <p className="text-sm text-gray-500">{props.role}</p>;
   }

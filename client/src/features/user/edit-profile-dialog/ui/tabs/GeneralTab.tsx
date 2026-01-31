@@ -87,7 +87,7 @@ export function GeneralTab(props: {
           placeholder="City, Country"
         />
 
-        {/* Bio textarea (через Field как у тебя) */}
+        {/* Bio textarea */}
         <div>
           <Field data-invalid={!!formState.errors.profile?.bio}>
             <FieldLabel htmlFor="profile.bio">Bio</FieldLabel>
@@ -105,7 +105,7 @@ export function GeneralTab(props: {
           </Field>
         </div>
 
-        {/* DOB 3 selects -> profile.dateOfBirth */}
+        {/* DOB */}
         <Field data-invalid={!!formState.errors.profile?.dateOfBirth}>
           <FieldLabel>Date of birth</FieldLabel>
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import { Avatar } from "@/shared/components/Avatar";
-import { AvatarCropDialog } from "@/widgets/AvatarCropDialog";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,13 +20,14 @@ import {
 } from "@/shared/components/ui/alert-dialog";
 
 import { useGroupAvatar } from "../model/useGroupAvatar";
+import { ImageCropDialog } from "@/widgets/AvatarCrop/ImageCropDialog";
 
 interface GroupProfileAvatarProps {
   groupId?: string | null;
   avatarUrl?: string | null;
   name?: string | null;
   isOwner: boolean;
-  className?: string; // ✅
+  className?: string;
 }
 
 const GroupProfileAvatar = ({
@@ -94,7 +95,7 @@ const GroupProfileAvatar = ({
         )}
       </DropdownMenu>
 
-      <AvatarCropDialog
+      <ImageCropDialog
         open={cropOpen}
         onOpenChange={setCropOpen}
         onSaved={async ({ original, preview }) => {

@@ -4,6 +4,7 @@ namespace App\Modules\Group\Application\DTO;
 
 use App\Modules\Group\Domain\Enum\GroupMemberRoleEnum;
 use App\Modules\Group\Domain\Enum\GroupMemberStatusEnum;
+use App\Modules\Group\Domain\Enum\GroupVisibilityEnum;
 
 final readonly class GroupPreviewRawDTO 
 {
@@ -16,5 +17,6 @@ final readonly class GroupPreviewRawDTO
         public ?GroupMemberStatusEnum $status,
         public int $subscribersCount,
         public ?string $avatarId,
+        public GroupVisibilityEnum $visibility,
     ) {}
 }

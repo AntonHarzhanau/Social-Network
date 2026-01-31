@@ -37,7 +37,9 @@ function invalidateFriends(qc: QueryClient, currentUserId?: string) {
 
   qc.invalidateQueries({ queryKey: friendsQueryKeys.stats.me() });
 
-  //   qc.invalidateQueries({ queryKey: friendsQueryKeys.stats.user(currentUserId) });
+  qc.invalidateQueries({
+    // queryKey: friendsQueryKeys.stats.user(currentUserId),
+  });
 }
 
 export function useSendFriendRequestMutation(currentUserId?: string) {
