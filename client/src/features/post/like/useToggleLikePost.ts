@@ -1,5 +1,5 @@
 import { postApi } from "@/entities/post/api/postApi";
-import { syncPostByIdInCache } from "@/entities/post/model/syncPost";
+import { postKeys } from "@/entities/post/model/queryKeys";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 export function useToggleLikePost() {
   const qc = useQueryClient();
@@ -9,8 +9,8 @@ export function useToggleLikePost() {
       return postApi.toggleLikePost(postId);
     },
 
-    onSuccess: async (res) => {
-      await syncPostByIdInCache(qc, res.id);
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: postKeys.lists() });
     },
   });
 }

@@ -38,6 +38,7 @@ const UserProfileHeader = ({ user, loading }: UserProfileHeaderProps) => {
   const updateCoverMutation = useUserCover(currentUser?.id ?? "");
 
   const deleteCoverMutation = useUserCover(currentUser?.id ?? "");
+  void deleteCoverMutation;
 
   const publicP = user?.public;
   const summary = user?.privateSummary;
@@ -54,7 +55,7 @@ const UserProfileHeader = ({ user, loading }: UserProfileHeaderProps) => {
     publicP?.id,
     moreOpen && !!user?.canViewMore,
   );
-
+  //   const ORIGIN = window.location.origin;
   const openingDialogRef = useRef(false);
 
   useEffect(() => {

@@ -17,10 +17,4 @@ final class ChatApi implements ChatApiInterface
 
         return $this->chatParticipantRepository->findAllUsersIdByChatId($chatId, includeDeleted: false, isMuted: $includeMuted);
     }
-
-    public function getChatInfo(Uuid $chatId): array
-    {
-        // Implement logic to retrieve chat info for the given chat ID
-        return ['type' => 'group', 'title' => 'Sample Chat'];
-    }
 }

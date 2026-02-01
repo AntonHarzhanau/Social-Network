@@ -1,41 +1,136 @@
 services:
-  ###> symfony/mercure-bundle ###
+  nginx:
+    container_name: app-nginx
+    working_dir: /var/www/app
+    image: nginx:alpine
+    depends_on:
+      - php
+      - mercure
+      - s3
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./var/log/nginx-log:/var/log/nginx
+      - ./:/var/www/app
+      - ../client/dist:/var/www/app/public/spa:ro
+    ports:
+      - "8098:80"
+    networks:
+      - app-network
+
+  php:
+    container_name: app-php
+    working_dir: /var/www/app
+    build:
+      context: ./docker/php
+      args:
+        INSTALL_XDEBUG: "0"
+    depends_on:
+      - postgres
+      - mercure
+      - s3
+      - mailer
+    volumes:
+      - ./:/var/www/app
+      - ./docker/php/conf/x-php.ini:/usr/local/etc/php/conf.d/custom-docker-php.ini:ro
+    networks:
+      - app-network
+
+  postgres:
+    container_name: app-postgres
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: dev
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports:
+      - "54328:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - app-network
+
   mercure:
+    container_name: app-mercure
     image: dunglas/mercure
     restart: unless-stopped
     environment:
-      # Uncomment the following line to disable HTTPS,
-      SERVER_NAME: ':80'
+      SERVER_NAME: ":80"
       MERCURE_PUBLISHER_JWT_KEY: "!ChangeThisMercureHubJWTSecretKey!"
       MERCURE_SUBSCRIBER_JWT_KEY: "!ChangeThisMercureHubJWTSecretKey!"
       MERCURE_EXTRA_DIRECTIVES: |
-        cors_origins http://127.0.0.1:8000 http://127.0.0.1:5173 http://localhost:5173
+        cors_origins http://localhost:8098 http://127.0.0.1:8098 http://192.168.1.14:8098
     command: /usr/bin/caddy run --config /etc/caddy/dev.Caddyfile
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/healthz"]
+      test: ["CMD", "curl", "-fsS", "http://localhost/healthz"]
       timeout: 5s
       retries: 5
-      start_period: 60s
+      start_period: 20s
     volumes:
       - mercure_data:/data
       - mercure_config:/config
-  ###< symfony/mercure-bundle ###
+    networks:
+      - app-network
 
   s3:
-    image: minio/minio
-    container_name: s3
+    container_name: app-s3
+    image: minio/minio:latest
     restart: unless-stopped
     environment:
       MINIO_ROOT_USER: "admin"
       MINIO_ROOT_PASSWORD: "supersecretpassword"
+
+      # Желательно, чтобы MinIO в консоли/ответах знал “внешний” адрес.
+      # ВАЖНО: тут не localhost, а твой LAN IP:
+      MINIO_SERVER_URL: "http://192.168.1.14:9000"
+      # MINIO_BROWSER_REDIRECT_URL: "http://192.168.1.14:9001"
+      MINIO_BROWSER_REDIRECT_URL: "http://localhost:9001"
     command: server /data --console-address ":9001"
+    ports:
+      # - "9000:9000" # S3 API наружу
+      - "9001:9001" # консоль наружу (опционально)
     volumes:
       - s3_data:/data
+    networks:
+      - app-network
+
+  s3-init:
+    container_name: app-s3-init
+    image: minio/mc:latest
+    depends_on:
+      - s3
+    environment:
+      MINIO_ROOT_USER: "admin"
+      MINIO_ROOT_PASSWORD: "supersecretpassword"
+      AWS_BUCKET: "social-network-media"
+    networks:
+      - app-network
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://s3:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD; do sleep 1; done;
+      mc mb -p local/$$AWS_BUCKET || true;
+      mc anonymous set download local/$$AWS_BUCKET || true;
+      exit 0;
+      "
+
+  mailer:
+    container_name: app-mailer
+    image: axllent/mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    networks:
+      - app-network
 
 volumes:
-  ###> symfony/mercure-bundle ###
-  mercure_data:
-  mercure_config:
-  ###< symfony/mercure-bundle ###
+  postgres_data: {}
+  mercure_data: {}
+  mercure_config: {}
+  s3_data: {}
 
-  s3_data:
+networks:
+  app-network:
+    driver: bridge

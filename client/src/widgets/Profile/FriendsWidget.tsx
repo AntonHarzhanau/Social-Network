@@ -16,6 +16,9 @@ const FriendsWidget = ({ userId }: FriendsWidgetProps) => {
     error,
   } = usePeopleListInfinite("all", userId, 8);
 
+  void isLoading;
+  void isError;
+  void error;
   return (
     <div>
       <Card className="h-56 p-3">

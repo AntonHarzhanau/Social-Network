@@ -1,8 +1,16 @@
 import { useEffect, useRef } from "react";
 
-const MERCURE_URL =
-  import.meta.env.VITE_MERCURE_URL ||
-  "http://localhost:3000/.well-known/mercure";
+const ORIGIN = window.location.origin;
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
+
+export const MERCURE_URL = new URL(
+  import.meta.env.VITE_MERCURE_URL || "/.well-known/mercure",
+  ORIGIN,
+).toString();
+
+// const MERCURE_URL =
+//   import.meta.env.VITE_MERCURE_URL ||
+//   "http://localhost:3000/.well-known/mercure";
 
 interface UseMercureOptions<TPayload = unknown> {
   topic: string;

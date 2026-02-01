@@ -6,10 +6,7 @@ use App\Modules\User\Application\Action\Auth\ConfirmAccountRecoveryAction;
 use App\Modules\User\Application\Action\Auth\RegisterUserAction;
 use App\Modules\User\Application\Action\Auth\RequestAccountRecoveryAction;
 use App\Modules\User\Application\Action\Auth\ResendEmailVerificationAction;
-use App\Modules\User\Application\Action\Auth\UpdateMyPresenceAction;
 use App\Modules\User\Application\Action\Auth\VerifyEmailAction;
-use App\Modules\User\Application\Action\User\GetMeAction;
-use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Infrastructure\Http\Request\RecoveryAccountRequest;
 use App\Modules\User\Infrastructure\Http\Request\RegisterRequest;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,13 +16,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[Route('/api/auth')]
 final class AuthController extends AbstractController
 {
     public function __construct(
-        private readonly string $frontendBaseUrl = 'http://localhost:5173/auth'
+        private readonly string $frontendBaseUrl = 'http://localhost:8098/auth'
     ) {
     }
 

@@ -9,8 +9,13 @@ export const postKeys = {
       | { scope: "wall"; wallId: string; limit: number },
   ) =>
     args.scope === "mixed"
-      ? [...postKeys.lists(), "mixed", { limit: args.limit }] as const
-      : [...postKeys.lists(), "wall", args.wallId, { limit: args.limit }] as const,
+      ? ([...postKeys.lists(), "mixed", { limit: args.limit }] as const)
+      : ([
+          ...postKeys.lists(),
+          "wall",
+          args.wallId,
+          { limit: args.limit },
+        ] as const),
 
   detail: (postId: string) => [...postKeys.all, "detail", postId] as const,
 };

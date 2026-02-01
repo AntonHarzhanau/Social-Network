@@ -3,6 +3,11 @@
 /.env.local
 /.env.local.php
 /.env.*.local
+.env.local
+.env.prod
+.env.prod.local
+.env.*.local
+.env.test.local
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
 /var/

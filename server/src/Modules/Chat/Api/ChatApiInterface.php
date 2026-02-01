@@ -8,5 +8,4 @@ interface ChatApiInterface
 {
     public function getChatParticipants(Uuid $chatId, ?bool $includeMuted = null): array;
 
-    public function getChatInfo(Uuid $chatId): array;
 }
