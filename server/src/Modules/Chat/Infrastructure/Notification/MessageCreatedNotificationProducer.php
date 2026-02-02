@@ -31,17 +31,17 @@ final class MessageCreatedNotificationProducer implements EventSubscriberInterfa
         if (!$senderIdStr) {
             return;
         }
-
         $chatIdStr = $event->chatId;
         $senderId = Uuid::fromString($senderIdStr);
-
+        
         $participants = $this->participants->findAllUsersIdByChatId(Uuid::fromString($chatIdStr));
         if (empty($participants)) {
             return;
-        }
-
-        $recipientIds = [];
-
+            }
+            
+            $recipientIds = [];
+        
+            
         foreach ($participants as $participant) {
             if ($participant['userId'] === (string) $senderId)
                 continue;
@@ -62,17 +62,17 @@ final class MessageCreatedNotificationProducer implements EventSubscriberInterfa
             'group' => \sprintf("New message in %s from %s", $chatTitle, $senderName),
             default => "New message received",
         };
-
         $payload = [
             'source' => [
                 'kind' => 'chat',
                 'id' => $chatIdStr,
                 'name' => $chatTitle,
                 'avatarUrl' => $event->chat['avatarUrl'] ?? null,
-            ],
-            'chatId' => $chatIdStr,
-            'messageId' => $event->message['id'] ?? '',
-            'senderId' => $senderIdStr,
+                ],
+                'chatId' => $chatIdStr,
+                'messageId' => $event->message['id'] ?? '',
+                'senderId' => $senderIdStr,
+               
         ];
         
         $this->bus->dispatch(new UpsertNotification(

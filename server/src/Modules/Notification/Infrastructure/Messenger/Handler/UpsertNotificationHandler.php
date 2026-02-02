@@ -12,6 +12,7 @@ use App\Modules\Shared\Infrastructure\Realtime\Topics;
 use App\Modules\User\Domain\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Uid\Uuid;
 
 #[AsMessageHandler]
 final class UpsertNotificationHandler
@@ -26,22 +27,23 @@ final class UpsertNotificationHandler
 
     public function __invoke(UpsertNotification $message): void
     {
+       
         if ($message->recipientsIds === []) {
             return;
         }
 
         $recipientsRefs = [];
         foreach ($message->recipientsIds as $recipientId) {
-            $recipientsRefs[$recipientId] = $this->entityManager->getReference(User::class, $recipientId);
+            
+            $recipientsRefs[$recipientId] = $this->entityManager->getReference(User::class, Uuid::fromString($recipientId));
         }
-
+    
         $existingMap = [];
         if ($message->aggregate && $message->groupKey) {
             $existingMap = $this->notificationRepository->findGroupedForRecipients(recipientIds: $message->recipientsIds, type: NotificationTypeEnum::from($message->type), groupKey: $message->groupKey);
         }
 
         $toPublish = [];
-
         foreach ($message->recipientsIds as $recipientId) {
             $existing = $existingMap[$recipientId] ?? null;
 

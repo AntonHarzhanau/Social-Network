@@ -13,4 +13,6 @@ interface GroupDirectoryInterface
     /** @return array<string, GroupPreviewDTO | null> */
     public function findPreviewsByWallIds(Uuid $currentUserId, array $wallIds): array;
 
+    public function getUserRole(Uuid $groupId, Uuid $userId): ?string;
+
 }

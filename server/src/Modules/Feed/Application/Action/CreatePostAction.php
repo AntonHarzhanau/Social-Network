@@ -4,9 +4,11 @@ namespace App\Modules\Feed\Application\Action;
 
 use App\Modules\Feed\Application\Action\Command\CreatePostCommand;
 use App\Modules\Feed\Application\DTO\PostMutationResponse;
+use App\Modules\Feed\Application\Port\GroupDirectoryInterface;
 use App\Modules\Feed\Application\Port\UserDirectoryInterface;
 use App\Modules\Feed\Application\Service\PostMediaBindingsService;
 use App\Modules\Feed\Domain\Entity\Post;
+use App\Modules\Feed\Domain\Enum\WallOwnerTypeEnum;
 use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
 use App\Modules\Feed\Domain\Repository\WallRepositoryInterface;
 
@@ -17,6 +19,7 @@ final class CreatePostAction
         private readonly UserDirectoryInterface $userDirectory,
         private readonly WallRepositoryInterface $wallRepository,
         private readonly PostMediaBindingsService $postMediaBindingsService,
+        private readonly GroupDirectoryInterface $groupDirectory,
     ) {}
 
     public function execute(CreatePostCommand $command): PostMutationResponse
@@ -29,6 +32,18 @@ final class CreatePostAction
         $wall = $this->wallRepository->getWallById($command->wallId);
         if ($wall === null) {
             throw new \RuntimeException('Wall not found');
+        }
+
+        $canPost = false;
+        if (!$wall->getOwnerType() === WallOwnerTypeEnum::USER) {
+            $canPost = $wall->getId()->equals($author->getWall()->getId());
+        } else {
+            $groupWallIds = $this->groupDirectory->findGroupWallIdsByUserId($author->getId());
+            $canPost = \in_array($wall->getId()->toRfc4122(), $groupWallIds, true);
+        }
+
+        if (!$canPost) {
+            throw new \RuntimeException('User cannot post on this wall');
         }
 
         $post = new Post();

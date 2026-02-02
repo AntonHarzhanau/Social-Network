@@ -30,7 +30,6 @@ final class ChatRealtimeSubscriber implements EventSubscriberInterface
     public function onMessageCreated(MessageCreated $event): void
     {
         $topic = Topics::chat($event->chatId);
-
         $this->realtime->publish(
             $topic,
             [
@@ -39,6 +38,7 @@ final class ChatRealtimeSubscriber implements EventSubscriberInterface
             ],
             private: false
         );
+        
     }
 
     public function onMessageUpdated(MessageUpdated $event): void

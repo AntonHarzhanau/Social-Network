@@ -28,4 +28,9 @@ class GroupDirectoryAdapter implements GroupDirectoryInterface
 
         return $groups;
     }
+
+    public function getUserRole(Uuid $groupId, Uuid $userId): ?string
+    {
+        return $this->groupApi->getUserRole($groupId, $userId);
+    }
 }

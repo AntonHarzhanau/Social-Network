@@ -104,4 +104,19 @@ class GroupMemberRepository extends ServiceEntityRepository implements GroupMemb
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
+    public function findUserRoleInGroup(Uuid $groupId, Uuid $userId): ?GroupMemberRoleEnum
+    {
+        $qb = $this->createQueryBuilder('gm')
+            ->select('gm.role')
+            ->where('gm.group = :groupId')
+            ->andWhere('gm.user = :userId')
+            ->setParameter('groupId', $groupId)
+            ->setParameter('userId', $userId)
+            ->setMaxResults(1);
+
+        $result = $qb->getQuery()->getOneOrNullResult();
+        
+        return $result ? $result['role'] : null;
+    }
+
 }

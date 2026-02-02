@@ -25,4 +25,6 @@ interface GroupMemberRepositoryInterface
     public function findOneByCriteria(array $criteria): ?GroupMember;
 
     public function countGroupMembers(Uuid $groupId, ?GroupMemberStatusEnum $status = null): int;
+
+    public function findUserRoleInGroup(Uuid $groupId, Uuid $userId): ?GroupMemberRoleEnum;
 }
