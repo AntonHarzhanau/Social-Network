@@ -12,5 +12,5 @@ export const MAIN_MENU: MenuItem[] = [
   { path: "/chats", name: "Messages", icon: MessageCircle },
   { path: ROUTES.FRIENDS, name: "Friends", icon: Handshake },
   { path: ROUTES.GROUPS, name: "Groups", icon: Users },
-  { path: ROUTES.SETTINGS, name: "Settings", icon: Settings },
+  // { path: ROUTES.SETTINGS, name: "Settings", icon: Settings },
 ];

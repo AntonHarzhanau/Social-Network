@@ -1,92 +1,87 @@
-import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
+import { FormInput } from "@/shared/components/FormInput";
+import { useForm } from "react-hook-form";
+import { changePasswordSchema, type ChangePasswordSchema } from "../../model/change-password-schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { changePassword } from "@/entities/user/api/userApi";
+import { toast } from "sonner";
 
-export function SecurityTab(props?: {
-  onSave?: (data: {
-    oldPassword: string;
-    newPassword: string;
-    confirmNewPassword: string;
-  }) => Promise<void>;
-}) {
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmNewPassword, setConfirmNewPassword] = useState("");
-  const [saving, setSaving] = useState(false);
 
-  const canSave =
-    oldPassword.trim() &&
-    newPassword.trim() &&
-    confirmNewPassword.trim() &&
-    newPassword === confirmNewPassword;
+export function SecurityTab() {
+  const form = useForm<ChangePasswordSchema>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      oldPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
+    },
+    mode: "onChange",
+  });
+
+    const handleSubmit = async (data: ChangePasswordSchema) => {
+      try {
+        await changePassword(data.oldPassword, data.newPassword)
+        toast.success("Password changed successfully")
+      } catch (error) {
+        console.log(error)
+        toast.error("Failed to change password")
+      }
+  
+    form.reset();
+  };
 
   return (
-    <div className="grid gap-4 overflow-auto pr-2">
+    <form
+      id="change-password-form"
+      onSubmit={form.handleSubmit(handleSubmit)}
+      className="grid gap-4 overflow-auto pr-2">
       <div className="grid gap-2">
-        <Label>Old password</Label>
-        <Input
+        <FormInput
+          name="oldPassword"
+          control={form.control}
+          label="Old password"
           type="password"
-          value={oldPassword}
-          onChange={(e) => setOldPassword(e.target.value)}
+          autoComplete="current-password"
+          placeholder="Old password"
         />
-      </div>
 
-      <div className="grid gap-2">
-        <Label>New password</Label>
-        <Input
+        <FormInput
+          name="newPassword"
+          control={form.control}
+          label="New password"
           type="password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
+          autoComplete="new-password"
+          placeholder="New password"
         />
-      </div>
 
-      <div className="grid gap-2">
-        <Label>Confirm new password</Label>
-        <Input
+        <FormInput
+          name="confirmNewPassword"
+          control={form.control}
+          label="Confirm new password"
           type="password"
-          value={confirmNewPassword}
-          onChange={(e) => setConfirmNewPassword(e.target.value)}
+          autoComplete="new-password"
+          placeholder="Confirm new password"
         />
-        {confirmNewPassword && newPassword !== confirmNewPassword && (
-          <div className="text-xs text-destructive">Passwords do not match</div>
-        )}
       </div>
 
       <div className="flex gap-2 justify-end">
         <Button
           variant="ghost"
           onClick={() => {
-            setOldPassword("");
-            setNewPassword("");
-            setConfirmNewPassword("");
+            form.reset()
           }}
         >
           Clear
         </Button>
 
         <Button
-          disabled={!canSave || saving}
-          onClick={async () => {
-            if (!props?.onSave) return;
-            setSaving(true);
-            try {
-              await props.onSave({
-                oldPassword,
-                newPassword,
-                confirmNewPassword,
-              });
-              setOldPassword("");
-              setNewPassword("");
-              setConfirmNewPassword("");
-            } finally {
-              setSaving(false);
-            }
-          }}
+          form="change-password-form"
+          type="submit"
+          disabled={form.formState.isSubmitting}
         >
           Save
         </Button>
       </div>
-    </div>
+    </form >
   );
 }
