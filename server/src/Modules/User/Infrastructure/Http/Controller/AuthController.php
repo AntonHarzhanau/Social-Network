@@ -59,11 +59,13 @@ final class AuthController extends AbstractController
         VerifyEmailAction $action,
         Request $request,
     ): Response {
+        $token = (string) $request->query->get('token', '');
+
         try {
-            $action->execute($request->query->get('token'));
-            return $this->redirect($this->frontendBaseUrl . '?email-verify-status=ok');
-        } catch (\Throwable $th) {
-            return $this->redirect($this->frontendBaseUrl . '?email-verify-status=invalid');
+            $action->execute($token);
+            return $this->redirectToFrontendAuth($request, ['email-verify-status' => 'ok']);
+        } catch (\Throwable) {
+            return $this->redirectToFrontendAuth($request, ['email-verify-status' => 'invalid']);
         }
     }
 
@@ -76,8 +78,8 @@ final class AuthController extends AbstractController
         $email = json_decode($request->getContent(), true)['email'] ?? null;
         $userIp = $request->getClientIp();
         $userAgent = $request->headers->get('User-Agent');
-        $event = $action->execute($email, $userIp, $userAgent);
 
+        $event = $action->execute($email, $userIp, $userAgent);
         $eventDispatcher->dispatch($event);
 
         return $this->json(['ok' => true]);
@@ -89,6 +91,7 @@ final class AuthController extends AbstractController
         RequestAccountRecoveryAction $action,
     ): JsonResponse {
         $action->execute($dto->email);
+
         return $this->json([
             'message' => 'A recovery request has been sent to the specified address. Check your email.'
         ], JsonResponse::HTTP_ACCEPTED);
@@ -101,10 +104,25 @@ final class AuthController extends AbstractController
     ): Response {
         try {
             $action->execute($request);
-
-            return $this->redirect($this->frontendBaseUrl . '?restore-account-status=ok');
-        } catch (\InvalidArgumentException $e) {
-            return $this->redirect($this->frontendBaseUrl . '?restore-account-status=invalid');
+            return $this->redirectToFrontendAuth($request, ['restore-account-status' => 'ok']);
+        } catch (\InvalidArgumentException) {
+            return $this->redirectToFrontendAuth($request, ['restore-account-status' => 'invalid']);
         }
+    }
+
+    private function frontendAuthUrl(Request $request): string
+    {
+        // Если SPA реально доступна на том же хосте/порту что и API (через nginx :8098)
+        return rtrim($request->getSchemeAndHttpHost(), '/') . '/auth';
+    }
+
+    private function redirectToFrontendAuth(Request $request, array $query): Response
+    {
+        $base = $this->frontendAuthUrl($request);
+
+        $qs = http_build_query($query);
+        $sep = str_contains($base, '?') ? '&' : '?';
+
+        return $this->redirect($base . ($qs ? $sep . $qs : ''));
     }
 }

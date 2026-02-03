@@ -25,7 +25,8 @@ final class CreatePostAction
     public function execute(CreatePostCommand $command): PostMutationResponse
     {
         
-        $author = $this->userDirectory->getUser($command->authorId);
+        $author = $this->userDirectory->getUser($command->authorId->toRfc4122());
+
         if ($author === null) {
             throw new \RuntimeException('Author not found');
         }
@@ -35,7 +36,7 @@ final class CreatePostAction
         }
 
         $canPost = false;
-        if (!$wall->getOwnerType() === WallOwnerTypeEnum::USER) {
+        if ($wall->getOwnerType() === WallOwnerTypeEnum::USER) {
             $canPost = $wall->getId()->equals($author->getWall()->getId());
         } else {
             $groupWallIds = $this->groupDirectory->findGroupWallIdsByUserId($author->getId());

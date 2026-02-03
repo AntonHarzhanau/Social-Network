@@ -1,47 +1,52 @@
 services:
   nginx:
-    container_name: app-nginx
-    working_dir: /var/www/app
     image: nginx:alpine
     depends_on:
       - php
       - mercure
       - s3
-    volumes:
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./var/log/nginx-log:/var/log/nginx
-      - ./:/var/www/app
-      - ../client/dist:/var/www/app/public/spa:ro
     ports:
       - "8098:80"
+    volumes:
+      # Переключаем конфиг через переменную NGINX_MODE=prod|dev
+      - ./docker/nginx/nginx.${NGINX_MODE:-prod}.conf:/etc/nginx/nginx.conf:ro
+
+      # Symfony
+      - ./server:/var/www/app
+
+      # SPA dist -> /public/spa
+      - ./client/dist:/var/www/app/public/spa:ro
+
+      # Логи nginx в volume (без mkdir на хосте)
+      - nginx_logs:/var/log/nginx
     networks:
       - app-network
 
   php:
-    container_name: app-php
-    working_dir: /var/www/app
     build:
       context: ./docker/php
       args:
-        INSTALL_XDEBUG: "0"
+        INSTALL_XDEBUG: "${INSTALL_XDEBUG:-0}"
+    working_dir: /var/www/app
+    env_file:
+      - ./server/.env
     depends_on:
       - postgres
       - mercure
       - s3
       - mailer
     volumes:
-      - ./:/var/www/app
+      - ./server:/var/www/app
       - ./docker/php/conf/x-php.ini:/usr/local/etc/php/conf.d/custom-docker-php.ini:ro
     networks:
       - app-network
 
   postgres:
-    container_name: app-postgres
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: dev
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: app
+      POSTGRES_DB: "${POSTGRES_DB:-dev}"
+      POSTGRES_USER: "${POSTGRES_USER:-app}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-app}"
     ports:
       - "54328:5432"
     volumes:
@@ -51,7 +56,6 @@ services:
       - app-network
 
   mercure:
-    container_name: app-mercure
     image: dunglas/mercure
     restart: unless-stopped
     environment:
@@ -59,7 +63,7 @@ services:
       MERCURE_PUBLISHER_JWT_KEY: "!ChangeThisMercureHubJWTSecretKey!"
       MERCURE_SUBSCRIBER_JWT_KEY: "!ChangeThisMercureHubJWTSecretKey!"
       MERCURE_EXTRA_DIRECTIVES: |
-        cors_origins http://localhost:8098 http://127.0.0.1:8098 http://192.168.1.14:8098
+        cors_origins http://localhost:8098 http://127.0.0.1:8098
     command: /usr/bin/caddy run --config /etc/caddy/dev.Caddyfile
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost/healthz"]
@@ -73,29 +77,23 @@ services:
       - app-network
 
   s3:
-    container_name: app-s3
     image: minio/minio:latest
     restart: unless-stopped
     environment:
       MINIO_ROOT_USER: "admin"
       MINIO_ROOT_PASSWORD: "supersecretpassword"
-
-      # Желательно, чтобы MinIO в консоли/ответах знал “внешний” адрес.
-      # ВАЖНО: тут не localhost, а твой LAN IP:
-      MINIO_SERVER_URL: "http://192.168.1.14:9000"
-      # MINIO_BROWSER_REDIRECT_URL: "http://192.168.1.14:9001"
+      MINIO_SERVER_URL: "http://localhost:9000"
       MINIO_BROWSER_REDIRECT_URL: "http://localhost:9001"
     command: server /data --console-address ":9001"
     ports:
-      # - "9000:9000" # S3 API наружу
-      - "9001:9001" # консоль наружу (опционально)
+      - "9000:9000"
+      - "9001:9001"
     volumes:
       - s3_data:/data
     networks:
       - app-network
 
   s3-init:
-    container_name: app-s3-init
     image: minio/mc:latest
     depends_on:
       - s3
@@ -114,7 +112,6 @@ services:
       "
 
   mailer:
-    container_name: app-mailer
     image: axllent/mailpit
     ports:
       - "1025:1025"
@@ -125,11 +122,28 @@ services:
     networks:
       - app-network
 
+  client:
+    profiles: ["dev"]
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    working_dir: /app
+    command: sh -lc "npm run dev -- --host 0.0.0.0 --port 5173"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - client_node_modules:/app/node_modules
+    networks:
+      - app-network
+
 volumes:
   postgres_data: {}
   mercure_data: {}
   mercure_config: {}
   s3_data: {}
+  nginx_logs: {}
+  client_node_modules: {}
 
 networks:
   app-network:

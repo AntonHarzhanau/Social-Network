@@ -3,6 +3,7 @@ import CreatePostDIalog from "../../features/post/create/ui/CreatePostDIalog";
 import FeedsList from "../FeedsList";
 import MediaBox from "../MediaBox/MediaBox";
 import type { UserProfileResponse } from "@/entities/user/model/types";
+import { sessionStore } from "@/entities/session/model/sessionStore";
 
 interface ProfileColumnProps {
   user?: UserProfileResponse;
@@ -10,6 +11,7 @@ interface ProfileColumnProps {
 }
 
 const ProfileColumn = ({ user, loading }: ProfileColumnProps) => {
+  const currentUser = sessionStore((state) => state.user);
   const userId = user?.public.id;
   const wallId = user?.privateSummary?.wallId;
 
@@ -19,7 +21,7 @@ const ProfileColumn = ({ user, loading }: ProfileColumnProps) => {
       {userId ? <MediaBox id={userId} /> : <Skeleton className="h-48 w-full" />}
       {!loading && wallId ? (
         <div className="flex flex-col gap-2">
-          <CreatePostDIalog wallId={wallId} />
+          {currentUser?.id === userId && <CreatePostDIalog wallId={wallId} />}
           <FeedsList wallId={wallId} />
         </div>
       ) : (

@@ -1,0 +1,10 @@
+**/node_modules
+**/dist
+**/.vite
+**/var
+**/vendor
+**/.git
+**/.idea
+**/.vscode
+**/*.log
+
