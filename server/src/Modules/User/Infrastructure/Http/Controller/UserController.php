@@ -87,13 +87,14 @@ final class UserController extends AbstractController
     #[Route('/{userId}/media', methods: ['GET'])]
     public function getUserMedia(
         string $userId,
-        #[CurrentUser()] ?User $currentUser,
-        #[MapQueryParameter()] ?FileTypeEnum $type,
+        #[CurrentUser()] User $currentUser,
+        #[MapQueryParameter()] ?string $type,
         GetUserMediaFileAction $action,
     ): JsonResponse {
 
+        $fileType = $type !== null ? FileTypeEnum::from($type) : FileTypeEnum::IMAGE;
         try {
-            $media = $action->execute(Uuid::fromString($userId));
+            $media = $action->execute(Uuid::fromString($userId), $currentUser, $fileType);
             return $this->json($media, Response::HTTP_OK);
         } catch (UserNotFoundException $e) {
             return $this->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);

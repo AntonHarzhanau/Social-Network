@@ -2,6 +2,7 @@
 
 namespace App\Modules\User\Domain\Repository;
 
+use App\Modules\Media\Domain\Enum\FileTypeEnum;
 use App\Modules\User\Domain\Entity\UserMediaBinding;
 use Symfony\Component\Uid\Uuid;
 
@@ -11,5 +12,5 @@ interface UserMediaBindingRepositoryInterface
 
     public function remove(UserMediaBinding $entity, bool $flush = true): void;
 
-    public function findMediasByUserId(Uuid $userId): array;
+    public function findMediasByUserId(Uuid $userId, FileTypeEnum $fileType): array;
 }

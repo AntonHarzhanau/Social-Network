@@ -38,13 +38,26 @@ class UserMediaBindingRepository extends ServiceEntityRepository implements User
     }
 
     // Todo: optimize with DQL
-    public function findMediasByUserId(Uuid $userId): array
+    public function findMediasByUserId(Uuid $userId, FileTypeEnum $fileType): array
     {
-        $bindings = $this->findBy(["owner" => $userId]);
+        $bindings = $this->createQueryBuilder('b')
+            ->addSelect('m')
+            ->innerJoin('b.media', 'm')
+            ->innerJoin('b.owner', 'o')
+            ->andWhere('IDENTITY(b.owner) = :userId')
+            ->andWhere('m.fileType = :type')
+            ->setParameter('userId', $userId)
+            ->setParameter('type', $fileType)
+            ->orderBy('b.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
         $medias = [];
         foreach ($bindings as $binding) {
             $medias[] = $binding->getMedia();
         }
+
+        /** @var MediaAsset[] $medias */
         return $medias;
     }
 }

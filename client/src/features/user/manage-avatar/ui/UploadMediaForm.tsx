@@ -1,8 +1,10 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import DnDZone from "../../../media/upload-media/ui/DnDZone";
-import { PostMediaPreview } from "../../../media/upload-media/model/PostMediaPreview";
-import { usePostMediaUpload } from "@/features/media/upload-media/model/usePostMediaUpload";
+import DnDZone, {
+  type MediaAccept,
+} from "../../../media/upload-media/ui/DnDZone";
+import { MediaPreview } from "../../../media/upload-media/ui/MediaPreview";
+import { useMediaUpload } from "@/features/media/upload-media/model/useMediaUpload";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import { FieldGroup } from "@/shared/components/ui/field";
@@ -15,11 +17,14 @@ import { useAttachMyMediaMutation } from "@/entities/user/model/useUserMutations
 interface UploadMediaFormProps {
   userId: string;
   onSuccess?: () => void;
+
+  accept: Exclude<MediaAccept, "media">;
 }
 
 export const UploadMediaForm = ({
   userId,
   onSuccess,
+  accept,
 }: UploadMediaFormProps) => {
   const attachMutation = useAttachMyMediaMutation({ myUserId: userId });
 
@@ -35,8 +40,9 @@ export const UploadMediaForm = ({
     handleRemoveMedia,
     handleRetry,
     resetMedia,
-  } = usePostMediaUpload({
-    onMediaIdsChange: (mediaIds: string[]) => {
+  } = useMediaUpload({
+    mode: "single",
+    onMediaIdsChange: (mediaIds) => {
       form.setValue("mediaIds", mediaIds, {
         shouldDirty: true,
         shouldValidate: true,
@@ -52,6 +58,11 @@ export const UploadMediaForm = ({
 
     const values = uploadMediaSchema.parse(rawvalues);
 
+    if (!values.mediaIds?.[0]) {
+      toast("Select a file first");
+      return;
+    }
+
     try {
       await attachMutation.mutateAsync(values.mediaIds);
       toast.success("Media uploaded successfully", { closeButton: true });
@@ -64,6 +75,8 @@ export const UploadMediaForm = ({
     }
   };
 
+  const hasSelected = mediaItems.length > 0;
+
   return (
     <form
       id="upload-user-media-form"
@@ -71,18 +84,34 @@ export const UploadMediaForm = ({
       onSubmit={form.handleSubmit(onSubmit)}
     >
       <FieldGroup>
-        <DnDZone onFilesSelected={handleFilesSelected} />
-
-        <PostMediaPreview
-          items={mediaItems}
-          onRemove={handleRemoveMedia}
-          onRetry={handleRetry}
-        />
+        {!hasSelected ? (
+          <DnDZone
+            onFilesSelected={handleFilesSelected}
+            accept={accept} // "image" | "video"
+            multiple={false}
+            title={
+              accept === "image"
+                ? "Tap to choose a photo"
+                : "Tap to choose a video"
+            }
+            subtitle="or drag & drop on desktop"
+          />
+        ) : (
+          <MediaPreview
+            items={mediaItems}
+            onRemove={handleRemoveMedia}
+            onRetry={handleRetry}
+          />
+        )}
 
         <Button
           type="submit"
           form="upload-user-media-form"
-          disabled={attachMutation.isPending}
+          disabled={
+            attachMutation.isPending ||
+            isUploadingAny ||
+            !form.watch("mediaIds")?.[0]
+          }
         >
           Publish
         </Button>

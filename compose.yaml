@@ -8,7 +8,7 @@ services:
     ports:
       - "8098:80"
     volumes:
-      # Переключаем конфиг через переменную NGINX_MODE=prod|dev
+      #  NGINX_MODE=prod|dev
       - ./docker/nginx/nginx.${NGINX_MODE:-prod}.conf:/etc/nginx/nginx.conf:ro
 
       # Symfony
@@ -16,8 +16,8 @@ services:
 
       # SPA dist -> /public/spa
       - ./client/dist:/var/www/app/public/spa:ro
-
-      # Логи nginx в volume (без mkdir на хосте)
+      
+      # NGINX logs
       - nginx_logs:/var/log/nginx
     networks:
       - app-network

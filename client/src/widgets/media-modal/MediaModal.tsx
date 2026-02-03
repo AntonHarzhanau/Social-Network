@@ -25,6 +25,8 @@ import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { Sheet, SheetContent } from "@/shared/components/ui/sheet";
 import { ModalMediaCarousel } from "@/entities/media/ui/ModalMediaCarousel";
 
+import { useSwipeDownToClose } from "@/shared/hooks/useSwipeDownToClose";
+
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -65,7 +67,6 @@ export function MediaModal({
     gcTime: 5 * 60_000,
   });
 
-  // prefetch neighbors
   useEffect(() => {
     if (!open) return;
 
@@ -127,6 +128,11 @@ export function MediaModal({
 
   const liked = !!currentMedia?.likedByCurrentUser;
 
+  const swipe = useSwipeDownToClose({
+    enabled: open && !commentsOpen,
+    onClose: () => onOpenChange(false),
+  });
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -158,7 +164,14 @@ export function MediaModal({
             "md:overflow-y-auto",
             "lg:overflow-hidden",
           )}
+          {...swipe.bind}
+          style={swipe.style}
         >
+          {/* optional: handle */}
+          <div className="md:hidden w-full flex justify-center pt-2 pb-1">
+            <div className="h-1.5 w-12 rounded-full bg-white/20" />
+          </div>
+
           <MediaModalCloseButton onOpenChange={onOpenChange} />
 
           <div
@@ -203,6 +216,7 @@ export function MediaModal({
                     }}
                     aria-label="Like"
                     title="Like"
+                    data-swipe-ignore
                   >
                     <Heart
                       className={cn(
@@ -220,6 +234,7 @@ export function MediaModal({
                     onClick={() => setCommentsOpen(true)}
                     aria-label="Comments"
                     title="Comments"
+                    data-swipe-ignore
                   >
                     <MessageCircle className="h-5 w-5 text-white" />
                   </Button>
@@ -231,6 +246,7 @@ export function MediaModal({
                     className="h-11 w-11 rounded-full bg-black/50 hover:bg-black/70 border border-white/10"
                     aria-label="Share"
                     title="Share"
+                    data-swipe-ignore
                   >
                     <Share2 className="h-5 w-5 text-white" />
                   </Button>

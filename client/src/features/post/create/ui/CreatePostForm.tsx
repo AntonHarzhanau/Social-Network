@@ -3,9 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { createPostSchema, type CreatePostFormValues } from "../model/schema";
 import DnDZone from "../../../media/upload-media/ui/DnDZone";
-import { PostMediaPreview } from "../../../media/upload-media/model/PostMediaPreview";
+import { MediaPreview } from "../../../media/upload-media/ui/MediaPreview";
 import VisibilitySelector from "./VisibilitySelector";
-import { usePostMediaUpload } from "@/features/media/upload-media/model/usePostMediaUpload";
+import { useMediaUpload } from "@/features/media/upload-media/model/useMediaUpload";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -40,8 +40,9 @@ export const CreatePostForm = ({ wallId, onSuccess }: CreatePostFormProps) => {
     handleRemoveMedia,
     handleRetry,
     resetMedia,
-  } = usePostMediaUpload({
-    onMediaIdsChange: (mediaIds: string[]) => {
+  } = useMediaUpload({
+    mode: "multiple",
+    onMediaIdsChange: (mediaIds) => {
       form.setValue("mediaIds", mediaIds, {
         shouldDirty: true,
         shouldValidate: true,
@@ -51,10 +52,10 @@ export const CreatePostForm = ({ wallId, onSuccess }: CreatePostFormProps) => {
 
   const onSubmit = async (rawvalues: CreatePostFormValues) => {
     if (!wallId) {
-        toast.error("Wall ID is missing. Cannot create post.");
-        return;
+      toast.error("Wall ID is missing. Cannot create post.");
+      return;
     }
-    
+
     if (isUploadingAny) {
       toast("Wait until all files are uploaded");
       return;
@@ -81,9 +82,13 @@ export const CreatePostForm = ({ wallId, onSuccess }: CreatePostFormProps) => {
       onSubmit={form.handleSubmit(onSubmit)}
     >
       <FieldGroup>
-        <DnDZone onFilesSelected={handleFilesSelected} />
+        <DnDZone
+          onFilesSelected={handleFilesSelected}
+          accept="media"
+          multiple
+        />
 
-        <PostMediaPreview
+        <MediaPreview
           items={mediaItems}
           onRemove={handleRemoveMedia}
           onRetry={handleRetry}
