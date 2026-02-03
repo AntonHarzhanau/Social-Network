@@ -6,9 +6,11 @@ use App\Modules\User\Application\Action\Auth\ConfirmAccountRecoveryAction;
 use App\Modules\User\Application\Action\Auth\RegisterUserAction;
 use App\Modules\User\Application\Action\Auth\RequestAccountRecoveryAction;
 use App\Modules\User\Application\Action\Auth\ResendEmailVerificationAction;
+use App\Modules\User\Application\Action\Auth\ResetPasswordToRandomAction;
 use App\Modules\User\Application\Action\Auth\VerifyEmailAction;
 use App\Modules\User\Infrastructure\Http\Request\RecoveryAccountRequest;
 use App\Modules\User\Infrastructure\Http\Request\RegisterRequest;
+use App\Modules\User\Infrastructure\Http\Request\ResetPasswordRequest;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -110,9 +112,18 @@ final class AuthController extends AbstractController
         }
     }
 
+    #[Route('/reset-password', methods: ['POST'])]
+    public function resetPassword(
+        #[MapRequestPayload(validationFailedStatusCode: 422)] ResetPasswordRequest $dto,
+        ResetPasswordToRandomAction $action,
+    ): JsonResponse {
+        $action->execute($dto->email);
+
+        return $this->json(['ok' => true], Response::HTTP_ACCEPTED);
+    }
+
     private function frontendAuthUrl(Request $request): string
     {
-        // Если SPA реально доступна на том же хосте/порту что и API (через nginx :8098)
         return rtrim($request->getSchemeAndHttpHost(), '/') . '/auth';
     }
 

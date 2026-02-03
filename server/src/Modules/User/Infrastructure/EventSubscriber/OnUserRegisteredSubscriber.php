@@ -45,8 +45,6 @@ final class OnUserRegisteredSubscriber implements EventSubscriberInterface
 
         $this->emailVerificationRepository->save($emailVerification, true);
 
-        // $verifyLink = rtrim($this->frontendBaseUrl, '/') . '/verify-email?token=' . urlencode($rawToken);
-
         $verifyLink = $this->urlGenerator->generate(
             'api_auth_email_verify',
             [

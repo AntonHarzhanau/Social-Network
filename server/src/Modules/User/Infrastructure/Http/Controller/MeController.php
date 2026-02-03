@@ -3,6 +3,7 @@
 namespace App\Modules\User\Infrastructure\Http\Controller;
 
 use App\Modules\User\Application\Action\Me\AttachMediaAction;
+use App\Modules\User\Application\Action\Me\ChangePasswordAction;
 use App\Modules\User\Application\Action\Me\DeleteAccountAction;
 use App\Modules\User\Application\Action\Me\Education\AddEducationAction;
 use App\Modules\User\Application\Action\Me\Education\DeleteEducationAction;
@@ -17,6 +18,7 @@ use App\Modules\User\Application\Action\Me\WorkExperience\DeleteWorkExperienceAc
 use App\Modules\User\Application\Action\Me\WorkExperience\UpdateWorkExperienceAction;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Infrastructure\Http\Request\AttachMediaRequest;
+use App\Modules\User\Infrastructure\Http\Request\ChangePasswordRequest;
 use App\Modules\User\Infrastructure\Http\Request\CreateEducationRequest;
 use App\Modules\User\Infrastructure\Http\Request\CreateWorkExperienceRequest;
 use App\Modules\User\Infrastructure\Http\Request\UpdateAvatarRequest;
@@ -29,6 +31,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Uid\Uuid;
 
@@ -51,6 +54,20 @@ final class MeController extends AbstractController
         $action->execute($user->getId());
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+    #[Route('/password', methods: ['POST'])]
+    public function changePassword(
+        #[CurrentUser] User $user,
+        #[MapRequestPayload(validationFailedStatusCode: 422)] ChangePasswordRequest $dto,
+        ChangePasswordAction $action,
+    ): JsonResponse {
+        try {
+            $action->execute($user, $dto->oldPassword, $dto->newPassword);
+            return $this->json(['ok' => true], Response::HTTP_OK);
+        } catch (BadCredentialsException | \DomainException $e) {
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
     }
 
 
