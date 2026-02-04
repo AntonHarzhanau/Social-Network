@@ -1,8 +1,9 @@
-import { usePeopleListInfinite } from "@/entities/friends/model/usePeopleListInfinite";
 import { Card, CardTitle } from "@/shared/components/ui/card";
 import { Avatar } from "@/shared/components/Avatar";
 import { ROUTES } from "@/shared/constants/routes";
 import { Link } from "react-router-dom";
+import { useFriends } from "@/entities/friends/model/useFriends";
+import { useMyFriendsStats } from "@/entities/friends/model/useFriendsStats";
 
 interface FriendsWidgetProps {
   userId: string | undefined;
@@ -14,7 +15,11 @@ const FriendsWidget = ({ userId }: FriendsWidgetProps) => {
     isLoading,
     isError,
     error,
-  } = usePeopleListInfinite("all", userId, 8);
+  } = useFriends("all", userId, 8, "");
+
+  const totalFriends = useMyFriendsStats(!!userId);
+  
+  const friendsList = friends.slice(0, 8);
 
   void isLoading;
   void isError;
@@ -30,10 +35,10 @@ const FriendsWidget = ({ userId }: FriendsWidgetProps) => {
             >
               Friends
             </Link>
-            <p className="text-xs text-muted-foreground">{friends.length}</p>
+            <p className="text-xs text-muted-foreground">{totalFriends?.data?.total}</p>
           </div>
           <div className="grid grid-cols-4 gap-2 mt-4">
-            {friends.map((friend) => (
+            {friendsList.map((friend) => (
               <Link
                 key={friend.id}
                 to={`/profile/${friend.id}`}
@@ -44,9 +49,9 @@ const FriendsWidget = ({ userId }: FriendsWidgetProps) => {
                   name={friend.name}
                   alt="Friend Avatar"
                   isOnline={friend.isOnline}
-                  className="h-10 w-10"
+                  className="h-12 w-12"
                 />
-                <p className="text-xs font-light group-hover:underline">
+                <p className="text-sm font-light group-hover:underline">
                   {friend.name.split(" ")[0]}
                 </p>
               </Link>

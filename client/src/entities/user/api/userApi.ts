@@ -107,6 +107,17 @@ export const fetchPrivateProfileSettings = async (
   return response.data;
 };
 
+export const changePassword = async (
+  oldPassword: string,
+  newPassword: string,
+): Promise<void> => {
+  await apiClient.post("/me/password", {
+    oldPassword,
+    newPassword,
+  });
+};
+
+
 export const patchMyProfileSettings = async (
   payload: PatchProfileSettingsPayload,
 ): Promise<void> => {

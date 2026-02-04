@@ -42,15 +42,15 @@ export function EditProfileDialog(props: {
   const [tab, setTab] = useState<TabKey>("general");
   const hydratedRef = useRef(false);
 
-  const profileQ = useUserProfile({
+  const profile = useUserProfile({
     userId: props.myUserId,
     enabled: props.open,
   });
-  const detailsQ = useUserProfileDetails({
+  const details = useUserProfileDetails({
     userId: props.myUserId,
     enabled: props.open,
   });
-  const privacyQ = useMyPrivacySettings({ enabled: props.open });
+  const privacy = useMyPrivacySettings({ enabled: props.open });
 
   const patchMut = usePatchMyProfileSettingsMutation({
     myUserId: props.myUserId,
@@ -81,32 +81,32 @@ export function EditProfileDialog(props: {
     if (!props.open) return;
     if (hydratedRef.current) return;
 
-    if (!profileQ.data || !detailsQ.data || !privacyQ.data) return;
+    if (!profile.data || !details.data || !privacy.data) return;
 
     form.reset(
       {
         profile: {
-          username: profileQ.data.public.name ?? "",
-          location: detailsQ.data.location ?? "",
-          maritalStatus: detailsQ.data.maritalStatus ?? "",
-          bio: detailsQ.data.bio ?? "",
-          dateOfBirth: detailsQ.data.dateOfBirth ?? "",
+          username: profile.data.public.name ?? "",
+          location: details.data.location ?? "",
+          maritalStatus: details.data.maritalStatus ?? "",
+          bio: details.data.bio ?? "",
+          dateOfBirth: details.data.dateOfBirth ?? "",
         },
-        privacy: privacyQ.data,
+        privacy: privacy.data,
       },
       { keepDirty: false },
     );
 
     hydratedRef.current = true;
-  }, [props.open, profileQ.data, detailsQ.data, privacyQ.data, form]);
+  }, [props.open, profile.data, details.data, privacy.data, form]);
 
   const loading =
     props.open &&
-    (profileQ.isLoading || detailsQ.isLoading || privacyQ.isLoading);
+    (profile.isLoading || details.isLoading || privacy.isLoading);
   const loadFail =
     props.open &&
     !loading &&
-    (!profileQ.data || !detailsQ.data || !privacyQ.data);
+    (!profile.data || !details.data || !privacy.data);
 
   const left = useMemo(() => {
     if (!props.open) return null;
@@ -119,8 +119,8 @@ export function EditProfileDialog(props: {
       case "general":
         return (
           <GeneralTab
-            avatarUrl={profileQ.data!.public.avatarUrl}
-            displayName={profileQ.data!.public.name}
+            avatarUrl={profile.data!.public.avatarUrl}
+            displayName={profile.data!.public.name}
           />
         );
       case "privacy":
@@ -131,14 +131,14 @@ export function EditProfileDialog(props: {
         return (
           <EducationTab
             myUserId={props.myUserId}
-            items={detailsQ.data!.educations}
+            items={details.data!.educations}
           />
         );
       case "workExperience":
         return (
           <WorkExperienceTab
             myUserId={props.myUserId}
-            items={detailsQ.data!.workExperiences}
+            items={details.data!.workExperiences}
           />
         );
     }
@@ -147,8 +147,8 @@ export function EditProfileDialog(props: {
     loading,
     loadFail,
     tab,
-    profileQ.data,
-    detailsQ.data,
+    profile.data,
+    details.data,
     props.myUserId,
   ]);
 

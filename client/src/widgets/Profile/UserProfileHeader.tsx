@@ -26,6 +26,7 @@ import { useUserProfileDetails } from "@/entities/user/model/useUserProfileDetai
 import { EditProfileDialog } from "./edit-profile-dialog/EditProfilleDialog";
 import { useUserCover } from "@/features/user/manage-avatar/model/useUserCover";
 import { ImageCropDialog } from "../AvatarCrop/ImageCropDialog";
+import NewMessageDialog from "../NewMessageDialog";
 
 interface UserProfileHeaderProps {
   user?: UserProfileResponse;
@@ -55,7 +56,7 @@ const UserProfileHeader = ({ user, loading }: UserProfileHeaderProps) => {
     publicP?.id,
     moreOpen && !!user?.canViewMore,
   );
-  //   const ORIGIN = window.location.origin;
+
   const openingDialogRef = useRef(false);
 
   useEffect(() => {
@@ -171,13 +172,24 @@ const UserProfileHeader = ({ user, loading }: UserProfileHeaderProps) => {
             <div className="hidden md:block">
               <Button onClick={openEditProfile}>Edit profile</Button>
             </div>
-          ) : null
+          ) : (
+            <div>
+             {publicP?.id && (
+               <NewMessageDialog
+                userId={publicP?.id}
+                username={publicP?.name || "User"}
+                avatarUrl={publicP?.avatarUrl}
+                type="default"
+              />
+             )}
+            </div>
+          )
         }
         meta={
           <div className="text-muted-foreground">
             <div className="flex flex-wrap gap-x-4 items-center">
               {summary?.location ? (
-                <Link to="/profile" className="inline-flex">
+                <Link to={`/profile/${publicP?.id}`} className="inline-flex">
                   <div className="flex gap-1 items-center hover:underline">
                     <MapPin className="text-foreground h-4 w-4" />
                     <p className="text-foreground">{summary.location}</p>

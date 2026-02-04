@@ -14,36 +14,54 @@ import { Textarea } from "@/shared/components/ui/textarea";
 import { Avatar } from "@/shared/components/Avatar";
 import { MessageCircle } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { chatQueryKeys } from "@/entities/chat/model/chatQueryKeys";
 
 interface NewMessageDialogProps {
   userId: string;
   username: string;
   avatarUrl?: string | null;
+  type?: "default" | "link";
 }
 
 const NewMessageDialog = ({
   userId,
   username,
   avatarUrl,
+  type = "link",
+
 }: NewMessageDialogProps) => {
   const [newMessage, setNewMessage] = useState("");
-
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Submitting new message to user:", userId, newMessage);
     if (!userId || !newMessage.trim()) return;
-    await createDirectChat({
-      participantId: userId,
-      content: newMessage,
-    });
-    setNewMessage("");
+    try {
+      await createDirectChat({
+        participantId: userId,
+        content: newMessage,
+      });
+      toast.success("Message sent!");
+      queryClient.invalidateQueries({ queryKey: chatQueryKeys.all });
+      navigate(`/chats`);
+
+    } catch (error) {
+      toast.error("Failed to send message.");
+      console.error("Error creating direct chat:", error);
+    }
+
+
   };
 
   return (
     <Dialog>
       <form onSubmit={handleSubmit} id={`new-message-form-${userId}`}>
         <DialogTrigger asChild>
-          <Button variant="link" className="text-xs font-normal p-0">
+          <Button variant={type} className="text-xs font-normal">
             <div className="flex gap-1">
               <MessageCircle className="" />
               <p>New Message</p>

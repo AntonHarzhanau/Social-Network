@@ -9,6 +9,7 @@ const ProfilePage = () => {
   const { userId } = useParams<{ userId: string }>();
 
   const profileQuery = useUserProfile(userId);
+  console.log(profileQuery.data)
 
   return (
     <div>
@@ -20,14 +21,21 @@ const ProfilePage = () => {
       <div className="flex gap-2 mt-4">
         <MainSectionLayout
           pageContent={
-            <ProfileColumn
-              user={profileQuery.data}
-              loading={profileQuery.isPending}
-            />
+            <>
+              {profileQuery.data?.canViewPrivateSummary ? <ProfileColumn
+                user={profileQuery.data}
+                loading={profileQuery.isPending}
+              /> : (
+                <h2>This User's Profile is Private</h2>
+              )}
+            </>
           }
           asideContent={
             <>
-              <FriendsWidget userId={profileQuery.data?.public.id} />
+              {profileQuery.data?.canViewPrivateSummary ? (
+                <FriendsWidget userId={profileQuery.data?.public.id} />
+              ) : null
+              }
             </>
           }
         />
