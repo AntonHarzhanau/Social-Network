@@ -1,13 +1,6 @@
-import { useCallback } from "react";
-import {
-  useMutation,
-  useQueryClient,
-  type InfiniteData,
-} from "@tanstack/react-query";
-import type { CreatePostPayload, Post } from "./types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { CreatePostPayload } from "./types";
 import { postKeys } from "./queryKeys";
-import { removePostFromInfinite } from "./postCache";
-import { fetchAndInsertCreatedPost, syncPostByIdInCache } from "./syncPost";
 import { postApi } from "../api/postApi";
 
 type CreatePostVars = {
@@ -19,14 +12,17 @@ export function useCreatePost() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ payload, wallId }: CreatePostVars) =>{
-        if (!wallId) {
-            throw new Error("wallId is required");
-        }
-        return postApi.createPost(payload, wallId);
+    mutationFn: ({ payload, wallId }: CreatePostVars) => {
+      if (!wallId) throw new Error("wallId is required");
+      return postApi.createPost(payload, wallId);
     },
     onSuccess: async (res) => {
-      await fetchAndInsertCreatedPost(qc, res.id);
+      qc.invalidateQueries({ queryKey: postKeys.detail(res.id), exact: true });
+
+      await qc.invalidateQueries({
+        queryKey: postKeys.lists(),
+        refetchType: "active",
+      });
     },
   });
 }
@@ -36,19 +32,29 @@ export function useDeletePost() {
 
   return useMutation({
     mutationFn: (postId: string) => postApi.deletePost(postId),
-    onSuccess: (_res, postId) => {
-      qc.setQueriesData<InfiniteData<Post[]>>(
-        { queryKey: postKeys.lists() },
-        (old) => removePostFromInfinite(old, postId),
-      );
-
+    onSuccess: async (_res, postId) => {
       qc.removeQueries({ queryKey: postKeys.detail(postId), exact: true });
+
+      await qc.invalidateQueries({
+        queryKey: postKeys.lists(),
+        refetchType: "active",
+      });
     },
   });
 }
 
-export function useSyncPostInCache() {
+export function useToggleLikePost() {
   const qc = useQueryClient();
 
-  return useCallback((postId: string) => syncPostByIdInCache(qc, postId), [qc]);
+  return useMutation({
+    mutationFn: (postId: string) => postApi.toggleLikePost(postId),
+    onSuccess: async (_res, postId) => {
+      qc.invalidateQueries({ queryKey: postKeys.detail(postId), exact: true });
+
+      await qc.invalidateQueries({
+        queryKey: postKeys.lists(),
+        refetchType: "active",
+      });
+    },
+  });
 }

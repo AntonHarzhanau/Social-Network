@@ -3,29 +3,15 @@ import { chatQueryKeys } from "@/entities/chat/model/chatQueryKeys";
 import { useMyFriendsStats } from "@/entities/friends/model/useFriendsStats";
 import { sessionStore } from "@/entities/session/model/sessionStore";
 import type { UserPreview } from "@/entities/user/model/types";
+import { MAIN_MENU } from "@/shared/constants/menu";
 import { ROUTES } from "@/shared/constants/routes";
 import { cn } from "@/shared/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Handshake,
-  Home,
-  MessageCircle,
-  Settings,
-  UsersRound,
-} from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 interface Props {
   user?: UserPreview | null;
 }
-
-const mobilePrimary = [
-  { name: "Feed", path: ROUTES.HOME, icon: Home },
-  { name: "Messages", path: "/chats", icon: MessageCircle },
-  { name: "Friends", path: ROUTES.FRIENDS, icon: Handshake },
-  { name: "Groups", path: ROUTES.GROUPS, icon: UsersRound },
-  { name: "Settings", path: ROUTES.SETTINGS, icon: Settings },
-];
 
 const formatBadge = (n: number) => (n > 99 ? "99+" : String(n));
 
@@ -35,15 +21,18 @@ export default function MobileBottomNav({}: Props) {
 
   const { data: stats } = useMyFriendsStats(enabled);
 
-  const ureadChatQuery = useQuery({
+  const unreadChatsQuery = useQuery({
     queryKey: chatQueryKeys.unread(),
     queryFn: getUnreadChatCount,
     enabled,
-    initialData: 0,
+    placeholderData: 0,
+    refetchOnMount: "always",
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: false,
   });
 
   const receivedCount = stats?.receivedRequests ?? 0;
-  const unreadChatCount = ureadChatQuery.data ?? 0;
+  const unreadChatCount = unreadChatsQuery.data ?? 0;
 
   const friendsBadgeText = formatBadge(receivedCount);
   const chatsBadgeText = formatBadge(unreadChatCount);
@@ -51,8 +40,8 @@ export default function MobileBottomNav({}: Props) {
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 border-t bg-card">
       <div className="mx-auto max-w-[1100px] px-2 pb-[env(safe-area-inset-bottom)]">
-        <div className="h-14 grid grid-cols-5 items-center">
-          {mobilePrimary.map((item) => {
+        <div className="h-14 grid grid-cols-4 items-center">
+          {MAIN_MENU.map((item) => {
             const Icon = item.icon;
 
             const showFriendsBadge =

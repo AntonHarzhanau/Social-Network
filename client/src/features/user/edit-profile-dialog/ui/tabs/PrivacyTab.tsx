@@ -15,7 +15,7 @@ export function PrivacyTab() {
 
   return (
     <div className="grid gap-4 overflow-auto pr-2">
-      <FormSelect<EditProfileForm, Visibility>
+      {/* <FormSelect<EditProfileForm, Visibility>
         name="privacy.postsVisibility"
         control={control}
         label="Posts visibility"
@@ -26,25 +26,25 @@ export function PrivacyTab() {
         control={control}
         label="Media visibility"
         options={[...visibilityOptions]}
-      />
-      <FormSelect<EditProfileForm, Visibility>
+      /> */}
+      {/* <FormSelect<EditProfileForm, Visibility>
         name="privacy.friendsVisibility"
         control={control}
         label="Friends visibility"
         options={[...visibilityOptions]}
-      />
+      /> */}
       <FormSelect<EditProfileForm, Visibility>
         name="privacy.profileVisibility"
         control={control}
         label="Profile visibility"
         options={[...visibilityOptions]}
       />
-      <FormSelect<EditProfileForm, Visibility>
+      {/* <FormSelect<EditProfileForm, Visibility>
         name="privacy.groupsVisibility"
         control={control}
         label="Groups visibility"
         options={[...visibilityOptions]}
-      />
+      /> */}
     </div>
   );
 }

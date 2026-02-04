@@ -48,7 +48,7 @@ export const useMercure = <TPayload = unknown>({
     });
 
     eventSource.onopen = () => {
-      console.log("Mercure connected:", url.toString());
+      //   console.log("Mercure connected:", url.toString());
     };
 
     eventSource.onmessage = (event) => {
@@ -72,7 +72,7 @@ export const useMercure = <TPayload = unknown>({
 
     return () => {
       eventSource.close();
-      console.log("Mercure connection closed:", url.toString());
+      //   console.log("Mercure connection closed:", url.toString());
     };
   }, [topic, enable]);
 };

@@ -1,7 +1,9 @@
 import { useInfinitePosts } from "@/entities/post/model/useInfinitePosts";
 import FeedCard from "../entities/post/ui/FeedCard";
 import { useInfiniteScrollSentinel } from "@/shared/hooks/useInfiniteScrollSentinel";
+import { usePostFilterStore } from "@/features/post/post-filter/model/usePostFilterStore";
 const FeedsList = ({ wallId = null }: { wallId?: string | null }) => {
+  const filter = usePostFilterStore((s) => s.filter);
   const {
     posts,
     isLoading,
@@ -9,7 +11,7 @@ const FeedsList = ({ wallId = null }: { wallId?: string | null }) => {
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useInfinitePosts({ limit: 10, wallId });
+  } = useInfinitePosts({ limit: 10, wallId, filter });
 
   const sentinelRef = useInfiniteScrollSentinel({
     enabled: !isLoading && !isError,

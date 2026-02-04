@@ -50,7 +50,10 @@ export function NotificationsBell({ enabled = true }: { enabled?: boolean }) {
     queryKey: notificationsKeys.unread,
     queryFn: fetchUnreadCount,
     enabled,
-    initialData: { unreadCount: 0 },
+    placeholderData: { unreadCount: 0 },
+    refetchOnMount: "always",
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: false,
   });
 
   const notificationsQuery = useInfiniteQuery<NotificationDTO[]>({

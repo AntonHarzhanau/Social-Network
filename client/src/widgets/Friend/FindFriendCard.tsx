@@ -3,6 +3,7 @@ import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Avatar } from "@/shared/components/Avatar";
 import { cn } from "@/shared/lib/utils";
+import { Link } from "react-router-dom";
 
 interface FindFriendCardProps {
   user: UserPreview;
@@ -24,13 +25,14 @@ export function FindFriendCard({
         "hover:transition-transform hover:scale-105",
       )}
     >
-      <Avatar
-        imageUrl={user.avatarUrl}
-        name={user.name}
-        shape="square"
-        className="w-full aspect-square rounded-none"
-      />
-
+      <Link to={`/profile/${user.id}`} key={user.id} className="h-full w-full">
+        <Avatar
+          imageUrl={user.avatarUrl}
+          name={user.name}
+          shape="square"
+          className="w-full aspect-square rounded-none"
+        />
+      </Link>
       <div className="text-center">
         <div className="text-sm font-medium leading-tight">{user.name}</div>
       </div>

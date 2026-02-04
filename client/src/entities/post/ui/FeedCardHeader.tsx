@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { CardHeader } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { Avatar } from "@/shared/components/Avatar";
@@ -12,12 +11,14 @@ import {
 import { useDeletePost } from "../model/usePostMutations";
 import type { Post } from "../model/types";
 import { formatPostDate } from "@/shared/lib/date";
+import { cn } from "@/shared/lib/utils";
 
 interface FeedCardHeaderProps {
   post: Post;
+  className?: string;
 }
 
-const FeedCardHeader = ({ post }: FeedCardHeaderProps) => {
+const FeedCardHeader = ({ post, className }: FeedCardHeaderProps) => {
   const { mutateAsync: deletePost } = useDeletePost();
 
   const isGroupPost = post.wallOwner.type === "group";
@@ -38,7 +39,7 @@ const FeedCardHeader = ({ post }: FeedCardHeaderProps) => {
     : (post.wallOwner.avatarUrl ?? null);
 
   return (
-    <CardHeader className="flex items-center gap-3">
+    <div className={cn("flex items-center gap-3 p-4", className)}>
       <Link to={headerHref}>
         <Avatar
           imageUrl={headerAvatarUrl}
@@ -83,7 +84,7 @@ const FeedCardHeader = ({ post }: FeedCardHeaderProps) => {
           </DropdownMenuContent>
         </DropdownMenu>
       )}
-    </CardHeader>
+    </div>
   );
 };
 

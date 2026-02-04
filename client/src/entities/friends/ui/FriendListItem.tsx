@@ -51,7 +51,7 @@ const FriendListItem = ({ user, filter }: FriendListItemProps) => {
             imageUrl={user.avatarUrl}
             name={user.name}
             isOnline={user.isOnline}
-            className=" rounded-full"
+            className=" rounded-full h-18 w-18"
           />
         </Link>
       </ItemMedia>

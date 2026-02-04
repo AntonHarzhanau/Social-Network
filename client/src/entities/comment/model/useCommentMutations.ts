@@ -7,7 +7,7 @@ import {
   toggleLikeComment,
 } from "../api/commentApi";
 import { commentsKey, commentRepliesKey } from "./commentQuetyKeys";
-import { useSyncPostInCache } from "@/entities/post/model/usePostMutations";
+import { postKeys } from "@/entities/post/model/queryKeys";
 
 function invalidateComments(
   qc: ReturnType<typeof useQueryClient>,
@@ -18,15 +18,14 @@ function invalidateComments(
 
 export function useCreateCommentMutation(threadId: string, postId?: string) {
   const qc = useQueryClient();
-  const syncPost = useSyncPostInCache();
 
   return useMutation({
     mutationFn: (content: string) => createComment(threadId, content),
     onSuccess: async () => {
       invalidateComments(qc, threadId);
-        if (postId) {
-            await syncPost(postId);
-        }
+      if (postId) {
+        qc.invalidateQueries({ queryKey: postKeys.all });
+      }
     },
   });
 }
@@ -43,13 +42,12 @@ export function useEditCommentMutation(threadId: string) {
 
 export function useDeleteCommentMutation(threadId: string, postId: string) {
   const qc = useQueryClient();
-  const syncPost = useSyncPostInCache();
-
+  void postId;
   return useMutation({
     mutationFn: (commentId: string) => deleteComment(commentId),
     onSuccess: async () => {
       invalidateComments(qc, threadId);
-      await syncPost(postId);
+      qc.invalidateQueries({ queryKey: postKeys.all });
     },
   });
 }

@@ -2,7 +2,7 @@ import { Avatar } from "@/shared/components/Avatar";
 import type { CommentResponse } from "../model/types";
 import { Item } from "@/shared/components/ui/item";
 import { formatPostDate } from "@/shared/lib/date";
-import { Button } from "@/shared/components/ui/button";
+// import { Button } from "@/shared/components/ui/button";
 import { LikeButton } from "@/shared/components/LikeButton";
 import { useToggleLikeCommentMutation } from "../model/useCommentMutations";
 import ExpandableDescription from "@/shared/components/ExpandableDescription";
@@ -38,10 +38,10 @@ const CommentItem = ({ threadId, comment }: CommentItemProps) => {
       </div>
 
       {/* Actions*/}
-      <div className="flex justify-between w-full items-center">
-        <Button className="p-0" variant="link">
+      <div className="flex justify-end w-full items-center">
+        {/* <Button className="p-0" variant="link">
           <p className="text-sm font-normal">reply</p> ({comment.replyCount})
-        </Button>
+        </Button> */}
         <LikeButton
           count={comment.likeCount}
           isActive={comment.likedByCurrentUser}

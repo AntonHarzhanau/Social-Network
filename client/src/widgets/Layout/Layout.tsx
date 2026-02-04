@@ -1,12 +1,12 @@
 import { Outlet } from "react-router";
 import Header from "./Header";
 import Menu from "./Menu";
-import { sessionUser } from "@/entities/session/model/sessionStore";
+import { sessionStore } from "@/entities/session/model/sessionStore";
 import GlobalMediaViewer from "../media-modal/GlobalMediaViewer";
 import MobileBottomNav from "./MobileBottomNav";
 
 const Layout = () => {
-  const user = sessionUser();
+  const user = sessionStore((s) => s.user);
 
   return (
     <div className="min-h-screen flex flex-col">

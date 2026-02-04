@@ -6,7 +6,7 @@ services:
       - mercure
       - s3
     ports:
-      - "8098:80"
+      - "80:80"
     volumes:
       #  NGINX_MODE=prod|dev
       - ./docker/nginx/nginx.${NGINX_MODE:-prod}.conf:/etc/nginx/nginx.conf:ro
@@ -30,6 +30,9 @@ services:
     working_dir: /var/www/app
     env_file:
       - ./server/.env
+    environment:
+      MAILER_DSN: ${MAILER_DSN}
+      MAIL_FROM: ${MAIL_FROM:-no-reply@localhost}
     depends_on:
       - postgres
       - mercure

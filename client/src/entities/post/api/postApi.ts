@@ -11,10 +11,11 @@ export const postApi = {
     wallId = null,
     page = 1,
     limit = 10,
+    filter = "all",
   }: FetchPostsParams = {}) {
     const wallIdParam = wallId ? `/wall/${wallId}` : "";
     const response = await apiClient.get<Post[]>(
-      `/posts${wallIdParam}?page=${page}&limit=${limit}`,
+      `/posts${wallIdParam}?page=${page}&limit=${limit}&filter=${filter}`,
     );
     return response.data;
   },

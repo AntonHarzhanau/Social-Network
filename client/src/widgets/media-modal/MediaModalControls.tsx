@@ -1,7 +1,7 @@
 import type { MediaDetail } from "@/entities/media/model/types";
 import { LikeButton } from "@/shared/components/LikeButton";
-import { Button } from "@/shared/components/ui/button";
-import { Share2 } from "lucide-react";
+// import { Button } from "@/shared/components/ui/button";
+// import { Share2 } from "lucide-react";
 
 interface MediaModalControlsProps {
   mediaDetail: MediaDetail;
@@ -19,7 +19,7 @@ const MediaModalControls = ({
         isActive={mediaDetail.likedByCurrentUser}
         onClick={onToggleLike}
       />
-      <Button
+      {/* <Button
         type="button"
         variant="ghost"
         size="sm"
@@ -28,7 +28,7 @@ const MediaModalControls = ({
       >
         <Share2 className="h-4 w-4" />
         Share
-      </Button>
+      </Button> */}
     </div>
   );
 };

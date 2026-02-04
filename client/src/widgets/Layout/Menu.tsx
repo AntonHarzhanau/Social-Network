@@ -30,7 +30,10 @@ const Menu = ({ user, className }: MenuProps) => {
     queryKey: chatQueryKeys.unread(),
     queryFn: getUnreadChatCount,
     enabled,
-    initialData: 0,
+    placeholderData: 0,
+    refetchOnMount: "always",
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: false,
   });
 
   const receivedCount = stats?.receivedRequests ?? 0;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Feed\Infrastructure\Controller;
+namespace App\Modules\Feed\Infrastructure\Http\Controller;
 
 use App\Modules\Feed\Application\Action\Command\CreatePostCommand;
 use App\Modules\Feed\Application\Action\CreatePostAction;
@@ -56,6 +56,7 @@ final class PostController extends AbstractController
     {
         $page = max((int) $request->query->get('page', 1), 1);
         $limit = min(max((int) $request->query->get('limit', 20), 1), 50);
+        $filter = $request->get('filter', '');
         $visibilities = [VisibilityEnum::PUBLIC];
 
         $posts = $action->execute(
@@ -63,7 +64,7 @@ final class PostController extends AbstractController
             limit: $limit,
             visibilities: $visibilities,
             currentUserId: $user->getId(),
-            // wallIds: [Uuid::fromString($wallId)],
+            filter: $filter
         );
         return $this->json($posts, JsonResponse::HTTP_OK);
     }

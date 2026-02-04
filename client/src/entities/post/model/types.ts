@@ -58,6 +58,7 @@ export interface FetchPostsParams {
   wallId?: string | null;
   page?: number;
   limit?: number;
+  filter?: string;
 }
 
 export interface CreatePostPayload {

@@ -8,6 +8,7 @@ use App\Modules\Feed\Application\Port\UserDirectoryInterface;
 use App\Modules\Feed\Application\Service\PostFactory;
 use App\Modules\Feed\Domain\Repository\PostRepositoryInterface;
 use Symfony\Component\Uid\Uuid;
+use function PHPUnit\Framework\matches;
 
 final class GetAllPostsAction
 {
@@ -17,17 +18,24 @@ final class GetAllPostsAction
         private readonly GroupDirectoryInterface $groupDirectory,
         private readonly FriendsDirectoryInterface $friendsDirectory,
         private readonly UserDirectoryInterface $userDirectory,
-    ) {}
+    ) {
+    }
 
-    public function execute(array $visibilities, Uuid $currentUserId, int $page, int $limit): array
+    public function execute(array $visibilities, Uuid $currentUserId, int $page, int $limit, string $filter): array
     {
         $currentUser = $this->userDirectory->findPreviewsByIds([$currentUserId])[0];
 
         $curentUserWallId = $currentUser->wallId;
+
         $groupWallIds = $this->groupDirectory->findGroupWallIdsByUserId($currentUserId);
         $friendWallIds = $this->friendsDirectory->findFriendWallIdsByUserId($currentUserId);
 
-        $wallIds = array_merge($groupWallIds, $friendWallIds, [$curentUserWallId]);
+        $wallIds = match ($filter) {
+            'friends' => array_merge($friendWallIds),
+            'groups' => array_merge($groupWallIds),
+            default => array_merge($groupWallIds, $friendWallIds, [$curentUserWallId]),
+        };
+        // $wallIds = array_merge($groupWallIds, $friendWallIds, [$curentUserWallId]);
         $rows = $this->postRepository->findFeed(
             currentUser: $currentUserId,
             wallIds: $wallIds,
