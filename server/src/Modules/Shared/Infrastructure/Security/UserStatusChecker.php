@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Security;
+namespace App\Modules\Shared\Infrastructure;
 
 use App\Modules\User\Domain\Entity\User;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusException;
