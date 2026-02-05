@@ -46,7 +46,7 @@ const VideoThumb = ({
 export const MediaBoxVideosTab = ({
   source,
   labelUpload = "Load videos",
-  labelAll = "All videos",
+  //   labelAll = "All videos",
 }: {
   source: MediaBoxSource;
   labelUpload?: string;
@@ -127,9 +127,9 @@ export const MediaBoxVideosTab = ({
           />
         ) : null}
 
-        <Button className="flex-1" onClick={() => source.onShowAll?.("video")}>
+        {/* <Button className="flex-1" onClick={() => source.onShowAll?.("video")}>
           {labelAll}
-        </Button>
+        </Button> */}
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 import { deleteMessage } from "../api/chat";
 import { useMessageComposer } from "../model/messageComposerContext";
-
+import { useLongPress } from "@/shared/hooks/useLongPress";
 export function ChatMessageRow(props: {
   message: Message;
   isMine: boolean;
@@ -39,16 +39,17 @@ export function ChatMessageRow(props: {
     await deleteMessage(messageId);
   };
 
-  const ChatMessageRow = (
+  const longPress = useLongPress(() => setOpen(true), {
+    delay: 350,
+    moveThreshold: 10,
+  });
+
+  const row = (
     <div
       className={cn(
         "w-full px-2 py-1 mb-2",
         "flex gap-2 justify-start rounded-md",
-
-        // background is darker for unread inboxes
         !isMine && isUnread && "bg-muted ring-1 ring-border",
-
-        // behavior for my messages (context menu)
         isMine && "cursor-pointer",
         isMine && open && "bg-muted ring-1 ring-border",
         isMine && !open && "hover:bg-muted/50",
@@ -86,7 +87,7 @@ export function ChatMessageRow(props: {
     </div>
   );
 
-  if (!isMine || !message.id) return ChatMessageRow;
+  if (!isMine || !message.id) return row;
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -94,9 +95,17 @@ export function ChatMessageRow(props: {
         <button
           type="button"
           className="w-full text-left focus-visible:outline-none"
-          onClick={() => setOpen(true)}
+          onPointerDown={longPress.onPointerDown}
+          onPointerMove={longPress.onPointerMove}
+          onPointerUp={longPress.onPointerUp}
+          onPointerCancel={longPress.onPointerCancel}
+          onClick={(e) => {
+            if ((e as any).pointerType && (e as any).pointerType !== "mouse")
+              return;
+            setOpen(true);
+          }}
         >
-          {ChatMessageRow}
+          {row}
         </button>
       </DropdownMenuTrigger>
 

@@ -31,7 +31,7 @@ final class UploadMediaAction
 
         $fileType = $this->fileTypeDetector->detect($mime);
 
-        $localPath = $file->getPathname(); // временный файл на диске
+        $localPath = $file->getPathname();
         $meta = $this->metadataExtractor->extract($localPath, $fileType, $mime);
 
         $subdir = $now->format('Y/m/d');

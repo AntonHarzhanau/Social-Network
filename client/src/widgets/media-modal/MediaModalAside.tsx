@@ -48,14 +48,17 @@ const MediaModalAside = ({
       {/* Header */}
       <div className="shrink-0 p-4 border-b border-white/10 flex items-center gap-3">
         <Avatar className="h-9 w-9">
-          <AvatarImage src={author.avatarUrl ?? undefined} alt={author.name} />
+          <AvatarImage
+            src={author?.avatarUrl ?? undefined}
+            alt={author?.name}
+          />
           <AvatarFallback>
-            {(author.name?.[0] ?? "?").toUpperCase()}
+            {(author?.name?.[0] ?? "?").toUpperCase()}
           </AvatarFallback>
         </Avatar>
 
         <div className="min-w-0 flex-1">
-          <div className="font-medium truncate">{author.name}</div>
+          <div className="font-medium truncate">{author?.name}</div>
           {!!createdAtText && (
             <div className="text-xs text-zinc-400">
               {formatPostDate(createdAtText)}
