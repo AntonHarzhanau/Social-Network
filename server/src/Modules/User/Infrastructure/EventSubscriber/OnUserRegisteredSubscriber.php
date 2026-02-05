@@ -18,7 +18,6 @@ final class OnUserRegisteredSubscriber implements EventSubscriberInterface
         private EmailVerificationTokenGenerator $tokenGenerator,
         private EmailSenderInterface $mailer,
         private readonly UrlGeneratorInterface $urlGenerator,
-        private string $frontendBaseUrl = 'http://localhost:5173',
     ) {}
 
     public static function getSubscribedEvents(): array
@@ -60,7 +59,6 @@ final class OnUserRegisteredSubscriber implements EventSubscriberInterface
         );
 
         $this->mailer->send(new SendEmailMessage(
-            from: 'no-reply@socialnetwork.com',
             to: [$event->getUser()->getEmail()],
             subject: 'Please verify your email address',
             body: $body,

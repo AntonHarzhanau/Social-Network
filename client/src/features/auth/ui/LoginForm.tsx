@@ -1,11 +1,11 @@
-import GoogleIconButton from "@/shared/components/GoogleIconButton";
+// import GoogleIconButton from "@/shared/components/GoogleIconButton";
 import { Button } from "@/shared/components/ui/button";
 
 import {
   Field,
   FieldDescription,
   FieldGroup,
-  FieldSeparator,
+  // FieldSeparator,
 } from "@/shared/components/ui/field";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -21,6 +21,8 @@ import type { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import EmailVerificationNotice from "@/features/auth/ui/EmailVerificationNotice";
 import { authActions } from "@/features/auth/model/authActions";
+import ResetPasswordNotice from "./ResetPasswordNotice";
+import RecoveryAccountNotice from "./RecoveryAccountNotice";
 
 function safeRedirectTo(value: string | null): string | null {
   if (!value) return null;
@@ -42,9 +44,13 @@ const LoginForm = ({
     },
   });
 
+
+
   const navigate = useNavigate();
 
-  const [emailVerification, setEmailVerification] = useState(false);
+  const [openEmailVerification, setOpenEmailVerification] = useState(false);
+  const [openResetPassword, setOpenResetPassword] = useState(false);
+  const [openRecoveryAccount, setOpenRecoveryAccount] = useState(false);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -70,7 +76,7 @@ const LoginForm = ({
     } catch (error: AxiosError | any) {
       const message = error.response?.data?.message || error.message;
       if (message === "Email not verified.") {
-        setEmailVerification(true);
+        setOpenEmailVerification(true);
       } else if (message) {
         toast.error(message, { closeButton: true });
       } else {
@@ -83,10 +89,20 @@ const LoginForm = ({
 
   return (
     <>
-      {emailVerification && (
+      {openEmailVerification && (
         <EmailVerificationNotice
           email={form.getValues("email")}
-          onClose={() => setEmailVerification(false)}
+          onClose={() => setOpenEmailVerification(false)}
+        />
+      )}
+      {openResetPassword && (
+        <ResetPasswordNotice
+          onClose={() => setOpenResetPassword(false)}
+        />
+      )}
+       {openRecoveryAccount && (
+        <RecoveryAccountNotice
+          onClose={() => setOpenRecoveryAccount(false)}
         />
       )}
       <form
@@ -128,18 +144,37 @@ const LoginForm = ({
               Login
             </Button>
           </Field>
-          <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+          {/* .   <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
             Or continue with
           </FieldSeparator>
           <Field className="flex">
             <GoogleIconButton />
-          </Field>
-          <FieldDescription className="text-center">
-            Don&apos;t have an account?{" "}
-            <Button type="button" variant="link" onClick={onSwitchToRegister}>
-              Sign up
-            </Button>
-          </FieldDescription>
+          </Field> */}
+
+
+          <div>
+            <FieldDescription className="text-center">
+              Don&apos;t have an account?{" "}
+              <Button type="button" variant="link" onClick={onSwitchToRegister}>
+                Sign up
+              </Button>
+            </FieldDescription>
+
+            <FieldDescription className="text-center">
+              You forgot password?{" "}
+              <Button type="button" variant="link" onClick={() => setOpenResetPassword(true)}>
+                Reset password
+              </Button>
+            </FieldDescription>
+
+            <FieldDescription className="text-center">
+              Old participant?{" "}
+              <Button type="button" variant="link" onClick={() => setOpenRecoveryAccount(true)}>
+                Recovery account
+              </Button>
+            </FieldDescription>
+          </div>
+
         </FieldGroup>
       </form>
     </>

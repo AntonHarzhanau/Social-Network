@@ -20,5 +20,16 @@ export const authApi = {
     const response = apiClient.get<UserPreview>("/me");
     return response;
   },
+  resetPassword(email: string) {
+    apiClient.post("/auth/reset-password", { email })
+  },
+  resendEmailVerification(email: string) {
+    apiClient.post("/auth/resend-email-verification", {
+      email: email,
+    });
+  },
+  recoveryAccount(email: string) {
+    apiClient.post('/auth/recovery/request', { email })
+  },
 
 };

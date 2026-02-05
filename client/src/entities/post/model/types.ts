@@ -22,7 +22,7 @@ export type WallOwner = {
 export interface Post {
   id: string;
   wallId: string;
-  wallOwner: WallOwner;
+  wallOwner: WallOwner | null;
 
   author: UserPreview;
   content: string;

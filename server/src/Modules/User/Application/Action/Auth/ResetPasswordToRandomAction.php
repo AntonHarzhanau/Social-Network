@@ -40,7 +40,6 @@ final class ResetPasswordToRandomAction
 
        $this->mailer->send(new SendEmailMessage(
             to: [$user->getEmail()],
-            from: 'no-reply@socialnetwork.com',
             subject: 'Your password has been reset',
             body: $body,
         ));

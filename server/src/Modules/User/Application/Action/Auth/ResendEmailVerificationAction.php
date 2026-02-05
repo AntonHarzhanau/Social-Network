@@ -2,12 +2,9 @@
 
 namespace App\Modules\User\Application\Action\Auth;
 
-use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Domain\Event\UserRegistredEvent;
-use App\Modules\User\Domain\Exception\EmailAlreadyInUseException;
 use App\Modules\User\Domain\Repository\EmailVerificationRepositoryInterface;
 use App\Modules\User\Domain\Repository\UserRepositoryInterface;
-use App\Modules\User\Domain\Service\PasswordHasher;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class ResendEmailVerificationAction

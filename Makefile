@@ -5,7 +5,6 @@ DC := docker compose
         s3-init \
         rebuild-nginx rebuild-php rebuild-postgres rebuild-s3 rebuild-mercure rebuild-mailer
 
-# setup всегда пересоздаёт контейнеры (но не трогает volumes)
 setup:
 	$(DC) --profile mailpit up -d --build --force-recreate --remove-orphans
 	$(DC) --profile init run --rm s3-init

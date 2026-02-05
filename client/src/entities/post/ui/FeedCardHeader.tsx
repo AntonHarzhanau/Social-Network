@@ -21,7 +21,7 @@ interface FeedCardHeaderProps {
 const FeedCardHeader = ({ post, className }: FeedCardHeaderProps) => {
   const { mutateAsync: deletePost } = useDeletePost();
 
-  const isGroupPost = post.wallOwner.type === "group";
+  const isGroupPost = post.wallOwner?.type === "group";
 
   const ownerName = post.wallOwner?.name ?? "";
   const isDeletedOwner = !isGroupPost && ownerName === "[deleted]";
@@ -29,14 +29,14 @@ const FeedCardHeader = ({ post, className }: FeedCardHeaderProps) => {
   const headerHref = isDeletedOwner
     ? "/notfound"
     : isGroupPost
-      ? `/groups/${post.wallOwner.id}`
-      : `/profile/${post.wallOwner.id}`;
+      ? `/groups/${post.wallOwner?.id}`
+      : `/profile/${post.wallOwner?.id}`;
 
   const headerTitle = isDeletedOwner ? "Deleted User" : ownerName;
 
   const headerAvatarUrl = isDeletedOwner
     ? "/public/deletedUserImage.png"
-    : (post.wallOwner.avatarUrl ?? null);
+    : (post.wallOwner?.avatarUrl ?? null);
 
   return (
     <div className={cn("flex items-center gap-3 p-4", className)}>
@@ -45,7 +45,7 @@ const FeedCardHeader = ({ post, className }: FeedCardHeaderProps) => {
           imageUrl={headerAvatarUrl}
           name={headerTitle}
           alt={headerTitle}
-          isOnline={post.wallOwner.isOnline}
+          isOnline={post.wallOwner?.isOnline ?? false}
           className="w-10 h-10"
         />
       </Link>

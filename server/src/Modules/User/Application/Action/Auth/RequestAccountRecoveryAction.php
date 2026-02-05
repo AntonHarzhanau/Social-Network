@@ -48,7 +48,6 @@ final class RequestAccountRecoveryAction
 
         $this->emailSender->send(new SendEmailMessage(
             to: [$user->getEmail()],
-            from: 'no-reply@socialnetwork.com',
             subject: 'Restore your account',
             body: $body,
         ));

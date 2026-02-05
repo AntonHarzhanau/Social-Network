@@ -10,7 +10,6 @@ final readonly class SendEmailMessage
      */
     public function __construct(
         public array $to,
-        public string $from,
         public string $subject,
         public string $body,
     ) {}

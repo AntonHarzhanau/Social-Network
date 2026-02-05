@@ -33,13 +33,11 @@ final class ConfirmAccountRecoveryAction
         
         $user = $this->userRepository->findOneBy(['id' => $id]);
         if ($user === null || $user->getDeletedAt() === null) {
-            // throw new \InvalidArgumentException('Invalid token');
-            throw new \InvalidArgumentException('User not found or not deleted.');
+            throw new \InvalidArgumentException('Invalid token');
         }
 
         if ($user->getDeletedAt()->getTimestamp() !== $deleted) {
-            // throw new \InvalidArgumentException('Invalid token');
-            throw new \InvalidArgumentException('Token payload does not match user data.');
+            throw new \InvalidArgumentException('Invalid token');
         }
 
         $user->setDeletedAt(null);

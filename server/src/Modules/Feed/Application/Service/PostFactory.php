@@ -79,7 +79,6 @@ class PostFactory
         foreach ($authors as $a) {
             $authorById[$a->id] = $a;
         }
-
         // media
         $mediaByPostId = $this->postMediaBindingsService->getMediasForPosts($postIds);
 
@@ -92,7 +91,7 @@ class PostFactory
             }
         }
 
-
+       
         $groupOwnerByWallId = [];
         if ($wallIdsGroup !== []) {
             $groupOwners = $this->groupDirectory->findPreviewsByWallIds($currentUserId, $wallIdsGroup);
@@ -100,30 +99,77 @@ class PostFactory
                 $groupOwnerByWallId[$g->wallId] = $g;
             }
         }
-       
 
         // build responses
         $posts = [];
         foreach ($dtos as $row) {
-            $author = $authorById[$row->authorId] ?? null;
+            if (!$row->authorId) {
+                
+                $author = $authorById[$row->authorId] ?? null;
+            } else {
+                $author = null;
+            }
 
-            $wallOwner = $row->wallOwnerType === WallOwnerTypeEnum::USER
-                ? $wallOwner = new WallOwnerPreviewDTO(
-                    id: $userOwnerByWallId[$row->wallId]->id,
-                    type: WallOwnerTypeEnum::USER->value,
-                    name: $userOwnerByWallId[$row->wallId]->name,
-                    avatarUrl: $userOwnerByWallId[$row->wallId]->avatarUrl,
-                    wallId: $row->wallId,
-                    isOnline: $userOwnerByWallId[$row->wallId]->isOnline,
-                )
-                : $wallOwner = new WallOwnerPreviewDTO(
-                    id: $groupOwnerByWallId[$row->wallId]->id,
-                    type: WallOwnerTypeEnum::GROUP->value,
-                    name: $groupOwnerByWallId[$row->wallId]->name,
-                    avatarUrl: $groupOwnerByWallId[$row->wallId]->avatarUrl,
-                    wallId: $row->wallId,
-                    isOnline: false,
-                );
+            $wallOwner = null;
+            if($row->wallOwnerType === WallOwnerTypeEnum::USER ) {
+                if (!isset($userOwnerByWallId[$row->wallId])) {
+                    $wallOwner = new WallOwnerPreviewDTO(
+                        id: "",
+                        type: WallOwnerTypeEnum::USER->value,
+                        name: "[deleted]",
+                        avatarUrl: null,
+                        wallId: $row->wallId,
+                        isOnline: false,
+                    );
+                } else {
+                    $wallOwner = new WallOwnerPreviewDTO(
+                        id: $userOwnerByWallId[$row->wallId]->id,
+                        type: WallOwnerTypeEnum::USER->value,
+                        name: $userOwnerByWallId[$row->wallId]->name,
+                        avatarUrl: $userOwnerByWallId[$row->wallId]->avatarUrl,
+                        wallId: $row->wallId,
+                        isOnline: $userOwnerByWallId[$row->wallId]->isOnline,
+                    );
+                }
+
+            } else {
+                if (!isset($groupOwnerByWallId[$row->wallId])) {
+                    $wallOwner = new WallOwnerPreviewDTO(
+                        id: "",
+                        type: WallOwnerTypeEnum::GROUP->value,
+                        name: "[deleted]",
+                        avatarUrl: null,
+                        wallId: $row->wallId,
+                        isOnline: false,
+                    );
+                } else {
+                    $wallOwner = new WallOwnerPreviewDTO(
+                        id: $groupOwnerByWallId[$row->wallId]->id,
+                        type: WallOwnerTypeEnum::GROUP->value,
+                        name: $groupOwnerByWallId[$row->wallId]->name,
+                        avatarUrl: $groupOwnerByWallId[$row->wallId]->avatarUrl,
+                        wallId: $row->wallId,
+                        isOnline: false,
+                    );
+                }
+            }
+            // $wallOwner = $row->wallOwnerType === WallOwnerTypeEnum::USER
+            //     ?  $wallOwner = new WallOwnerPreviewDTO(
+            //         id: $userOwnerByWallId[$row->wallId]->id,
+            //         type: WallOwnerTypeEnum::USER->value,
+            //         name: $userOwnerByWallId[$row->wallId]->name,
+            //         avatarUrl: $userOwnerByWallId[$row->wallId]->avatarUrl,
+            //         wallId: $row->wallId,
+            //         isOnline: $userOwnerByWallId[$row->wallId]->isOnline,
+            //     )
+            //     : $wallOwner = new WallOwnerPreviewDTO(
+            //         id: $groupOwnerByWallId[$row->wallId]->id,
+            //         type: WallOwnerTypeEnum::GROUP->value,
+            //         name: $groupOwnerByWallId[$row->wallId]->name,
+            //         avatarUrl: $groupOwnerByWallId[$row->wallId]->avatarUrl,
+            //         wallId: $row->wallId,
+            //         isOnline: false,
+            //     );
 
             $canDelete = ($row->wallOwnerType === WallOwnerTypeEnum::USER)
                 ? $row->authorId === (string) $currentUserId
