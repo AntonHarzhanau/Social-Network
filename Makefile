@@ -1,11 +1,11 @@
-DC := docker compose
+DC := docker compose --env-file ./server/.env
 
 .PHONY: setup up down destroy ps logs \
-        front back \
-        s3-init \
+        front back s3-init \
         rebuild-nginx rebuild-php rebuild-postgres rebuild-s3 rebuild-mercure rebuild-mailer
 
 setup:
+	mkdir -p ./client/dist
 	$(DC) --profile mailpit up -d --build --force-recreate --remove-orphans
 	$(DC) --profile init run --rm s3-init
 
@@ -36,9 +36,7 @@ back:
 s3-init:
 	$(DC) --profile init run --rm s3-init
 
-# Isolated rebuilds
 rebuild-nginx:
-	$(DC) build nginx
 	$(DC) up -d --no-deps --force-recreate nginx
 
 rebuild-php:

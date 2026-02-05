@@ -1,18 +1,20 @@
 services:
   nginx:
-    build:
-      context: ./docker/nginx
+    image: nginx:alpine
     restart: unless-stopped
     depends_on:
       - php
       - mercure
       - s3
     ports:
-      - "80:80"
+      - "${HTTP_PORT:-80}:80"
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
       - ./server/public:/var/www/app/public:ro
-      - ./client/dist:/var/www/app/public/spa:ro
+
+      - ./client/dist:/usr/share/nginx/html:ro
+
       - nginx_logs:/var/log/nginx
     networks: [app-network]
 
@@ -20,7 +22,7 @@ services:
     build:
       context: ./docker/php
       args:
-        INSTALL_XDEBUG: "0"
+        INSTALL_XDEBUG: "${INSTALL_XDEBUG:-0}"
     restart: unless-stopped
     working_dir: /var/www/app
     env_file:
@@ -47,16 +49,16 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: development
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: app
+      POSTGRES_DB: "${POSTGRES_DB:-development}"
+      POSTGRES_USER: "${POSTGRES_USER:-app}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-app}"
     ports:
-      - "127.0.0.1:54328:5432"
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-54328}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app -d dev"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-development}"]
       interval: 2s
       timeout: 3s
       retries: 30
@@ -67,19 +69,17 @@ services:
     restart: unless-stopped
     environment:
       SERVER_NAME: ":80"
-      MERCURE_PUBLISHER_JWT_KEY: "!ChangeThisMercureHubJWTSecretKey!"
-      MERCURE_SUBSCRIBER_JWT_KEY: "!ChangeThisMercureHubJWTSecretKey!"
-      MERCURE_EXTRA_DIRECTIVES: |
-        anonymous
-        cors_origins *
+      MERCURE_PUBLISHER_JWT_KEY: "${MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}"
+      MERCURE_SUBSCRIBER_JWT_KEY: "${MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}"
+      MERCURE_EXTRA_DIRECTIVES: "${MERCURE_EXTRA_DIRECTIVES:-anonymous\ncors_origins *\n}"
     networks: [app-network]
 
   s3:
     image: minio/minio:latest
     restart: unless-stopped
     environment:
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: supersecretpassword
+      MINIO_ROOT_USER: "${MINIO_ROOT_USER:-admin}"
+      MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD:-supersecretpassword}"
     command: server /data --console-address ":9001"
     volumes:
       - s3_data:/data
@@ -91,21 +91,18 @@ services:
     depends_on: [s3]
     networks: [app-network]
     restart: "no"
-    entrypoint: >
-      /bin/sh -lc "
-      until mc alias set local http://s3:9000 admin supersecretpassword; do sleep 1; done;
-      mc mb -p local/social-network-media || true;
-      mc anonymous set download local/social-network-media || true;
-      exit 0;
-      "
+    entrypoint: ["/bin/sh", "-lc"]
+    command: >
+      until mc alias set local http://s3:9000 ${MINIO_ROOT_USER:-admin} ${MINIO_ROOT_PASSWORD:-supersecretpassword}; do sleep 1; done;
+      mc mb -p local/${AWS_BUCKET:-social-network-media} || true;
+      mc anonymous set download local/${AWS_BUCKET:-social-network-media} || true;
 
   mailer:
     profiles: ["mailpit"]
     image: axllent/mailpit
     restart: unless-stopped
-    ports:
-      - "8025:8025"
     networks: [app-network]
+
 
   client:
     profiles: ["tools"]
@@ -122,7 +119,6 @@ volumes:
   postgres_data: {}
   s3_data: {}
   nginx_logs: {}
-
   symfony_var: {}
   symfony_vendor: {}
   composer_cache: {}

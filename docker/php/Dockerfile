@@ -3,8 +3,7 @@ FROM php:8.5-fpm
 ARG INSTALL_XDEBUG=0
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git unzip zip curl bash ca-certificates \
-    gosu \
+    git unzip zip curl bash \
     libpq-dev \
     libicu-dev \
     libzip-dev zlib1g-dev \
