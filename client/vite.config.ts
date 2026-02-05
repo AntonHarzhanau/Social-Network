@@ -12,28 +12,15 @@ export default defineConfig({
   },
 
   server: {
-    host: true,
     port: 5173,
-    strictPort: true,
-
-    hmr: {
-      host: "localhost",
-      clientPort: 8098,
-    },
-
     proxy: {
-      "/api": {
-        target: "http://nginx",
-        changeOrigin: true,
-      },
+      "/api": { target: "http://localhost", changeOrigin: true },
       "/.well-known/mercure": {
-        target: "http://nginx",
+        target: "http://localhost",
         changeOrigin: true,
+        ws: true,
       },
-      "/media": {
-        target: "http://nginx",
-        changeOrigin: true,
-      },
+      "/media": { target: "http://localhost", changeOrigin: true },
     },
   },
 });
