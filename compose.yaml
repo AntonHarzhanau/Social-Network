@@ -2,13 +2,21 @@ services:
   nginx:
     image: nginx:alpine
     restart: unless-stopped
-    depends_on: [php, mercure, s3]
+    depends_on:
+      - php
+      - mercure
+      - s3
     ports:
       - "80:80"
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./server:/var/www/app
+
+      # В nginx НЕ монтируем весь server (чтобы не светить .env, var и т.п.)
+      - ./server/public:/var/www/app/public:ro
+
+      # SPA dist -> /public/spa
       - ./client/dist:/var/www/app/public/spa:ro
+
       - nginx_logs:/var/log/nginx
     networks: [app-network]
 
@@ -21,9 +29,25 @@ services:
     working_dir: /var/www/app
     env_file:
       - ./server/.env
-    depends_on: [postgres, mercure, s3]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mercure:
+        condition: service_started
+      s3:
+        condition: service_started
+    environment:
+      # чтобы composer кэш не засорял контейнер
+      COMPOSER_HOME: /tmp/composer
     volumes:
+      # исходники
       - ./server:/var/www/app
+
+      # ВАЖНО: var и vendor НЕ на хосте -> исчезают проблемы с правами
+      - symfony_var:/var/www/app/var
+      - symfony_vendor:/var/www/app/vendor
+      - composer_cache:/tmp/composer
+
       - ./docker/php/conf/x-php.ini:/usr/local/etc/php/conf.d/custom-docker-php.ini:ro
     networks: [app-network]
 
@@ -39,6 +63,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d dev"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
     networks: [app-network]
 
   mercure:
@@ -48,6 +77,9 @@ services:
       SERVER_NAME: ":80"
       MERCURE_PUBLISHER_JWT_KEY: "!ChangeThisMercureHubJWTSecretKey!"
       MERCURE_SUBSCRIBER_JWT_KEY: "!ChangeThisMercureHubJWTSecretKey!"
+      MERCURE_EXTRA_DIRECTIVES: |
+        anonymous
+        cors_origins *
     networks: [app-network]
 
   s3:
@@ -57,8 +89,6 @@ services:
       MINIO_ROOT_USER: admin
       MINIO_ROOT_PASSWORD: supersecretpassword
     command: server /data --console-address ":9001"
-    # ports:
-    #   - "127.0.0.1:9001:9001"
     volumes:
       - s3_data:/data
     networks: [app-network]
@@ -82,7 +112,7 @@ services:
     image: axllent/mailpit
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8025:8025"
+      - "8025:8025"
     networks: [app-network]
 
   client:
@@ -100,6 +130,10 @@ volumes:
   postgres_data: {}
   s3_data: {}
   nginx_logs: {}
+
+  symfony_var: {}
+  symfony_vendor: {}
+  composer_cache: {}
 
 networks:
   app-network:
