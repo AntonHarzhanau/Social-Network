@@ -58,7 +58,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-development}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-development}",
+        ]
       interval: 2s
       timeout: 3s
       retries: 30
@@ -71,7 +75,9 @@ services:
       SERVER_NAME: ":80"
       MERCURE_PUBLISHER_JWT_KEY: "${MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}"
       MERCURE_SUBSCRIBER_JWT_KEY: "${MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}"
-      MERCURE_EXTRA_DIRECTIVES: "${MERCURE_EXTRA_DIRECTIVES:-anonymous\ncors_origins *\n}"
+      MERCURE_EXTRA_DIRECTIVES: |
+        anonymous
+        cors_origins *
     networks: [app-network]
 
   s3:
@@ -91,18 +97,26 @@ services:
     depends_on: [s3]
     networks: [app-network]
     restart: "no"
-    entrypoint: ["/bin/sh", "-lc"]
-    command: >
-      until mc alias set local http://s3:9000 ${MINIO_ROOT_USER:-admin} ${MINIO_ROOT_PASSWORD:-supersecretpassword}; do sleep 1; done;
-      mc mb -p local/${AWS_BUCKET:-social-network-media} || true;
-      mc anonymous set download local/${AWS_BUCKET:-social-network-media} || true;
+    entrypoint: ["/bin/sh", "-ec"]
+    command: |
+      echo "[s3-init] waiting for MinIO..."
+      until mc alias set local http://s3:9000 "${MINIO_ROOT_USER}" "${MINIO_ROOT_PASSWORD}"; do
+        sleep 1
+      done
+
+      echo "[s3-init] create bucket if missing..."
+      mc mb -p "local/${AWS_BUCKET}" || true
+
+      echo "[s3-init] set anonymous download..."
+      mc anonymous set download "local/${AWS_BUCKET}" || true
+
+      echo "[s3-init] done."
 
   mailer:
     profiles: ["mailpit"]
     image: axllent/mailpit
     restart: unless-stopped
     networks: [app-network]
-
 
   client:
     profiles: ["tools"]

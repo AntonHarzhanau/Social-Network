@@ -1,4 +1,4 @@
-DC := docker compose --env-file ./server/.env
+DC := docker compose
 
 .PHONY: setup up down destroy ps logs \
         front back s3-init \
