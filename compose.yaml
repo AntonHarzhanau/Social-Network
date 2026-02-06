@@ -10,13 +10,11 @@ services:
       - "${HTTP_PORT:-80}:80"
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-
       - ./server/public:/var/www/app/public:ro
-
       - ./client/dist:/usr/share/nginx/html:ro
-
       - nginx_logs:/var/log/nginx
-    networks: [app-network]
+    networks:
+      - app-network
 
   php:
     build:
@@ -41,9 +39,9 @@ services:
       - symfony_var:/var/www/app/var
       - symfony_vendor:/var/www/app/vendor
       - composer_cache:/tmp/composer
-
       - ./docker/php/conf/x-php.ini:/usr/local/etc/php/conf.d/custom-docker-php.ini:ro
-    networks: [app-network]
+    networks:
+      - app-network
 
   postgres:
     image: postgres:16-alpine
@@ -59,26 +57,26 @@ services:
       - ./docker/postgres/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     healthcheck:
       test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-development}",
-        ]
+        - CMD-SHELL
+        - pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-development}
       interval: 2s
       timeout: 3s
       retries: 30
-    networks: [app-network]
+    networks:
+      - app-network
 
   mercure:
     image: dunglas/mercure
     restart: unless-stopped
     environment:
       SERVER_NAME: ":80"
-      MERCURE_PUBLISHER_JWT_KEY: "${MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}"
-      MERCURE_SUBSCRIBER_JWT_KEY: "${MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}"
+      MERCURE_PUBLISHER_JWT_KEY: "${MERCURE_JWT_SECRET}"
+      MERCURE_SUBSCRIBER_JWT_KEY: "${MERCURE_JWT_SECRET}"
       MERCURE_EXTRA_DIRECTIVES: |
         anonymous
         cors_origins *
-    networks: [app-network]
+    networks:
+      - app-network
 
   s3:
     image: minio/minio:latest
@@ -86,18 +84,26 @@ services:
     environment:
       MINIO_ROOT_USER: "${MINIO_ROOT_USER:-admin}"
       MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD:-supersecretpassword}"
-    command: server /data --console-address ":9001"
+    command:
+      - server
+      - /data
+      - --console-address
+      - ":9001"
     volumes:
       - s3_data:/data
-    networks: [app-network]
+    networks:
+      - app-network
 
   s3-init:
-    profiles: ["init"]
+    profiles:
+      - init
     image: minio/mc:latest
-    depends_on: [s3]
-    networks: [app-network]
+    depends_on:
+      - s3
     restart: "no"
-    entrypoint: ["/bin/sh", "-ec"]
+    entrypoint:
+      - /bin/sh
+      - -ec
     command: |
       echo "[s3-init] waiting for MinIO..."
       until mc alias set local http://s3:9000 "${MINIO_ROOT_USER}" "${MINIO_ROOT_PASSWORD}"; do
@@ -111,23 +117,32 @@ services:
       mc anonymous set download "local/${AWS_BUCKET}" || true
 
       echo "[s3-init] done."
+    networks:
+      - app-network
 
   mailer:
-    profiles: ["mailpit"]
+    profiles:
+      - mailpit
     image: axllent/mailpit
     restart: unless-stopped
-    networks: [app-network]
+    networks:
+      - app-network
 
   client:
-    profiles: ["tools"]
+    profiles:
+      - tools
     image: node:24-alpine
     working_dir: /app
     volumes:
       - ./client:/app
-    command: sh -lc "node -v && npm -v"
+    command:
+      - sh
+      - -lc
+      - node -v && npm -v
     ports:
       - "5173:5173"
-    networks: [app-network]
+    networks:
+      - app-network
 
 volumes:
   postgres_data: {}
@@ -140,3 +155,4 @@ volumes:
 networks:
   app-network:
     driver: bridge
+

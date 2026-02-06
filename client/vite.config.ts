@@ -14,13 +14,13 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      "/api": { target: "http://localhost", changeOrigin: true },
+      "/api": { target: "http://hardev.eu", changeOrigin: true },
       "/.well-known/mercure": {
-        target: "http://localhost",
+        target: "http://hardev.eu",
         changeOrigin: true,
         ws: true,
       },
-      "/media": { target: "http://localhost", changeOrigin: true },
+      "/media": { target: "http://hardev.eu", changeOrigin: true },
     },
   },
 });
