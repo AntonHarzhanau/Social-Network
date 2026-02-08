@@ -1,16 +1,25 @@
-DC := docker compose
+ENV ?= local
+ENV_FILE ?= ./server/.env
+
+DC := ENV_FILE=$(ENV_FILE) docker compose --env-file $(ENV_FILE)
+
+ifeq ($(ENV),local)
+PROFILES := --profile mailpit
+else
+PROFILES :=
+endif
 
 .PHONY: setup up down destroy ps logs \
-        front back s3-init \
+        front front-dev back s3-init \
         rebuild-nginx rebuild-php rebuild-postgres rebuild-s3 rebuild-mercure rebuild-mailer
 
 setup:
 	mkdir -p ./client/dist
-	$(DC) --profile mailpit up -d --build --force-recreate --remove-orphans
-	$(DC) --profile init run --rm s3-init
+	$(MAKE) front
+	$(DC) $(PROFILES) up -d --build --force-recreate --remove-orphans
 
 up:
-	$(DC) up -d
+	$(DC) $(PROFILES) up -d
 
 down:
 	$(DC) down --remove-orphans
@@ -28,13 +37,18 @@ logs:
 front:
 	$(DC) --profile tools run --rm client sh -lc "npm ci && npm run build"
 
+# Vite dev server (порт 5173)
+front-dev:
+	$(DC) --profile tools run --rm --service-ports client sh -lc "npm ci && npm run dev -- --host 0.0.0.0"
+
 # Rebuild ONLY symfony container image + recreate container
 back:
 	$(DC) build php
 	$(DC) up -d --no-deps --force-recreate php
 
+# Manually rerun s3 init (normally it runs on up)
 s3-init:
-	$(DC) --profile init run --rm s3-init
+	$(DC) run --rm s3-init
 
 rebuild-nginx:
 	$(DC) up -d --no-deps --force-recreate nginx
@@ -53,4 +67,8 @@ rebuild-mercure:
 	$(DC) up -d --no-deps --force-recreate mercure
 
 rebuild-mailer:
+ifeq ($(ENV),local)
 	$(DC) --profile mailpit up -d --no-deps --force-recreate mailer
+else
+	@echo "mailer (mailpit) disabled for ENV=$(ENV)"
+endif

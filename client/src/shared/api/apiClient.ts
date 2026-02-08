@@ -1,7 +1,7 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { clearToken, getToken, setToken } from "./tokenStorage";
 
-const baseURL = import.meta.env.VITE_API_BASE_URL;
+const baseURL = import.meta.env.VITE_API_BASE;
 
 export const apiClient = axios.create({
   baseURL,
@@ -56,7 +56,7 @@ apiClient.interceptors.response.use(
       return apiClient.request(config);
     } catch (e) {
       clearToken();
-      
+
       window.dispatchEvent(new Event("auth:required"));
       throw e;
     }

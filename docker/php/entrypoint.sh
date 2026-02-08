@@ -16,7 +16,6 @@ if [ "$is_php_fpm" -eq 1 ]; then
 
   # -------------------------
   # ALWAYS fix permissions for Symfony var/ (named volume symfony_var)
-  # Prevents: Cannot rename ... var/cache/prod/... Permission denied
   # -------------------------
   echo "[entrypoint] Fixing permissions for var/ (env=${APP_ENV})..."
   mkdir -p var/cache var/log
@@ -30,13 +29,27 @@ if [ "$is_php_fpm" -eq 1 ]; then
 
   if [ -f "composer.json" ] && [ ! -f "vendor/autoload.php" ]; then
     echo "[entrypoint] vendor/ missing -> running composer install..."
-
     if [ "$APP_ENV" = "prod" ]; then
       composer install --no-dev --optimize-autoloader --no-interaction --no-progress
     else
       composer install --no-interaction --no-progress
     fi
   fi
+
+  # -------------------------
+  # Wait postgres DNS + TCP
+  # -------------------------
+  echo "[entrypoint] Waiting for postgres DNS..."
+  until php -r 'exit(gethostbyname("postgres")==="postgres");' ; do
+    echo "[entrypoint] postgres DNS not ready, retry..."
+    sleep 1
+  done
+
+  echo "[entrypoint] Waiting for postgres TCP 5432..."
+  until php -r '$s=@fsockopen("postgres",5432,$e,$m,1); if(!$s){exit(1);} fclose($s);' ; do
+    echo "[entrypoint] postgres:5432 not ready, retry..."
+    sleep 1
+  done
 
   echo "[entrypoint] Waiting DB + applying migrations..."
 
@@ -56,7 +69,6 @@ if [ "$is_php_fpm" -eq 1 ]; then
   php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration --env="$APP_ENV"
   php bin/console messenger:setup-transports --no-interaction --env="$APP_ENV" || true
 
-  # Helpful for prod: build cache files with correct owner right away
   if [ "$APP_ENV" = "prod" ]; then
     echo "[entrypoint] Warming up cache (prod)..."
     su -s /bin/sh www-data -c 'php bin/console cache:warmup --env=prod' || true
@@ -66,4 +78,3 @@ if [ "$is_php_fpm" -eq 1 ]; then
 fi
 
 exec "$@"
-
