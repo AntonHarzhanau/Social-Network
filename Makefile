@@ -37,10 +37,6 @@ logs:
 front:
 	$(DC) --profile tools run --rm client sh -lc "npm ci && npm run build"
 
-# Vite dev server (порт 5173)
-front-dev:
-	$(DC) --profile tools run --rm --service-ports client sh -lc "npm ci && npm run dev -- --host 0.0.0.0"
-
 # Rebuild ONLY symfony container image + recreate container
 back:
 	$(DC) build php
