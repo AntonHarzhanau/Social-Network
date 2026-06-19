@@ -1,0 +1,25 @@
+services:
+  playwright:
+    profiles: [e2e]
+    image: mcr.microsoft.com/playwright:v1.61.0-noble
+    working_dir: /work/client
+    depends_on:
+      nginx:
+        condition: service_started
+      mailer:
+        condition: service_started
+    environment:
+      CI: "1"
+      NODE_PATH: ./node_modules
+      E2E_BASE_URL: http://127.0.0.1:5173
+      E2E_API_ORIGIN: http://nginx
+      E2E_MAILPIT_URL: http://mailer:8025
+    volumes:
+      - ./:/work
+      - playwright_node_modules:/work/client/node_modules
+    command: ["sh", "-lc", "npm ci --no-audit --fund=false && npm run test:e2e"]
+    networks:
+      - app-network
+
+volumes:
+  playwright_node_modules: {}

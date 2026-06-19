@@ -36,6 +36,14 @@ if [ "$is_php_fpm" -eq 1 ]; then
     fi
   fi
 
+  if [ -f "bin/console" ]; then
+    echo "[entrypoint] Ensuring JWT keypair exists..."
+    mkdir -p config/jwt
+    php bin/console lexik:jwt:generate-keypair --skip-if-exists --no-interaction --env="$APP_ENV"
+    chown -R www-data:www-data config/jwt || true
+    chmod -R u=rwX,g=rX,o= config/jwt || true
+  fi
+
   # -------------------------
   # Wait postgres DNS + TCP
   # -------------------------

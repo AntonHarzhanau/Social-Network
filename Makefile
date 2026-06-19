@@ -2,6 +2,7 @@ ENV ?= local
 ENV_FILE ?= ./server/.env
 
 DC := ENV_FILE=$(ENV_FILE) docker compose --env-file $(ENV_FILE)
+E2E_DC := ENV_FILE=$(ENV_FILE) docker compose --env-file $(ENV_FILE) -f compose.yaml -f compose.e2e.yaml
 
 ifeq ($(ENV),local)
 PROFILES := --profile mailpit
@@ -11,6 +12,7 @@ endif
 
 .PHONY: setup up down destroy ps logs \
         front front-dev back s3-init \
+        e2e e2e-up e2e-down \
         rebuild-nginx rebuild-php rebuild-postgres rebuild-s3 rebuild-mercure rebuild-mailer
 
 setup:
@@ -32,6 +34,17 @@ ps:
 
 logs:
 	$(DC) logs -f --tail=200
+
+e2e-up:
+	mkdir -p ./client/dist
+	$(E2E_DC) --profile mailpit up -d --build --remove-orphans nginx mailer
+
+e2e:
+	$(MAKE) e2e-up
+	$(E2E_DC) --profile mailpit --profile e2e run --rm playwright
+
+e2e-down:
+	$(E2E_DC) down --remove-orphans
 
 # Build SPA -> client/dist (nginx serves it)
 front:

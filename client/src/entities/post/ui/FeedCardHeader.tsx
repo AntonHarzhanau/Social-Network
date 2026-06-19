@@ -70,6 +70,8 @@ const FeedCardHeader = ({ post, className }: FeedCardHeaderProps) => {
               variant="ghost"
               size="icon"
               className="ml-auto p-2 hover:bg-accent-foreground/5"
+              aria-label="Open post menu"
+              data-testid="post-menu-trigger"
             >
               <MoreHorizontal />
             </Button>

@@ -70,6 +70,25 @@ make back       # rebuild and restart php
 make s3-init    # re-initialize MinIO
 ```
 
+## E2E tests
+
+The Playwright tests live in `tests/` and can run in a dedicated Docker
+container:
+
+```bash
+make e2e
+```
+
+This starts the API stack with Mailpit, then runs the Playwright service from
+`compose.e2e.yaml`. The test container uses its own `node_modules` volume, so it
+does not depend on host-side frontend dependencies.
+
+To stop the e2e stack:
+
+```bash
+make e2e-down
+```
+
 ## Working with the backend inside the container
 
 ```bash

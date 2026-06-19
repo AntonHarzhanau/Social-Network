@@ -23,7 +23,11 @@ const FeedCard = ({ post }: FeedCardProps) => {
 
   return (
     <>
-      <Card className="max-w-full bg-card">
+      <Card
+        className="max-w-full bg-card"
+        data-testid="post-card"
+        data-post-id={post.id}
+      >
         <FeedCardHeader post={post} />
 
         <CardContent className="w-full px-2">
