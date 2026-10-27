@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Modules\SocialGraph\Infrastructure\Controller;
+namespace App\Tests\Modules\SocialGraph\Infrastructure\Controller;
 
 use App\Modules\SocialGraph\Domain\Enum\FriendshipStatusEnum;
 use App\Modules\SocialGraph\Domain\Entity\Friendship;
@@ -33,7 +33,7 @@ final class FriendsControllerTest extends ApiWebTestCase
     public function testFriendsListUnauthorized(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/friends');
+        $client->request('GET', '/api/friends/' . (string) Uuid::v4());
 
         self::assertResponseStatusCodeSame(JsonResponse::HTTP_UNAUTHORIZED);
     }
@@ -54,13 +54,16 @@ final class FriendsControllerTest extends ApiWebTestCase
         // accepted friendship
         $this->createFriendship($em, $currentUser, $friend, FriendshipStatusEnum::ACCEPTED);
 
-        $client->request('GET', '/api/friends');
+        $client->request('GET', '/api/friends/' . $currentUser->getId());
         self::assertResponseStatusCodeSame(JsonResponse::HTTP_OK);
         self::assertJsonStringEqualsJsonString(
             json_encode([
                 [
                     'id' => (string) $friend->getId(),
-                    'username' => $friend->getUsername(),
+                    'name' => $friend->getUsername(),
+                    'wallId' => (string) $friend->getWall()->getId(),
+                    'lastLoginAt' => null,
+                    'isOnline' => false,
                     'slug' => $friend->getSlug(),
                     'avatarUrl' => $friend->getAvatarUrl(),
                 ],

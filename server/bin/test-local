@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+for program in docker php openssl; do
+    command -v "$program" >/dev/null || { echo "Missing command: $program" >&2; exit 1; }
+done
+# Check access before creating any resources.
+docker info --format '{{.ServerVersion}}' >/dev/null
+
+test_dir="$(mktemp -d /tmp/social-network-tests.XXXXXXXX)"
+test_container="${test_dir##*/}"
+cleanup() {
+    test_exit_code=$?
+    trap - EXIT
+    if ! docker rm --force "$test_container" >/dev/null 2>&1; then
+        echo "Could not remove test container: $test_container" >&2
+        if [[ "$test_exit_code" -eq 0 ]]; then test_exit_code=1; fi
+    fi
+    rm -rf -- "$test_dir"
+    exit "$test_exit_code"
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+# A dedicated container for this run: ephemeral storage, random loopback port.
+docker run --detach --name "$test_container" \
+    --label social-network.purpose=phpunit \
+    --publish 127.0.0.1::5432 \
+    --tmpfs /var/lib/postgresql/data \
+    --env POSTGRES_USER=test \
+    --env POSTGRES_PASSWORD=test \
+    --env POSTGRES_DB=postgres \
+    --health-cmd 'pg_isready -U test -d postgres' \
+    --health-interval 1s --health-timeout 3s --health-retries 30 \
+    postgres:16.15-alpine3.24 >/dev/null
+
+healthy=false
+for ((attempt = 0; attempt < 60; attempt++)); do
+    container_health="$(docker inspect --format '{{.State.Health.Status}}' "$test_container")"
+    if [[ "$container_health" == healthy ]]; then healthy=true; break; fi
+    if [[ "$container_health" == unhealthy ]]; then break; fi
+    sleep 1
+done
+if [[ "$healthy" != true ]]; then
+    docker logs "$test_container" >&2
+    echo 'Test PostgreSQL did not become healthy.' >&2
+    exit 1
+fi
+
+test_port="$(docker inspect --format '{{(index (index .NetworkSettings.Ports "5432/tcp") 0).HostPort}}' "$test_container")"
+export APP_ENV=test APP_DEBUG=1 TEST_TOKEN=''
+export DATABASE_URL="postgresql://test:test@127.0.0.1:$test_port/social_network?serverVersion=16&charset=utf8"
+export JWT_SECRET_KEY="$test_dir/private.pem" JWT_PUBLIC_KEY="$test_dir/public.pem" JWT_PASSPHRASE=''
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out "$JWT_SECRET_KEY" 2>"$test_dir/openssl.log"
+openssl pkey -in "$JWT_SECRET_KEY" -pubout -out "$JWT_PUBLIC_KEY" 2>>"$test_dir/openssl.log"
+
+php bin/console doctrine:database:create --env=test --no-interaction
+php bin/console doctrine:migrations:migrate --env=test --no-interaction
+php bin/phpunit "$@"

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Modules\SocialGraph\Infrastructure\Controller;
+namespace App\Tests\Modules\SocialGraph\Infrastructure\Controller;
 
 use App\Modules\SocialGraph\Domain\Entity\Friendship;
 use App\Modules\SocialGraph\Domain\Enum\FriendshipStatusEnum;
@@ -59,7 +59,10 @@ final class FriendsRequestsControllerTest extends ApiWebTestCase
             json_encode([
                 [
                     'id' => (string) $friend->getId(),
-                    'username' => $friend->getUsername(),
+                    'name' => $friend->getUsername(),
+                    'wallId' => (string) $friend->getWall()->getId(),
+                    'lastLoginAt' => null,
+                    'isOnline' => false,
                     'slug' => $friend->getSlug(),
                     'avatarUrl' => $friend->getAvatarUrl(),
                 ],
@@ -89,7 +92,10 @@ final class FriendsRequestsControllerTest extends ApiWebTestCase
             json_encode([
                 [
                     'id' => (string) $friend->getId(),
-                    'username' => $friend->getUsername(),
+                    'name' => $friend->getUsername(),
+                    'wallId' => (string) $friend->getWall()->getId(),
+                    'lastLoginAt' => null,
+                    'isOnline' => false,
                     'slug' => $friend->getSlug(),
                     'avatarUrl' => $friend->getAvatarUrl(),
                 ],
@@ -131,7 +137,7 @@ final class FriendsRequestsControllerTest extends ApiWebTestCase
     public function testFriendsRequestsDeleteUnauthorized(): void
     {
         $client = static::createClient();
-        $client->request('DELETE', '/api/friends/' . (string) Uuid::v4());
+        $client->request('DELETE', '/api/friends-requests/' . (string) Uuid::v4());
 
         self::assertResponseStatusCodeSame(JsonResponse::HTTP_UNAUTHORIZED);
     }
@@ -179,7 +185,7 @@ final class FriendsRequestsControllerTest extends ApiWebTestCase
         );
 
         $fakeFriendId = Uuid::v4();
-        $client->request('POST', '/api/friends-requests', [
+        $client->jsonRequest('POST', '/api/friends-requests', [
             'friendId' => (string) $fakeFriendId,
         ]);
 
@@ -191,7 +197,7 @@ final class FriendsRequestsControllerTest extends ApiWebTestCase
             'username' => 'friend',
         ]);
 
-        $client->request('POST', '/api/friends-requests', [
+        $client->jsonRequest('POST', '/api/friends-requests', [
             'friendId' => (string) $friend->getId(),
         ]);
 

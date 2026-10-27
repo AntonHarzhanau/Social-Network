@@ -5,6 +5,7 @@ namespace App\Tests\Modules\Media\Infrastructure\Controller;
 use App\Tests\Support\ApiWebTestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Uid\Uuid;
 
 final class MediaControllerTest extends ApiWebTestCase
 {
@@ -84,7 +85,7 @@ final class MediaControllerTest extends ApiWebTestCase
 
         $first = $list[0];
         self::assertArrayHasKey('id', $first);
-        self::assertArrayHasKey('mimeType', $first);
+        self::assertSame('image', $first['type']);
         self::assertArrayHasKey('url', $first);
         self::assertArrayHasKey('createdAt', $first);
     }
@@ -105,39 +106,37 @@ final class MediaControllerTest extends ApiWebTestCase
         self::assertResponseStatusCodeSame(JsonResponse::HTTP_OK);
         $page2 = json_decode($client->getResponse()->getContent() ?? '', true, 512, JSON_THROW_ON_ERROR);
         self::assertCount(1, $page2);
+        self::assertNotSame($page1[0]['id'], $page2[0]['id']);
     }
 
-    public function testDownloadRedirectOk(): void
+    public function testGetMediaDetails(): void
     {
         [$client] = $this->createAuthenticatedClient();
-
         $id = $this->uploadOneAndGetId($client);
 
         $client->request('GET', '/api/media/' . $id);
 
-        self::assertResponseStatusCodeSame(302);
-
-        $location = $client->getResponse()->headers->get('Location');
-        self::assertNotEmpty($location);
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_OK);
+        self::assertResponseHeaderSame('content-type', 'application/json');
+        $data = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame($id, $data['id']);
+        self::assertSame('image', $data['type']);
+        self::assertNotEmpty($data['storageKey']);
+        self::assertNotEmpty($data['commentThreadId']);
+        self::assertSame(0, $data['likeCount']);
+        self::assertFalse($data['likedByCurrentUser']);
     }
 
-    public function testDownloadRedirectSignedOk(): void
+    public function testGetMissingMediaReturns404(): void
     {
         [$client] = $this->createAuthenticatedClient();
+        $client->request('GET', '/api/media/' . Uuid::v4());
 
-        $id = $this->uploadOneAndGetId($client);
-
-        $client->request('GET', '/api/media/' . $id . '?signed=1');
-
-        self::assertResponseStatusCodeSame(302);
-
-        $location = $client->getResponse()->headers->get('Location');
-        self::assertNotEmpty($location);
-
-        self::assertStringContainsString('signed=1', $location);
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_NOT_FOUND);
+        self::assertSame(['error' => 'Not found'], json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR));
     }
 
-    public function testDownloadBadUuidReturns404(): void
+    public function testGetInvalidMediaIdReturns404(): void
     {
         [$client] = $this->createAuthenticatedClient();
 
@@ -159,6 +158,8 @@ final class MediaControllerTest extends ApiWebTestCase
         $client->request('DELETE', '/api/media/' . $id);
 
         self::assertResponseStatusCodeSame(JsonResponse::HTTP_NO_CONTENT);
+        $client->request('GET', '/api/media/' . $id);
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_NOT_FOUND);
     }
 
     public function testDeleteBadUuidReturns404(): void
@@ -173,7 +174,7 @@ final class MediaControllerTest extends ApiWebTestCase
         self::assertSame('Not found', $data['error'] ?? null);
     }
 
-    public function testCannotAccessOthersMedia(): void
+    public function testCanViewOthersMediaButCannotDeleteIt(): void
     {
 
         [$client] = $this->createAuthenticatedClient(['email' => 'userA@mail.com']);
@@ -183,7 +184,8 @@ final class MediaControllerTest extends ApiWebTestCase
         $clientB = $this->authClient($client, $userB);
 
         $clientB->request('GET', '/api/media/' . $id);
-        self::assertResponseStatusCodeSame(JsonResponse::HTTP_NOT_FOUND);
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_OK);
+        self::assertSame($id, json_decode($clientB->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR)['id']);
 
         $clientB->request('DELETE', '/api/media/' . $id);
         self::assertResponseStatusCodeSame(JsonResponse::HTTP_NOT_FOUND);

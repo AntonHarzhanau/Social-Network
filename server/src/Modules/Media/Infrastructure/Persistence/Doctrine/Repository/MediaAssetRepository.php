@@ -58,6 +58,7 @@ class MediaAssetRepository extends ServiceEntityRepository implements MediaAsset
             ->andWhere('m.owner = :ownerId')
             ->setParameter('ownerId', $ownerId)
             ->orderBy('m.createdAt', 'DESC')
+            ->addOrderBy('m.id', 'DESC')
             ->setFirstResult($offset)
             ->setMaxResults($limit)
             ->getQuery()

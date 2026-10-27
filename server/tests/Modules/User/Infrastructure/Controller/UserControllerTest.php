@@ -2,16 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Tests\Modules\User\Infrastructure\Controller;
+namespace App\Tests\Modules\User\Infrastructure\Controller;
 
 use App\Modules\Media\Application\Action\UploadMediaAction;
-use App\Modules\Media\Domain\Entity\MediaAsset;
-use App\Modules\Media\Domain\Repository\MediaAssetRepositoryInterface;
+use App\Modules\User\Domain\Entity\User;
 use App\Tests\Support\ApiWebTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Uid\Uuid;
 
 final class UserControllerTest extends ApiWebTestCase
 {
@@ -61,16 +59,21 @@ final class UserControllerTest extends ApiWebTestCase
 
         $client = $this->authClient($client, $user);
 
-        $client->request('PUT', '/api/users/profile', content: json_encode([
-            'username' => 'New Name',
-            'location' => 'Strasbourg',
-            'bio' => 'New bio',
-            'coverUrl' => null,
-            'maritalStatus' => null,
+        $client->request('PATCH', '/api/me/profile', content: json_encode([
+            'profile' => [
+                'username' => 'New Name',
+                'location' => 'Strasbourg',
+                'bio' => 'New bio',
+            ],
         ], JSON_THROW_ON_ERROR));
 
         self::assertResponseIsSuccessful();
         self::assertJsonStringEqualsJsonString(json_encode(['ok' => true], JSON_THROW_ON_ERROR), $client->getResponse()->getContent() ?? '');
+        $this->em()->clear();
+        $saved = $this->em()->find(User::class, $user->getId());
+        self::assertSame('New Name', $saved->getUsername());
+        self::assertSame('Strasbourg', $saved->getLocation());
+        self::assertSame('New bio', $saved->getBio());
     }
 
     public function testUpdateAvatarOk(): void
@@ -91,13 +94,17 @@ final class UserControllerTest extends ApiWebTestCase
         $originalFileId = $action($originalFile, $user->getId())->getId()->toRfc4122();
         $previewFileId = $action($previewFile, $user->getId())->getId()->toRfc4122();
 
-        $client->request('POST', '/api/users/avatar', content: json_encode([
+        $client->request('POST', '/api/me/avatar', content: json_encode([
             'originalFileId' => $originalFileId,
             'previewFileId' => $previewFileId,
         ], JSON_THROW_ON_ERROR));
 
         self::assertResponseIsSuccessful();
         self::assertJsonStringEqualsJsonString(json_encode(['ok' => true], JSON_THROW_ON_ERROR), $client->getResponse()->getContent() ?? '');
+        $this->em()->clear();
+        $saved = $this->em()->find(User::class, $user->getId());
+        self::assertSame($originalFileId, (string) $saved->getCurrentAvatar()->getOriginal()->getId());
+        self::assertSame($previewFileId, (string) $saved->getCurrentAvatar()->getPreview()->getId());
     }
 
     public function testDeleteAccountOk(): void
@@ -106,10 +113,12 @@ final class UserControllerTest extends ApiWebTestCase
             'email' => 'anton@test.com',
         ]);
         $client = $this->authClient($client, $user);
-        $client->request('DELETE', '/api/users');
+        $client->request('DELETE', '/api/me');
 
-        self::assertResponseIsSuccessful();
-        self::assertJsonStringEqualsJsonString(json_encode(['ok' => true], JSON_THROW_ON_ERROR), $client->getResponse()->getContent() ?? '');
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_NO_CONTENT);
+        self::assertSame('', $client->getResponse()->getContent());
+        $this->em()->clear();
+        self::assertNotNull($this->em()->find(User::class, $user->getId())->getDeletedAt());
     }
 
     public function testGetProfileOk(): void
@@ -121,19 +130,22 @@ final class UserControllerTest extends ApiWebTestCase
         $client->request('GET', '/api/users/' . $user->getId() . '/profile');
 
         $expectedResponse = [
-            'avatarUrl' => $user->getAvatarUrl(),
-            'bio' => $user->getBio(),
-            'coverUrl' => $user->getCoverUrl(),
-            'createdAt' => $user->getCreatedAt()->format(\DateTimeInterface::ATOM),
-            'dateOfBirth' => $user->getDateOfBirth()->format('Y-m-d'),
-            'email' => $user->getEmail(),
-            'emailVerifiedAt' => $user->getEmailVerifiedAt()->format(\DateTimeInterface::ATOM),
-            'id' => (string) $user->getId(),
-            'lastLoginAt' => $user->getLastLoginAt(),
-            'location' => $user->getLocation(),
-            'maritalStatus' => $user->getMaritalStatus(),
-            'slug' => $user->getSlug(),
-            'username' => $user->getUsername(),
+            'public' => [
+                'id' => (string) $user->getId(),
+                'name' => $user->getUsername(),
+                'slug' => $user->getSlug(),
+                'avatarUrl' => null,
+                'coverUrl' => null,
+                'isOnline' => true,
+            ],
+            'privateSummary' => [
+                'location' => null,
+                'wallId' => (string) $user->getWall()->getId(),
+                'currentEducation' => null,
+                'currentWorkExperience' => null,
+            ],
+            'canViewPrivateSummary' => true,
+            'canViewMore' => true,
         ];
 
         self::assertResponseIsSuccessful();

@@ -14,6 +14,7 @@ use App\Modules\User\Contracts\DTO\WorkExperiencePreviewDTO;
 use App\Modules\User\Domain\Entity\Education;
 use App\Modules\User\Domain\Entity\User;
 use App\Modules\User\Domain\Entity\WorkExperience;
+use App\Modules\User\Domain\Exception\UserNotFoundException;
 use App\Modules\User\Domain\Repository\EducationRepositoryInterface;
 use App\Modules\User\Domain\Repository\UserRepositoryInterface;
 use App\Modules\User\Domain\Repository\WorkExperienceRepositoryInterface;
@@ -35,6 +36,9 @@ final class GetUserProfileAction
     public function execute(Uuid $profileUserId, User $viewer): UserProfileResponseDTO
     {
         $owner = $this->users->findById($profileUserId);
+        if ($owner === null) {
+            throw new UserNotFoundException();
+        }
 
         $avatarUrl = $owner->getCurrentAvatar()
             ? ($this->getUrl)($owner->getCurrentAvatar()->getPreview()->getStorageKey())

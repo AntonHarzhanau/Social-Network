@@ -19,7 +19,7 @@ final class ListMediaAction
         int $offset = 0
     ): array 
     {
-        $medias = $this->mediaAssetRepository->findAll();
+        $medias = $this->mediaAssetRepository->findByOwnerId($ownerId, $limit, $offset);
         $result = [];
         foreach ($medias as $media) {
             $result[] = new MediaItemDTO(
