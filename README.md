@@ -118,3 +118,5 @@ Tracking remains disabled without a valid HTTPS script URL and website ID.
 `compose.build.yaml` adds build definitions for CI/manual builds;
 `compose.e2e.yaml` adds only the test runner and test settings. Neither file is
 needed on the server.
+
+test
