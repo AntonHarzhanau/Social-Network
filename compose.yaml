@@ -1,152 +1,130 @@
+name: social-network
+
 services:
-  nginx:
-    image: nginx:alpine
+  frontend:
+    image: ${IMAGE_PREFIX:-ghcr.io/antonharzhanau/social-network}-frontend:${APP_VERSION:?Set APP_VERSION}
+    restart: unless-stopped
+
+    depends_on:
+      backend-proxy:
+        condition: service_healthy
+    ports:
+      - "${HTTP_BIND_IP:-0.0.0.0}:${HTTP_PORT:-8080}:80"
+    networks: [frontend-net]
+
+  backend-proxy:
+    image: ${IMAGE_PREFIX:-ghcr.io/antonharzhanau/social-network}-proxy:${APP_VERSION:?Set APP_VERSION}
     restart: unless-stopped
     depends_on:
-      - php
-      - mercure
-      - s3
-    env_file:
-      - ${ENV_FILE:-./server/.env}
-    ports:
-      - "${NGINX_BIND_IP:-127.0.0.1}:${HTTP_PORT:-8080}:80"
-    volumes:
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./server/public:/var/www/app/public:ro
-      - ./client/dist:/usr/share/nginx/html:ro
-      - nginx_logs:/var/log/nginx
-    networks:
-      - app-network
+      php:
+        condition: service_healthy
+      mercure:
+        condition: service_healthy
+      s3:
+        condition: service_healthy
+    networks: [frontend-net, gateway-net]
 
   php:
-    build:
-      context: ./docker/php
-      args:
-        INSTALL_XDEBUG: "${INSTALL_XDEBUG:-0}"
+    image: ${IMAGE_PREFIX:-ghcr.io/antonharzhanau/social-network}-backend:${APP_VERSION:?Set APP_VERSION}
     restart: unless-stopped
-    working_dir: /var/www/app
-    env_file:
-      - ${ENV_FILE:-./server/.env}
+    env_file: ["${ENV_FILE:-.env}"]
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: "0"
+      TRUSTED_PROXIES: REMOTE_ADDR
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-social_network}?serverVersion=16&charset=utf8"
+      MERCURE_URL: http://mercure/.well-known/mercure
+      AWS_ENDPOINT: http://s3:9000
+      AWS_PUBLIC_ENDPOINT: /media
+      JWT_SECRET_KEY: /var/www/app/config/jwt/private.pem
+      JWT_PUBLIC_KEY: /var/www/app/config/jwt/public.pem
+      APP_SECRET: ${APP_SECRET:?Set APP_SECRET}
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE:-}
+      MERCURE_JWT_SECRET: ${MERCURE_JWT_SECRET:?Set MERCURE_JWT_SECRET}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?Set AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?Set AWS_SECRET_ACCESS_KEY}
+      MAILER_DSN: ${MAILER_DSN:?Set MAILER_DSN}
     depends_on:
       postgres:
         condition: service_healthy
-      mercure:
-        condition: service_started
-      s3:
-        condition: service_started
       s3-init:
         condition: service_completed_successfully
-    environment:
-      COMPOSER_HOME: /tmp/composer
+      mercure:
+        condition: service_healthy
     volumes:
-      - ./server:/var/www/app
       - symfony_var:/var/www/app/var
-      - symfony_vendor:/var/www/app/vendor
       - jwt_keys:/var/www/app/config/jwt
-      - composer_cache:/tmp/composer
-      - ./docker/php/conf/x-php.ini:/usr/local/etc/php/conf.d/custom-docker-php.ini:ro
-    networks:
-      - app-network
+    networks: [gateway-net, backend-net, egress]
 
   postgres:
-    image: postgres:16-alpine
+    image: postgres:16.15-alpine3.24
     restart: unless-stopped
-    env_file:
-      - ${ENV_FILE:-./server/.env}
     environment:
-      POSTGRES_DB: "${POSTGRES_DB:-dev}"
-      POSTGRES_USER: "${POSTGRES_USER:-app}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-app}"
-    ports:
-      - "127.0.0.1:${POSTGRES_HOST_PORT:-54328}:5432"
+      POSTGRES_DB: ${POSTGRES_DB:-social_network}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     healthcheck:
-      test:
-        - CMD-SHELL
-        - pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-dev}
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
       interval: 2s
       timeout: 3s
       retries: 30
-    networks:
-      - app-network
+    networks: [backend-net]
 
   mercure:
-    image: dunglas/mercure
+    image: dunglas/mercure:v1.1.4
     restart: unless-stopped
-    env_file:
-      - ${ENV_FILE:-./server/.env}
     environment:
       SERVER_NAME: ":80"
-      MERCURE_PUBLISHER_JWT_KEY: "${MERCURE_JWT_SECRET:-}"
-      MERCURE_SUBSCRIBER_JWT_KEY: "${MERCURE_JWT_SECRET:-}"
+      MERCURE_PUBLISHER_JWT_KEY: ${MERCURE_JWT_SECRET:?Set MERCURE_JWT_SECRET}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${MERCURE_JWT_SECRET:?Set MERCURE_JWT_SECRET}
       MERCURE_EXTRA_DIRECTIVES: |
+        protocol_version_compatibility 8
         anonymous
         cors_origins *
-    networks:
-      - app-network
+    networks: [gateway-net, backend-net]
 
   s3:
-    image: minio/minio:latest
+    image: ${IMAGE_PREFIX:-ghcr.io/antonharzhanau/social-network}-storage:${APP_VERSION:?Set APP_VERSION}
     restart: unless-stopped
-    env_file:
-      - ${ENV_FILE:-./server/.env}
     environment:
-      MINIO_ROOT_USER: "${MINIO_ROOT_USER:-admin}"
-      MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD:-supersecretpassword}"
-    command: ["server", "/data", "--console-address", ":9001"]
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD}
     volumes:
       - s3_data:/data
-    networks:
-      - app-network
+    networks: [gateway-net, backend-net]
 
   s3-init:
-    image: minio/mc:latest
-    depends_on:
-      - s3
+    image: ${IMAGE_PREFIX:-ghcr.io/antonharzhanau/social-network}-storage-init:${APP_VERSION:?Set APP_VERSION}
     restart: "no"
-    env_file:
-      - ${ENV_FILE:-./server/.env}
-    volumes:
-      - ./docker/minio/init.sh:/init.sh:ro
-    entrypoint: ["/bin/sh", "/init.sh"]
-    networks:
-      - app-network
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD}
+      AWS_BUCKET: social-network-media
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?Set AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?Set AWS_SECRET_ACCESS_KEY}
+    depends_on:
+      s3:
+        condition: service_healthy
+    networks: [backend-net]
 
   mailer:
     profiles: [mailpit]
-    image: axllent/mailpit
+    image: axllent/mailpit:v1.30.0
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:8025:8025"
-      - "127.0.0.1:1025:1025"
-    networks:
-      - app-network
-
-  client:
-    profiles: [tools]
-    image: node:24-alpine
-    working_dir: /app
-    volumes:
-      - ./client:/app
-      - client_node_modules:/app/node_modules
-    command: ["sh", "-lc", "node -v && npm -v"]
-    ports:
-      - "5173:5173"
-    networks:
-      - app-network
+    networks: [backend-net]
 
 volumes:
   postgres_data: {}
   s3_data: {}
-  nginx_logs: {}
   symfony_var: {}
-  symfony_vendor: {}
-  composer_cache: {}
   jwt_keys: {}
-  client_node_modules: {}
 
 networks:
-  app-network:
-    driver: bridge
+  frontend-net: {}
+  gateway-net:
+    internal: true
+  backend-net:
+    internal: true
+  egress: {}

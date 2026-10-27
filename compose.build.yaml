@@ -1,0 +1,17 @@
+services:
+  frontend:
+    build: ./client
+  backend-proxy:
+    build: ./docker/nginx
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+  s3:
+    build:
+      context: ./docker/minio
+      target: server
+  s3-init:
+    build:
+      context: ./docker/minio
+      target: client

@@ -8,3 +8,10 @@
 **/.vscode
 **/*.log
 
+**/.env
+**/.env.*
+**/config/jwt/*.pem
+**/.phpunit.cache
+**/*.tsbuildinfo
+test-results
+playwright-report

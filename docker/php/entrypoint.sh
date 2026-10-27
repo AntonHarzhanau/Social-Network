@@ -1,88 +1,27 @@
 #!/usr/bin/env sh
 set -eu
 
-is_php_fpm=0
-if [ "${1:-}" = "php-fpm" ] || [ "${1:-}" = "php-fpm8.5" ]; then
-  is_php_fpm=1
-fi
+if [ "${1:-}" = php-fpm ]; then
+    test -f vendor/autoload.php || { echo 'Missing dependencies in the PHP image.' >&2; exit 1; }
+    rm -rf var/cache
+    mkdir -p var/cache var/log config/jwt
+    chown -R www-data:www-data var config/jwt
+    chmod -R ug+rwX var
 
-if [ "$is_php_fpm" -eq 1 ]; then
-  if [ ! -f "bin/console" ]; then
-    echo "[entrypoint] bin/console not found, skipping bootstrap."
-    exec "$@"
-  fi
+    php bin/console lexik:jwt:generate-keypair --skip-if-exists --no-interaction
+    chown -R www-data:www-data config/jwt
+    chmod -R u=rwX,g=rX,o= config/jwt
 
-  APP_ENV="${APP_ENV:-dev}"
-
-  # -------------------------
-  # ALWAYS fix permissions for Symfony var/ (named volume symfony_var)
-  # -------------------------
-  echo "[entrypoint] Fixing permissions for var/ (env=${APP_ENV})..."
-  mkdir -p var/cache var/log
-  if [ "$APP_ENV" = "prod" ]; then
-    mkdir -p var/cache/prod
-  else
-    mkdir -p var/cache/dev
-  fi
-  chown -R www-data:www-data var || true
-  chmod -R ug+rwX var || true
-
-  if [ -f "composer.json" ] && [ ! -f "vendor/autoload.php" ]; then
-    echo "[entrypoint] vendor/ missing -> running composer install..."
-    if [ "$APP_ENV" = "prod" ]; then
-      composer install --no-dev --optimize-autoloader --no-interaction --no-progress
-    else
-      composer install --no-interaction --no-progress
-    fi
-  fi
-
-  if [ -f "bin/console" ]; then
-    echo "[entrypoint] Ensuring JWT keypair exists..."
-    mkdir -p config/jwt
-    php bin/console lexik:jwt:generate-keypair --skip-if-exists --no-interaction --env="$APP_ENV"
-    chown -R www-data:www-data config/jwt || true
-    chmod -R u=rwX,g=rX,o= config/jwt || true
-  fi
-
-  # -------------------------
-  # Wait postgres DNS + TCP
-  # -------------------------
-  echo "[entrypoint] Waiting for postgres DNS..."
-  until php -r 'exit(gethostbyname("postgres")==="postgres");' ; do
-    echo "[entrypoint] postgres DNS not ready, retry..."
-    sleep 1
-  done
-
-  echo "[entrypoint] Waiting for postgres TCP 5432..."
-  until php -r '$s=@fsockopen("postgres",5432,$e,$m,1); if(!$s){exit(1);} fclose($s);' ; do
-    echo "[entrypoint] postgres:5432 not ready, retry..."
-    sleep 1
-  done
-
-  echo "[entrypoint] Waiting DB + applying migrations..."
-
-  max_tries=60
-  i=0
-
-  until php bin/console doctrine:database:create --if-not-exists --no-interaction --env="$APP_ENV"; do
-    i=$((i + 1))
-    if [ "$i" -ge "$max_tries" ]; then
-      echo "[entrypoint] ERROR: DB not ready after ${max_tries}s, abort."
-      exit 1
-    fi
-    echo "[entrypoint] DB not ready yet, retry... (${i}/${max_tries})"
-    sleep 1
-  done
-
-  php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration --env="$APP_ENV"
-  php bin/console messenger:setup-transports --no-interaction --env="$APP_ENV" || true
-
-  if [ "$APP_ENV" = "prod" ]; then
-    echo "[entrypoint] Warming up cache (prod)..."
-    su -s /bin/sh www-data -c 'php bin/console cache:warmup --env=prod' || true
-  fi
-
-  echo "[entrypoint] Done."
+    attempt=0
+    until php bin/console doctrine:database:create --if-not-exists --no-interaction; do
+        attempt=$((attempt + 1))
+        [ "$attempt" -lt 30 ] || exit 1
+        sleep 2
+    done
+    php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
+    php bin/console messenger:setup-transports --no-interaction
+    chown -R www-data:www-data var
+    su -s /bin/sh www-data -c 'php bin/console cache:warmup'
 fi
 
 exec "$@"
