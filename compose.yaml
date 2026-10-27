@@ -5,6 +5,11 @@ services:
     image: ${IMAGE_PREFIX:-ghcr.io/antonharzhanau/social-network}-frontend:${APP_VERSION:?Set APP_VERSION}
     restart: unless-stopped
 
+    environment:
+      STATS_SCRIPT_URL: ${STATS_SCRIPT_URL:-}
+      STATS_WEBSITE_ID: ${STATS_WEBSITE_ID:-}
+      STATS_DOMAIN: ${STATS_DOMAIN:-}
+
     depends_on:
       backend-proxy:
         condition: service_healthy
