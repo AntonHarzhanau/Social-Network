@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const baseURL = process.env.E2E_BASE_URL ?? "http://127.0.0.1:5173";
-const apiOrigin = process.env.E2E_API_ORIGIN ?? "http://localhost:8080";
+const apiOrigin = process.env.E2E_API_ORIGIN ?? "http://127.0.0.1:8000";
 
 export default defineConfig({
   testDir: "../tests",
@@ -19,7 +19,7 @@ export default defineConfig({
     baseURL,
     trace: "on-first-retry",
   },
-  webServer: {
+  webServer: process.env.E2E_EXTERNAL_SERVER === "1" ? undefined : {
     command: "npm run dev -- --host 127.0.0.1",
     url: baseURL,
     reuseExistingServer: !process.env.CI,
@@ -28,7 +28,7 @@ export default defineConfig({
       VITE_API_BASE: "/api",
       VITE_MEDIA_BASE: "/media",
       VITE_MERCURE_URL: "/.well-known/mercure",
-      VITE_DEV_PROXY_TARGET: apiOrigin,
+      VITE_DEV_API_TARGET: apiOrigin,
     },
   },
   projects: [

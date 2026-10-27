@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: postgres:16.15-alpine3.24
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-dev}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+    ports: ["127.0.0.1:${DEV_DB_PORT:-54328}:5432"]
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  mercure:
+    image: dunglas/mercure:v1.1.4
+    environment:
+      SERVER_NAME: ":80"
+      MERCURE_PUBLISHER_JWT_KEY: ${MERCURE_JWT_SECRET:-local-mercure-secret-at-least-32-characters}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${MERCURE_JWT_SECRET:-local-mercure-secret-at-least-32-characters}
+      MERCURE_EXTRA_DIRECTIVES: |
+        protocol_version_compatibility 8
+        anonymous
+        cors_origins *
+    ports: ["127.0.0.1:${DEV_MERCURE_PORT:-3000}:80"]
+
+  s3:
+    image: social-network-storage:dev
+    build:
+      context: ./docker/minio
+      target: server
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-local-minio-password}
+    ports: ["127.0.0.1:${DEV_S3_PORT:-9000}:9000"]
+    volumes: [s3_data:/data]
+
+  s3-init:
+    image: social-network-storage-init:dev
+    build:
+      context: ./docker/minio
+      target: client
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-local-minio-password}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-local-app}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-local-app-secret}
+      AWS_BUCKET: social-network-media
+    depends_on:
+      s3:
+        condition: service_healthy
+
+  mailer:
+    image: axllent/mailpit:v1.30.0
+    ports:
+      - "127.0.0.1:${DEV_SMTP_PORT:-1025}:1025"
+      - "127.0.0.1:${DEV_MAILPIT_PORT:-8025}:8025"
+
+volumes:
+  postgres_data: {}
+  s3_data: {}

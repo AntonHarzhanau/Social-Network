@@ -1,83 +1,69 @@
-ENV ?= local
-ENV_FILE ?= ./server/.env
+ENV_FILE ?= .env
+DEV_ENV_FILE ?= server/.env
+TEST_IMAGE_PREFIX ?= social-network-test
+TEST_IMAGE_TAG ?= local
 
-DC := ENV_FILE=$(ENV_FILE) docker compose --env-file $(ENV_FILE)
-E2E_DC := ENV_FILE=$(ENV_FILE) docker compose --env-file $(ENV_FILE) -f compose.yaml -f compose.e2e.yaml
+DC = ENV_FILE=$(ENV_FILE) docker compose --env-file $(ENV_FILE) -f compose.yaml
+BUILD_DC = $(DC) -f compose.build.yaml
+DEV_DC = docker compose -p social-network-dev --env-file $(DEV_ENV_FILE) -f compose.dev.yaml
+E2E_DC = ENV_FILE=.env.ci IMAGE_PREFIX=$(TEST_IMAGE_PREFIX) APP_VERSION=$(TEST_IMAGE_TAG) docker compose -p social-network-e2e --env-file .env.ci -f compose.yaml -f compose.e2e.yaml
+E2E_BUILD_DC = ENV_FILE=.env.ci IMAGE_PREFIX=$(TEST_IMAGE_PREFIX) APP_VERSION=$(TEST_IMAGE_TAG) docker compose --env-file .env.ci -f compose.yaml -f compose.build.yaml
 
-ifeq ($(ENV),local)
-PROFILES := --profile mailpit
-else
-PROFILES :=
-endif
+.PHONY: dev dev-up dev-down dev-setup front-dev back-dev test build up down ps logs pull e2e e2e-up e2e-run e2e-down
 
-.PHONY: setup up down destroy ps logs \
-        front front-dev back s3-init \
-        e2e e2e-up e2e-down \
-        rebuild-nginx rebuild-php rebuild-postgres rebuild-s3 rebuild-mercure rebuild-mailer
+dev: dev-up
 
-setup:
-	mkdir -p ./client/dist
-	$(MAKE) front
-	$(DC) $(PROFILES) up -d --build --force-recreate --remove-orphans
+dev-up:
+	$(DEV_DC) up -d --build --wait --wait-timeout 120 postgres s3 mercure mailer
+	$(DEV_DC) run --rm --build s3-init
+
+dev-down:
+	$(DEV_DC) down
+
+dev-setup: dev-up
+	cd server && composer install --no-interaction
+	npm --prefix client ci
+	cd server && php bin/console lexik:jwt:generate-keypair --skip-if-exists --no-interaction
+	cd server && php bin/console doctrine:migrations:migrate --no-interaction
+
+front-dev:
+	npm --prefix client run dev
+
+back-dev:
+	cd server && php -S 127.0.0.1:8000 -t public
+
+test:
+	server/bin/test-local
+
+build:
+	$(BUILD_DC) build
+
+pull:
+	$(DC) pull
 
 up:
-	$(DC) $(PROFILES) up -d
+	$(DC) up -d --no-build --wait --wait-timeout 180
 
 down:
-	$(DC) down --remove-orphans
-
-destroy:
-	$(DC) down -v --remove-orphans
+	$(DC) down
 
 ps:
 	$(DC) ps
 
 logs:
-	$(DC) logs -f --tail=200
-
-e2e-up:
-	mkdir -p ./client/dist
-	$(E2E_DC) --profile mailpit up -d --build --remove-orphans nginx mailer
+	$(DC) logs -f --tail=100
 
 e2e:
+	$(E2E_BUILD_DC) build
 	$(MAKE) e2e-up
-	$(E2E_DC) --profile mailpit --profile e2e run --rm playwright
+	$(MAKE) e2e-run
+
+e2e-up:
+	$(E2E_DC) --profile mailpit up -d --no-build --wait --wait-timeout 180
+
+e2e-run:
+	mkdir -p playwright-report test-results
+	$(E2E_DC) --profile mailpit --profile e2e run --rm --no-deps playwright
 
 e2e-down:
-	$(E2E_DC) down --remove-orphans
-
-# Build SPA -> client/dist (nginx serves it)
-front:
-	$(DC) --profile tools run --rm client sh -lc "npm ci && npm run build"
-
-# Rebuild ONLY symfony container image + recreate container
-back:
-	$(DC) build php
-	$(DC) up -d --no-deps --force-recreate php
-
-# Manually rerun s3 init (normally it runs on up)
-s3-init:
-	$(DC) run --rm s3-init
-
-rebuild-nginx:
-	$(DC) up -d --no-deps --force-recreate nginx
-
-rebuild-php:
-	$(DC) build php
-	$(DC) up -d --no-deps --force-recreate php
-
-rebuild-postgres:
-	$(DC) up -d --no-deps --force-recreate postgres
-
-rebuild-s3:
-	$(DC) up -d --no-deps --force-recreate s3
-
-rebuild-mercure:
-	$(DC) up -d --no-deps --force-recreate mercure
-
-rebuild-mailer:
-ifeq ($(ENV),local)
-	$(DC) --profile mailpit up -d --no-deps --force-recreate mailer
-else
-	@echo "mailer (mailpit) disabled for ENV=$(ENV)"
-endif
+	$(E2E_DC) --profile mailpit --profile e2e down --volumes --remove-orphans
